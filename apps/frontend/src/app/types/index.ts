@@ -1,16 +1,16 @@
 // User Roles
-export type UserRole = 
-  | 'super_admin'
-  | 'director'
-  | 'project_manager'
-  | 'site_manager'
-  | 'works_manager'
-  | 'accountant'
-  | 'procurement_manager'
-  | 'qhse_manager'
-  | 'client'
-  | 'subcontractor'
-  | 'user';
+export type UserRole =
+  | "super_admin"
+  | "director"
+  | "project_manager"
+  | "site_manager"
+  | "works_manager"
+  | "accountant"
+  | "procurement_manager"
+  | "qhse_manager"
+  | "client"
+  | "subcontractor"
+  | "user";
 
 export interface User {
   id: string;
@@ -30,6 +30,9 @@ export interface AuthState {
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
+  getPendingUsers?: () => Promise<User[]>;
+  approveUser?: (userId: string) => Promise<User>;
+  rejectUser?: (userId: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -52,7 +55,7 @@ export interface Project {
   startDate: string;
   plannedEndDate: string;
   actualEndDate?: string;
-  status: 'planning' | 'in_progress' | 'on_hold' | 'completed' | 'cancelled';
+  status: "planning" | "in_progress" | "on_hold" | "completed" | "cancelled";
   progress: number;
   estimatedHours: number;
   createdAt: string;
@@ -65,7 +68,7 @@ export interface Site {
   address: string;
   coordinates?: { lat: number; lng: number };
   area: number;
-  status: 'planning' | 'in_progress' | 'on_hold' | 'completed';
+  status: "planning" | "in_progress" | "on_hold" | "completed";
   workStartDate: string;
   workEndDate?: string;
   projectId: string;
@@ -79,8 +82,8 @@ export interface Task {
   id: string;
   title: string;
   description: string;
-  status: 'todo' | 'in_progress' | 'review' | 'completed';
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  status: "todo" | "in_progress" | "review" | "completed";
+  priority: "low" | "medium" | "high" | "critical";
   startDate: string;
   plannedEndDate: string;
   actualEndDate?: string;
@@ -123,7 +126,7 @@ export interface Supplier {
 
 export interface Notification {
   id: string;
-  type: 'info' | 'warning' | 'critical' | 'success';
+  type: "info" | "warning" | "critical" | "success";
   title: string;
   message: string;
   read: boolean;
@@ -133,12 +136,12 @@ export interface Notification {
 
 export interface Incident {
   id: string;
-  type: 'safety' | 'quality' | 'delay' | 'other';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  type: "safety" | "quality" | "delay" | "other";
+  severity: "low" | "medium" | "high" | "critical";
   description: string;
   siteId: string;
   reportedBy: string;
-  status: 'open' | 'investigating' | 'resolved' | 'closed';
+  status: "open" | "investigating" | "resolved" | "closed";
   createdAt: string;
   resolvedAt?: string;
 }

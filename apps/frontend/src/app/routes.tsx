@@ -1,52 +1,57 @@
-import { createBrowserRouter, Navigate } from 'react-router';
-import DashboardLayout from './layouts/DashboardLayout';
-import Login from './pages/auth/Login';
-import Register from './pages/auth/Register';
-import Dashboard from './pages/dashboards/Dashboard';
-import Sites from './pages/sites/Sites';
-import Projects from './pages/projects/Projects';
-import Planning from './pages/planning/Planning';
-import Team from './pages/team/Team';
-import Clients from './pages/clients/Clients';
-import Suppliers from './pages/suppliers/Suppliers';
-import Materials from './pages/materials/Materials';
-import Finance from './pages/finance/Finance';
-import QHSE from './pages/qhse/QHSE';
-import Incidents from './pages/incidents/Incidents';
-import Reports from './pages/reports/Reports';
-import Analytics from './pages/analytics/Analytics';
-import Map from './pages/map/Map';
-import Notifications from './pages/notifications/Notifications';
-import Users from './pages/users/Users';
-import Profile from './pages/profile/Profile';
-import Home from './pages/home/Home';
-import Pricing from './pages/home/Pricing';
-
+import { createBrowserRouter, Navigate } from "react-router";
+import DashboardLayout from "./layouts/DashboardLayout";
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
+import Dashboard from "./pages/dashboards/Dashboard";
+import Sites from "./pages/sites/Sites";
+import Projects from "./pages/projects/Projects";
+import Planning from "./pages/planning/Planning";
+import Team from "./pages/team/Team";
+import Clients from "./pages/clients/Clients";
+import Suppliers from "./pages/suppliers/Suppliers";
+import Materials from "./pages/materials/Materials";
+import Finance from "./pages/finance/Finance";
+import QHSE from "./pages/qhse/QHSE";
+import Incidents from "./pages/incidents/Incidents";
+import Reports from "./pages/reports/Reports";
+import Analytics from "./pages/analytics/Analytics";
+import Map from "./pages/map/Map";
+import Notifications from "./pages/notifications/Notifications";
+import Users from "./pages/users/Users";
+import PendingUsers from "./pages/admin/PendingUsers";
+import Profile from "./pages/profile/Profile";
+import Home from "./pages/Home/Home";
+import Home2 from "./pages/Home/Home2";
+import Pricing from "./pages/pricing/Pricing";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const isAuthenticated = localStorage.getItem('smartsite-auth');
+  const isAuthenticated = true;
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
 }
 
 export const router = createBrowserRouter([
   {
-    path: '/',
+    path: "/",
     element: <Home />,
   },
   {
-        path: 'pricing',
-        element: <Pricing />,
-      },
+    path: "/pricing",
+    element: <Pricing />,
+  },
   {
-    path: '/login',
+    path: "/h",
+    element: <Home2 />,
+  },
+  {
+    path: "/login",
     element: <Login />,
   },
   {
-    path: '/register',
+    path: "/register",
     element: <Register />,
   },
   {
-    path: '/',
+    path: "/admin",
     element: (
       <ProtectedRoute>
         <DashboardLayout />
@@ -54,84 +59,90 @@ export const router = createBrowserRouter([
     ),
     children: [
       {
-        path: 'dashboard',
+        path: "dashboard",
         element: <Dashboard />,
       },
       {
-        path: 'sites',
+        path: "sites",
         element: <Sites />,
       },
       {
-        path: 'projects',
+        path: "projects",
         element: <Projects />,
       },
-      
       {
-        path: 'planning',
+        path: "planning",
         element: <Planning />,
       },
       {
-        path: 'team',
+        path: "team",
         element: <Team />,
       },
       {
-        path: 'clients',
+        path: "clients",
         element: <Clients />,
       },
       {
-        path: 'suppliers',
+        path: "suppliers",
         element: <Suppliers />,
       },
       {
-        path: 'materials',
+        path: "materials",
         element: <Materials />,
       },
       {
-        path: 'finance',
+        path: "finance",
         element: <Finance />,
       },
       {
-        path: 'qhse',
+        path: "qhse",
         element: <QHSE />,
       },
       {
-        path: 'incidents',
+        path: "incidents",
         element: <Incidents />,
       },
       {
-        path: 'reports',
+        path: "reports",
         element: <Reports />,
       },
       {
-        path: 'analytics',
+        path: "analytics",
         element: <Analytics />,
       },
       {
-        path: 'map',
+        path: "map",
         element: <Map />,
       },
       {
-        path: 'notifications',
+        path: "notifications",
         element: <Notifications />,
       },
       {
-        path: 'users',
+        path: "users",
         element: <Users />,
       },
       {
-        path: 'profile',
+        path: "admin/pending-users",
+        element: <PendingUsers />,
+      },
+      {
+        path: "profile",
         element: <Profile />,
       },
     ],
   },
   {
-    path: '*',
+    path: "*",
     element: (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <h1 className="text-6xl font-bold text-gray-900 mb-4">404</h1>
           <p className="text-xl text-gray-600 mb-4">Page not found</p>
-          <a href="/dashboard" className="text-blue-600 hover:text-blue-700 font-semibold">
+          <a
+            href="/dashboard"
+            className="text-blue-600 hover:text-blue-700 font-semibold"
+          >
             Return to Dashboard
           </a>
         </div>

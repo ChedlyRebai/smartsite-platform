@@ -1,32 +1,48 @@
-import { useState } from 'react';
-import { Link, Outlet, useNavigate, useLocation } from 'react-router';
-import { Building2, LogOut, Menu, X, Bell, User, ChevronDown } from 'lucide-react';
-import { useAuthStore } from '../store/authStore';
-import { Button } from '../components/ui/button';
-import { Avatar, AvatarFallback } from '../components/ui/avatar';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../components/ui/dropdown-menu';
-import { Badge } from '../components/ui/badge';
-import { getNavigationForRole, roleLabels } from '../utils/roleConfig';
-import { mockNotifications } from '../utils/mockData';
+import { useState } from "react";
+import { Link, Outlet, useNavigate, useLocation } from "react-router";
+import {
+  Building2,
+  LogOut,
+  Menu,
+  X,
+  Bell,
+  User,
+  ChevronDown,
+} from "lucide-react";
+import { useAuthStore } from "../store/authStore";
+import { Button } from "../components/ui/button";
+import { Avatar, AvatarFallback } from "../components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../components/ui/dropdown-menu";
+import { Badge } from "../components/ui/badge";
+import { getNavigationForRole, roleLabels } from "../utils/roleConfig";
+import { mockNotifications } from "../utils/mockData";
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [logoAvailable, setLogoAvailable] = useState(true);
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate("/login");
   };
 
   if (!user) {
-    navigate('/login');
+    navigate("/login");
     return null;
   }
 
   const navigationItems = getNavigationForRole(user.role);
-  const unreadNotifications = mockNotifications.filter(n => !n.read).length;
+  const unreadNotifications = mockNotifications.filter((n) => !n.read).length;
 
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
@@ -44,11 +60,24 @@ export default function DashboardLayout() {
               className="lg:hidden"
               onClick={() => setSidebarOpen(!sidebarOpen)}
             >
-              {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {sidebarOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
             </Button>
-            <Link to="/dashboard" className="flex items-center gap-2">
-              <div className="bg-gradient-to-br from-blue-600 to-green-600 p-2 rounded-lg">
-                <Building2 className="h-6 w-6 text-white" />
+            <Link to="/" className="flex items-center gap-2">
+              <div className="bg-white p-2 rounded-lg border border-gray-100">
+                {logoAvailable ? (
+                  <img
+                    src="/logo.png"
+                    alt="SmartSite"
+                    className="h-10 w-10 object-contain"
+                    onError={() => setLogoAvailable(false)}
+                  />
+                ) : (
+                  <Building2 className="h-10 w-10 text-blue-600" />
+                )}
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent hidden sm:inline">
                 SmartSite
@@ -58,7 +87,12 @@ export default function DashboardLayout() {
 
           <div className="flex items-center gap-2">
             {/* Notifications */}
-            <Button variant="ghost" size="icon" className="relative" onClick={() => navigate('/notifications')}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative"
+              onClick={() => navigate("/notifications")}
+            >
               <Bell className="h-5 w-5" />
               {unreadNotifications > 0 && (
                 <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center bg-red-500 text-white text-xs">
@@ -77,8 +111,12 @@ export default function DashboardLayout() {
                     </AvatarFallback>
                   </Avatar>
                   <div className="hidden md:flex flex-col items-start">
-                    <span className="text-sm font-semibold">{user.firstName} {user.lastName}</span>
-                    <span className="text-xs text-gray-500">{roleLabels[user.role]}</span>
+                    <span className="text-sm font-semibold">
+                      {user.firstName} {user.lastName}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {roleLabels[user.role]}
+                    </span>
                   </div>
                   <ChevronDown className="h-4 w-4 hidden md:block" />
                 </Button>
@@ -86,17 +124,24 @@ export default function DashboardLayout() {
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>
                   <div className="flex flex-col">
-                    <span>{user.firstName} {user.lastName}</span>
-                    <span className="text-xs font-normal text-gray-500">{user.email}</span>
+                    <span>
+                      {user.firstName} {user.lastName}
+                    </span>
+                    <span className="text-xs font-normal text-gray-500">
+                      {user.email}
+                    </span>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate('/profile')}>
+                <DropdownMenuItem onClick={() => navigate("/profile")}>
                   <User className="mr-2 h-4 w-4" />
                   Profile
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="text-red-600"
+                >
                   <LogOut className="mr-2 h-4 w-4" />
                   Logout
                 </DropdownMenuItem>
@@ -112,7 +157,7 @@ export default function DashboardLayout() {
           className={`
             fixed lg:sticky top-0 left-0 z-30 h-screen bg-white border-r border-gray-200
             transition-transform duration-300 lg:translate-x-0
-            ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+            ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
             w-64 pt-16 lg:pt-0 flex flex-col
           `}
         >
@@ -127,9 +172,10 @@ export default function DashboardLayout() {
                   onClick={() => setSidebarOpen(false)}
                   className={`
                     flex items-center gap-3 px-4 py-3 rounded-lg transition-all
-                    ${isActive
-                      ? 'bg-gradient-to-r from-blue-600 to-green-600 text-white shadow-md'
-                      : 'text-gray-700 hover:bg-gray-100'
+                    ${
+                      isActive
+                        ? "bg-gradient-to-r from-blue-600 to-green-600 text-white shadow-md"
+                        : "text-gray-700 hover:bg-gray-100"
                     }
                   `}
                 >

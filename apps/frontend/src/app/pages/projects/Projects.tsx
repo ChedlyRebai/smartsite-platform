@@ -65,7 +65,7 @@ export default function Projects() {
     }
     setProjects(projects.map(p => 
       p.id === selectedProject.id 
-        ? { ...p, name: editData.name, client: editData.client, budget: typeof editData.budget === 'string' ? parseInt(editData.budget) : editData.budget, status: editData.status, progress: editData.progress }
+        ? { ...p, name: editData.name, client: editData.client, budget: editData.budget, status: editData.status, progress: editData.progress }
         : p
     ));
     setEditOpen(false);
@@ -255,7 +255,7 @@ export default function Projects() {
                             id="edit-budget"
                             type="number"
                             value={editData.budget}
-                            // onChange={(e) => setEditData({ ...editData, budget: parseInt(e.target.value) })}
+                            onChange={(e) => setEditData({ ...editData, budget: parseInt(e.target.value) })}
                           />
                         </div>
                         <div className="space-y-2">
