@@ -1,0 +1,124 @@
+version: '3.8'
+
+services:
+  # API Gateway
+  api-gateway:
+    build:
+      context: .
+      dockerfile: docker/api-gateway.Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - PROJECTS_SERVICE_URL=http://projects-service:3002
+      - TEAM_SERVICE_URL=http://team-service:3003
+      - FINANCE_SERVICE_URL=http://finance-service:3004
+      - QHSE_SERVICE_URL=http://qhse-service:3005
+      - NOTIFICATIONS_SERVICE_URL=http://notifications-service:3006
+    depends_on:
+      - auth-service
+      - projects-service
+      - team-service
+      - finance-service
+      - qhse-service
+      - notifications-service
+
+  # Auth Service
+  auth-service:
+    build:
+      context: .
+      dockerfile: docker/auth-service.Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/auth_db
+      - PORT=3001
+    depends_on:
+      - postgres
+
+  # Projects Service
+  projects-service:
+    build:
+      context: .
+      dockerfile: docker/projects-service.Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/projects_db
+      - PORT=3002
+    depends_on:
+      - postgres
+
+  # Team Service
+  team-service:
+    build:
+      context: .
+      dockerfile: docker/team-service.Dockerfile
+    ports:
+      - "3003:3003"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/team_db
+      - PORT=3003
+    depends_on:
+      - postgres
+
+  # Finance Service
+  finance-service:
+    build:
+      context: .
+      dockerfile: docker/finance-service.Dockerfile
+    ports:
+      - "3004:3004"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/finance_db
+      - PORT=3004
+    depends_on:
+      - postgres
+
+  # QHSE Service
+  qhse-service:
+    build:
+      context: .
+      dockerfile: docker/qhse-service.Dockerfile
+    ports:
+      - "3005:3005"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/qhse_db
+      - PORT=3005
+    depends_on:
+      - postgres
+
+  # Notifications Service
+  notifications-service:
+    build:
+      context: .
+      dockerfile: docker/notifications-service.Dockerfile
+    ports:
+      - "3006:3006"
+    environment:
+      - PORT=3006
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=smartsite
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  # Frontend (Shell/Host application)
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:3000/api
+
+volumes:
+  postgres_data:
