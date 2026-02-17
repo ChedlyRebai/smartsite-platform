@@ -47,7 +47,7 @@ export default function Sites() {
       workStartDate: new Date().toISOString(),
       managerId: 0,
     };
-    setSites([...sites, site]);
+   // setSites([...sites, site]);
     setNewSite({ name: '', address: '', area: '', budget: '' });
     toast.success('Site added successfully!');
   };
@@ -70,7 +70,7 @@ export default function Sites() {
     }
     setSites(sites.map(s => 
       s.id === selectedSite.id 
-        ? { ...s, status: manageData.status, progress: manageData.progress }
+        ? { ...s, status: manageData.status as 'planning' | 'in_progress' | 'on_hold' | 'completed', progress: manageData.progress }
         : s
     ));
     setManageDialogOpen(false);
