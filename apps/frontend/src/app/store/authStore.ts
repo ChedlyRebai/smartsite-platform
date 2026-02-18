@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { AuthState, User, RegisterData } from "../types";
+import axios from "axios";
 
 // Mock users database
 const mockUsers: User[] = [
@@ -14,111 +15,37 @@ const mockUsers: User[] = [
     createdDate: "2026-01-01",
     lastLoginDate: "2026-02-17",
   },
-  {
-    id: "2",
-    firstName: "John",
-    lastName: "Director",
-    email: "director@smartsite.com",
-    role: "director",
-    isActive: true,
-    createdDate: "2026-01-01",
-  },
-  {
-    id: "3",
-    firstName: "Sarah",
-    lastName: "Manager",
-    email: "pm@smartsite.com",
-    role: "project_manager",
-    isActive: true,
-    createdDate: "2026-01-01",
-  },
-  {
-    id: "4",
-    firstName: "Mike",
-    lastName: "Site",
-    email: "site@smartsite.com",
-    role: "site_manager",
-    isActive: true,
-    createdDate: "2026-01-01",
-  },
-  {
-    id: "5",
-    firstName: "Emma",
-    lastName: "Works",
-    email: "works@smartsite.com",
-    role: "works_manager",
-    isActive: true,
-    createdDate: "2026-01-01",
-  },
-  {
-    id: "6",
-    firstName: "David",
-    lastName: "Finance",
-    email: "accountant@smartsite.com",
-    role: "accountant",
-    isActive: true,
-    createdDate: "2026-01-01",
-  },
-  {
-    id: "7",
-    firstName: "Lisa",
-    lastName: "Procurement",
-    email: "procurement@smartsite.com",
-    role: "procurement_manager",
-    isActive: true,
-    createdDate: "2026-01-01",
-  },
-  {
-    id: "8",
-    firstName: "Tom",
-    lastName: "Safety",
-    email: "qhse@smartsite.com",
-    role: "qhse_manager",
-    isActive: true,
-    createdDate: "2026-01-01",
-  },
-  {
-    id: "9",
-    firstName: "Client",
-    lastName: "Owner",
-    email: "client@smartsite.com",
-    role: "client",
-    isActive: true,
-    createdDate: "2026-01-01",
-  },
-  {
-    id: "10",
-    firstName: "Sub",
-    lastName: "Contractor",
-    email: "subcontractor@smartsite.com",
-    role: "subcontractor",
-    isActive: true,
-    createdDate: "2026-01-01",
-  },
 ];
+
+const api = axios.create({
+  baseURL: "http://localhost:3000",
+});
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
-      isAuthenticated: false,
+      isAuthenticated: true,
 
-      login: async (email: string, password: string) => {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+      login: async (cin: string, password: string) => {
+        const res = await api.post("/auth/login", {
+          cin,
+          password,
+        });
 
-        // Mock authentication - in production, this would be a real API call
-        const user = mockUsers.find((u) => u.email === email);
-
-        if (!user || password !== "password123") {
-          throw new Error("Invalid credentials");
-        }
-
-        if (!user.isActive) {
-          throw new Error("Account is not active. Waiting for admin approval.");
-        }
-
-        set({ user, isAuthenticated: true });
+        const token = res.data.access_token;
+        const userWIthToken= res.data
+        // attach token globally
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        console.log('mmmmmmmmmmmmmmmmmmmmm',userWIthToken);
+        // get user profile
+        //const profileRes = await api.get("/auth/profile");
+        
+        set({
+          
+          user: res.data,
+          isAuthenticated: true,
+        });
       },
 
       register: async (data: RegisterData) => {
