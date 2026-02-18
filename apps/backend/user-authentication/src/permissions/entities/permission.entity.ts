@@ -1,11 +1,23 @@
-// src/permissions/schemas/permission.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
+
 @Schema({ timestamps: true })
 export class Permission extends Document {
+  
   @Prop({ required: true, unique: true, trim: true })
-  name: string; // ex: "users:read", "projects:update", "incidents:delete"
+  name: string;
+
+  @Prop()
+  source: boolean;
+  @Prop()
+  access: boolean;
+  @Prop()
+  create: boolean;
+  @Prop()
+  delete: boolean;
+  @Prop()
+  update: boolean;
 
   @Prop({ trim: true })
   description?: string;

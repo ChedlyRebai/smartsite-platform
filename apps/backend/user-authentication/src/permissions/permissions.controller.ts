@@ -3,7 +3,7 @@ import { PermissionsService } from './permissions.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('permissions')
-@UseGuards(JwtAuthGuard)
+//@UseGuards(JwtAuthGuard)
 export class PermissionsController {
   constructor(private permissionsService: PermissionsService) {}
 
