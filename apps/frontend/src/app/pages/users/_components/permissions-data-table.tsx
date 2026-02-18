@@ -132,13 +132,14 @@ export function PermissionsDataTable({
 
             defaultValue={row.getValue("access")}
           >
+           
             <SelectTrigger
               className={` w-fit ${
                 row.getValue("access") == "1"
                   ? "border-green-500"
                   : "border-red-500"
               }`}
-            >
+            > {row.getValue("access") === "1" ? "Oui" : "Non"}
               <SelectValue placeholder="Select a fruit" />
             </SelectTrigger>
             <SelectContent>
@@ -180,13 +181,14 @@ export function PermissionsDataTable({
 
             defaultValue={row.getValue("create")}
           >
+           
             <SelectTrigger
               className={` w-fit ${
                 row.getValue("create") == "1"
                   ? "border-green-500"
                   : "border-red-500"
               }`}
-            >
+            > {row.getValue("create") === "1" ? "Oui" : "Non"}
               <SelectValue placeholder="Select a fruit" />
             </SelectTrigger>
             <SelectContent>
@@ -228,13 +230,14 @@ export function PermissionsDataTable({
 
             defaultValue={row.getValue("update")}
           >
+          
             <SelectTrigger
               className={` w-fit ${
                 row.getValue("update") == "1"
                   ? "border-green-500"
                   : "border-red-500"
               }`}
-            >
+            >  {row.getValue("update") === "1" ? "Oui" : "Non"}
               <SelectValue placeholder="Select a fruit" />
             </SelectTrigger>
             <SelectContent>
@@ -262,16 +265,17 @@ export function PermissionsDataTable({
       },
       cell: ({ row }) => {
         return (
-          // <span
-          //   className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-lg font-medium ${
-          //     row.getValue("acces") === "O"
-          //       ? "bg-green-100 text-green-800"
+        <>
+           {/* <span
+             className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-lg font-medium ${
+               row.getValue("acces") === "O"
+                 ? "bg-green-100 text-green-800"
 
-          //       : "bg-red-100 text-red-800"
-          //   } `}
-          // >
-          //   {row.getValue("acces") === "O" ? "Oui" : "Non"}
-          // </span>
+                 : "bg-red-100 text-red-800"
+             } `}
+           >
+             {row.getValue("delete") === "1" ? "Oui" : "Non"}
+           </span> */}
           <Select
             // disabled={access.modification === "N"}
 
@@ -283,7 +287,7 @@ export function PermissionsDataTable({
                   ? "border-green-500"
                   : "border-red-500"
               }`}
-            >
+            >{row.getValue("delete") === "1" ? "Oui" : "Non"}
               <SelectValue placeholder="Select a fruit" />
             </SelectTrigger>
             <SelectContent>
@@ -294,6 +298,7 @@ export function PermissionsDataTable({
               
             </SelectContent>
           </Select>
+          </>
         );
       },
     },

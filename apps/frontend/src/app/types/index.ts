@@ -28,11 +28,10 @@ export interface User {
 export interface Role {
   _id: string;
   name: string;
-  description?: string;
-  permissions?: Permission[];
-  userCount?: number;
-  createdAt: string;
-  updatedAt?: string;
+  permissions: string[] | Permission[]; // ObjectId[] or populated Permission[]
+  createdAt: Date;
+  updatedAt: Date;
+  userCount?: number; // Virtual field for frontend
 }
 
 export interface Permission {

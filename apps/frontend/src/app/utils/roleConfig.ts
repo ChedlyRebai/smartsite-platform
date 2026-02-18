@@ -17,6 +17,7 @@ import {
   AlertTriangle,
   MapPin,
   type LucideIcon,
+  Clock,
 } from "lucide-react";
 
 export interface NavItem {
@@ -41,7 +42,6 @@ export const roleLabels: Record<UserRole, string> = {
 };
 
 export const navigationItems: NavItem[] = [
-  
   {
     label: "Dashboard",
     href: "/dashboard",
@@ -59,6 +59,18 @@ export const navigationItems: NavItem[] = [
       "subcontractor",
       "user",
     ],
+  },
+  {
+    label: "Permissions",
+    href: "/permissions",
+    icon: Clock ,
+    roles: ["super_admin"],
+  },
+  {
+    label: "Roles",
+    href: "/roles",
+    icon: Users,
+    roles: ["super_admin"],
   },
   {
     label: "User Management",
@@ -207,7 +219,7 @@ export const navigationItems: NavItem[] = [
       "user",
     ],
   },
-  
+
   {
     label: "Pending Approvals",
     href: "/admin/pending-users",

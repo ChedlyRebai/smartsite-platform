@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = process.env.ROLE_API_URL || "http://localhost:3000/roles";
+const API_URL = "http://localhost:3000/roles";
 
 export const getAllRoles = async () => {
   try {

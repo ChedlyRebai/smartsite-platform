@@ -12,13 +12,14 @@ import { canEdit } from "../../utils/permissions";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { Role } from "@/app/types";
-import { RolesDataTable } from "./_components/roles-data-table";
+
 import {
   getAllRoles,
   createRole,
   updateRole,
   deleteRole,
 } from "@/app/action/role.action";
+import { RolesDataTable } from "./_components/roles-data-table";
 
 export default function RolesPage() {
   const user = useAuthStore((state) => state.user);
@@ -38,7 +39,57 @@ export default function RolesPage() {
       if (response.status === 200 && Array.isArray(response.data)) {
         setRoles(response.data);
       } else {
-        // Mock data for development
+        // Mock data for development - matches Mongoose schema
+        setRoles([
+          {
+            _id: "65a1b2c3d4e5f6g7h8i9j0k1",
+            name: "Super Administrator",
+            permissions: [], // Will be populated with Permission ObjectIds
+            userCount: 1,
+            createdAt: new Date("2026-01-01T00:00:00Z"),
+            updatedAt: new Date("2026-01-01T00:00:00Z"),
+          },
+          {
+            _id: "65a1b2c3d4e5f6g7h8i9j0k2",
+            name: "Director",
+            permissions: [],
+            userCount: 2,
+            createdAt: new Date("2026-01-01T00:00:00Z"),
+            updatedAt: new Date("2026-01-05T00:00:00Z"),
+          },
+          {
+            _id: "65a1b2c3d4e5f6g7h8i9j0k3",
+            name: "Project Manager",
+            permissions: [],
+            userCount: 5,
+            createdAt: new Date("2026-01-05T00:00:00Z"),
+            updatedAt: new Date("2026-01-10T00:00:00Z"),
+          },
+          {
+            _id: "65a1b2c3d4e5f6g7h8i9j0k4",
+            name: "Site Manager",
+            permissions: [],
+            userCount: 4,
+            createdAt: new Date("2026-01-08T00:00:00Z"),
+            updatedAt: new Date("2026-01-15T00:00:00Z"),
+          },
+          {
+            _id: "65a1b2c3d4e5f6g7h8i9j0k5",
+            name: "QHSE Manager",
+            permissions: [],
+            userCount: 2,
+            createdAt: new Date("2026-01-10T00:00:00Z"),
+            updatedAt: new Date("2026-01-12T00:00:00Z"),
+          },
+          {
+            _id: "65a1b2c3d4e5f6g7h8i9j0k6",
+            name: "Accountant",
+            permissions: [],
+            userCount: 2,
+            createdAt: new Date("2026-01-12T00:00:00Z"),
+            updatedAt: new Date("2026-01-18T00:00:00Z"),
+          },
+        ]);
       }
     } catch (error) {
       console.error("Failed to load roles:", error);
