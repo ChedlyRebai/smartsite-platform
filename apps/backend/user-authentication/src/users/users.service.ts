@@ -12,8 +12,8 @@ export class UsersService {
     return createdUser.save();
   }
 
-  async findByEmail(email: string) {
-    return this.userModel.findOne({ email }).populate('roles').exec();
+  async findByCin(cin: string) {
+    return this.userModel.findOne({ cin }).populate('roles').exec();
   }
 
   async findById(id: string) {

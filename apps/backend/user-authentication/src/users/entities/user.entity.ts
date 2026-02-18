@@ -12,12 +12,12 @@ export class User extends Document {
   prenom: string;
 
   @Prop({ required: true, unique: true, lowercase: true, trim: true })
-  email: string;
+  cin: string;
 
   @Prop({ required: true })
   motDePasse: string; // hashed !
 
-  @Prop({ type: [{ type: Types.ObjectId, ref: 'Role' }], default: ['USER'] })
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Role' }], default: [] })
   roles: Types.ObjectId[] | Role[];
 
   @Prop({ default: true })
@@ -37,4 +37,15 @@ export class User extends Document {
 export const UserSchema = SchemaFactory.createForClass(User);
 
 // Optionnel : index pour recherche rapide
-UserSchema.index({ email: 1 });
+UserSchema.index({ cin: 1 });
+
+// Pre-save hook to ensure roles is always an array of ObjectIds or empty
+UserSchema.pre('save', function (next) {
+  if (this.roles && !Array.isArray(this.roles)) {
+    this.roles = [];
+  }
+  if (this.roles && this.roles.length > 0) {
+    this.roles = this.roles.filter((role) => role && typeof role !== 'string') as Types.ObjectId[] | Role[];
+  }
+  next;
+});

@@ -15,14 +15,14 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() registerDto: any) {
-    const { email, password, nom, prenom } = registerDto;
+    const { cin, password, nom, prenom } = registerDto;
     try {
-      const user = await this.authService.register(email, password, nom, prenom);
+      const user = await this.authService.register(cin, password, nom, prenom);
       return {
         message: 'User registered successfully',
         user: {
           id: user._id,
-          email: user.email,
+          cin: user.cin,
           nom: user.nom,
           prenom: user.prenom,
         },
