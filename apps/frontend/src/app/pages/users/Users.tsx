@@ -9,6 +9,9 @@ import { canEdit } from '../../utils/permissions';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 
+import { mockTeamMembers } from '@/app/utils/mockData';
+import { UserDataTable } from './_components/data-table';
+
 export default function UsersPage() {
   const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();
@@ -107,7 +110,11 @@ export default function UsersPage() {
           <CardTitle>System Roles</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
+
+          <UserDataTable users={mockTeamMembers} />
+
+
+          {/* <div className="space-y-3">
             {roles.map((item, index) => (
               <div key={index} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
                 <div>
@@ -148,7 +155,7 @@ export default function UsersPage() {
                 </div>
               </div>
             ))}
-          </div>
+          </div> */}
         </CardContent>
       </Card>
     </div>

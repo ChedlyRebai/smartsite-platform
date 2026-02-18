@@ -207,12 +207,7 @@ export const navigationItems: NavItem[] = [
       "user",
     ],
   },
-  {
-    label: "User Management",
-    href: "/users",
-    icon: Settings,
-    roles: ["super_admin"],
-  },
+  
   {
     label: "Pending Approvals",
     href: "/admin/pending-users",
