@@ -34,7 +34,7 @@ export default function Suppliers() {
       rating: 4.5,
       joinDate: new Date().toISOString(),
     };
-    setSuppliers([...suppliers, supplier]);
+    //setSuppliers([...suppliers, supplier]);
     setNewSupplier({ name: '', category: '', email: '', phone: '' });
     toast.success('Supplier added successfully!');
   };
