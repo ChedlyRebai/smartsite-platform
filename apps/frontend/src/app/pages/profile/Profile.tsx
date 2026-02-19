@@ -14,9 +14,9 @@ import { toast } from 'sonner';
 export default function Profile() {
   const user = useAuthStore((state) => state.user);
   const [editData, setEditData] = useState({
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
-    phone: user?.phone || '',
+    firstname: user?.firstname || '',
+    lastname: user?.lastname || '',
+    //phone: user?.phone || '',
   });
   const [passwords, setPasswords] = useState({
     current: '',
@@ -26,12 +26,12 @@ export default function Profile() {
 
   if (!user) return null;
 
-  const getInitials = (firstName: string, lastName: string) => {
-    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  const getInitials = (firstname: string, lastname: string) => {
+    return `${firstname.charAt(0)}${lastname.charAt(0)}`.toUpperCase();
   };
 
   const handleSaveProfile = () => {
-    if (!editData.firstName || !editData.lastName) {
+    if (!editData.firstname || !editData.lastname) {
       toast.error('First and last names are required');
       return;
     }
@@ -70,13 +70,13 @@ export default function Profile() {
           <div className="flex items-start gap-6">
             <Avatar className="h-24 w-24">
               <AvatarFallback className="bg-gradient-to-br from-blue-600 to-green-600 text-white text-2xl">
-                {getInitials(user.firstName, user.lastName)}
+                {getInitials(user.firstname, user.lastname)}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 space-y-4">
-              <div>
+              {/* <div>
                 <h2 className="text-2xl font-bold text-gray-900">
-                  {user.firstName} {user.lastName}
+                  {user.firstname} {user.lastname}
                 </h2>
                 <p className="text-gray-500">{roleLabels[user.role]}</p>
               </div>
@@ -102,7 +102,7 @@ export default function Profile() {
                     {user.isActive ? 'Active' : 'Inactive'}
                   </Badge>
                 </div>
-              </div>
+              </div> */}
 
               <div className="flex gap-3 pt-4">
                 <Dialog>
@@ -121,32 +121,32 @@ export default function Profile() {
                     <div className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label htmlFor="firstName">First Name</Label>
+                          <Label htmlFor="firstname">First Name</Label>
                           <Input
-                            id="firstName"
-                            value={editData.firstName}
-                            onChange={(e) => setEditData({ ...editData, firstName: e.target.value })}
+                            id="firstname"
+                            value={editData.firstname}
+                            onChange={(e) => setEditData({ ...editData, firstname: e.target.value })}
                             placeholder="First name"
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="lastName">Last Name</Label>
+                          <Label htmlFor="lastname">Last Name</Label>
                           <Input
-                            id="lastName"
-                            value={editData.lastName}
-                            onChange={(e) => setEditData({ ...editData, lastName: e.target.value })}
+                            id="lastname"
+                            value={editData.lastname}
+                            onChange={(e) => setEditData({ ...editData, lastname: e.target.value })}
                             placeholder="Last name"
                           />
                         </div>
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="phone">Phone</Label>
-                        <Input
+                        {/* <Input
                           id="phone"
                           value={editData.phone}
                           onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
                           placeholder="Phone number"
-                        />
+                        /> */}
                       </div>
                       <Button 
                         className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
@@ -214,7 +214,7 @@ export default function Profile() {
         </CardContent>
       </Card>
 
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle>Account Activity</CardTitle>
         </CardHeader>
@@ -238,7 +238,7 @@ export default function Profile() {
             </div>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   );
 }

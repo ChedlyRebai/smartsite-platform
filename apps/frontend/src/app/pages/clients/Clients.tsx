@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 
 export default function Clients() {
   const user = useAuthStore((state) => state.user);
-  const canManageClients = user && canEdit(user.role, 'clients');
+  const canManageClients = user && canEdit(user.role.name, 'clients');
   const [clients, setClients] = useState(mockClients);
   const [viewDetailsOpen, setViewDetailsOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
