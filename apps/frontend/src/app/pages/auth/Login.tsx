@@ -2,13 +2,7 @@ import { useState } from "react";
 import { data, Link, useNavigate } from "react-router";
 import { Building2, Loader2 } from "lucide-react";
 import { useAuthStore } from "../../store/authStore";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-
 import { toast } from "sonner";
-import { LoginAction } from "@/app/action/auth.action";
-import axios from "axios";
-
 export default function Login() {
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
