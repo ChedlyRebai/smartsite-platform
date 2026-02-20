@@ -5,6 +5,7 @@ import {
   Instagram,
   Menu,
   Twitter,
+<<<<<<< HEAD
   ChevronDown,
   LayoutDashboard,
   Users,
@@ -185,19 +186,73 @@ const values = [
     name: "Balance and efficiency",
     description:
       "Reduce daily stress while boosting team productivity.",
+=======
+} from "lucide-react";
+import { useState } from "react";
+
+const navigation = [
+  { name: "Produit", href: "#" },
+  { name: "Fonctionnalités", href: "#" },
+  { name: "Ressources", href: "#" },
+  { name: "Entreprise", href: "#" },
+];
+const stats = [
+  { label: "Chantiers gérés activement", value: "+150" },
+  { label: "Alertes IA envoyées par mois", value: "12,000+" },
+  { label: "Utilisateurs en Tunisie et Maghreb", value: "2,500+" },
+];
+const values = [
+  {
+    name: "Excellence sur le terrain",
+    description:
+      "Contrôlez chaque détail de vos chantiers en temps réel avec des outils fiables et intuitifs.",
+  },
+  {
+    name: "Partagez l'intelligence",
+    description:
+      "Collaborez facilement entre équipes, ingénieurs, chefs de chantier et direction.",
+  },
+  {
+    name: "Apprentissage continu",
+    description:
+      "L'IA apprend de vos projets pour améliorer les prédictions jour après jour.",
+  },
+  {
+    name: "Support sans faille",
+    description: "Assistance rapide et adaptée aux réalités du BTP en Tunisie.",
+  },
+  {
+    name: "Responsabilité totale",
+    description:
+      "Transparence sur les coûts, délais et sécurité – plus de surprises.",
+  },
+  {
+    name: "Équilibre et efficacité",
+    description:
+      "Réduisez le stress quotidien tout en boostant la productivité des équipes.",
+>>>>>>> origin/main
   },
 ];
 const team = [
   {
     name: "Chedly Ben Ali",
+<<<<<<< HEAD
     role: "Founder & CEO",
     imageUrl:
       "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=1024&h=1024&q=80",
   },
+=======
+    role: "Fondateur & CEO",
+    imageUrl:
+      "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=1024&h=1024&q=80",
+  },
+  // Ajoutez plus de membres si besoin
+>>>>>>> origin/main
 ];
 const blogPosts = [
   {
     id: 1,
+<<<<<<< HEAD
     title: "How AI predicts delays on your construction sites",
     href: "#",
     description:
@@ -205,6 +260,15 @@ const blogPosts = [
     imageUrl:
       "https://images.unsplash.com/photo-1496128858413-b36217c2ce36?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3603&q=80",
     date: "Jan 15, 2026",
+=======
+    title: "Comment l'IA prédit les retards sur vos chantiers",
+    href: "#",
+    description:
+      "Découvrez comment SmartSite analyse les données en temps réel pour alerter avant les problèmes.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1496128858413-b36217c2ce36?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3603&q=80",
+    date: "15 Jan 2026",
+>>>>>>> origin/main
     datetime: "2026-01-15",
     author: {
       name: "Chedly Ben Ali",
@@ -212,14 +276,25 @@ const blogPosts = [
         "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
     },
   },
+<<<<<<< HEAD
+=======
+  // Ajoutez plus d'articles si besoin
+>>>>>>> origin/main
 ];
 const footerNavigation = {
   main: [
     { name: "Blog", href: "#" },
+<<<<<<< HEAD
     { name: "Careers", href: "#" },
     { name: "Press", href: "#" },
     { name: "Accessibility", href: "#" },
     { name: "Partners", href: "#" },
+=======
+    { name: "Carrières", href: "#" },
+    { name: "Presse", href: "#" },
+    { name: "Accessibilité", href: "#" },
+    { name: "Partenaires", href: "#" },
+>>>>>>> origin/main
   ],
   social: [
     {
@@ -304,6 +379,7 @@ const navigationFooter: any = {
   ],
 };
 
+<<<<<<< HEAD
 export default function Home2({ userRole = "director" }: { userRole?: string }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -315,6 +391,10 @@ export default function Home2({ userRole = "director" }: { userRole?: string }) 
       navigate(route);
     }
   };
+=======
+export default function Home2() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+>>>>>>> origin/main
 
   return (
     <div className="bg-white">
@@ -340,6 +420,7 @@ export default function Home2({ userRole = "director" }: { userRole?: string }) 
               className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
               onClick={() => setMobileMenuOpen(true)}
             >
+<<<<<<< HEAD
               <span className="sr-only">Open main menu</span>
               <Menu className="h-6 w-6" aria-hidden="true" />
             </button>
@@ -379,6 +460,13 @@ export default function Home2({ userRole = "director" }: { userRole?: string }) 
               </DropdownMenuContent>
             </DropdownMenu>
 
+=======
+              <span className="sr-only">Ouvrir le menu principal</span>
+              <Menu className="h-6 w-6" aria-hidden="true" />
+            </button>
+          </div>
+          <div className="hidden lg:flex lg:gap-x-12">
+>>>>>>> origin/main
             {navigation.map((item) => (
               <a
                 key={item.name}
@@ -391,10 +479,17 @@ export default function Home2({ userRole = "director" }: { userRole?: string }) 
           </div>
           <div className="hidden lg:flex lg:flex-1 lg:justify-end">
             <a
+<<<<<<< HEAD
               href="/login"
               className="text-sm font-semibold leading-6 text-gray-900"
             >
               Login <span aria-hidden="true">&rarr;</span>
+=======
+              href="#"
+              className="text-sm font-semibold leading-6 text-gray-900"
+            >
+              Connexion <span aria-hidden="true">&rarr;</span>
+>>>>>>> origin/main
             </a>
           </div>
         </nav>
@@ -450,12 +545,23 @@ export default function Home2({ userRole = "director" }: { userRole?: string }) 
               <div className="mx-auto max-w-2xl gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
                 <div className="w-full max-w-xl lg:shrink-0 xl:max-w-2xl">
                   <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+<<<<<<< HEAD
                     SmartSite: Manage your construction sites with artificial intelligence
                   </h1>
                   <p className="relative mt-6 text-lg leading-8 text-gray-600 sm:max-w-md lg:max-w-none">
                     Real-time tracking, AI predictions for delays and risks,
                     automatic alerts, instant reports, mobile app for the field.
                     Control costs, deadlines, and safety like never before.
+=======
+                    SmartSite : Gérez vos chantiers avec l'intelligence
+                    artificielle
+                  </h1>
+                  <p className="relative mt-6 text-lg leading-8 text-gray-600 sm:max-w-md lg:max-w-none">
+                    Suivi en temps réel, prédictions IA des retards et risques,
+                    alertes automatiques, rapports instantanés, application
+                    mobile pour le terrain. Contrôlez coûts, délais et sécurité
+                    comme jamais auparavant.
+>>>>>>> origin/main
                   </p>
                 </div>
                 <div className="mt-14 flex justify-end gap-8 sm:-mt-44 sm:justify-start sm:pl-20 lg:mt-0 lg:pl-0">
@@ -463,7 +569,11 @@ export default function Home2({ userRole = "director" }: { userRole?: string }) 
                     <div className="relative">
                       <img
                         src="https://www.openspace.ai/wp-content/uploads/2025/02/BIM-Compare-tablet-on-jobsite-scaled.webp"
+<<<<<<< HEAD
                         alt="Site manager using a tablet on site for real-time tracking"
+=======
+                        alt="Chef de chantier utilisant une tablette sur site pour suivi en temps réel"
+>>>>>>> origin/main
                         className="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg"
                       />
                       <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
@@ -474,7 +584,11 @@ export default function Home2({ userRole = "director" }: { userRole?: string }) 
                     <div className="relative">
                       <img
                         src="https://www.deltek.com/-/media/deltekblogs/lead-images/2023/construction-supervisor-with-digital-tablet-on-site.ashx"
+<<<<<<< HEAD
                         alt="Construction supervisor checking site progress on mobile tablet"
+=======
+                        alt="Superviseur BTP vérifiant avancement chantier sur tablette mobile"
+>>>>>>> origin/main
                         className="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg"
                       />
                       <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
@@ -483,7 +597,11 @@ export default function Home2({ userRole = "director" }: { userRole?: string }) 
                     <div className="relative">
                       <img
                         src="https://www.deltek.com/-/media/deltekblogs/lead-images/2023/750x500-ae-ipad.ashx"
+<<<<<<< HEAD
                         alt="Construction worker capturing photos and data on iPad at site"
+=======
+                        alt="Ouvrier construction capturant photos et données sur iPad sur chantier"
+>>>>>>> origin/main
                         className="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg"
                       />
                       <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
@@ -494,7 +612,11 @@ export default function Home2({ userRole = "director" }: { userRole?: string }) 
                     <div className="relative">
                       <img
                         src="https://assets.marketing.quickbase.com/product/Screenshots/_1320x939_crop_center-center_82_line/product-screenshots-mobile-and-gantt.png"
+<<<<<<< HEAD
                         alt="Mobile dashboard and Gantt chart for construction project tracking SmartSite"
+=======
+                        alt="Dashboard mobile et Gantt de suivi projet construction SmartSite"
+>>>>>>> origin/main
                         className="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg"
                       />
                       <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
@@ -503,7 +625,11 @@ export default function Home2({ userRole = "director" }: { userRole?: string }) 
                     <div className="relative">
                       <img
                         src="https://www.openspace.ai/wp-content/uploads/2025/10/Hero.png"
+<<<<<<< HEAD
                         alt="Construction site progress dashboard with AI and alerts SmartSite"
+=======
+                        alt="Tableau de bord avancement chantier avec IA et alertes SmartSite"
+>>>>>>> origin/main
                         className="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg"
                       />
                       <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
@@ -519,11 +645,16 @@ export default function Home2({ userRole = "director" }: { userRole?: string }) 
         <div className="mx-auto mb-30 mt-12 max-w-7xl px-6 sm:mt-0 lg:px-8 xl:-mt-8">
           <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-none">
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+<<<<<<< HEAD
               Our mission
+=======
+              Notre mission
+>>>>>>> origin/main
             </h2>
             <div className="mt-6 flex flex-col gap-x-8 gap-y-20 lg:flex-row">
               <div className="lg:w-full lg:max-w-2xl lg:flex-auto">
                 <p className="text-xl leading-8 text-gray-600">
+<<<<<<< HEAD
                   Transform construction site management in the Maghreb through AI:
                   fewer delays, fewer accidents, more profitability.
                 </p>
@@ -540,6 +671,24 @@ export default function Home2({ userRole = "director" }: { userRole?: string }) 
                     Available on web and mobile, even with limited
                     connection in the field. Try it for free and take control
                     today.
+=======
+                  Transformer la gestion des chantiers au Maghreb grâce à l'IA :
+                  moins de retards, moins d'accidents, plus de rentabilité.
+                </p>
+                <div className="mt-10 max-w-xl text-base leading-7 text-gray-700">
+                  <p>
+                    SmartSite centralise toutes vos données chantier
+                    (avancement, ressources, sécurité, budget) et utilise
+                    l'intelligence artificielle pour prédire les risques,
+                    optimiser les plannings et générer des rapports
+                    automatiques. Adapté aux entreprises tunisiennes, du petit
+                    chantier à la grande infrastructure.
+                  </p>
+                  <p className="mt-10">
+                    Disponible sur web et mobile, même avec connexion limitée
+                    sur le terrain. Essayez gratuitement et prenez le contrôle
+                    dès aujourd'hui.
+>>>>>>> origin/main
                   </p>
                 </div>
               </div>
@@ -567,9 +716,40 @@ export default function Home2({ userRole = "director" }: { userRole?: string }) 
         <div className="relative isolate overflow-hidden bg-gray-900">
           <div className="px-6 py-24 sm:px-6 sm:py-32 lg:px-8">
             <div className="mx-auto max-w-3xl text-center">
+<<<<<<< HEAD
               <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-gray-300">
                 {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
               </p>
+=======
+              <h2 className="text-3xl font-bold tracking-tight text-white sm:text-5xl">
+                Take Control of Your Construction Projects.
+                <br />
+                Build Smarter Starting Today.
+              </h2>
+
+              <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-gray-300">
+                Manage workers, materials, budgets, and deadlines in one
+                powerful platform designed specifically for construction
+                companies. Reduce delays, cut costs, and improve site
+                productivity.
+              </p>
+
+              <div className="mt-10 flex items-center justify-center gap-x-6">
+                <a
+                  href="#"
+                  className="rounded-md bg-indigo-500 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 transition"
+                >
+                  Start Free Trial
+                </a>
+
+                <a
+                  href="#"
+                  className="text-sm font-semibold leading-6 text-white hover:text-indigo-400 transition"
+                >
+                  Request Demo <span aria-hidden="true">→</span>
+                </a>
+              </div>
+>>>>>>> origin/main
             </div>
           </div>
 
@@ -607,11 +787,19 @@ export default function Home2({ userRole = "director" }: { userRole?: string }) 
         <div className="mx-auto mb-32 mt-32 max-w-7xl px-6 sm:mt-40 lg:px-8">
           <div className="mx-auto max-w-2xl lg:mx-0">
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+<<<<<<< HEAD
               Our values
             </h2>
             <p className="mt-6 text-lg leading-8 text-gray-600">
               Building the future of construction sites with precision, innovation, and
               field proximity.
+=======
+              Nos valeurs
+            </h2>
+            <p className="mt-6 text-lg leading-8 text-gray-600">
+              Construire l'avenir des chantiers avec précision, innovation et
+              proximité terrain.
+>>>>>>> origin/main
             </p>
           </div>
           <dl className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 text-base leading-7 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
@@ -633,8 +821,36 @@ export default function Home2({ userRole = "director" }: { userRole?: string }) 
           />
 
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
+<<<<<<< HEAD
             {/* Stats */}
             <dl className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+=======
+            {/* Main Text */}
+            <div className="mx-auto max-w-2xl lg:mx-0">
+              <h2 className="text-4xl font-bold tracking-tight text-white sm:text-6xl">
+                Build Smarter. Deliver Projects On Time.
+              </h2>
+
+              <p className="mt-6 text-lg leading-8 text-gray-300">
+                Our construction management platform helps contractors and
+                engineers reduce delays, control costs, and improve productivity
+                across all active sites.
+              </p>
+
+              <div className="mt-8 flex gap-4">
+                <button className="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold px-6 py-3 rounded-lg transition">
+                  Start Free Trial
+                </button>
+
+                <button className="border border-white text-white hover:bg-white hover:text-gray-900 px-6 py-3 rounded-lg transition">
+                  Request Demo
+                </button>
+              </div>
+            </div>
+
+            {/* Stats */}
+            <dl className="mt-20 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+>>>>>>> origin/main
               <div className="flex flex-col-reverse">
                 <dt className="text-base leading-7 text-gray-300">
                   Active Construction Projects

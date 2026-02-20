@@ -58,6 +58,7 @@ describe('AuthService', () => {
     });
   });
 
+<<<<<<< HEAD
   describe('login', () => {
     it('should return access token and user data', async () => {
       const user = {
@@ -111,4 +112,59 @@ describe('AuthService', () => {
       ).rejects.toThrow('User already exists');
     });
   });
+=======
+  // describe('login', () => {
+  //   it('should return access token and user data', async () => {
+  //     const user = {
+  //       _id: '123',
+  //       cin: '12345678',
+  //       nom: 'Test',
+  //       prenom: 'User',
+  //       roles: [],
+  //     };
+  //     mockJwtService.sign.mockReturnValue('token123');
+
+  //     const result = await service.login(user);
+  //     expect(result.access_token).toBe('token123');
+  //     expect(result.user).toEqual({
+  //       id: '123',
+  //       cin: '12345678',
+  //       nom: 'Test',
+  //       prenom: 'User',
+  //       roles: [],
+  //     });
+  //     expect(jwtService.sign).toHaveBeenCalledWith({
+  //       cin: '12345678',
+  //       sub: '123',
+  //       roles: [],
+  //     });
+  //   });
+  // });
+
+  // describe('register', () => {
+  //   it('should create a new user with hashed password', async () => {
+  //     const newUser = {
+  //       _id: '456',
+  //       cin: '87654321',
+  //       nom: 'New',
+  //       prenom: 'User',
+  //     };
+  //     mockUsersService.findByCin.mockResolvedValue(null);
+  //     mockUsersService.create.mockResolvedValue(newUser);
+
+  //     const result = await service.register('87654321', 'password', 'New', 'User');
+  //     expect(result).toEqual(newUser);
+  //     expect(mockUsersService.findByCin).toHaveBeenCalledWith('87654321');
+  //     expect(usersService.create).toHaveBeenCalled();
+  //   });
+
+  //   it('should throw error if user already exists', async () => {
+  //     mockUsersService.findByCin.mockResolvedValue({ cin: '11111111' });
+
+  //     await expect(
+  //       service.register('11111111', 'password', 'Existing', 'User'),
+  //     ).rejects.toThrow('User already exists');
+  //   });
+  // });
+>>>>>>> origin/main
 });

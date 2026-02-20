@@ -14,7 +14,11 @@ import { toast } from 'sonner';
 
 export default function Sites() {
   const user = useAuthStore((state) => state.user);
+<<<<<<< HEAD
   const canManageSites = user && canEdit(user.role, 'sites');
+=======
+  const canManageSites = user && canEdit(user.role.name, 'sites');
+>>>>>>> origin/main
   const [searchTerm, setSearchTerm] = useState('');
   const [sites, setSites] = useState(mockSites);
   const [newSite, setNewSite] = useState({ name: '', address: '', area: '', budget: '' });

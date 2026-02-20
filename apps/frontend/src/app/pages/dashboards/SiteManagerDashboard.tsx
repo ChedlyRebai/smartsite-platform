@@ -12,7 +12,11 @@ export default function SiteManagerDashboard() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Site Operations Dashboard</h1>
+<<<<<<< HEAD
         <p className="text-gray-500 mt-1">Daily site management - {user?.firstName}</p>
+=======
+        <p className="text-gray-500 mt-1">Daily site management - {user?.firstname}</p>
+>>>>>>> origin/main
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">

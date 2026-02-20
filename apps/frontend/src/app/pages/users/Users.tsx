@@ -17,7 +17,11 @@ import { getAllUsers, deleteUser } from '@/app/action/user.action';
 export default function UsersPage() {
   const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();
+<<<<<<< HEAD
   const canManageUsers = user && canEdit(user.role, 'users');
+=======
+  const canManageUsers = user && canEdit(user.role.name, 'users');
+>>>>>>> origin/main
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 

@@ -304,6 +304,7 @@ export const mockTasks: Task[] = [
 ];
 
 export const mockTeamMembers: User[] = [
+<<<<<<< HEAD
   {
     id: '11',
     firstName: 'Ali',
@@ -348,4 +349,7 @@ export const mockTeamMembers: User[] = [
     createdDate: '2026-01-05',
     lastLoginDate: '2026-02-10',
   },
+=======
+
+>>>>>>> origin/main
 ];

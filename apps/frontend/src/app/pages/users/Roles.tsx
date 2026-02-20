@@ -24,7 +24,11 @@ import { RolesDataTable } from "./_components/roles-data-table";
 export default function RolesPage() {
   const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();
+<<<<<<< HEAD
   const canManageRoles = user && canEdit(user.role, "users");
+=======
+  const canManageRoles = user && canEdit(user.role.name, "users");
+>>>>>>> origin/main
   const [roles, setRoles] = useState<Role[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 

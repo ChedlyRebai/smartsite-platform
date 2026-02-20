@@ -45,6 +45,7 @@ const Pricing = () => {
   ];
   return (
     <>
+<<<<<<< HEAD
       {/* Background pattern - same as Home */}
       <svg
         className="fixed inset-x-0 top-0 -z-10 h-[64rem] w-full stroke-gray-200 [mask-image:radial-gradient(32rem_32rem_at_center,white,transparent)]"
@@ -87,6 +88,8 @@ const Pricing = () => {
           }}
         />
       </div>
+=======
+>>>>>>> origin/main
       <Navbar />
       <section className="bg-white py-20">
         <div className="max-w-7xl mx-auto mt-20 px-6 lg:px-8">

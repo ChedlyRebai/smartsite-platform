@@ -18,7 +18,11 @@ import {
 export default function PermissionsPage() {
   const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();
+<<<<<<< HEAD
   const canManagePermissions = user && canEdit(user.role, "users");
+=======
+  const canManagePermissions = user && canEdit(user.role.name, "users");
+>>>>>>> origin/main
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { Menu, ChevronDown, LayoutDashboard, Users, Calendar, Package, DollarSign, Shield, FileText, BarChart3, Briefcase, UserCog, Warehouse, AlertTriangle, MapPin, Bell, Clock, Settings } from 'lucide-react';
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router';
@@ -137,6 +138,20 @@ const Navbar = ({ userRole = "user" }: NavbarProps) => {
     const handleServiceClick = (href: string) => {
       navigate(href);
     };
+=======
+import { Menu } from 'lucide-react';
+import React, { useState } from 'react'
+const navigation = [
+  { name: "Produit", href: "#" },
+  { name: "Fonctionnalités", href: "#" },
+  { name: "Ressources", href: "#" },
+  { name: "Entreprise", href: "#" },
+];
+
+
+const Navbar = () => {
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+>>>>>>> origin/main
 
   return (
      <header className="absolute inset-x-0 top-0 z-50">
@@ -160,11 +175,19 @@ const Navbar = ({ userRole = "user" }: NavbarProps) => {
               className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
               onClick={() => setMobileMenuOpen(true)}
             >
+<<<<<<< HEAD
               <span className="sr-only">Open main menu</span>
               <Menu className="h-6 w-6" aria-hidden="true" />
             </button>
           </div>
           <div className="hidden lg:flex lg:gap-x-12 items-center">
+=======
+              <span className="sr-only">Ouvrir le menu principal</span>
+              <Menu className="h-6 w-6" aria-hidden="true" />
+            </button>
+          </div>
+          <div className="hidden lg:flex lg:gap-x-12">
+>>>>>>> origin/main
             {navigation.map((item) => (
               <a
                 key={item.name}
@@ -174,6 +197,7 @@ const Navbar = ({ userRole = "user" }: NavbarProps) => {
                 {item.name}
               </a>
             ))}
+<<<<<<< HEAD
 
             {/* Features Dropdown - Application Services */}
             <DropdownMenu>
@@ -215,6 +239,15 @@ const Navbar = ({ userRole = "user" }: NavbarProps) => {
               className="text-sm font-semibold leading-6 text-gray-900"
             >
               Login <span aria-hidden="true">&rarr;</span>
+=======
+          </div>
+          <div className="hidden lg:flex lg:flex-1 lg:justify-end">
+            <a
+              href="#"
+              className="text-sm font-semibold leading-6 text-gray-900"
+            >
+              Connexion <span aria-hidden="true">&rarr;</span>
+>>>>>>> origin/main
             </a>
           </div>
         </nav>

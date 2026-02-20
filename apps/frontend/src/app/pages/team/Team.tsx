@@ -13,11 +13,19 @@ import { canEdit } from '../../utils/permissions';
 import { mockTeamMembers } from '../../utils/mockData';
 import { roleLabels } from '../../utils/roleConfig';
 import { toast } from 'sonner';
+<<<<<<< HEAD
 import type { UserRole } from '../../types/index';
 
 export default function Team() {
   const user = useAuthStore((state) => state.user);
   const canManageTeam = user && canEdit(user.role, 'team');
+=======
+import type { Role, RoleType } from '../../types/index';
+
+export default function Team() {
+  const user = useAuthStore((state) => state.user);
+  const canManageTeam = user && canEdit(user.role.name, 'team');
+>>>>>>> origin/main
   const [members, setMembers] = useState([...mockTeamMembers]);
   const [searchTerm, setSearchTerm] = useState('');
   const [newMember, setNewMember] = useState({
@@ -25,7 +33,11 @@ export default function Team() {
     lastName: '',
     email: '',
     phone: '',
+<<<<<<< HEAD
     role: 'user' as UserRole,
+=======
+    role: 'user' as RoleType,
+>>>>>>> origin/main
   });
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [memberBeingEdited, setMemberBeingEdited] = useState<number | null>(null);
@@ -34,7 +46,11 @@ export default function Team() {
     lastName: '',
     email: '',
     phone: '',
+<<<<<<< HEAD
     role: 'user' as UserRole,
+=======
+    role: 'user' as RoleType,
+>>>>>>> origin/main
   });
 
   const filteredMembers = members.filter(member =>
@@ -63,24 +79,40 @@ export default function Team() {
       lastLoginDate: new Date().toISOString(),
       createdDate: new Date().toISOString(),
     };
+<<<<<<< HEAD
     setMembers([...members, member]);
+=======
+   // setMembers([...members, member]);
+>>>>>>> origin/main
     setNewMember({ firstName: '', lastName: '', email: '', phone: '', role: 'user' });
     toast.success('Team member added successfully!');
   };
 
   const handleRemoveMember = (memberId: number, memberName: string) => {
+<<<<<<< HEAD
     setMembers(members.filter(m => m.id !== memberId));
+=======
+    //setMembers(members.filter(m => m._id !== memberId));
+>>>>>>> origin/main
     toast.success(`${memberName} has been removed from the team`);
   };
 
   const handleEditMember = (member: typeof mockTeamMembers[0]) => {
+<<<<<<< HEAD
     setMemberBeingEdited(member.id);
+=======
+    //setMemberBeingEdited(member.id);
+>>>>>>> origin/main
     setEditData({
       firstName: member.firstName,
       lastName: member.lastName,
       email: member.email,
       phone: member.phone,
+<<<<<<< HEAD
       role: member.role,
+=======
+      role: member.role.name,
+>>>>>>> origin/main
     });
     setEditDialogOpen(true);
   };
@@ -90,6 +122,7 @@ export default function Team() {
       toast.error('All fields are required');
       return;
     }
+<<<<<<< HEAD
     setMembers(members.map(m =>
       m.id === memberBeingEdited
         ? {
@@ -102,6 +135,20 @@ export default function Team() {
           }
         : m
     ));
+=======
+    // setMembers(members.map(m =>
+    //   m.id === memberBeingEdited
+    //     ? {
+    //         ...m,
+    //         firstName: editData.firstName,
+    //         lastName: editData.lastName,
+    //         email: editData.email,
+    //         phone: editData.phone,
+    //         role: editData.role,
+    //       }
+    //     : m
+    // ));
+>>>>>>> origin/main
     setEditDialogOpen(false);
     setMemberBeingEdited(null);
     toast.success('Team member updated successfully!');
@@ -173,7 +220,11 @@ export default function Team() {
                 <Label htmlFor="role">Role</Label>
                 <Select
                   value={newMember.role}
+<<<<<<< HEAD
                   onValueChange={(value) => setNewMember({ ...newMember, role: value as UserRole })}
+=======
+                  onValueChange={(value) => setNewMember({ ...newMember, role: value as RoleType })}
+>>>>>>> origin/main
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select role" />
@@ -257,7 +308,11 @@ export default function Team() {
               <Label htmlFor="edit-role">Role</Label>
               <Select
                 value={editData.role}
+<<<<<<< HEAD
                 onValueChange={(value) => setEditData({ ...editData, role: value as UserRole })}
+=======
+                onValueChange={(value) => setEditData({ ...editData, role: value as RoleType })}
+>>>>>>> origin/main
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select role" />
@@ -307,7 +362,11 @@ export default function Team() {
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filteredMembers.map((member) => (
+<<<<<<< HEAD
               <Card key={member.id} className="hover:shadow-md transition-shadow">
+=======
+              <Card key={member._id} className="hover:shadow-md transition-shadow">
+>>>>>>> origin/main
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
@@ -318,7 +377,11 @@ export default function Team() {
                       </Avatar>
                       <div>
                         <h3 className="font-semibold text-gray-900">{member.firstName} {member.lastName}</h3>
+<<<<<<< HEAD
                         <p className="text-sm text-gray-500">{roleLabels[member.role]}</p>
+=======
+                        <p className="text-sm text-gray-500">{roleLabels[member.role.name]}</p>
+>>>>>>> origin/main
                       </div>
                     </div>
                     <Badge variant={member.isActive ? 'secondary' : 'destructive'}>
@@ -353,7 +416,11 @@ export default function Team() {
                       variant="outline" 
                       size="sm" 
                       className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+<<<<<<< HEAD
                       onClick={() => handleRemoveMember(member.id, `${member.firstName} ${member.lastName}`)}
+=======
+                      //onClick={() => handleRemoveMember(member._id, `${member.firstName} ${member.lastName}`)}
+>>>>>>> origin/main
                     >
                       <Trash2 className="h-3 w-3 mr-1" />
                       Remove

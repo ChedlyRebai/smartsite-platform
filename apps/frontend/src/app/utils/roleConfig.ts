@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import type { UserRole } from "../types";
+=======
+import type { RoleType, UserRole } from "../types";
+>>>>>>> origin/main
 import {
   LayoutDashboard,
   Building2,
@@ -24,10 +28,19 @@ export interface NavItem {
   label: string;
   href: string;
   icon: LucideIcon;
+<<<<<<< HEAD
   roles: UserRole[];
 }
 
 export const roleLabels: Record<UserRole, string> = {
+=======
+  roles: RoleType[];
+}
+
+
+
+export const roleLabels: Record<RoleType, string> = {
+>>>>>>> origin/main
   super_admin: "Super Administrator",
   director: "Director / Business Manager",
   project_manager: "Project Manager",
@@ -228,11 +241,21 @@ export const navigationItems: NavItem[] = [
   },
 ];
 
+<<<<<<< HEAD
 export const getNavigationForRole = (role: UserRole): NavItem[] => {
   return navigationItems.filter((item) => item.roles.includes(role));
 };
 
 export const canAccessRoute = (role: UserRole, path: string): boolean => {
+=======
+export const getNavigationForRole = (role: RoleType): NavItem[] => {
+  return navigationItems.filter((item) => item.roles.includes(role));
+};
+
+
+
+export const canAccessRoute = (role: RoleType, path: string): boolean => {
+>>>>>>> origin/main
   const navItem = navigationItems.find((item) => path.startsWith(item.href));
   return navItem ? navItem.roles.includes(role) : false;
 };

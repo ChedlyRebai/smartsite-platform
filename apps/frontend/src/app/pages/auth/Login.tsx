@@ -1,16 +1,29 @@
 import { useState } from "react";
+<<<<<<< HEAD
 import { Link, useNavigate } from "react-router";
+=======
+import { data, Link, useNavigate } from "react-router";
+>>>>>>> origin/main
 import { Building2, Loader2 } from "lucide-react";
 import { useAuthStore } from "../../store/authStore";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 
 import { toast } from "sonner";
+<<<<<<< HEAD
+=======
+import { LoginAction } from "@/app/action/auth.action";
+import axios from "axios";
+>>>>>>> origin/main
 
 export default function Login() {
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
+<<<<<<< HEAD
   const [cin, setCin] = useState("");
+=======
+  const [cin, setcin] = useState("");
+>>>>>>> origin/main
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [logoAvailable, setLogoAvailable] = useState(true);
@@ -19,16 +32,49 @@ export default function Login() {
     e.preventDefault();
     setIsLoading(true);
     try {
+<<<<<<< HEAD
       await login(cin, password);
       toast.success("Login successful!");
       navigate("/dashboard");
     } catch (error: any) {
       const message = error?.message || "Invalid credentials. Please try again.";
+=======
+      // const res = await axios.post(`http://localhost:3000/auth/login`, {
+      //   cin,
+      //   password,
+      // });
+
+      // console.log(
+      //   `${process.env.LOGIN_API_URL}/login`,
+      //   "ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
+      // );
+      // if (res.status === 200) {
+      //   const expires = new Date(Date.now() + 1000 * 1000 * 1000);
+
+      //   cookieStore.set("session", res.data.token);
+      //   return Promise.resolve({ status: res.status, data: res.data.message });
+      // }
+
+      await login(cin, password).then((data:any) => {
+        console.log("Login successful!",data);
+        toast.success("Login successful!");
+        navigate("/dashboard");
+      });
+
+      toast.success("Login successful!");
+      navigate("/dashboard");
+    } catch (error: any) {
+      const message =
+        error?.message ||
+        error?.response?.data?.message ||
+        "Invalid credentials. Please try again.";
+>>>>>>> origin/main
       toast.error(message);
     } finally {
       setIsLoading(false);
     }
   };
+<<<<<<< HEAD
 
   return (
     <>
@@ -75,6 +121,28 @@ export default function Login() {
         />
       </div>
       <div className="h-screen flex min-h-full flex-1 bg-white">
+=======
+  // <Input
+  //id="cin"
+  //type="cin"
+  //placeholder="your.cin@smartsite.com"
+  //value={cin}
+  //onChange={(e) => setcin(e.target.value)}
+  //required
+  //disabled={isLoading}
+
+  return (
+    <>
+      {/*
+        This example requires updating your template:
+
+        ```
+        <html class="h-full bg-white">
+        <body class="h-full">
+        ```
+      */}
+      <div className="h-screen flex min-h-full flex-1">
+>>>>>>> origin/main
         <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
           <div className="mx-auto w-full max-w-sm lg:w-96">
             <div>
@@ -88,29 +156,47 @@ export default function Login() {
               </h2>
               <p className="mt-2 text-sm leading-6 text-gray-500">
                 Not a member?{" "}
+<<<<<<< HEAD
                 <Link
                   to="/register"
                   className="font-semibold text-indigo-600 hover:text-indigo-500"
                 >
                   Start a 14 day free trial
                 </Link>
+=======
+                <a
+                  href="#"
+                  className="font-semibold text-indigo-600 hover:text-indigo-500"
+                >
+                  Start a 14 day free trial
+                </a>
+>>>>>>> origin/main
               </p>
             </div>
 
             <div className="mt-10">
               <div>
+<<<<<<< HEAD
                 <form onSubmit={handleSubmit} className="space-y-6">
+=======
+                <form action="#" method="POST" className="space-y-6">
+>>>>>>> origin/main
                   <div>
                     <label
                       htmlFor="cin"
                       className="block text-sm font-medium leading-6 text-gray-900"
                     >
+<<<<<<< HEAD
                       CIN (Carte d'Identité Nationale)
+=======
+                      cin
+>>>>>>> origin/main
                     </label>
                     <div className="mt-2">
                       <input
                         id="cin"
                         name="cin"
+<<<<<<< HEAD
                         type="text"
                         autoComplete="off"
                         required
@@ -119,6 +205,15 @@ export default function Login() {
                         onChange={(e) => setCin(e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 px-3"
                         placeholder="Enter your CIN number"
+=======
+                        type="string"
+                        autoComplete="cin"
+                        required
+                        value={cin}
+                        disabled={isLoading}
+                        onChange={(e) => setcin(e.target.value)}
+                        className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+>>>>>>> origin/main
                       />
                     </div>
                   </div>
@@ -139,8 +234,12 @@ export default function Login() {
                         required
                         onChange={(e) => setPassword(e.target.value)}
                         value={password}
+<<<<<<< HEAD
                         className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 px-3"
                         placeholder="Enter your password"
+=======
+                        className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+>>>>>>> origin/main
                       />
                     </div>
                   </div>
@@ -174,6 +273,7 @@ export default function Login() {
                   <div>
                     <button
                       type="submit"
+<<<<<<< HEAD
                       disabled={isLoading}
                       className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                     >
@@ -185,10 +285,18 @@ export default function Login() {
                       ) : (
                         "Sign in"
                       )}
+=======
+                      onClick={handleSubmit}
+                      disabled={isLoading}
+                      className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                    >
+                      Sign in
+>>>>>>> origin/main
                     </button>
                   </div>
                 </form>
               </div>
+<<<<<<< HEAD
 
               {/* Help Text */}
               <div className="mt-8 border-t border-gray-200 pt-6">
@@ -196,6 +304,8 @@ export default function Login() {
                   Enter your CIN and password to access your account.
                 </p>
               </div>
+=======
+>>>>>>> origin/main
             </div>
           </div>
         </div>

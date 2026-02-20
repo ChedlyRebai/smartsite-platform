@@ -26,6 +26,7 @@ import { roleLabels } from "../../utils/roleConfig";
 export default function Register() {
   return (
     <>
+<<<<<<< HEAD
       {/* Background pattern - same as Home */}
       <svg
         className="fixed inset-x-0 top-0 -z-10 h-[64rem] w-full stroke-gray-200 [mask-image:radial-gradient(32rem_32rem_at_center,white,transparent)]"
@@ -69,6 +70,17 @@ export default function Register() {
         />
       </div>
       <div className="h-screen flex min-h-full flex-1 bg-white">
+=======
+      {/*
+        This example requires updating your template:
+
+        ```
+        <html class="h-full bg-white">
+        <body class="h-full">
+        ```
+      */}
+      <div className="h-screen flex min-h-full flex-1">
+>>>>>>> origin/main
         <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
           <div className="mx-auto w-full max-w-sm lg:w-96">
             <div>

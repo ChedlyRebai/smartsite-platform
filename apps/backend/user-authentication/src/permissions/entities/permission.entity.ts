@@ -4,10 +4,15 @@ import { Document } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class Permission extends Document {
+<<<<<<< HEAD
   
   @Prop({ required: true, unique: true, trim: true })
   name: string;
 
+=======
+  @Prop({ required: true, unique: true, trim: true })
+  name: string;
+>>>>>>> origin/main
   @Prop()
   source: string;
   @Prop()

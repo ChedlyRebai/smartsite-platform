@@ -30,17 +30,26 @@ export default function DashboardLayout() {
   const { user, logout } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [logoAvailable, setLogoAvailable] = useState(true);
+<<<<<<< HEAD
 
+=======
+  console.log(user, "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu");
+>>>>>>> origin/main
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
+<<<<<<< HEAD
 
+=======
+  console.log(user, "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu");
+>>>>>>> origin/main
   if (!user) {
     navigate("/login");
     return null;
   }
 
+<<<<<<< HEAD
   const navigationItems = getNavigationForRole(user.role);
   const unreadNotifications = mockNotifications.filter((n) => !n.read).length;
 
@@ -92,6 +101,17 @@ export default function DashboardLayout() {
           }}
         />
       </div>
+=======
+  const navigationItems = getNavigationForRole(user.role.name);
+  const unreadNotifications = mockNotifications.filter((n) => !n.read).length;
+
+  const getInitials = (nom: string, lastname: string) => {
+    return `${nom.charAt(0)}${lastname.charAt(0)}`.toUpperCase();
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+>>>>>>> origin/main
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
         <div className="flex items-center justify-between px-4 py-3">
@@ -149,15 +169,26 @@ export default function DashboardLayout() {
                 <Button variant="ghost" className="gap-2">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="bg-gradient-to-br from-blue-600 to-green-600 text-white">
+<<<<<<< HEAD
                       {getInitials(user.firstName, user.lastName)}
+=======
+                      {getInitials(user.firstname || "", user.lastname || "")}
+>>>>>>> origin/main
                     </AvatarFallback>
                   </Avatar>
                   <div className="hidden md:flex flex-col items-start">
                     <span className="text-sm font-semibold">
+<<<<<<< HEAD
                       {user.firstName} {user.lastName}
                     </span>
                     <span className="text-xs text-gray-500">
                       {roleLabels[user.role]}
+=======
+                      {user.firstname} {user.lastname}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {/* {roleLabels[user.role]} */}
+>>>>>>> origin/main
                     </span>
                   </div>
                   <ChevronDown className="h-4 w-4 hidden md:block" />
@@ -167,10 +198,17 @@ export default function DashboardLayout() {
                 <DropdownMenuLabel>
                   <div className="flex flex-col">
                     <span>
+<<<<<<< HEAD
                       {user.firstName} {user.lastName}
                     </span>
                     <span className="text-xs font-normal text-gray-500">
                       {user.email}
+=======
+                      {user.firstname} {user.lastname}
+                    </span>
+                    <span className="text-xs font-normal text-gray-500">
+                      {user.cin}
+>>>>>>> origin/main
                     </span>
                   </div>
                 </DropdownMenuLabel>
@@ -235,7 +273,11 @@ export default function DashboardLayout() {
               className="w-full bg-red-600 hover:bg-red-700 text-white gap-2"
             >
               <LogOut className="h-4 w-4" />
+<<<<<<< HEAD
               Logout
+=======
+              Déconnecter
+>>>>>>> origin/main
             </Button>
           </div>
         </aside>
