@@ -1,5 +1,5 @@
 // User Roles
-export type UserRole =
+export type RoleType =
   | "super_admin"
   | "director"
   | "project_manager"
@@ -12,11 +12,21 @@ export type UserRole =
   | "subcontractor"
   | "user";
 
+export interface UserRole {
+  _id: string;
+  name: RoleType;
+  permissions: Array<String>;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
+  _id: string;
+  nom?: string;
+  prenom?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
   phone?: string;
   role: UserRole;
   isActive: boolean;
@@ -35,19 +45,26 @@ export interface Role {
 }
 
 export interface Permission {
-   _id: string,
-    name: string,
-    source: boolean,
-    access: boolean,
-    create: boolean,
-    delete: boolean,
-    update: boolean,
-    createdAt: Date,
-    updatedAt: Date,
+  _id: string;
+  name: string;
+  source: boolean;
+  access: boolean;
+  create: boolean;
+  delete: boolean;
+  update: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface AuthState {
-  user: User | null;
+  user: {
+    access_token: string;
+    id: string;
+    cin: string;
+    firstname: string;
+    lastname: string;
+    role: UserRole;
+  };
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;

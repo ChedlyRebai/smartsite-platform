@@ -12,7 +12,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 @Module({
   imports: [
     JwtModule.register({
-      secret: 'your-secret-key',
+      secret: 'smartiste',
       signOptions: { expiresIn: '24h' },
     }),
     PassportModule,

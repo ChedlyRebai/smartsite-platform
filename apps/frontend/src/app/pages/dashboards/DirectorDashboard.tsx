@@ -26,7 +26,7 @@ export default function DirectorDashboard() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Executive Overview</h1>
-        <p className="text-gray-500 mt-1">Strategic Business Dashboard - {user?.firstName} {user?.lastName}</p>
+        <p className="text-gray-500 mt-1">Strategic Business Dashboard - {user?.firstname} {user?.lastname}</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">

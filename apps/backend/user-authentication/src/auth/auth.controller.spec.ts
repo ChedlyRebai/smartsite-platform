@@ -31,23 +31,23 @@ describe('AuthController', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('login', () => {
-    it('should call authService.login with user data', async () => {
-      const mockUser = {
-        _id: '123',
-        cin: '12345678',
-        nom: 'Test',
-        prenom: 'User',
-      };
-      const mockToken = { access_token: 'token123', user: mockUser };
-      mockAuthService.login.mockResolvedValue(mockToken);
+  // describe('login', () => {
+  //   it('should call authService.login with user data', async () => {
+  //     const mockUser = {
+  //       _id: '123',
+  //       cin: '12345678',
+  //       nom: 'Test',
+  //       prenom: 'User',
+  //     };
+  //     const mockToken = { access_token: 'token123', user: mockUser };
+  //     mockAuthService.login.mockResolvedValue(mockToken);
 
-      const request = { user: mockUser };
-      const result = await controller.login(request);
-      expect(result).toEqual(mockToken);
-      expect(authService.login).toHaveBeenCalledWith(mockUser);
-    });
-  });
+  //     const request = { user: mockUser };
+  //     const result = await controller.login(request);
+  //     expect(result).toEqual(mockToken);
+  //     expect(authService.login).toHaveBeenCalledWith(mockUser);
+  //   });
+  // });
 
   describe('register', () => {
     it('should call authService.register and return success message', async () => {

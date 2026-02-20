@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { data, Link, useNavigate } from "react-router";
 import { Building2, Loader2 } from "lucide-react";
 import { useAuthStore } from "../../store/authStore";
 import { Button } from "../../components/ui/button";
@@ -21,21 +21,27 @@ export default function Login() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const res = await axios.post(`http://localhost:3000/auth/login`, {
-        cin,
-        password,
+      // const res = await axios.post(`http://localhost:3000/auth/login`, {
+      //   cin,
+      //   password,
+      // });
+
+      // console.log(
+      //   `${process.env.LOGIN_API_URL}/login`,
+      //   "ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
+      // );
+      // if (res.status === 200) {
+      //   const expires = new Date(Date.now() + 1000 * 1000 * 1000);
+
+      //   cookieStore.set("session", res.data.token);
+      //   return Promise.resolve({ status: res.status, data: res.data.message });
+      // }
+
+      await login(cin, password).then((data:any) => {
+        console.log("Login successful!",data);
+        toast.success("Login successful!");
+        navigate("/dashboard");
       });
-
-      console.log(
-        `${process.env.LOGIN_API_URL}/login`,
-        "ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
-      );
-      if (res.status === 200) {
-        const expires = new Date(Date.now() + 1000 * 1000 * 1000);
-
-        cookieStore.set("session", res.data.token);
-        return Promise.resolve({ status: res.status, data: res.data.message });
-      }
 
       toast.success("Login successful!");
       navigate("/dashboard");
@@ -99,7 +105,7 @@ export default function Login() {
                       htmlFor="cin"
                       className="block text-sm font-medium leading-6 text-gray-900"
                     >
-                      cin address
+                      cin
                     </label>
                     <div className="mt-2">
                       <input

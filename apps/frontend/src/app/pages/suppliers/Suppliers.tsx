@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 
 export default function Suppliers() {
   const user = useAuthStore((state) => state.user);
-  const canManageSuppliers = user && canEdit(user.role, 'suppliers');
+  const canManageSuppliers = user && canEdit(user.role.name, 'suppliers');
   const [suppliers, setSuppliers] = useState(mockSuppliers);
   const [newSupplier, setNewSupplier] = useState({ name: '', category: '', email: '', phone: '' });
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
@@ -34,7 +34,7 @@ export default function Suppliers() {
       rating: 4.5,
       joinDate: new Date().toISOString(),
     };
-    setSuppliers([...suppliers, supplier]);
+    //setSuppliers([...suppliers, supplier]);
     setNewSupplier({ name: '', category: '', email: '', phone: '' });
     toast.success('Supplier added successfully!');
   };

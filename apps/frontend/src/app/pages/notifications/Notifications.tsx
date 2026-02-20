@@ -49,7 +49,7 @@ export default function Notifications() {
   };
 
   const handleDeleteNotification = (id: number) => {
-    setNotifications(notifications.filter(n => n.id !== id));
+    //setNotifications(notifications.filter(n => n.id !== id));
     toast.success('Notification removed');
   };
 
@@ -121,7 +121,9 @@ export default function Notifications() {
                         </Badge>
                       </div>
                     </div>
-                    <Button variant="ghost" size="icon" className="flex-shrink-0" onClick={() => handleDeleteNotification(notification.id)}>
+                    <Button variant="ghost" size="icon" className="flex-shrink-0" 
+                    //onClick={() => handleDeleteNotification(notification.id)}
+                    >
                       <X className="h-4 w-4" />
                     </Button>
                   </div>
@@ -161,7 +163,9 @@ export default function Notifications() {
                       </Badge>
                     </div>
                   </div>
-                  <Button variant="ghost" size="icon" className="flex-shrink-0" onClick={() => handleDeleteNotification(notification.id)}>
+                  <Button variant="ghost" size="icon" className="flex-shrink-0" 
+                  //onClick={() => handleDeleteNotification(notification.id)}
+                  >
                     <X className="h-4 w-4" />
                   </Button>
                 </div>

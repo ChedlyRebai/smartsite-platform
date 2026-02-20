@@ -30,22 +30,22 @@ export default function DashboardLayout() {
   const { user, logout } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [logoAvailable, setLogoAvailable] = useState(true);
-
+  console.log(user, "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu");
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
-
+  console.log(user, "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu");
   if (!user) {
     navigate("/login");
     return null;
   }
 
-  const navigationItems = getNavigationForRole(user.role);
+  const navigationItems = getNavigationForRole(user.role.name);
   const unreadNotifications = mockNotifications.filter((n) => !n.read).length;
 
-  const getInitials = (firstName: string, lastName: string) => {
-    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  const getInitials = (nom: string, lastname: string) => {
+    return `${nom.charAt(0)}${lastname.charAt(0)}`.toUpperCase();
   };
 
   return (
@@ -107,15 +107,15 @@ export default function DashboardLayout() {
                 <Button variant="ghost" className="gap-2">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="bg-gradient-to-br from-blue-600 to-green-600 text-white">
-                      {getInitials(user.firstName, user.lastName)}
+                      {getInitials(user.firstname || "", user.lastname || "")}
                     </AvatarFallback>
                   </Avatar>
                   <div className="hidden md:flex flex-col items-start">
                     <span className="text-sm font-semibold">
-                      {user.firstName} {user.lastName}
+                      {user.firstname} {user.lastname}
                     </span>
                     <span className="text-xs text-gray-500">
-                      {roleLabels[user.role]}
+                      {/* {roleLabels[user.role]} */}
                     </span>
                   </div>
                   <ChevronDown className="h-4 w-4 hidden md:block" />
@@ -125,10 +125,10 @@ export default function DashboardLayout() {
                 <DropdownMenuLabel>
                   <div className="flex flex-col">
                     <span>
-                      {user.firstName} {user.lastName}
+                      {user.firstname} {user.lastname}
                     </span>
                     <span className="text-xs font-normal text-gray-500">
-                      {user.email}
+                      {user.cin}
                     </span>
                   </div>
                 </DropdownMenuLabel>

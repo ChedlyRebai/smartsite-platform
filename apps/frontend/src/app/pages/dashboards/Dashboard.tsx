@@ -17,7 +17,7 @@ export default function Dashboard() {
   if (!user) return null;
 
   // Route to appropriate dashboard based on role
-  switch (user.role) {
+  switch (user.role.name) {
     case 'super_admin':
       return <SuperAdminDashboard />;
     case 'director':
