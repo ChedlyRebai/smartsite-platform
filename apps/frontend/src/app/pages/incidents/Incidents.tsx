@@ -13,11 +13,7 @@ import { toast } from 'sonner';
 
 export default function Incidents() {
   const user = useAuthStore((state) => state.user);
-<<<<<<< HEAD
-  const canManageIncidents = user && canEdit(user.role, 'incidents');
-=======
   const canManageIncidents = user && canEdit(user.role.name, 'incidents');
->>>>>>> origin/main
   const [incidents, setIncidents] = useState(mockIncidents);
   const [newIncident, setNewIncident] = useState({ type: '', description: '', severity: 'medium' });
 
@@ -35,25 +31,15 @@ export default function Incidents() {
       createdAt: new Date().toISOString(),
       reportedBy: 'Current User',
     };
-<<<<<<< HEAD
-    setIncidents([...incidents, incident]);
-=======
     //setIncidents([...incidents, incident]);
->>>>>>> origin/main
     setNewIncident({ type: '', description: '', severity: 'medium' });
     toast.success('Incident reported successfully!');
   };
 
   const handleResolveIncident = (id: number) => {
-<<<<<<< HEAD
-    setIncidents(incidents.map(i => 
-      i.id === id ? { ...i, status: 'resolved' } : i
-    ));
-=======
     // setIncidents(incidents.map(i => 
     //   i.id === id ? { ...i, status: 'resolved' } : i
     // ));
->>>>>>> origin/main
     toast.success('Incident marked as resolved');
   };
   return (
@@ -166,11 +152,7 @@ export default function Incidents() {
                       size="sm" 
                       variant="outline" 
                       className="mt-3"
-<<<<<<< HEAD
-                      onClick={() => handleResolveIncident(incident.id)}
-=======
                    //   onClick={() => handleResolveIncident(incident.id)}
->>>>>>> origin/main
                     >
                       Mark as Resolved
                     </Button>

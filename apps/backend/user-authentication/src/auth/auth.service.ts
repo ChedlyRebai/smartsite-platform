@@ -12,10 +12,6 @@ export class AuthService {
   ) {}
 
   async validateUser(cin: string, password: string): Promise<any> {
-<<<<<<< HEAD
-    const user = await this.usersService.findByCin(cin);
-    if (user && (await bcrypt.compare(password, user.motDePasse))) {
-=======
     if (!cin || !password) {
       return null;
     }
@@ -26,7 +22,6 @@ export class AuthService {
     }
 
     if (await bcrypt.compare(password, user.motDePasse)) {
->>>>>>> origin/main
       const { motDePasse, ...result } = user.toObject ? user.toObject() : user;
       return result;
     }
@@ -42,19 +37,6 @@ export class AuthService {
     };
     return {
       access_token: this.jwtService.sign(payload),
-<<<<<<< HEAD
-      user: {
-        id: user._id,
-        cin: user.cin,
-        nom: user.nom,
-        prenom: user.prenom,
-        roles: user.roles,
-      },
-    };
-  }
-
-  async register(cin: string, password: string, nom: string, prenom: string) {
-=======
       
         id: user._id,
         cin: user.cin,
@@ -66,7 +48,6 @@ export class AuthService {
   }
 
   async register(cin: string, password: string, firstname: string, lastname: string,role:string) {
->>>>>>> origin/main
     const existingUser = await this.usersService.findByCin(cin);
     if (existingUser) {
       throw new Error('User already exists');
@@ -75,14 +56,9 @@ export class AuthService {
     return this.usersService.create({
       cin,
       motDePasse: hashedPassword,
-<<<<<<< HEAD
-      nom,
-      prenom,
-=======
       lastname,
       firstname,
       role
->>>>>>> origin/main
     });
   }
 }

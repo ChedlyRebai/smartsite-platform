@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import type { UserRole } from '../types';
-=======
 import type { RoleType, UserRole } from '../types';
->>>>>>> origin/main
 
 export type Permission = 
   | 'view_dashboard'
@@ -19,11 +15,7 @@ export type Permission =
   | 'view_analytics'
   | 'view_reports';
 
-<<<<<<< HEAD
-const rolePermissions: Record<UserRole, Permission[]> = {
-=======
 const rolePermissions: Record<RoleType, Permission[]> = {
->>>>>>> origin/main
   super_admin: [
     'view_dashboard',
     'manage_sites',
@@ -107,19 +99,11 @@ const rolePermissions: Record<RoleType, Permission[]> = {
   ],
 };
 
-<<<<<<< HEAD
-export const hasPermission = (role: UserRole, permission: Permission): boolean => {
-  return rolePermissions[role]?.includes(permission) ?? false;
-};
-
-export const canEdit = (role: UserRole, resource: 'sites' | 'projects' | 'team' | 'clients' | 'suppliers' | 'materials' | 'finance' | 'qhse' | 'incidents' | 'users'): boolean => {
-=======
 export const hasPermission = (role: RoleType, permission: Permission): boolean => {
   return rolePermissions[role]?.includes(permission) ?? false;
 };
 
 export const canEdit = (role: RoleType, resource: 'sites' | 'projects' | 'team' | 'clients' | 'suppliers' | 'materials' | 'finance' | 'qhse' | 'incidents' | 'users'): boolean => {
->>>>>>> origin/main
   const permissionMap: Record<string, Permission> = {
     sites: 'manage_sites',
     projects: 'manage_projects',

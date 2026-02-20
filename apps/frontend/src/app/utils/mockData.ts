@@ -304,52 +304,5 @@ export const mockTasks: Task[] = [
 ];
 
 export const mockTeamMembers: User[] = [
-<<<<<<< HEAD
-  {
-    id: '11',
-    firstName: 'Ali',
-    lastName: 'Hassan',
-    email: 'ali.hassan@smartsite.com',
-    phone: '+216 98 123 456',
-    role: 'user',
-    isActive: true,
-    createdDate: '2026-01-05',
-    lastLoginDate: '2026-02-17',
-  },
-  {
-    id: '12',
-    firstName: 'Leila',
-    lastName: 'Mansour',
-    email: 'leila.mansour@smartsite.com',
-    phone: '+216 98 234 567',
-    role: 'user',
-    isActive: true,
-    createdDate: '2026-01-05',
-    lastLoginDate: '2026-02-16',
-  },
-  {
-    id: '13',
-    firstName: 'Karim',
-    lastName: 'Belhadj',
-    email: 'karim.belhadj@smartsite.com',
-    phone: '+216 98 345 678',
-    role: 'user',
-    isActive: true,
-    createdDate: '2026-01-05',
-    lastLoginDate: '2026-02-17',
-  },
-  {
-    id: '14',
-    firstName: 'Amira',
-    lastName: 'Jebali',
-    email: 'amira.jebali@smartsite.com',
-    phone: '+216 98 456 789',
-    role: 'user',
-    isActive: false,
-    createdDate: '2026-01-05',
-    lastLoginDate: '2026-02-10',
-  },
-=======
 
->>>>>>> origin/main
 ];

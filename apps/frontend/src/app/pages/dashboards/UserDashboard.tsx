@@ -13,11 +13,7 @@ export default function UserDashboard() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">My Dashboard</h1>
-<<<<<<< HEAD
-        <p className="text-gray-500 mt-1">Welcome, {user?.firstName} - Your daily tasks and activities</p>
-=======
         <p className="text-gray-500 mt-1">Welcome, {user?.firstname} - Your daily tasks and activities</p>
->>>>>>> origin/main
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">

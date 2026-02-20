@@ -12,11 +12,7 @@ import { toast } from 'sonner';
 
 export default function Materials() {
   const user = useAuthStore((state) => state.user);
-<<<<<<< HEAD
-  const canManageMaterials = user && canEdit(user.role, 'materials');
-=======
   const canManageMaterials = user && canEdit(user.role.name, 'materials');
->>>>>>> origin/main
   const [materials, setMaterials] = useState([
     { id: 1, name: 'Concrete (m³)', quantity: 150, unit: 'm³', status: 'in_stock' },
     { id: 2, name: 'Steel Rebar (kg)', quantity: 5000, unit: 'kg', status: 'in_stock' },

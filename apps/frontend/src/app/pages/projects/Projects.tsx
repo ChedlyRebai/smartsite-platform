@@ -11,11 +11,7 @@ import { toast } from 'sonner';
 
 export default function Projects() {
   const user = useAuthStore((state) => state.user);
-<<<<<<< HEAD
-  const canManageProjects = user && canEdit(user.role, 'projects');
-=======
   const canManageProjects = user && canEdit(user.role.name, 'projects');
->>>>>>> origin/main
   const [projects, setProjects] = useState([
     { id: 1, name: 'Downtown Office Tower', status: 'in_progress', progress: 65, client: 'ABC Corp', budget: 5000000 },
     { id: 2, name: 'Residential Complex', status: 'planning', progress: 20, client: 'XYZ Holdings', budget: 3500000 },

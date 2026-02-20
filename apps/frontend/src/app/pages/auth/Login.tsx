@@ -1,29 +1,18 @@
 import { useState } from "react";
-<<<<<<< HEAD
-import { Link, useNavigate } from "react-router";
-=======
 import { data, Link, useNavigate } from "react-router";
->>>>>>> origin/main
 import { Building2, Loader2 } from "lucide-react";
 import { useAuthStore } from "../../store/authStore";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 
 import { toast } from "sonner";
-<<<<<<< HEAD
-=======
 import { LoginAction } from "@/app/action/auth.action";
 import axios from "axios";
->>>>>>> origin/main
 
 export default function Login() {
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
-<<<<<<< HEAD
-  const [cin, setCin] = useState("");
-=======
   const [cin, setcin] = useState("");
->>>>>>> origin/main
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [logoAvailable, setLogoAvailable] = useState(true);
@@ -32,13 +21,6 @@ export default function Login() {
     e.preventDefault();
     setIsLoading(true);
     try {
-<<<<<<< HEAD
-      await login(cin, password);
-      toast.success("Login successful!");
-      navigate("/dashboard");
-    } catch (error: any) {
-      const message = error?.message || "Invalid credentials. Please try again.";
-=======
       // const res = await axios.post(`http://localhost:3000/auth/login`, {
       //   cin,
       //   password,
@@ -68,60 +50,11 @@ export default function Login() {
         error?.message ||
         error?.response?.data?.message ||
         "Invalid credentials. Please try again.";
->>>>>>> origin/main
       toast.error(message);
     } finally {
       setIsLoading(false);
     }
   };
-<<<<<<< HEAD
-
-  return (
-    <>
-      {/* Background pattern - same as Home */}
-      <svg
-        className="fixed inset-x-0 top-0 -z-10 h-[64rem] w-full stroke-gray-200 [mask-image:radial-gradient(32rem_32rem_at_center,white,transparent)]"
-        aria-hidden="true"
-      >
-        <defs>
-          <pattern
-            id="login-pattern"
-            width={200}
-            height={200}
-            x="50%"
-            y={-1}
-            patternUnits="userSpaceOnUse"
-          >
-            <path d="M.5 200V.5H200" fill="none" />
-          </pattern>
-        </defs>
-        <svg x="50%" y={-1} className="overflow-visible fill-gray-50">
-          <path
-            d="M-200 0h201v201h-201Z M600 0h201v201h-201Z M-400 600h201v201h-201Z M200 800h201v201h-201Z"
-            strokeWidth={0}
-          />
-        </svg>
-        <rect
-          width="100%"
-          height="100%"
-          strokeWidth={0}
-          fill="url(#login-pattern)"
-        />
-      </svg>
-      <div
-        className="fixed left-1/2 right-0 top-0 -z-10 -ml-24 transform-gpu overflow-hidden blur-3xl lg:ml-24 xl:ml-48"
-        aria-hidden="true"
-      >
-        <div
-          className="aspect-[801/1036] w-[50.0625rem] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30"
-          style={{
-            clipPath:
-              "polygon(63.1% 29.5%, 100% 17.1%, 76.6% 3%, 48.4% 0%, 44.6% 4.7%, 54.5% 25.3%, 59.8% 49%, 55.2% 57.8%, 44.4% 57.2%, 27.8% 47.9%, 35.1% 81.5%, 0% 97.7%, 39.2% 100%, 35.2% 81.4%, 97.2% 52.8%, 63.1% 29.5%)",
-          }}
-        />
-      </div>
-      <div className="h-screen flex min-h-full flex-1 bg-white">
-=======
   // <Input
   //id="cin"
   //type="cin"
@@ -142,7 +75,6 @@ export default function Login() {
         ```
       */}
       <div className="h-screen flex min-h-full flex-1">
->>>>>>> origin/main
         <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
           <div className="mx-auto w-full max-w-sm lg:w-96">
             <div>
@@ -156,56 +88,29 @@ export default function Login() {
               </h2>
               <p className="mt-2 text-sm leading-6 text-gray-500">
                 Not a member?{" "}
-<<<<<<< HEAD
-                <Link
-                  to="/register"
-                  className="font-semibold text-indigo-600 hover:text-indigo-500"
-                >
-                  Start a 14 day free trial
-                </Link>
-=======
                 <a
                   href="#"
                   className="font-semibold text-indigo-600 hover:text-indigo-500"
                 >
                   Start a 14 day free trial
                 </a>
->>>>>>> origin/main
               </p>
             </div>
 
             <div className="mt-10">
               <div>
-<<<<<<< HEAD
-                <form onSubmit={handleSubmit} className="space-y-6">
-=======
                 <form action="#" method="POST" className="space-y-6">
->>>>>>> origin/main
                   <div>
                     <label
                       htmlFor="cin"
                       className="block text-sm font-medium leading-6 text-gray-900"
                     >
-<<<<<<< HEAD
-                      CIN (Carte d'Identité Nationale)
-=======
                       cin
->>>>>>> origin/main
                     </label>
                     <div className="mt-2">
                       <input
                         id="cin"
                         name="cin"
-<<<<<<< HEAD
-                        type="text"
-                        autoComplete="off"
-                        required
-                        value={cin}
-                        disabled={isLoading}
-                        onChange={(e) => setCin(e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 px-3"
-                        placeholder="Enter your CIN number"
-=======
                         type="string"
                         autoComplete="cin"
                         required
@@ -213,7 +118,6 @@ export default function Login() {
                         disabled={isLoading}
                         onChange={(e) => setcin(e.target.value)}
                         className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
->>>>>>> origin/main
                       />
                     </div>
                   </div>
@@ -234,12 +138,7 @@ export default function Login() {
                         required
                         onChange={(e) => setPassword(e.target.value)}
                         value={password}
-<<<<<<< HEAD
-                        className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 px-3"
-                        placeholder="Enter your password"
-=======
                         className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
->>>>>>> origin/main
                       />
                     </div>
                   </div>
@@ -273,39 +172,15 @@ export default function Login() {
                   <div>
                     <button
                       type="submit"
-<<<<<<< HEAD
-                      disabled={isLoading}
-                      className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                    >
-                      {isLoading ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Signing in...
-                        </>
-                      ) : (
-                        "Sign in"
-                      )}
-=======
                       onClick={handleSubmit}
                       disabled={isLoading}
                       className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                     >
                       Sign in
->>>>>>> origin/main
                     </button>
                   </div>
                 </form>
               </div>
-<<<<<<< HEAD
-
-              {/* Help Text */}
-              <div className="mt-8 border-t border-gray-200 pt-6">
-                <p className="text-xs text-gray-500 text-center">
-                  Enter your CIN and password to access your account.
-                </p>
-              </div>
-=======
->>>>>>> origin/main
             </div>
           </div>
         </div>

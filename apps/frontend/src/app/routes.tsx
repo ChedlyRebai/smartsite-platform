@@ -34,11 +34,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 export const router = createBrowserRouter([
   {
     path: "/",
-<<<<<<< HEAD
-    element: <Home2 />,
-=======
     element: <Home />,
->>>>>>> origin/main
   },
   {
     path: "/pricing",

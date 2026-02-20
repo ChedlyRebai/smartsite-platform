@@ -5,188 +5,6 @@ import {
   Instagram,
   Menu,
   Twitter,
-<<<<<<< HEAD
-  ChevronDown,
-  LayoutDashboard,
-  Users,
-  Calendar,
-  Package,
-  DollarSign,
-  Shield,
-  FileText,
-  BarChart3,
-  Briefcase,
-  UserCog,
-  Warehouse,
-  AlertTriangle,
-  MapPin,
-  Bell,
-  Clock,
-  Settings,
-} from "lucide-react";
-import { useState } from "react";
-import { useNavigate } from "react-router";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../../components/ui/dropdown-menu";
-import { Button } from "../../components/ui/button";
-
-// Feature to route mapping
-const featureRoutes: Record<string, string> = {
-  "Dashboard": "/dashboard",
-  "User Management": "/users",
-  "Roles": "/roles",
-  "Permissions": "/permissions",
-  "Site Management": "/sites",
-  "Projects": "/projects",
-  "Planning": "/planning",
-  "Team": "/team",
-  "Clients": "/clients",
-  "Suppliers": "/suppliers",
-  "Materials": "/materials",
-  "Finance": "/finance",
-  "QHSE & Safety": "/qhse",
-  "Incidents": "/incidents",
-  "Reports": "/reports",
-  "Analytics": "/analytics",
-  "Map View": "/map",
-  "Notifications": "/notifications",
-};
-
-const navigation = [
-  { name: "Resources", href: "#" },
-  { name: "Company", href: "#" },
-];
-
-// Role-based features configuration
-const roleFeatures: Record<string, { label: string; icon: React.ElementType; description: string }[]> = {
-  super_admin: [
-    { label: "Dashboard", icon: LayoutDashboard, description: "Overview and analytics" },
-    { label: "User Management", icon: Users, description: "Manage system users" },
-    { label: "Roles", icon: Settings, description: "Configure user roles" },
-    { label: "Permissions", icon: Clock, description: "Set access permissions" },
-    { label: "Site Management", icon: MapPin, description: "Manage construction sites" },
-    { label: "Projects", icon: Briefcase, description: "Project oversight" },
-    { label: "Reports", icon: FileText, description: "Generate reports" },
-    { label: "Analytics", icon: BarChart3, description: "Data analytics" },
-  ],
-  director: [
-    { label: "Dashboard", icon: LayoutDashboard, description: "Business overview" },
-    { label: "Site Management", icon: MapPin, description: "Site management" },
-    { label: "Projects", icon: Briefcase, description: "Project tracking" },
-    { label: "Team", icon: Users, description: "Team management" },
-    { label: "Clients", icon: UserCog, description: "Client relations" },
-    { label: "Finance", icon: DollarSign, description: "Financial overview" },
-    { label: "Reports", icon: FileText, description: "Business reports" },
-    { label: "Analytics", icon: BarChart3, description: "Performance analytics" },
-    { label: "Map View", icon: MapPin, description: "Site locations" },
-  ],
-  project_manager: [
-    { label: "Dashboard", icon: LayoutDashboard, description: "Project overview" },
-    { label: "Site Management", icon: MapPin, description: "Site operations" },
-    { label: "Projects", icon: Briefcase, description: "Project details" },
-    { label: "Planning", icon: Calendar, description: "Schedule planning" },
-    { label: "Team", icon: Users, description: "Team coordination" },
-    { label: "Incidents", icon: AlertTriangle, description: "Issue tracking" },
-    { label: "Reports", icon: FileText, description: "Progress reports" },
-    { label: "Analytics", icon: BarChart3, description: "Project analytics" },
-    { label: "Map View", icon: MapPin, description: "Site locations" },
-  ],
-  site_manager: [
-    { label: "Dashboard", icon: LayoutDashboard, description: "Site overview" },
-    { label: "Site Management", icon: MapPin, description: "Site management" },
-    { label: "Planning", icon: Calendar, description: "Daily planning" },
-    { label: "Team", icon: Users, description: "Crew management" },
-    { label: "Materials", icon: Package, description: "Material tracking" },
-    { label: "QHSE & Safety", icon: Shield, description: "Safety compliance" },
-    { label: "Incidents", icon: AlertTriangle, description: "Incident reports" },
-  ],
-  works_manager: [
-    { label: "Dashboard", icon: LayoutDashboard, description: "Works overview" },
-    { label: "Site Management", icon: MapPin, description: "Site operations" },
-    { label: "Projects", icon: Briefcase, description: "Project works" },
-    { label: "Planning", icon: Calendar, description: "Work scheduling" },
-    { label: "Team", icon: Users, description: "Workforce management" },
-    { label: "Materials", icon: Package, description: "Material needs" },
-    { label: "QHSE & Safety", icon: Shield, description: "Safety oversight" },
-    { label: "Incidents", icon: AlertTriangle, description: "Work incidents" },
-    { label: "Reports", icon: FileText, description: "Work reports" },
-    { label: "Analytics", icon: BarChart3, description: "Performance data" },
-    { label: "Map View", icon: MapPin, description: "Site locations" },
-  ],
-  accountant: [
-    { label: "Dashboard", icon: LayoutDashboard, description: "Financial overview" },
-    { label: "Projects", icon: Briefcase, description: "Project budgets" },
-    { label: "Clients", icon: UserCog, description: "Client billing" },
-    { label: "Suppliers", icon: Warehouse, description: "Supplier payments" },
-    { label: "Finance", icon: DollarSign, description: "Financial management" },
-    { label: "Reports", icon: FileText, description: "Financial reports" },
-    { label: "Analytics", icon: BarChart3, description: "Financial analytics" },
-  ],
-  procurement_manager: [
-    { label: "Dashboard", icon: LayoutDashboard, description: "Procurement overview" },
-    { label: "Suppliers", icon: Warehouse, description: "Supplier management" },
-    { label: "Materials", icon: Package, description: "Material procurement" },
-  ],
-  qhse_manager: [
-    { label: "Dashboard", icon: LayoutDashboard, description: "QHSE overview" },
-    { label: "Site Management", icon: MapPin, description: "Site inspections" },
-    { label: "QHSE & Safety", icon: Shield, description: "Safety management" },
-    { label: "Incidents", icon: AlertTriangle, description: "Incident tracking" },
-    { label: "Reports", icon: FileText, description: "Compliance reports" },
-  ],
-  client: [
-    { label: "Dashboard", icon: LayoutDashboard, description: "Project overview" },
-    { label: "Projects", icon: Briefcase, description: "Your projects" },
-    { label: "Reports", icon: FileText, description: "Progress reports" },
-  ],
-  subcontractor: [
-    { label: "Dashboard", icon: LayoutDashboard, description: "Work overview" },
-  ],
-  user: [
-    { label: "Dashboard", icon: LayoutDashboard, description: "Your dashboard" },
-  ],
-};
-const stats = [
-  { label: "Active construction sites managed", value: "+150" },
-  { label: "AI alerts sent per month", value: "12,000+" },
-  { label: "Users in Tunisia and Maghreb", value: "2,500+" },
-];
-const values = [
-  {
-    name: "Excellence on the ground",
-    description:
-      "Control every detail of your construction sites in real-time with reliable and intuitive tools.",
-  },
-  {
-    name: "Share intelligence",
-    description:
-      "Collaborate easily between teams, engineers, site managers, and management.",
-  },
-  {
-    name: "Continuous learning",
-    description:
-      "AI learns from your projects to improve predictions day after day.",
-  },
-  {
-    name: "Reliable support",
-    description: "Fast assistance adapted to the realities of construction in Tunisia.",
-  },
-  {
-    name: "Total accountability",
-    description:
-      "Transparency on costs, deadlines, and safety – no more surprises.",
-  },
-  {
-    name: "Balance and efficiency",
-    description:
-      "Reduce daily stress while boosting team productivity.",
-=======
 } from "lucide-react";
 import { useState } from "react";
 
@@ -230,37 +48,20 @@ const values = [
     name: "Équilibre et efficacité",
     description:
       "Réduisez le stress quotidien tout en boostant la productivité des équipes.",
->>>>>>> origin/main
   },
 ];
 const team = [
   {
     name: "Chedly Ben Ali",
-<<<<<<< HEAD
-    role: "Founder & CEO",
-    imageUrl:
-      "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=1024&h=1024&q=80",
-  },
-=======
     role: "Fondateur & CEO",
     imageUrl:
       "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=1024&h=1024&q=80",
   },
   // Ajoutez plus de membres si besoin
->>>>>>> origin/main
 ];
 const blogPosts = [
   {
     id: 1,
-<<<<<<< HEAD
-    title: "How AI predicts delays on your construction sites",
-    href: "#",
-    description:
-      "Discover how SmartSite analyzes real-time data to alert you before problems occur.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1496128858413-b36217c2ce36?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3603&q=80",
-    date: "Jan 15, 2026",
-=======
     title: "Comment l'IA prédit les retards sur vos chantiers",
     href: "#",
     description:
@@ -268,7 +69,6 @@ const blogPosts = [
     imageUrl:
       "https://images.unsplash.com/photo-1496128858413-b36217c2ce36?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3603&q=80",
     date: "15 Jan 2026",
->>>>>>> origin/main
     datetime: "2026-01-15",
     author: {
       name: "Chedly Ben Ali",
@@ -276,25 +76,15 @@ const blogPosts = [
         "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
     },
   },
-<<<<<<< HEAD
-=======
   // Ajoutez plus d'articles si besoin
->>>>>>> origin/main
 ];
 const footerNavigation = {
   main: [
     { name: "Blog", href: "#" },
-<<<<<<< HEAD
-    { name: "Careers", href: "#" },
-    { name: "Press", href: "#" },
-    { name: "Accessibility", href: "#" },
-    { name: "Partners", href: "#" },
-=======
     { name: "Carrières", href: "#" },
     { name: "Presse", href: "#" },
     { name: "Accessibilité", href: "#" },
     { name: "Partenaires", href: "#" },
->>>>>>> origin/main
   ],
   social: [
     {
@@ -379,22 +169,8 @@ const navigationFooter: any = {
   ],
 };
 
-<<<<<<< HEAD
-export default function Home2({ userRole = "director" }: { userRole?: string }) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const navigate = useNavigate();
-  const features = roleFeatures[userRole] || roleFeatures.user;
-
-  const handleFeatureClick = (featureLabel: string) => {
-    const route = featureRoutes[featureLabel];
-    if (route) {
-      navigate(route);
-    }
-  };
-=======
 export default function Home2() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
->>>>>>> origin/main
 
   return (
     <div className="bg-white">
@@ -420,53 +196,11 @@ export default function Home2() {
               className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
               onClick={() => setMobileMenuOpen(true)}
             >
-<<<<<<< HEAD
-              <span className="sr-only">Open main menu</span>
-              <Menu className="h-6 w-6" aria-hidden="true" />
-            </button>
-          </div>
-          <div className="hidden lg:flex lg:gap-x-12 items-center">
-            {/* Features Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="gap-1 text-sm font-semibold leading-6 text-gray-900 hover:bg-transparent">
-                  Features
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" className="w-80 max-h-96 overflow-y-auto">
-                <DropdownMenuLabel className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
-                  Available Features ({features.length})
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {features.map((feature, index) => {
-                  const Icon = feature.icon;
-                  return (
-                    <DropdownMenuItem
-                      key={index}
-                      className="flex items-start gap-3 py-3 cursor-pointer"
-                      onClick={() => handleFeatureClick(feature.label)}
-                    >
-                      <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center">
-                        <Icon className="h-4 w-4 text-white" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="font-medium text-gray-900">{feature.label}</span>
-                        <span className="text-xs text-gray-500">{feature.description}</span>
-                      </div>
-                    </DropdownMenuItem>
-                  );
-                })}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-=======
               <span className="sr-only">Ouvrir le menu principal</span>
               <Menu className="h-6 w-6" aria-hidden="true" />
             </button>
           </div>
           <div className="hidden lg:flex lg:gap-x-12">
->>>>>>> origin/main
             {navigation.map((item) => (
               <a
                 key={item.name}
@@ -479,17 +213,10 @@ export default function Home2() {
           </div>
           <div className="hidden lg:flex lg:flex-1 lg:justify-end">
             <a
-<<<<<<< HEAD
-              href="/login"
-              className="text-sm font-semibold leading-6 text-gray-900"
-            >
-              Login <span aria-hidden="true">&rarr;</span>
-=======
               href="#"
               className="text-sm font-semibold leading-6 text-gray-900"
             >
               Connexion <span aria-hidden="true">&rarr;</span>
->>>>>>> origin/main
             </a>
           </div>
         </nav>
@@ -545,14 +272,6 @@ export default function Home2() {
               <div className="mx-auto max-w-2xl gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
                 <div className="w-full max-w-xl lg:shrink-0 xl:max-w-2xl">
                   <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-<<<<<<< HEAD
-                    SmartSite: Manage your construction sites with artificial intelligence
-                  </h1>
-                  <p className="relative mt-6 text-lg leading-8 text-gray-600 sm:max-w-md lg:max-w-none">
-                    Real-time tracking, AI predictions for delays and risks,
-                    automatic alerts, instant reports, mobile app for the field.
-                    Control costs, deadlines, and safety like never before.
-=======
                     SmartSite : Gérez vos chantiers avec l'intelligence
                     artificielle
                   </h1>
@@ -561,7 +280,6 @@ export default function Home2() {
                     alertes automatiques, rapports instantanés, application
                     mobile pour le terrain. Contrôlez coûts, délais et sécurité
                     comme jamais auparavant.
->>>>>>> origin/main
                   </p>
                 </div>
                 <div className="mt-14 flex justify-end gap-8 sm:-mt-44 sm:justify-start sm:pl-20 lg:mt-0 lg:pl-0">
@@ -569,11 +287,7 @@ export default function Home2() {
                     <div className="relative">
                       <img
                         src="https://www.openspace.ai/wp-content/uploads/2025/02/BIM-Compare-tablet-on-jobsite-scaled.webp"
-<<<<<<< HEAD
-                        alt="Site manager using a tablet on site for real-time tracking"
-=======
                         alt="Chef de chantier utilisant une tablette sur site pour suivi en temps réel"
->>>>>>> origin/main
                         className="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg"
                       />
                       <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
@@ -584,11 +298,7 @@ export default function Home2() {
                     <div className="relative">
                       <img
                         src="https://www.deltek.com/-/media/deltekblogs/lead-images/2023/construction-supervisor-with-digital-tablet-on-site.ashx"
-<<<<<<< HEAD
-                        alt="Construction supervisor checking site progress on mobile tablet"
-=======
                         alt="Superviseur BTP vérifiant avancement chantier sur tablette mobile"
->>>>>>> origin/main
                         className="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg"
                       />
                       <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
@@ -597,11 +307,7 @@ export default function Home2() {
                     <div className="relative">
                       <img
                         src="https://www.deltek.com/-/media/deltekblogs/lead-images/2023/750x500-ae-ipad.ashx"
-<<<<<<< HEAD
-                        alt="Construction worker capturing photos and data on iPad at site"
-=======
                         alt="Ouvrier construction capturant photos et données sur iPad sur chantier"
->>>>>>> origin/main
                         className="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg"
                       />
                       <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
@@ -612,11 +318,7 @@ export default function Home2() {
                     <div className="relative">
                       <img
                         src="https://assets.marketing.quickbase.com/product/Screenshots/_1320x939_crop_center-center_82_line/product-screenshots-mobile-and-gantt.png"
-<<<<<<< HEAD
-                        alt="Mobile dashboard and Gantt chart for construction project tracking SmartSite"
-=======
                         alt="Dashboard mobile et Gantt de suivi projet construction SmartSite"
->>>>>>> origin/main
                         className="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg"
                       />
                       <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
@@ -625,11 +327,7 @@ export default function Home2() {
                     <div className="relative">
                       <img
                         src="https://www.openspace.ai/wp-content/uploads/2025/10/Hero.png"
-<<<<<<< HEAD
-                        alt="Construction site progress dashboard with AI and alerts SmartSite"
-=======
                         alt="Tableau de bord avancement chantier avec IA et alertes SmartSite"
->>>>>>> origin/main
                         className="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg"
                       />
                       <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
@@ -645,33 +343,11 @@ export default function Home2() {
         <div className="mx-auto mb-30 mt-12 max-w-7xl px-6 sm:mt-0 lg:px-8 xl:-mt-8">
           <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-none">
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-<<<<<<< HEAD
-              Our mission
-=======
               Notre mission
->>>>>>> origin/main
             </h2>
             <div className="mt-6 flex flex-col gap-x-8 gap-y-20 lg:flex-row">
               <div className="lg:w-full lg:max-w-2xl lg:flex-auto">
                 <p className="text-xl leading-8 text-gray-600">
-<<<<<<< HEAD
-                  Transform construction site management in the Maghreb through AI:
-                  fewer delays, fewer accidents, more profitability.
-                </p>
-                <div className="mt-10 max-w-xl text-base leading-7 text-gray-700">
-                  <p>
-                    SmartSite centralizes all your site data
-                    (progress, resources, safety, budget) and uses
-                    artificial intelligence to predict risks,
-                    optimize schedules, and generate automatic
-                    reports. Adapted for Tunisian companies, from small
-                    sites to large infrastructure projects.
-                  </p>
-                  <p className="mt-10">
-                    Available on web and mobile, even with limited
-                    connection in the field. Try it for free and take control
-                    today.
-=======
                   Transformer la gestion des chantiers au Maghreb grâce à l'IA :
                   moins de retards, moins d'accidents, plus de rentabilité.
                 </p>
@@ -688,7 +364,6 @@ export default function Home2() {
                     Disponible sur web et mobile, même avec connexion limitée
                     sur le terrain. Essayez gratuitement et prenez le contrôle
                     dès aujourd'hui.
->>>>>>> origin/main
                   </p>
                 </div>
               </div>
@@ -716,11 +391,6 @@ export default function Home2() {
         <div className="relative isolate overflow-hidden bg-gray-900">
           <div className="px-6 py-24 sm:px-6 sm:py-32 lg:px-8">
             <div className="mx-auto max-w-3xl text-center">
-<<<<<<< HEAD
-              <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-gray-300">
-                {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-              </p>
-=======
               <h2 className="text-3xl font-bold tracking-tight text-white sm:text-5xl">
                 Take Control of Your Construction Projects.
                 <br />
@@ -749,7 +419,6 @@ export default function Home2() {
                   Request Demo <span aria-hidden="true">→</span>
                 </a>
               </div>
->>>>>>> origin/main
             </div>
           </div>
 
@@ -787,19 +456,11 @@ export default function Home2() {
         <div className="mx-auto mb-32 mt-32 max-w-7xl px-6 sm:mt-40 lg:px-8">
           <div className="mx-auto max-w-2xl lg:mx-0">
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-<<<<<<< HEAD
-              Our values
-            </h2>
-            <p className="mt-6 text-lg leading-8 text-gray-600">
-              Building the future of construction sites with precision, innovation, and
-              field proximity.
-=======
               Nos valeurs
             </h2>
             <p className="mt-6 text-lg leading-8 text-gray-600">
               Construire l'avenir des chantiers avec précision, innovation et
               proximité terrain.
->>>>>>> origin/main
             </p>
           </div>
           <dl className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 text-base leading-7 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
@@ -821,10 +482,6 @@ export default function Home2() {
           />
 
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
-<<<<<<< HEAD
-            {/* Stats */}
-            <dl className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-=======
             {/* Main Text */}
             <div className="mx-auto max-w-2xl lg:mx-0">
               <h2 className="text-4xl font-bold tracking-tight text-white sm:text-6xl">
@@ -850,7 +507,6 @@ export default function Home2() {
 
             {/* Stats */}
             <dl className="mt-20 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
->>>>>>> origin/main
               <div className="flex flex-col-reverse">
                 <dt className="text-base leading-7 text-gray-300">
                   Active Construction Projects

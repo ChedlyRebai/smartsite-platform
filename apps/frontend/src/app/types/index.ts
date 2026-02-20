@@ -1,9 +1,5 @@
 // User Roles
-<<<<<<< HEAD
-export type UserRole =
-=======
 export type RoleType =
->>>>>>> origin/main
   | "super_admin"
   | "director"
   | "project_manager"
@@ -16,14 +12,6 @@ export type RoleType =
   | "subcontractor"
   | "user";
 
-<<<<<<< HEAD
-export interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  cin?: string;
-=======
 export interface UserRole {
   _id: string;
   name: RoleType;
@@ -39,7 +27,6 @@ export interface User {
   firstName?: string;
   lastName?: string;
   email?: string;
->>>>>>> origin/main
   phone?: string;
   role: UserRole;
   isActive: boolean;
@@ -58,23 +45,6 @@ export interface Role {
 }
 
 export interface Permission {
-<<<<<<< HEAD
-   _id: string,
-    name: string,
-    source: boolean,
-    access: boolean,
-    create: boolean,
-    delete: boolean,
-    update: boolean,
-    createdAt: Date,
-    updatedAt: Date,
-}
-
-export interface AuthState {
-  user: User | null;
-  isAuthenticated: boolean;
-  login: (cin: string, password: string) => Promise<void>;
-=======
   _id: string;
   name: string;
   source: boolean;
@@ -97,7 +67,6 @@ export interface AuthState {
   };
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
->>>>>>> origin/main
   register: (data: RegisterData) => Promise<void>;
   getPendingUsers?: () => Promise<User[]>;
   approveUser?: (userId: string) => Promise<User>;
@@ -108,18 +77,10 @@ export interface AuthState {
 export interface RegisterData {
   firstName: string;
   lastName: string;
-<<<<<<< HEAD
-  email?: string;
-  cin?: string;
-  password: string;
-  phone?: string;
-  role?: UserRole;
-=======
   email: string;
   password: string;
   phone?: string;
   role: UserRole;
->>>>>>> origin/main
 }
 
 export interface Project {

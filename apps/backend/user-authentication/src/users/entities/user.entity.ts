@@ -6,31 +6,15 @@ import { Role } from 'src/roles/entities/role.entity';
 @Schema({ timestamps: true })
 export class User extends Document {
   @Prop({ required: true, trim: true })
-<<<<<<< HEAD
-  nom: string;
-
-  @Prop({ required: true, trim: true })
-  prenom: string;
-=======
   firstname: string;
 
   @Prop({ required: true, trim: true })
   lastname: string;
->>>>>>> origin/main
 
   @Prop({ required: true, unique: true, lowercase: true, trim: true })
   cin: string;
 
   @Prop({ required: true })
-<<<<<<< HEAD
-  motDePasse: string; 
-
-  @Prop({ type: [{ type: Types.ObjectId, ref: 'Role' }], default: [] })
-  roles: Types.ObjectId[] | Role[];
-
-  @Prop({ default: true })
-  estActif: boolean;
-=======
   motDePasse: string;
 
   @Prop({ type: Types.ObjectId, ref: 'Role', required: true })
@@ -39,7 +23,6 @@ export class User extends Document {
   @Prop({ default: true })
   estActif: boolean;
 
->>>>>>> origin/main
   @Prop()
   telephone?: string;
 
@@ -54,16 +37,6 @@ export const UserSchema = SchemaFactory.createForClass(User);
 
 // Pre-save hook to ensure roles is always an array of ObjectIds or empty
 UserSchema.pre('save', function (next) {
-<<<<<<< HEAD
-  if (this.roles && !Array.isArray(this.roles)) {
-    this.roles = [];
-  }
-  if (this.roles && this.roles.length > 0) {
-    this.roles = this.roles.filter((role) => role && typeof role !== 'string') as Types.ObjectId[] | Role[];
-  }
-  next;
-});
-=======
   // if (this.roles && !Array.isArray(this.roles)) {
   //   this.roles = "";
   // }
@@ -72,4 +45,3 @@ UserSchema.pre('save', function (next) {
   // }
   next;
 });
->>>>>>> origin/main

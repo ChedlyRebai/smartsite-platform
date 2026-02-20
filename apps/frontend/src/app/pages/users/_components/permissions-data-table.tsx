@@ -21,20 +21,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-<<<<<<< HEAD
-import { useEffect, useState } from "react";
-import { Input } from "@/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-=======
 import {  useState } from "react";
 import { Input } from "@/components/ui/input";
 
->>>>>>> origin/main
 import {
   ArrowUpDown,
   ListPlusIcon,
@@ -43,11 +32,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { Permission } from "@/app/types";
-<<<<<<< HEAD
-import { toast } from "sonner";
-=======
 
->>>>>>> origin/main
 import {
   Select,
   SelectContent,
@@ -102,21 +87,7 @@ export function PermissionsDataTable({
         return <div className="font-medium">{row.getValue("name")}</div>;
       },
     },
-<<<<<<< HEAD
-    {
-      accessorKey: "source",
-      header: "Source",
-      cell: ({ row }) => {
-        return (
-          <div className="text-sm text-gray-600">
-            {row.getValue("source") || "source"}
-          </div>
-        );
-      },
-    },
-=======
     
->>>>>>> origin/main
     {
       accessorKey: "access",
       header: ({ column }) => {

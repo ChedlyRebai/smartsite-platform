@@ -35,11 +35,7 @@ export default function SuperAdminDashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-<<<<<<< HEAD
-        <h1 className="text-3xl font-bold text-gray-900">Welcome back, {user?.firstName}!</h1>
-=======
         <h1 className="text-3xl font-bold text-gray-900">Welcome back, {user?.firstname}!</h1>
->>>>>>> origin/main
         <p className="text-gray-500 mt-1">System Overview - Super Administrator Dashboard</p>
       </div>
 

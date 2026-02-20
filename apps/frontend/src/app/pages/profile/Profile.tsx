@@ -14,15 +14,9 @@ import { toast } from 'sonner';
 export default function Profile() {
   const user = useAuthStore((state) => state.user);
   const [editData, setEditData] = useState({
-<<<<<<< HEAD
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
-    phone: user?.phone || '',
-=======
     firstname: user?.firstname || '',
     lastname: user?.lastname || '',
     //phone: user?.phone || '',
->>>>>>> origin/main
   });
   const [passwords, setPasswords] = useState({
     current: '',
@@ -32,21 +26,12 @@ export default function Profile() {
 
   if (!user) return null;
 
-<<<<<<< HEAD
-  const getInitials = (firstName: string, lastName: string) => {
-    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
-  };
-
-  const handleSaveProfile = () => {
-    if (!editData.firstName || !editData.lastName) {
-=======
   const getInitials = (firstname: string, lastname: string) => {
     return `${firstname.charAt(0)}${lastname.charAt(0)}`.toUpperCase();
   };
 
   const handleSaveProfile = () => {
     if (!editData.firstname || !editData.lastname) {
->>>>>>> origin/main
       toast.error('First and last names are required');
       return;
     }
@@ -85,15 +70,6 @@ export default function Profile() {
           <div className="flex items-start gap-6">
             <Avatar className="h-24 w-24">
               <AvatarFallback className="bg-gradient-to-br from-blue-600 to-green-600 text-white text-2xl">
-<<<<<<< HEAD
-                {getInitials(user.firstName, user.lastName)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 space-y-4">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {user.firstName} {user.lastName}
-=======
                 {getInitials(user.firstname, user.lastname)}
               </AvatarFallback>
             </Avatar>
@@ -101,7 +77,6 @@ export default function Profile() {
               {/* <div>
                 <h2 className="text-2xl font-bold text-gray-900">
                   {user.firstname} {user.lastname}
->>>>>>> origin/main
                 </h2>
                 <p className="text-gray-500">{roleLabels[user.role]}</p>
               </div>
@@ -127,11 +102,7 @@ export default function Profile() {
                     {user.isActive ? 'Active' : 'Inactive'}
                   </Badge>
                 </div>
-<<<<<<< HEAD
-              </div>
-=======
               </div> */}
->>>>>>> origin/main
 
               <div className="flex gap-3 pt-4">
                 <Dialog>
@@ -150,56 +121,32 @@ export default function Profile() {
                     <div className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-<<<<<<< HEAD
-                          <Label htmlFor="firstName">First Name</Label>
-                          <Input
-                            id="firstName"
-                            value={editData.firstName}
-                            onChange={(e) => setEditData({ ...editData, firstName: e.target.value })}
-=======
                           <Label htmlFor="firstname">First Name</Label>
                           <Input
                             id="firstname"
                             value={editData.firstname}
                             onChange={(e) => setEditData({ ...editData, firstname: e.target.value })}
->>>>>>> origin/main
                             placeholder="First name"
                           />
                         </div>
                         <div className="space-y-2">
-<<<<<<< HEAD
-                          <Label htmlFor="lastName">Last Name</Label>
-                          <Input
-                            id="lastName"
-                            value={editData.lastName}
-                            onChange={(e) => setEditData({ ...editData, lastName: e.target.value })}
-=======
                           <Label htmlFor="lastname">Last Name</Label>
                           <Input
                             id="lastname"
                             value={editData.lastname}
                             onChange={(e) => setEditData({ ...editData, lastname: e.target.value })}
->>>>>>> origin/main
                             placeholder="Last name"
                           />
                         </div>
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="phone">Phone</Label>
-<<<<<<< HEAD
-                        <Input
-=======
                         {/* <Input
->>>>>>> origin/main
                           id="phone"
                           value={editData.phone}
                           onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
                           placeholder="Phone number"
-<<<<<<< HEAD
-                        />
-=======
                         /> */}
->>>>>>> origin/main
                       </div>
                       <Button 
                         className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
@@ -267,11 +214,7 @@ export default function Profile() {
         </CardContent>
       </Card>
 
-<<<<<<< HEAD
-      <Card>
-=======
       {/* <Card>
->>>>>>> origin/main
         <CardHeader>
           <CardTitle>Account Activity</CardTitle>
         </CardHeader>
@@ -295,11 +238,7 @@ export default function Profile() {
             </div>
           </div>
         </CardContent>
-<<<<<<< HEAD
-      </Card>
-=======
       </Card> */}
->>>>>>> origin/main
     </div>
   );
 }

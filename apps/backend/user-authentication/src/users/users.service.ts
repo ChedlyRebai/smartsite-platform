@@ -13,17 +13,6 @@ export class UsersService {
   }
 
   async findByCin(cin: string) {
-<<<<<<< HEAD
-    return this.userModel.findOne({ cin }).populate('roles').exec();
-  }
-
-  async findById(id: string) {
-    return this.userModel.findById(id).populate('roles').exec();
-  }
-
-  async findAll() {
-    return this.userModel.find().populate('roles').exec();
-=======
     return this.userModel.findOne({ cin }).populate('role').exec();
   }
 
@@ -33,7 +22,6 @@ export class UsersService {
 
   async findAll() {
     return this.userModel.find().populate('role').exec();
->>>>>>> origin/main
   }
 
   async update(id: string, updateUserDto: any) {
