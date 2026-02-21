@@ -26,6 +26,7 @@ import { Input } from "@/components/ui/input";
 
 import { ArrowUpDown, ListPlusIcon, Edit, Trash2, Shield } from "lucide-react";
 import { Role, Permission } from "@/app/types";
+import useRoleModal from "@/app/hooks/use-role-Modal";
 
 interface RolesDataTableProps {
   roles: Role[];
@@ -203,7 +204,7 @@ export function RolesDataTable({
       globalFilter,
     },
   });
-
+  const {onOpen}= useRoleModal();
   return (
     <>
       <div className="flex justify-between items-center py-4 flex-wrap gap-4">
@@ -213,12 +214,12 @@ export function RolesDataTable({
           onChange={(event) => setGlobalFilter(event.target.value)}
           className="max-w-sm"
         />
-        {onAddNew && (
-          <Button onClick={onAddNew} variant="default">
+        
+          <Button onClick={onOpen} variant="default">
             <ListPlusIcon className="mr-2 h-4 w-4" />
             Add New Role
           </Button>
-        )}
+        
       </div>
       <div className="rounded-md border">
         <Table>
