@@ -29,7 +29,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ArrowUpDown, ListPlusIcon, SearchIcon } from "lucide-react";
+import { ArrowUpDown, Edit, ListPlusIcon, SearchIcon, Trash } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -95,12 +95,12 @@ export function UserDataTable<TData, TValue>({
           </Button>
         );
       },
-      cell: ({row})=>{
-        const fullname= `${row.getValue("firstname")} ${row.getValue("lastname")}`
-        return <>{fullname}</>
-      }
+      cell: ({ row }) => {
+        const fullname = `${row.getValue("firstname")} ${row.getValue("lastname")}`;
+        return <>{fullname}</>;
+      },
     },
-    
+
     {
       accessorKey: "email",
       header: ({ column }) => {
@@ -141,7 +141,7 @@ export function UserDataTable<TData, TValue>({
             {isActive ? "Active" : "Inactive"}
           </Badge>
         );
-      }
+      },
     },
     {
       accessorKey: "cin",
@@ -179,7 +179,7 @@ export function UserDataTable<TData, TValue>({
       //   );
       // },
     },
-   
+
     {
       accessorKey: "createdAt",
       header: ({ column }) => {
@@ -196,6 +196,32 @@ export function UserDataTable<TData, TValue>({
       cell: ({ row }) => {
         const date = new Date(row.getValue("createdAt"));
         return <>{date.toLocaleDateString()}</>;
+      },
+    },
+    {
+      accessorKey: "Actions",
+      // header: ({ column }) => {
+      //   return (
+      //     <Button
+      //       variant="ghost"
+      //       onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      //     >
+      //       Actions
+      //       <ArrowUpDown className="ml-2 h-4 w-4" />
+      //     </Button>
+      //   );
+      // },
+      cell: ({ row }) => {
+        return (
+          <>
+            <Button variant="ghost" size="sm">
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="sm">
+              <Trash className="h-4 w-4 text-red-600" />
+            </Button>
+          </>
+        );
       },
     },
   ];

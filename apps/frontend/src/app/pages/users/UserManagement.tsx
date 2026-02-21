@@ -32,7 +32,7 @@ import {
 
 import { RolesDataTable } from "./_components/roles-data-table";
 
-import { UserDataTable } from "./_components/data-table";
+import { UserDataTable } from "./_components/user-data-table";
 
 import { deleteUser, getAllUsers } from "@/app/action/user.action";
 
