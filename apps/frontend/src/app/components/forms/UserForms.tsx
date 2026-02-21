@@ -23,6 +23,7 @@ import { createUser } from "@/app/action/user.action";
 
 const formSchema = z
   .object({
+    cin: z.string().min(8, "CIN must be at least 8 characters."),
     firstname: z
       .string()
       .min(5, "Firstname must be at least 5 characters.")
@@ -35,7 +36,6 @@ const formSchema = z
     telephone: z.string(),
     password: z
       .string()
-
       .max(32, "Password must be at most 32 characters.")
       .min(8, "password must be at least 8 characters"),
     confirmPassword: z
@@ -53,6 +53,7 @@ const UserForms = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      cin: "",
       firstname: "",
       lastname: "",
       email: "",
@@ -80,73 +81,67 @@ const UserForms = () => {
       data.telephone,
       data,
     );
+    try {
+      const response = await createUser(data);
+      if (response.status === 201) {
+        toast.success("User created successfully");
+      }
+    } catch (error) {
+      toast.error("Failed to create user. Please try again.");
+    }
   };
   return (
     <>
-      <form id="form-rhf-demo" onSubmit={form.handleSubmit(onSubmit)}>
+      <form
+        className=""
+        id="form-rhf-demo"
+        onSubmit={form.handleSubmit(onSubmit)}
+      >
         <FieldGroup>
-          <Controller
-            name="firstname"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="form-rhf-demo-firstname">
-                  Firstname
-                </FieldLabel>
-                <Input
-                  {...field}
-                  id="form-rhf-demo-firstname"
-                  aria-invalid={fieldState.invalid}
-                  placeholder="Enter firstname"
-                  autoComplete="off"
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-          <Controller
-            name="lastname"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="form-rhf-demo-lastname">
-                  Lastname
-                </FieldLabel>
-                <Input
-                  {...field}
-                  id="form-rhf-demo-lastname"
-                  aria-invalid={fieldState.invalid}
-                  placeholder="Enter Lastname"
-                  autoComplete="off"
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-
-          <Controller
-            name="address"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="form-rhf-demo-address">Address</FieldLabel>
-                <Input
-                  {...field}
-                  id="form-rhf-demo-address"
-                  aria-invalid={fieldState.invalid}
-                  placeholder="Enter address"
-                  autoComplete="off"
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
+          <div className="flex justify-between gap-x-3">
+            <Controller
+              name="firstname"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="form-rhf-demo-firstname">
+                    Firstname
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    id="form-rhf-demo-firstname"
+                    aria-invalid={fieldState.invalid}
+                    placeholder="Enter firstname"
+                    autoComplete="off"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+            <Controller
+              name="lastname"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="form-rhf-demo-lastname">
+                    Lastname
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    id="form-rhf-demo-lastname"
+                    aria-invalid={fieldState.invalid}
+                    placeholder="Enter Lastname"
+                    autoComplete="off"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+          </div>
           <Controller
             name="email"
             control={form.control}
@@ -158,6 +153,68 @@ const UserForms = () => {
                   id="form-rhf-demo-email"
                   aria-invalid={fieldState.invalid}
                   placeholder="Enter email"
+                  autoComplete="off"
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+
+          <div className="flex justify-between gap-x-3">
+            <Controller
+              name="cin"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="form-rhf-demo-cin">CIN</FieldLabel>
+                  <Input
+                    {...field}
+                    id="form-rhf-demo-cin"
+                    aria-invalid={fieldState.invalid}
+                    placeholder="Enter cin"
+                    autoComplete="off"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+            <Controller
+              name="telephone"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="form-rhf-demo-telephone">
+                    Telephone
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    id="form-rhf-demo-telephone"
+                    aria-invalid={fieldState.invalid}
+                    placeholder="Enter telephone"
+                    autoComplete="off"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+          </div>
+          <Controller
+            name="address"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="form-rhf-demo-address">Address</FieldLabel>
+                <Input
+                  {...field}
+                  id="form-rhf-demo-address"
+                  aria-invalid={fieldState.invalid}
+                  placeholder="Enter address"
                   autoComplete="off"
                 />
                 {fieldState.invalid && (
@@ -199,31 +256,9 @@ const UserForms = () => {
                 <Input
                   type="password"
                   {...field}
-                  
                   id="form-rhf-demo-confirm"
                   aria-invalid={fieldState.invalid}
                   placeholder="Confirm password"
-                  autoComplete="off"
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-          <Controller
-            name="telephone"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="form-rhf-demo-telephone">
-                  Telephone
-                </FieldLabel>
-                <Input
-                  {...field}
-                  id="form-rhf-demo-telephone"
-                  aria-invalid={fieldState.invalid}
-                  placeholder="Enter telephone"
                   autoComplete="off"
                 />
                 {fieldState.invalid && (

@@ -38,6 +38,8 @@ export const createUser = async (userData: {
   firstName?: string;
   lastName?: string;
   email?: string;
+  telephone?:string;
+  address?:string;
 }) => {
   try {
     const res = await axios.post(`${API_URL}`, userData);

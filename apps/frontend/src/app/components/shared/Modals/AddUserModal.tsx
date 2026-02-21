@@ -11,8 +11,9 @@ const AddUserModal = () => {
       description="Fill in the details to create a new user account"
       isOpen={isOpen}
       onChange={onClose}
+      
     >
-      <UserForms />
+      <UserForms  />
     </Modal>
   );
 };
