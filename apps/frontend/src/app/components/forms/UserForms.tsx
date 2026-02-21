@@ -13,13 +13,13 @@ import {
   InputGroupText,
 } from "@/components/ui/input-group";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
 import * as z from "zod";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { createRole } from "@/app/action/role.action";
+import { createRole, getAllRoles } from "@/app/action/role.action";
 import { createUser } from "@/app/action/user.action";
 import {
   SelectTrigger,
@@ -31,6 +31,7 @@ import {
   SelectSeparator,
 } from "../ui/select";
 import { SelectLabel } from "../ui/select";
+import { Role } from "@/app/types";
 
 const formSchema = z
   .object({
@@ -76,11 +77,22 @@ const UserForms = () => {
       role: "",
     },
   });
-  const spokenLanguages = [
-    { label: "super_admin", value: "699733a96b4fcf8d6d4a6d00" },
-   
-  ] as const;
+  
 
+  useEffect(()=>{
+    loadRoles();
+  },[])
+  const [roles, setRoles] = useState<Role[]>([]);
+  const loadRoles = async () => {
+    try {
+      const response = await getAllRoles();
+      if (response.status === 200) {
+        setRoles(response.data);
+      }
+    } catch (error) {
+      console.log("FAiled to loading roles");
+    }
+  };
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     // try {
     //   const res = await createUser(data.firstname, data.lastname, data.email, data.telephone, data.password, data.address);
@@ -246,9 +258,7 @@ const UserForms = () => {
             control={form.control}
             render={({ field, fieldState }) => (
               <Field orientation="responsive" data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="form-rhf-demo-password">
-                  Role
-                </FieldLabel>
+                <FieldLabel htmlFor="form-rhf-demo-password">Role</FieldLabel>
                 <Select
                   name={field.name}
                   value={field.value}
@@ -262,11 +272,9 @@ const UserForms = () => {
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent position="item-aligned">
-                    
-                    
-                    {spokenLanguages.map((language) => (
-                      <SelectItem key={language.value} value={language.value}>
-                        {language.label}
+                    {roles.map((language) => (
+                      <SelectItem key={language._id} value={language._id}>
+                        {language.name}
                       </SelectItem>
                     ))}
                   </SelectContent>

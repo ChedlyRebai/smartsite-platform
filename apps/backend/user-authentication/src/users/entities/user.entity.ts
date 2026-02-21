@@ -21,14 +21,13 @@ export class User extends Document {
   role: Types.ObjectId;
 
   @Prop()
-  email:string;
+  email: string;
 
   @Prop()
-  connected:boolean;
+  connected: boolean;
 
   @Prop()
-  address : string;
-
+  address: string;
 
   @Prop({ default: true })
   estActif: boolean;

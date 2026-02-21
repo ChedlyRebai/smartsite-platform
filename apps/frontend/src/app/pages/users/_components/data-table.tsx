@@ -42,6 +42,7 @@ import {
 import toast from "react-hot-toast";
 import { User } from "@/app/types";
 import useAddUserModal from "@/app/hooks/use-user-Modal";
+import { Badge } from "@/app/components/ui/badge";
 
 interface DataTableProps<TData, TValue> {
   //columns: ColumnDef<TData, TValue>[];
@@ -89,25 +90,58 @@ export function UserDataTable<TData, TValue>({
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            firstName
+            Full name
             <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         );
       },
+      cell: ({row})=>{
+        const fullname= `${row.getValue("firstname")} ${row.getValue("lastname")}`
+        return <>{fullname}</>
+      }
     },
+    
     {
-      accessorKey: "lastname",
+      accessorKey: "email",
       header: ({ column }) => {
         return (
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            lastName
+            email
             <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         );
       },
+    },
+    {
+      accessorKey: "estActif",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            isActive
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        );
+      },
+      cell: ({ row }) => {
+        const isActive = row.getValue("estActif") as boolean;
+        return (
+          <Badge
+            className={
+              isActive
+                ? "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
+                : "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"
+            }
+          >
+            {isActive ? "Active" : "Inactive"}
+          </Badge>
+        );
+      }
     },
     {
       accessorKey: "cin",
@@ -136,21 +170,16 @@ export function UserDataTable<TData, TValue>({
           </Button>
         );
       },
+      // cell: ({ row }) => {
+      //   const role = row.getValue("role.name") as string;
+      //   return (
+      //     <Badge className="bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">
+      //       {row.getValue("role.name")}
+      //     </Badge>
+      //   );
+      // },
     },
-    {
-      accessorKey: "estActif",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            isActive
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        );
-      },
-    },
+   
     {
       accessorKey: "createdAt",
       header: ({ column }) => {
@@ -189,7 +218,7 @@ export function UserDataTable<TData, TValue>({
   });
 
   console.log(users);
-  const {onOpen}= useAddUserModal()
+  const { onOpen } = useAddUserModal();
   return (
     <>
       <div className="flex justify-between items-center py-4 flex-wrap">
@@ -210,7 +239,9 @@ export function UserDataTable<TData, TValue>({
           Add New User
         </Button>
       </div>
-      <div className={`rounded-md border ${table.getRowModel().rows.length === 0 ? "border-red-500" : ""}`}>
+      <div
+        className={`rounded-md border ${table.getRowModel().rows.length === 0 ? "border-red-500" : ""}`}
+      >
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
