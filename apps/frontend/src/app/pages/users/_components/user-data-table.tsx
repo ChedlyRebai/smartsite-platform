@@ -59,7 +59,7 @@ export function UserDataTable<TData, TValue>({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
-
+  const {setId,id,onOpen}=useAddUserModal();
   console.log("users:", users);
   const columns: ColumnDef<User>[] = [
     //     {
@@ -146,6 +146,7 @@ export function UserDataTable<TData, TValue>({
     {
       accessorKey: "cin",
       header: ({ column }) => {
+        
         return (
           <Button
             variant="ghost"
@@ -212,6 +213,8 @@ export function UserDataTable<TData, TValue>({
       //   );
       // },
       cell: ({ row }) => {
+        const id=row.getValue("id") as string;
+        setId(id);
         return (
           <>
             <Button variant="ghost" size="sm">
@@ -244,7 +247,7 @@ export function UserDataTable<TData, TValue>({
   });
 
   console.log(users);
-  const { onOpen } = useAddUserModal();
+  
   return (
     <>
       <div className="flex justify-between items-center py-4 flex-wrap">

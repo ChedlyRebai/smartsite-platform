@@ -3,6 +3,8 @@ import { create } from "zustand";
 interface RoleModalStore {
   id?: string | number;
   setId: (id: string | number) => void;
+  type: "add" | "edit";
+  setType:(type: "add" | "edit") => void
   isOpen: boolean;
   onOpen: () => void;
   onClose: () => void;
@@ -11,6 +13,9 @@ interface RoleModalStore {
 const useRoleModal = create<RoleModalStore>(
   (set) => ({
     id: undefined,
+    type:undefined,
+    setType: (type) => set({type}),
+
     isOpen: false,
     setId: (id) => set({ id }),
     onOpen: () => set({ isOpen: true }),
