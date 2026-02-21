@@ -215,9 +215,9 @@ export default function UserManagement() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Role Management</h1>
+        <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
         <p className="text-gray-500 mt-1">
-          Manage system roles and their permissions
+          Manage user roles, permissions, and access control settings to ensure secure
         </p>
       </div>
 
