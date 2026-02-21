@@ -43,12 +43,20 @@ import {
   getAllPermissions,
 } from "@/app/action/permission.action";
 import { PermissionsDataTable } from "./_components/permissions-data-table";
+import { set } from "zod";
+import { getAllStatics } from "@/app/action/statiscs.action";
 
 export default function UserManagement() {
   const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();
   const canManageRoles = user && canEdit(user.role.name, "users");
   const [roles, setRoles] = useState<Role[]>([]);
+
+  const [statics, setStatics] = useState({
+    totalRoles:0,
+    totalUsers:0,
+    totalPermissions:0
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [users, setUsers] = useState<User[]>([]);
   const canManagePermissions = user && canEdit(user.role.name, "users");
@@ -58,8 +66,19 @@ export default function UserManagement() {
     loadRoles();
     loadPermissions();
     loadUsers();
+    loadStatics();
   }, []);
 
+  const loadStatics = async () =>{
+    try {
+      const response =await getAllStatics();
+      if(response.status === 200){
+        setStatics(response.data);
+      }
+    } catch (error) {
+      console.error("Failed to load statics:", error);
+    }
+  }
   const loadUsers = async () => {
     setIsLoading(true);
     try {
@@ -92,8 +111,6 @@ export default function UserManagement() {
       toast.error("Failed to delete user");
     }
   };
-
-  
 
   const loadPermissions = async () => {
     setIsLoading(true);
@@ -222,20 +239,6 @@ export default function UserManagement() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5" />
-              Total Roles
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-4xl font-bold text-gray-900">{roles.length}</p>
-            <p className="text-sm text-gray-500 mt-2">
-              Active roles in the system
-            </p>
-          </CardContent>
-        </Card>
 
         <Card>
           <CardHeader>
@@ -246,10 +249,24 @@ export default function UserManagement() {
           </CardHeader>
           <CardContent>
             <p className="text-4xl font-bold text-gray-900">
-              {roles.reduce((acc, role) => acc + (role.userCount || 0), 0)}
+              {statics.totalUsers}
             </p>
             <p className="text-sm text-gray-500 mt-2">
               Users assigned to roles
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              Total Roles
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-4xl font-bold text-gray-900">{statics.totalRoles}</p>
+            <p className="text-sm text-gray-500 mt-2">
+              Active roles in the system
             </p>
           </CardContent>
         </Card>
@@ -262,7 +279,9 @@ export default function UserManagement() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-4xl font-bold text-gray-900">-</p>
+            <p className="text-4xl font-bold text-gray-900">
+              {statics.totalPermissions}
+            </p>
             <p className="text-sm text-gray-500 mt-2">
               Total permissions available
             </p>
