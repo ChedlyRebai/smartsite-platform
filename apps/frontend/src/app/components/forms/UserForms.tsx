@@ -4,6 +4,7 @@ import {
   FieldLabel,
   FieldError,
   FieldDescription,
+  FieldContent,
 } from "@/components/ui/field";
 import {
   InputGroup,
@@ -20,6 +21,16 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { createRole } from "@/app/action/role.action";
 import { createUser } from "@/app/action/user.action";
+import {
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  Select,
+  SelectSeparator,
+} from "../ui/select";
+import { SelectLabel } from "../ui/select";
 
 const formSchema = z
   .object({
@@ -44,6 +55,7 @@ const formSchema = z
       .min(8, "password must be at least 8 characters"),
 
     address: z.string().optional(),
+    role: z.string().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
@@ -61,8 +73,13 @@ const UserForms = () => {
       password: "",
       address: "",
       confirmPassword: "",
+      role: "",
     },
   });
+  const spokenLanguages = [
+    { label: "super_admin", value: "699733a96b4fcf8d6d4a6d00" },
+   
+  ] as const;
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     // try {
@@ -223,6 +240,41 @@ const UserForms = () => {
               </Field>
             )}
           />
+
+          <Controller
+            name="role"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field orientation="responsive" data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="form-rhf-demo-password">
+                  Role
+                </FieldLabel>
+                <Select
+                  name={field.name}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                >
+                  <SelectTrigger
+                    id="form-rhf-select-language"
+                    aria-invalid={fieldState.invalid}
+                    className="min-w-[120px]"
+                  >
+                    <SelectValue placeholder="Select" />
+                  </SelectTrigger>
+                  <SelectContent position="item-aligned">
+                    
+                    
+                    {spokenLanguages.map((language) => (
+                      <SelectItem key={language.value} value={language.value}>
+                        {language.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+            )}
+          />
+
           <Controller
             name="password"
             control={form.control}
