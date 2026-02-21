@@ -18,6 +18,12 @@ class UpdateIncidentDto {
     title;
     description;
     reportedBy;
+    siteId;
+    projectId;
+    location;
+    status;
+    resolutionNotes;
+    resolvedBy;
 }
 exports.UpdateIncidentDto = UpdateIncidentDto;
 __decorate([
@@ -45,4 +51,34 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateIncidentDto.prototype, "reportedBy", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateIncidentDto.prototype, "siteId", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateIncidentDto.prototype, "projectId", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateIncidentDto.prototype, "location", void 0);
+__decorate([
+    (0, class_validator_1.IsEnum)(["open", "in_progress", "resolved", "closed"]),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateIncidentDto.prototype, "status", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateIncidentDto.prototype, "resolutionNotes", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateIncidentDto.prototype, "resolvedBy", void 0);
 //# sourceMappingURL=update-incident.dto.js.map

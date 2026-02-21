@@ -5,4 +5,10 @@ export declare class UpdateIncidentDto {
     title?: string;
     description?: string;
     reportedBy?: string;
+    siteId?: string;
+    projectId?: string;
+    location?: string;
+    status?: string;
+    resolutionNotes?: string;
+    resolvedBy?: string;
 }

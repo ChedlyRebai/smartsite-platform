@@ -5,4 +5,12 @@ export declare class CreateIncidentDto {
     title: string;
     description?: string;
     reportedBy?: string;
+    siteId?: string;
+    projectId?: string;
+    location?: string;
+    reporterName?: string;
+    reporterPhone?: string;
+    affectedPersons?: string;
+    immediateAction?: string;
+    status?: string;
 }

@@ -21,4 +21,28 @@ export class UpdateIncidentDto {
   @IsString()
   @IsOptional()
   reportedBy?: string;
+
+  @IsString()
+  @IsOptional()
+  siteId?: string;
+
+  @IsString()
+  @IsOptional()
+  projectId?: string;
+
+  @IsString()
+  @IsOptional()
+  location?: string;
+
+  @IsEnum(["open", "in_progress", "resolved", "closed"])
+  @IsOptional()
+  status?: string;
+
+  @IsString()
+  @IsOptional()
+  resolutionNotes?: string;
+
+  @IsString()
+  @IsOptional()
+  resolvedBy?: string;
 }

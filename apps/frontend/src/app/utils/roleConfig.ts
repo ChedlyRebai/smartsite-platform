@@ -27,8 +27,6 @@ export interface NavItem {
   roles: RoleType[];
 }
 
-
-
 export const roleLabels: Record<RoleType, string> = {
   super_admin: "Super Administrator",
   director: "Director / Business Manager",
@@ -65,7 +63,7 @@ export const navigationItems: NavItem[] = [
   {
     label: "Permissions",
     href: "/permissions",
-    icon: Clock ,
+    icon: Clock,
     roles: ["super_admin"],
   },
   {
@@ -165,6 +163,7 @@ export const navigationItems: NavItem[] = [
     icon: AlertTriangle,
     roles: [
       "super_admin",
+      "admin",
       "qhse_manager",
       "site_manager",
       "works_manager",
@@ -233,8 +232,6 @@ export const navigationItems: NavItem[] = [
 export const getNavigationForRole = (role: RoleType): NavItem[] => {
   return navigationItems.filter((item) => item.roles.includes(role));
 };
-
-
 
 export const canAccessRoute = (role: RoleType, path: string): boolean => {
   const navItem = navigationItems.find((item) => path.startsWith(item.href));

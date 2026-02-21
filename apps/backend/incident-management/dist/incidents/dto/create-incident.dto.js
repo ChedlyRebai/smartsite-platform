@@ -18,6 +18,14 @@ class CreateIncidentDto {
     title;
     description;
     reportedBy;
+    siteId;
+    projectId;
+    location;
+    reporterName;
+    reporterPhone;
+    affectedPersons;
+    immediateAction;
+    status;
 }
 exports.CreateIncidentDto = CreateIncidentDto;
 __decorate([
@@ -43,4 +51,44 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateIncidentDto.prototype, "reportedBy", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateIncidentDto.prototype, "siteId", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateIncidentDto.prototype, "projectId", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateIncidentDto.prototype, "location", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateIncidentDto.prototype, "reporterName", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateIncidentDto.prototype, "reporterPhone", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateIncidentDto.prototype, "affectedPersons", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateIncidentDto.prototype, "immediateAction", void 0);
+__decorate([
+    (0, class_validator_1.IsEnum)(["open", "in_progress", "resolved", "closed"]),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateIncidentDto.prototype, "status", void 0);
 //# sourceMappingURL=create-incident.dto.js.map

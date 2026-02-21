@@ -1,4 +1,11 @@
-import { Facebook, Github, Instagram, Menu, Twitter, Youtube } from "lucide-react";
+import {
+  Facebook,
+  Github,
+  Instagram,
+  Menu,
+  Twitter,
+  Youtube,
+} from "lucide-react";
 import { useState } from "react";
 import Navbar from "../../Navbar";
 
@@ -115,7 +122,7 @@ export default function Home2() {
   return (
     <div className="bg-white">
       {/* Header */}
-     <Navbar />
+      <Navbar />
 
       <main className="isolate">
         {/* Hero section */}
@@ -296,14 +303,14 @@ export default function Home2() {
 
               <div className="mt-10 flex items-center justify-center gap-x-6">
                 <a
-                  href="#"
+                  href="/register"
                   className="rounded-md bg-yellow-500 px-6 py-3 text-sm font-semibold text-gray-900 shadow-sm hover:bg-yellow-400 transition"
                 >
                   Start Free Trial
                 </a>
 
                 <a
-                  href="#"
+                  href="/login"
                   className="text-sm font-semibold leading-6 text-white hover:text-yellow-400 transition"
                 >
                   Request Demo <span aria-hidden="true">→</span>
