@@ -32,12 +32,12 @@ export const getRoleById = async (id: string) => {
   }
 };
 
-export const createRole = async (roleData: {
-  name: string;
-  description?: string;
-}) => {
+export const createRole = async (
+  name: string,
+  description?: string
+) => {
   try {
-    const res = await axios.post(`${API_URL}`, roleData);
+    const res = await axios.post(`${API_URL}`, {name,description});
     if (res.status === 201) {
       return Promise.resolve({ status: res.status, data: res.data });
     }

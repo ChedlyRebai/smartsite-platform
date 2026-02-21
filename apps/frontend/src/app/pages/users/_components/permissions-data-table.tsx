@@ -320,43 +320,43 @@ export function PermissionsDataTable({
         return <div>{date.toLocaleDateString()}</div>;
       },
     },
-    {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => {
-        const permission = row.original;
-        return (
-          <div className="flex gap-2">
-            {onEdit && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onEdit(permission)}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-            )}
-            {onDelete && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  if (
-                    confirm(
-                      `Are you sure you want to delete permission "${permission.name}"?`,
-                    )
-                  ) {
-                    onDelete(permission._id);
-                  }
-                }}
-              >
-                <Trash2 className="h-4 w-4 text-red-500" />
-              </Button>
-            )}
-          </div>
-        );
-      },
-    },
+     {
+       id: "actions",
+       header: "Actions",
+       cell: ({ row }) => {
+         const permission = row.original;
+         return (
+           <div className="flex gap-2">
+             {onEdit && (
+               <Button
+                 variant="ghost"
+                 size="sm"
+                 onClick={() => onEdit(permission)}
+               >
+                 <Edit className="h-4 w-4" />
+               </Button>
+             )}
+             {onDelete && (
+               <Button
+                 variant="ghost"
+                 size="sm"
+                 onClick={() => {
+                   if (
+                     confirm(
+                       `Are you sure you want to delete permission "${permission.name}"?`,
+                     )
+                   ) {
+                     onDelete(permission._id);
+                   }
+                 }}
+               >
+                 <Trash2 className="h-4 w-4 text-red-500" />
+               </Button>
+             )}
+           </div>
+         );
+       },
+     },
   ];
 
   const table = useReactTable({

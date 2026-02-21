@@ -18,6 +18,7 @@ import { toast } from "react-hot-toast";
 import * as z from "zod";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
+import { createRole } from "@/app/action/role.action";
 
 const formSchema = z.object({
   name: z
@@ -26,10 +27,9 @@ const formSchema = z.object({
     .max(32, "Role name must be at most 32 characters."),
   description: z
     .string()
-    .min(20, "Description must be at least 20 characters.")
-    .max(100, "Description must be at most 100 characters."),
+    .optional()
+    
 });
-
 
 const RoleForms = () => {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -40,8 +40,17 @@ const RoleForms = () => {
     },
   });
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    toast.success("You submitted the following values:");
+  const onSubmit =async (data: z.infer<typeof formSchema>)=> {
+    try{
+        const res= await createRole(data.name,data.description);
+        if(res.status === 201){
+            toast.success("Role created successfully");
+            
+        }
+    }catch(error :any)
+    {
+        toast.error("Failed to create role. PLease try again.");
+    }
   }
   return (
     <>
