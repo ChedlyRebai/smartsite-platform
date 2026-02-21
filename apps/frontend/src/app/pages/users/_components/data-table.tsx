@@ -53,6 +53,11 @@ export function UserDataTable<TData, TValue>({
   const [data, setData] = useState<User[]>([]);
   const [TotalPages, setTotalPages] = useState(0);
   const [TotalAccount, setTotalAccount] = useState(0);
+
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [globalFilter, setGlobalFilter] = useState("");
+
   console.log("users:", users);
   const columns: ColumnDef<User>[] = [
     //     {
@@ -161,7 +166,7 @@ export function UserDataTable<TData, TValue>({
       cell: ({ row }) => {
         const date = new Date(row.getValue("createdAt"));
         return <>{date.toLocaleDateString()}</>;
-      }
+      },
     },
   ];
 
@@ -169,13 +174,31 @@ export function UserDataTable<TData, TValue>({
     data: users,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
+    onColumnFiltersChange: setColumnFilters,
+    getFilteredRowModel: getFilteredRowModel(),
+    onGlobalFilterChange: setGlobalFilter,
+    state: {
+      sorting,
+      columnFilters,
+      globalFilter,
+    },
   });
 
   console.log(users);
 
   return (
     <>
-      <div className="flex justify-end  items-center py-4 flex-wrap">
+      <div className="flex justify-between items-center py-4 flex-wrap">
+        <Input
+          placeholder="Search users..."
+          value={globalFilter ?? ""}
+          onChange={(event) => setGlobalFilter(event.target.value)}
+          className="max-w-sm"
+        />
+
         <Button
           //   disabled={access.creation === "N"}
           variant="default"
