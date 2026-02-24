@@ -8,6 +8,8 @@ interface RoleModalStore {
   isOpen: boolean;
   onOpen: () => void;
   onClose: () => void;
+   onRoleChange: () => void;
+  setOnRoleChange: (callback: () => void) => void;
 }
 
 const useRoleModal = create<RoleModalStore>(
@@ -20,6 +22,8 @@ const useRoleModal = create<RoleModalStore>(
     setId: (id) => set({ id }),
     onOpen: () => set({ isOpen: true }),
     onClose: () => set({ isOpen: false }),
+        onRoleChange: () => {},
+    setOnRoleChange: (callback) => set({ onRoleChange: callback }),
   })
 );
 

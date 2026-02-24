@@ -63,12 +63,13 @@ export function PermissionsDataTable({
 
   const columns: ColumnDef<Permission>[] = [
     {
-      accessorKey: "id",
-      header: ({ column }) => {
-        return <></>;
-      },
+      accessorKey: "_id",
+      header: "ID",
       cell: ({ row }) => {
-        return <></>;
+        const id = row.getValue("_id") as string;
+        return (
+          <div className="font-mono text-xs text-gray-500">{id.slice(-8)}</div>
+        );
       },
     },
     {

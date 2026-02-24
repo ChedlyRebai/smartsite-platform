@@ -93,11 +93,12 @@ export function UserDataTable<TData, TValue>({
     //   },
     {
       accessorKey: "_id",
-      header: ({ column }) => {
-        return <></>;
-      },
+      header: "ID",
       cell: ({ row }) => {
-        return <></>;
+        const id = row.getValue("_id") as string;
+        return (
+          <div className="font-mono text-xs text-gray-500">{id.slice(-8)}</div>
+        );
       },
     },
     {
