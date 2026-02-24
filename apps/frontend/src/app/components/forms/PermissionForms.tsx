@@ -101,11 +101,13 @@ const PermissionForms = ({ type }: { type: "add" | "edit" }) => {
     try {
       if (type === "add") {
         const response = await createPermission(data);
+        console.log("data",data)
         if (response.status === 201) {
           toast.success("Permission created successfully");
           form.reset();
           onClose();
           onPermissionChange();
+          loadPermissionData()
         } else {
           toast.error(response.data || "Failed to create permission");
         }
@@ -116,6 +118,7 @@ const PermissionForms = ({ type }: { type: "add" | "edit" }) => {
           form.reset();
           onClose();
           onPermissionChange();
+          loadPermissionData();
         } else {
           toast.error(response.data || "Failed to update permission");
         }

@@ -20,6 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -30,8 +31,20 @@ import {
   SearchIcon,
   Edit,
   Trash2,
+  Trash,
 } from "lucide-react";
 import { Permission } from "@/app/types";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/app/components/ui/alert-dialog";
 
 import {
   Select,
@@ -116,38 +129,38 @@ export function PermissionsDataTable({
       },
       cell: ({ row }) => {
         return (
-          // <span
-          //   className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-lg font-medium ${
-          //     row.getValue("acces") === "O"
-          //       ? "bg-green-100 text-green-800"
-          //       : "bg-red-100 text-red-800"
-          //   } `}
-          // >
-          //   {row.getValue("acces") === "O" ? "Oui" : "Non"}
-          // </span>
-          <Select
-            // disabled={access.modification === "N"}
+          <span
+             className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-[18px]  ${
+               row.getValue("access") === true
+                 ? "bg-green-100 text-green-800"
+                 : "bg-red-100 text-red-800"
+             } `}
+           >
+             {row.getValue("access") === true ? "Oui" : "Non"}
+           </span>
+          // <Select
+          //   // disabled={access.modification === "N"}
 
-            defaultValue={row.getValue("access")}
-          >
-            <SelectTrigger
-              className={` w-fit ${
-                row.getValue("access") == "1"
-                  ? "border-green-500"
-                  : "border-red-500"
-              }`}
-            >
-              {" "}
-              {row.getValue("access") === "1" ? "Oui" : "Non"}
-              <SelectValue placeholder="Select a fruit" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="1">Oui</SelectItem>
-                <SelectItem value="0">Non</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          //   defaultValue={row.getValue("access")}
+          // >
+          //   <SelectTrigger
+          //     className={` w-fit ${
+          //       row.getValue("access") == "1"
+          //         ? "border-green-500"
+          //         : "border-red-500"
+          //     }`}
+          //   >
+          //     {" "}
+          //     {row.getValue("access") === "1" ? "Oui" : "Non"}
+          //     <SelectValue placeholder="Select a fruit" />
+          //   </SelectTrigger>
+          //   <SelectContent>
+          //     <SelectGroup>
+          //       <SelectItem value="1">Oui</SelectItem>
+          //       <SelectItem value="0">Non</SelectItem>
+          //     </SelectGroup>
+          //   </SelectContent>
+          // </Select>
         );
       },
     },
@@ -159,45 +172,45 @@ export function PermissionsDataTable({
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            access
+            create
             <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         );
       },
       cell: ({ row }) => {
         return (
-          // <span
-          //   className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-lg font-medium ${
-          //     row.getValue("acces") === "O"
-          //       ? "bg-green-100 text-green-800"
-          //       : "bg-red-100 text-red-800"
-          //   } `}
-          // >
-          //   {row.getValue("acces") === "O" ? "Oui" : "Non"}
-          // </span>
-          <Select
-            // disabled={access.modification === "N"}
+          <span
+             className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-[18px]  ${
+               row.getValue("create") === true
+                 ? "bg-green-100 text-green-800"
+                 : "bg-red-100 text-red-800"
+             } `}
+           >
+             {row.getValue("create") === true ? "Oui" : "Non"}
+           </span>
+          // <Select
+          //   // disabled={access.modification === "N"}
 
-            defaultValue={row.getValue("create")}
-          >
-            <SelectTrigger
-              className={` w-fit ${
-                row.getValue("create") == "1"
-                  ? "border-green-500"
-                  : "border-red-500"
-              }`}
-            >
-              {" "}
-              {row.getValue("create") === "1" ? "Oui" : "Non"}
-              <SelectValue placeholder="Select a fruit" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="1">Oui</SelectItem>
-                <SelectItem value="0">Non</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          //   defaultValue={row.getValue("create")}
+          // >
+          //   <SelectTrigger
+          //     className={` w-fit ${
+          //       row.getValue("create") == "1"
+          //         ? "border-green-500"
+          //         : "border-red-500"
+          //     }`}
+          //   >
+          //     {" "}
+          //     {row.getValue("create") === "1" ? "Oui" : "Non"}
+          //     <SelectValue placeholder="Select a fruit" />
+          //   </SelectTrigger>
+          //   <SelectContent>
+          //     <SelectGroup>
+          //       <SelectItem value="1">Oui</SelectItem>
+          //       <SelectItem value="0">Non</SelectItem>
+          //     </SelectGroup>
+          //   </SelectContent>
+          // </Select>
         );
       },
     },
@@ -216,38 +229,38 @@ export function PermissionsDataTable({
       },
       cell: ({ row }) => {
         return (
-          // <span
-          //   className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-lg font-medium ${
-          //     row.getValue("acces") === "O"
-          //       ? "bg-green-100 text-green-800"
-          //       : "bg-red-100 text-red-800"
-          //   } `}
-          // >
-          //   {row.getValue("acces") === "O" ? "Oui" : "Non"}
-          // </span>
-          <Select
-            // disabled={access.modification === "N"}
+           <span
+             className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-[18px]  ${
+               row.getValue("update") === true
+                 ? "bg-green-100 text-green-800"
+                 : "bg-red-100 text-red-800"
+             } `}
+           >
+             {row.getValue("update") === true ? "Oui" : "Non"}
+           </span>
+          // <Select
+          //   // disabled={access.modification === "N"}
 
-            defaultValue={row.getValue("update")}
-          >
-            <SelectTrigger
-              className={` w-fit ${
-                row.getValue("update") == "1"
-                  ? "border-green-500"
-                  : "border-red-500"
-              }`}
-            >
-              {" "}
-              {row.getValue("update") === "1" ? "Oui" : "Non"}
-              <SelectValue placeholder="Select a fruit" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="1">Oui</SelectItem>
-                <SelectItem value="0">Non</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          //   defaultValue={row.getValue("update")}
+          // >
+          //   <SelectTrigger
+          //     className={` w-fit ${
+          //       row.getValue("update") == "1"
+          //         ? "border-green-500"
+          //         : "border-red-500"
+          //     }`}
+          //   >
+          //     {" "}
+          //     {row.getValue("update") === "1" ? "Oui" : "Non"}
+          //     <SelectValue placeholder="Select a fruit" />
+          //   </SelectTrigger>
+          //   <SelectContent>
+          //     <SelectGroup>
+          //       <SelectItem value="1">Oui</SelectItem>
+          //       <SelectItem value="0">Non</SelectItem>
+          //     </SelectGroup>
+          //   </SelectContent>
+          // </Select>
         );
       },
     },
@@ -267,8 +280,17 @@ export function PermissionsDataTable({
       cell: ({ row }) => {
         return (
           <>
+             <span
+             className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-[18px]  ${
+               row.getValue("delete") === true
+                 ? "bg-green-100 text-green-800"
+                 : "bg-red-100 text-red-800"
+             } `}
+           >
+             {row.getValue("update") === true ? "Oui" : "Non"}
+           </span>
             {/* <span
-             className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-lg font-medium ${
+             className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-lg  ${
                row.getValue("acces") === "O"
                  ? "bg-green-100 text-green-800"
 
@@ -277,7 +299,7 @@ export function PermissionsDataTable({
            >
              {row.getValue("delete") === "1" ? "Oui" : "Non"}
            </span> */}
-            <Select
+            {/* <Select
               // disabled={access.modification === "N"}
 
               defaultValue={row.getValue("delete")}
@@ -298,7 +320,7 @@ export function PermissionsDataTable({
                   <SelectItem value="0">Non</SelectItem>
                 </SelectGroup>
               </SelectContent>
-            </Select>
+            </Select> */}
           </>
         );
       },
@@ -339,26 +361,37 @@ export function PermissionsDataTable({
                </Button>
              )}
              {onDelete && (
-               <Button
-                 variant="ghost"
-                 size="sm"
-                 onClick={() => {
-                   if (
-                     confirm(
-                       `Are you sure you want to delete permission "${permission.name}"?`,
-                     )
-                   ) {
-                     onDelete(permission._id);
-                   }
-                 }}
-               >
-                 <Trash2 className="h-4 w-4 text-red-500" />
-               </Button>
+               <AlertDialog>
+                 <AlertDialogTrigger asChild>
+                   <Button variant="ghost" size="sm">
+                     <Trash2 className="h-4 w-4 text-red-500" />
+                   </Button>
+                 </AlertDialogTrigger>
+                 <AlertDialogContent>
+                   <AlertDialogHeader>
+                     <AlertDialogTitle>Delete Permission</AlertDialogTitle>
+                     <AlertDialogDescription>
+                       Are you sure you want to delete the permission "{permission.name}"?
+                       This action cannot be undone.
+                     </AlertDialogDescription>
+                   </AlertDialogHeader>
+                   <AlertDialogFooter>
+                     <AlertDialogCancel>Cancel</AlertDialogCancel>
+                     <AlertDialogAction
+                       onClick={() => onDelete(permission._id)}
+                       className="bg-red-600 hover:bg-red-700"
+                     >
+                       Delete
+                     </AlertDialogAction>
+                   </AlertDialogFooter>
+                 </AlertDialogContent>
+               </AlertDialog>
              )}
            </div>
          );
        },
      },
+      
   ];
 
   const table = useReactTable({

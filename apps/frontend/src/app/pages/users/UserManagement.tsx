@@ -123,6 +123,8 @@ export default function UserManagement() {
     try {
       const response = await getAllPermissions();
       if (response.status === 200 && Array.isArray(response.data)) {
+        console.log("Permissions data:", response.data);
+        console.log("First permission:", response.data[0]);
         setPermissions(response.data);
       } else {
         toast.error("Failed to load permissions");
@@ -136,6 +138,8 @@ export default function UserManagement() {
   };
 
   const handleEditPermission = (permission: Permission) => {
+    console.log("Edit permission clicked:", permission);
+    console.log("Permission _id:", permission._id);
     const { setId, setType, onOpen } = useAddPermissionModal.getState();
     setId(permission._id);
     setType("edit");
