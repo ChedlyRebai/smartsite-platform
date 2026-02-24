@@ -23,6 +23,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/app/components/ui/alert-dialog";
 
 import {
   ArrowUpDown,
@@ -51,7 +62,20 @@ export function RolesDataTable({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const { setId, id, onOpen, setType } = useRoleModal();
+  const handleDelete = async (roleId: string) => {
+    if (!onDelete) {
+      return;
+    }
+
+    setDeletingId(roleId);
+    try {
+      await onDelete(roleId);
+    } finally {
+      setDeletingId(null);
+    }
+  };
   const columns: ColumnDef<Role>[] = [
     {
       accessorKey: "_id",
@@ -175,6 +199,7 @@ export function RolesDataTable({
       // },
       cell: ({ row }) => {
         const id = row.getValue("_id") as string;
+        const name = row.getValue("name") as string;
 
         return (
           <>
@@ -187,9 +212,31 @@ export function RolesDataTable({
             >
               <Edit className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="sm">
-              <Trash className="h-4 w-4 text-red-600" />
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <Trash className="h-4 w-4 text-red-600" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete role</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently delete the role "{name}" and remove it
+                    from the system.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => handleDelete(id)}
+                    disabled={deletingId === id}
+                  >
+                    {deletingId === id ? "Deleting..." : "Delete"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </>
         );
       },

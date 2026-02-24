@@ -16,7 +16,7 @@ export class UsersService {
 
   async findByCin(cin: string) {
     console.log("from user service",cin)
-    return this.userModel.findOne({cin});
+    return this.userModel.findOne({cin}).populate('role').exec();
   }
 
   async findById(id: string) {

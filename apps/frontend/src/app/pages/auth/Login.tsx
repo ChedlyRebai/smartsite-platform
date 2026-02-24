@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/app/store/authStore";
 import { useNavigate } from "react-router";
 import toast from "react-hot-toast";
+import { Eye, EyeOff } from "lucide-react";
 
 const formSchema = z.object({
   cin: z
@@ -77,27 +78,27 @@ export default function Login() {
     },
   });
 
-   const onSubmit = async (data: z.infer<typeof formSchema>) => {
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-     try {
-       await login(data.cin, data.password).then((data: any) => {
-         console.log("Login successful!", data);
-         toast.success("Login successful!");
-         navigate("/dashboard");
-       });
-       toast.success("Login successful!");
-       navigate("/dashboard");
-     } catch (error: any) {
-       const message =
-         error?.message ||
-         error?.response?.data?.message ||
-         "Invalid credentials. Please try again.";
-       toast.error(message);
-     } finally {
-       setIsLoading(false);
-     }
-  }
-
+    try {
+      await login(data.cin, data.password).then((data: any) => {
+        console.log("Login successful!", data);
+        toast.success("Login successful!");
+        navigate("/dashboard");
+      });
+      toast.success("Login successful!");
+      navigate("/dashboard");
+    } catch (error: any) {
+      const message =
+        error?.message ||
+        error?.response?.data?.message ||
+        "Invalid credentials. Please try again.";
+      toast.error(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const [showPassword, setShowPassword] =React.useState(false);
   return (
     <>
       {/*
@@ -164,15 +165,30 @@ export default function Login() {
                           <FieldLabel htmlFor="form-rhf-demo-password">
                             Password
                           </FieldLabel>
+                          
+                          <div className="relative">
+                            <Input
+                              {...field}
+                              type={showPassword ? "text" : "password"}
+                              id="form-rhf-demo-password"
+                              aria-invalid={fieldState.invalid}
+                              placeholder="Enter your password"
+                              autoComplete="off"
+                              className="pr-10"
+                            />
 
-                          <Input
-                            {...field}
-                            id="form-rhf-demo-password"
-                            aria-invalid={fieldState.invalid}
-                            placeholder="Enter your password"
-                            autoComplete="off"
-                          />
-
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                            >
+                              {showPassword ? (
+                                <EyeOff size={18} />
+                              ) : (
+                                <Eye size={18} />
+                              )}
+                            </button>
+                          </div>
                           {fieldState.invalid && (
                             <FieldError errors={[fieldState.error]} />
                           )}

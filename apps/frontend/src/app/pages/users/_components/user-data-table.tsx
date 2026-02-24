@@ -29,7 +29,13 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ArrowUpDown, Edit, ListPlusIcon, SearchIcon, Trash } from "lucide-react";
+import {
+  ArrowUpDown,
+  Edit,
+  ListPlusIcon,
+  SearchIcon,
+  Trash,
+} from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -59,7 +65,7 @@ export function UserDataTable<TData, TValue>({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
-  const {setId,id,onOpen,setType}=useAddUserModal();
+  const { setId, id, onOpen, setType } = useAddUserModal();
   console.log("users:", users);
   const columns: ColumnDef<User>[] = [
     //     {
@@ -75,6 +81,15 @@ export function UserDataTable<TData, TValue>({
     //   },
     {
       accessorKey: "_id",
+      header: ({ column }) => {
+        return <></>;
+      },
+      cell: ({ row }) => {
+        return <></>;
+      },
+    },
+    {
+      accessorKey: "lastname",
       header: ({ column }) => {
         return <></>;
       },
@@ -146,7 +161,6 @@ export function UserDataTable<TData, TValue>({
     {
       accessorKey: "cin",
       header: ({ column }) => {
-        
         return (
           <Button
             variant="ghost"
@@ -213,15 +227,17 @@ export function UserDataTable<TData, TValue>({
       //   );
       // },
       cell: ({ row }) => {
-        const id=row.getValue("_id") as string;
-        
+        const id = row.getValue("_id") as string;
+
         return (
           <>
-            <Button onClick={()=>{
-              onOpen(),
-              setType("edit"),
-              setId(id)
-            }} variant="ghost" size="sm">
+            <Button
+              onClick={() => {
+                (onOpen(), setType("edit"), setId(id));
+              }}
+              variant="ghost"
+              size="sm"
+            >
               <Edit className="h-4 w-4" />
             </Button>
             <Button variant="ghost" size="sm">
@@ -251,7 +267,7 @@ export function UserDataTable<TData, TValue>({
   });
 
   console.log(users);
-  
+
   return (
     <>
       <div className="flex justify-between items-center py-4 flex-wrap">
