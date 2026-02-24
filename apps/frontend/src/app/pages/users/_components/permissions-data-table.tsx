@@ -90,6 +90,17 @@ export function PermissionsDataTable({
     },
 
     {
+      accessorKey: "href",
+      header: "href",
+      cell: ({ row }) => {
+        return (
+          <div className="text-sm text-gray-600 max-w-md truncate">
+            {row.getValue("href") || "No href"}
+          </div>
+        );
+      },
+    },
+    {
       accessorKey: "access",
       header: ({ column }) => {
         return (
@@ -291,17 +302,7 @@ export function PermissionsDataTable({
         );
       },
     },
-    {
-      accessorKey: "description",
-      header: "Description",
-      cell: ({ row }) => {
-        return (
-          <div className="text-sm text-gray-600 max-w-md truncate">
-            {row.getValue("description") || "No description"}
-          </div>
-        );
-      },
-    },
+    
     {
       accessorKey: "createdAt",
       header: ({ column }) => {

@@ -35,26 +35,12 @@ import {
   AlertDialogTrigger,
 } from "@/app/components/ui/alert-dialog";
 import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   ArrowUpDown,
   Edit,
   ListPlusIcon,
   SearchIcon,
   Trash,
 } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 import toast from "react-hot-toast";
 import { User } from "@/app/types";

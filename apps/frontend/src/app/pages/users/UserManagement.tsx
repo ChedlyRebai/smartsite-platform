@@ -91,13 +91,10 @@ export default function UserManagement() {
       const response = await getAllUsers();
       if (response.status === 200 && Array.isArray(response.data)) {
         setUsers(response.data);
-      } else {
-        // Use mock data for development
-        setUsers(mockTeamMembers);
       }
     } catch (error) {
       console.error("Failed to load users:", error);
-      setUsers(mockTeamMembers);
+      toast.error("Failed to load users");
     } finally {
       setIsLoading(false);
     }

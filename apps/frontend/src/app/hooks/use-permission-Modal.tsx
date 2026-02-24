@@ -16,7 +16,7 @@ const useAddPermissionModal = create<addPermissionModalStore>(
   (set, get) => ({
     id: undefined,
     isOpen: false,
-    type:undefined,
+    type:"add",
     setType: (type) => set({type}),
 
     setId: (id) => set({ id }),

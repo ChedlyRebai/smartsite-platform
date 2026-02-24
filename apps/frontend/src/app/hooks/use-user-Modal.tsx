@@ -15,7 +15,7 @@ interface addUserModalStore {
 const useAddUserModal = create<addUserModalStore>(
   (set, get) => ({
     id: undefined,
-    type:undefined,
+    type:"add",
     setType: (type) => set({type}),
 
     isOpen: false,

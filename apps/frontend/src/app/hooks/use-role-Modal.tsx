@@ -13,7 +13,7 @@ interface RoleModalStore {
 const useRoleModal = create<RoleModalStore>(
   (set) => ({
     id: undefined,
-    type:undefined,
+    type:"add",
     setType: (type) => set({type}),
 
     isOpen: false,
