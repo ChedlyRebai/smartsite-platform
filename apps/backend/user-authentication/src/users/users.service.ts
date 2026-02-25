@@ -27,7 +27,7 @@ export class UsersService {
           path: 'permissions',
           match: { access: true },
         },
-      })
+      }).sort({name:1})
       .exec();
 
     if (!user) {

@@ -50,7 +50,7 @@ export default  function DashboardLayout() {
     const fetchData= async ()=>{
       try {
         const permissions = await getPermissions();
-        console.log('permissions:', permissions);
+        console.log('permissions:', permissions.data);
         setNavigationItems(permissions.data);
       } catch (error) {
         console.error("Error fetching permissions:", error);
@@ -177,30 +177,30 @@ export default  function DashboardLayout() {
             w-64 pt-16 lg:pt-0 flex flex-col
           `}
         >
-          {/* <nav className="p-4 space-y-1 overflow-y-auto flex-1">
-            {navigationItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = location.pathname.startsWith(item.href);
-              return (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  onClick={() => setSidebarOpen(false)}
-                  className={`
-                    flex items-center gap-3 px-4 py-3 rounded-lg transition-all
-                    ${
-                      isActive
-                        ? "bg-gradient-to-r from-blue-600 to-green-600 text-white shadow-md"
-                        : "text-gray-700 hover:bg-gray-100"
-                    }
-                  `}
-                >
-                  <Icon className="h-5 w-5" />
-                  <span className="font-medium">{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav> */}
+               <nav className="p-4 space-y-1 overflow-y-auto flex-1">
+                {navigationItems.map((item) => {
+                  // const Icon = item.icon;
+                const isActive = location.pathname.startsWith(item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      to={item.href}
+                      onClick={() => setSidebarOpen(false)}
+                      className={`
+                        flex items-center gap-3 px-4 py-3 rounded-lg transition-all
+                        ${
+                          isActive
+                            ? "bg-gradient-to-r from-blue-600 to-green-600 text-white shadow-md"
+                            : "text-gray-700 hover:bg-gray-100"
+                        }
+                      `}
+                    >
+                      {/* <Icon className="h-5 w-5" /> */}
+                      <span className="font-medium">{item.name}</span>
+                    </Link>
+                  );
+                })}
+              </nav>  
 
           {/* Logout Button at Bottom */}
           <div className="p-4 border-t border-gray-200">
