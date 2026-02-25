@@ -29,28 +29,28 @@ const TUNISIA_CENTER = { lat: 33.8869, lng: 9.5375 };
 // Status configuration for consistent styling
 const STATUS_CONFIG = {
   planning: {
-    label: 'Planification',
+    label: 'Planning',
     variant: 'outline' as const,
     icon: Clock,
     color: 'text-blue-600 bg-blue-50',
     progressColor: 'bg-blue-600'
   },
   in_progress: {
-    label: 'En cours',
+    label: 'In Progress',
     variant: 'default' as const,
     icon: CheckCircle2,
     color: 'text-green-600 bg-green-50',
     progressColor: 'bg-green-600'
   },
   on_hold: {
-    label: 'En pause',
+    label: 'On Hold',
     variant: 'destructive' as const,
     icon: PauseCircle,
     color: 'text-amber-600 bg-amber-50',
     progressColor: 'bg-amber-600'
   },
   completed: {
-    label: 'Terminé',
+    label: 'Completed',
     variant: 'secondary' as const,
     icon: CheckCircle2,
     color: 'text-gray-600 bg-gray-50',
@@ -111,7 +111,7 @@ export default function Sites() {
       setError('Backend not available, using mock data');
       setSites(mockSites);
       setUseMockData(true);
-      toast.warning('Mode hors ligne - données de démonstration');
+      toast.warning('Offline mode - demo data');
     } finally {
       setLoading(false);
     }
@@ -147,27 +147,27 @@ export default function Sites() {
     const newErrors: { name?: string; address?: string; area?: string; budget?: string } = {};
     
     if (!newSite.name.trim()) {
-      newErrors.name = 'Le nom du site est requis';
+      newErrors.name = 'Site name is required';
     }
     
     if (!newSite.address.trim()) {
-      newErrors.address = 'L\'adresse est requise';
+      newErrors.address = 'Address is required';
     }
     
     if (!newSite.area) {
-      newErrors.area = 'La surface est requise';
+      newErrors.area = 'Area is required';
     } else if (parseInt(newSite.area) <= 0) {
-      newErrors.area = 'La surface doit être supérieure à 0';
+      newErrors.area = 'Area must be greater than 0';
     }
     
     if (!newSite.budget) {
-      newErrors.budget = 'Le budget est requis';
+      newErrors.budget = 'Budget is required';
     } else if (parseInt(newSite.budget) <= 0) {
-      newErrors.budget = 'Le budget doit être supérieur à 0';
+      newErrors.budget = 'Budget must be greater than 0';
     }
     
     if (!mapPosition) {
-      toast.error('Veuillez sélectionner l\'emplacement sur la carte');
+      toast.error('Please select a location on the map');
       return false;
     }
     
@@ -180,19 +180,19 @@ export default function Sites() {
     const newErrors: { name?: string; address?: string; area?: string; budget?: string } = {};
     
     if (!manageData.name.trim()) {
-      newErrors.name = 'Le nom du site est requis';
+      newErrors.name = 'Site name is required';
     }
     
     if (!manageData.address.trim()) {
-      newErrors.address = 'L\'adresse est requise';
+      newErrors.address = 'Address is required';
     }
     
     if (!manageData.area || manageData.area <= 0) {
-      newErrors.area = 'La surface doit être supérieure à 0';
+      newErrors.area = 'Area must be greater than 0';
     }
     
     if (!manageData.budget || manageData.budget <= 0) {
-      newErrors.budget = 'Le budget doit être supérieur à 0';
+      newErrors.budget = 'Budget must be greater than 0';
     }
     
     setErrors(newErrors);
@@ -201,7 +201,7 @@ export default function Sites() {
 
   const handleAddSite = async () => {
     if (!validateForm()) {
-      toast.error('Veuillez corriger les erreurs du formulaire');
+      toast.error('Please correct the form errors');
       return;
     }
     
@@ -223,7 +223,7 @@ export default function Sites() {
         };
         setSites([...sites, site]);
         resetAddForm();
-        toast.success('Site ajouté avec succès!');
+        toast.success('Site added successfully!');
       } else {
         const site: Partial<Site> = {
           name: newSite.name,
@@ -240,11 +240,11 @@ export default function Sites() {
         const createdSite = await createSite(site);
         setSites([...sites, createdSite]);
         resetAddForm();
-        toast.success('Site ajouté avec succès!');
+        toast.success('Site added successfully!');
       }
     } catch (error) {
       console.error('Error creating site:', error);
-      toast.error('Erreur lors de la création du site');
+      toast.error('Error creating site');
     }
   };
 
@@ -286,15 +286,15 @@ export default function Sites() {
     try {
       if (useMockData) {
         setSites(sites.filter(s => s.id !== selectedSite.id));
-        toast.success('Site supprimé avec succès!');
+        toast.success('Site deleted successfully!');
       } else {
         await deleteSite(selectedSite.id);
         setSites(sites.filter(s => s.id !== selectedSite.id));
-        toast.success('Site supprimé avec succès!');
+        toast.success('Site deleted successfully!');
       }
     } catch (error) {
       console.error('Error deleting site:', error);
-      toast.error('Erreur lors de la suppression du site');
+      toast.error('Error deleting site');
     } finally {
       setDeleteDialogOpen(false);
       setSelectedSite(null);
@@ -303,7 +303,7 @@ export default function Sites() {
 
   const handleSaveManage = async () => {
     if (!validateEditForm()) {
-      toast.error('Veuillez corriger les erreurs du formulaire');
+      toast.error('Please correct the form errors');
       return;
     }
     
@@ -324,7 +324,7 @@ export default function Sites() {
             : s
         ));
         setManageDialogOpen(false);
-        toast.success('Site modifié avec succès!');
+        toast.success('Site updated successfully!');
       } else {
         const updatedSite = await updateSite(selectedSite!.id, {
           status: manageData.status as 'planning' | 'in_progress' | 'on_hold' | 'completed',
@@ -342,11 +342,11 @@ export default function Sites() {
             : s
         ));
         setManageDialogOpen(false);
-        toast.success('Site modifié avec succès!');
+        toast.success('Site updated successfully!');
       }
     } catch (error) {
       console.error('Error updating site:', error);
-      toast.error('Erreur lors de la modification du site');
+      toast.error('Error updating site');
     }
   };
 
@@ -362,11 +362,11 @@ export default function Sites() {
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Chantiers</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Sites</h1>
           <p className="text-sm sm:text-base text-gray-500 mt-1">
-            {filteredSites.length} chantier{filteredSites.length !== 1 ? 's' : ''} • 
+            {filteredSites.length} site{filteredSites.length !== 1 ? 's' : ''} • 
             <span className="ml-1">
-              {sites.filter(s => s.status === 'in_progress').length} en cours
+              {sites.filter(s => s.status === 'in_progress').length} in progress
             </span>
           </p>
         </div>
@@ -375,25 +375,25 @@ export default function Sites() {
             <DialogTrigger asChild>
               <Button className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 shadow-lg hover:shadow-xl transition-all">
                 <Plus className="h-4 w-4 mr-2" />
-                Nouveau chantier
+                New Site
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle className="text-2xl">Ajouter un nouveau chantier</DialogTitle>
+                <DialogTitle className="text-2xl">Add New Site</DialogTitle>
                 <DialogDescription>
-                  Remplissez les informations ci-dessous pour créer un nouveau chantier
+                  Fill in the information below to create a new site
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-6 py-4">
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="site-name" className="text-sm font-medium">
-                      Nom du chantier <span className="text-red-500">*</span>
+                      Site Name <span className="text-red-500">*</span>
                     </Label>
                     <Input
                       id="site-name"
-                      placeholder="ex: Tour de bureaux Centre-ville"
+                      placeholder="e.g., Downtown Office Tower"
                       value={newSite.name}
                       onChange={(e) => setNewSite({ ...newSite, name: e.target.value })}
                       className={errors.name ? 'border-red-500 focus:ring-red-500' : ''}
@@ -408,11 +408,11 @@ export default function Sites() {
                   
                   <div className="space-y-2">
                     <Label htmlFor="address" className="text-sm font-medium">
-                      Adresse <span className="text-red-500">*</span>
+                      Address <span className="text-red-500">*</span>
                     </Label>
                     <Input
                       id="address"
-                      placeholder="ex: 123 Avenue Habib Bourguiba, Tunis"
+                      placeholder="e.g., 123 Main Street, City"
                       value={newSite.address}
                       onChange={(e) => setNewSite({ ...newSite, address: e.target.value })}
                       className={errors.address ? 'border-red-500 focus:ring-red-500' : ''}
@@ -428,13 +428,13 @@ export default function Sites() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="area" className="text-sm font-medium">
-                        Surface (m²) <span className="text-red-500">*</span>
+                        Area (m²) <span className="text-red-500">*</span>
                       </Label>
                       <Input
                         id="area"
                         type="number"
                         min="1"
-                        placeholder="ex: 5000"
+                        placeholder="e.g., 5000"
                         value={newSite.area}
                         onChange={(e) => setNewSite({ ...newSite, area: e.target.value })}
                         className={errors.area ? 'border-red-500 focus:ring-red-500' : ''}
@@ -455,7 +455,7 @@ export default function Sites() {
                         id="budget"
                         type="number"
                         min="1"
-                        placeholder="ex: 2500000"
+                        placeholder="e.g., 2500000"
                         value={newSite.budget}
                         onChange={(e) => setNewSite({ ...newSite, budget: e.target.value })}
                         className={errors.budget ? 'border-red-500 focus:ring-red-500' : ''}
@@ -471,7 +471,7 @@ export default function Sites() {
                   
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">
-                      Emplacement sur la carte <span className="text-red-500">*</span>
+                      Location on Map <span className="text-red-500">*</span>
                     </Label>
                     <div className="h-64 rounded-lg overflow-hidden border-2 border-gray-200 hover:border-blue-400 transition-colors">
                       <MapContainer
@@ -489,30 +489,30 @@ export default function Sites() {
                     {mapPosition ? (
                       <p className="text-sm text-green-600 flex items-center gap-1">
                         <CheckCircle2 className="h-4 w-4" />
-                        Position sélectionnée: {mapPosition.lat.toFixed(4)}, {mapPosition.lng.toFixed(4)}
+                        Selected position: {mapPosition.lat.toFixed(4)}, {mapPosition.lng.toFixed(4)}
                       </p>
                     ) : (
                       <p className="text-sm text-gray-500 flex items-center gap-1">
                         <MapPin className="h-4 w-4" />
-                        Cliquez sur la carte pour sélectionner l'emplacement
+                        Click on the map to select a location
                       </p>
                     )}
                   </div>
                 </div>
                 
                 <div className="flex gap-3 pt-4">
-                  <Button 
+                  <Button
                     variant="outline"
                     className="flex-1"
                     onClick={() => setAddDialogOpen(false)}
                   >
-                    Annuler
+                    Cancel
                   </Button>
-                  <Button 
+                  <Button
                     className="flex-1 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
                     onClick={handleAddSite}
                   >
-                    Créer le chantier
+                    Create Site
                   </Button>
                 </div>
               </div>
@@ -521,7 +521,7 @@ export default function Sites() {
         ) : (
           <Button disabled className="opacity-50 cursor-not-allowed">
             <Plus className="h-4 w-4 mr-2" />
-            Nouveau chantier
+            New Site
           </Button>
         )}
       </div>
@@ -533,7 +533,7 @@ export default function Sites() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Rechercher par nom ou adresse..."
+                placeholder="Search by name or address..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 border-gray-200 focus:border-blue-400 focus:ring-blue-400"
@@ -543,7 +543,7 @@ export default function Sites() {
               <DialogTrigger asChild>
                 <Button variant="outline" className="sm:w-auto w-full border-gray-200">
                   <Filter className="h-4 w-4 mr-2" />
-                  Filtres
+                  Filters
                   {selectedStatus !== 'all' && (
                     <Badge variant="secondary" className="ml-2 bg-blue-100 text-blue-700">
                       1
@@ -553,18 +553,18 @@ export default function Sites() {
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Filtrer les chantiers</DialogTitle>
+                  <DialogTitle>Filter Sites</DialogTitle>
                   <DialogDescription>
-                    Sélectionnez un statut pour filtrer la liste
+                    Select a status to filter the list
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-2 py-4">
                   {[
-                    { value: 'all', label: 'Tous les chantiers', icon: MapPin },
-                    { value: 'planning', label: 'Planification', icon: Clock },
-                    { value: 'in_progress', label: 'En cours', icon: CheckCircle2 },
-                    { value: 'on_hold', label: 'En pause', icon: PauseCircle },
-                    { value: 'completed', label: 'Terminé', icon: CheckCircle2 }
+                    { value: 'all', label: 'All Sites', icon: MapPin },
+                    { value: 'planning', label: 'Planning', icon: Clock },
+                    { value: 'in_progress', label: 'In Progress', icon: CheckCircle2 },
+                    { value: 'on_hold', label: 'On Hold', icon: PauseCircle },
+                    { value: 'completed', label: 'Completed', icon: CheckCircle2 }
                   ].map((status) => {
                     const Icon = status.icon;
                     const isSelected = selectedStatus === status.value;
@@ -595,8 +595,8 @@ export default function Sites() {
         <div className="flex items-center justify-center py-20">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
-            <p className="text-gray-600 font-medium">Chargement des chantiers...</p>
-            <p className="text-sm text-gray-400 mt-1">Veuillez patienter</p>
+            <p className="text-gray-600 font-medium">Loading sites...</p>
+            <p className="text-sm text-gray-400 mt-1">Please wait</p>
           </div>
         </div>
       ) : error ? (
@@ -605,13 +605,13 @@ export default function Sites() {
             <div className="text-center">
               <AlertCircle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
               <p className="text-gray-800 font-medium mb-2">{error}</p>
-              <p className="text-sm text-gray-500 mb-4">Mode démonstration actif</p>
+              <p className="text-sm text-gray-500 mb-4">Demo mode active</p>
               <Button onClick={loadSites} variant="outline" className="gap-2">
                 <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
-                Réessayer
+                Retry
               </Button>
             </div>
           </CardContent>
@@ -623,39 +623,39 @@ export default function Sites() {
               <div className="bg-gray-50 rounded-full p-4 w-20 h-20 mx-auto mb-4 flex items-center justify-center">
                 <MapPin className="h-8 w-8 text-gray-400" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Aucun chantier trouvé</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No sites found</h3>
               <p className="text-gray-500 mb-6">
                 {searchTerm || selectedStatus !== 'all' 
-                  ? 'Aucun résultat ne correspond à vos critères'
-                  : 'Commencez par ajouter votre premier chantier'}
+                  ? 'No results match your criteria'
+                  : 'Start by adding your first site'}
               </p>
               {(searchTerm || selectedStatus !== 'all') && (
                 <div className="flex gap-3 justify-center">
                   {searchTerm && (
-                    <Button 
+                    <Button
                       variant="outline"
                       onClick={() => setSearchTerm('')}
                     >
-                      Effacer la recherche
+                      Clear search
                     </Button>
                   )}
                   {selectedStatus !== 'all' && (
-                    <Button 
+                    <Button
                       variant="outline"
                       onClick={() => setSelectedStatus('all')}
                     >
-                      Effacer les filtres
+                      Clear filters
                     </Button>
                   )}
                 </div>
               )}
               {!searchTerm && selectedStatus === 'all' && canManageSites && (
-                <Button 
+                <Button
                   className="bg-gradient-to-r from-blue-600 to-green-600"
                   onClick={() => setAddDialogOpen(true)}
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Ajouter un chantier
+                  Add Site
                 </Button>
               )}
             </div>
@@ -706,7 +706,7 @@ export default function Sites() {
                   
                   <div className="grid grid-cols-2 gap-4 bg-gray-50 rounded-lg p-3">
                     <div>
-                      <p className="text-xs text-gray-500 mb-1">Surface</p>
+                      <p className="text-xs text-gray-500 mb-1">Area</p>
                       <p className="font-semibold text-gray-900">
                         {site.area.toLocaleString()} <span className="text-xs font-normal text-gray-500">m²</span>
                       </p>
@@ -717,10 +717,10 @@ export default function Sites() {
                     </div>
                   </div>
 
-                  {/* Barre de progression personnalisée */}
+                  {/* Progress bar */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">Progression</span>
+                      <span className="text-gray-600">Progress</span>
                       <span className="font-semibold text-gray-900">{site.progress}%</span>
                     </div>
                     <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
@@ -732,23 +732,23 @@ export default function Sites() {
                   </div>
 
                   <div className="flex gap-2 pt-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="flex-1 border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-colors"
                       onClick={() => handleViewDetails(site)}
                     >
-                      Détails
+                      Details
                     </Button>
-                    
-                    <Button 
-                      size="sm" 
+
+                    <Button
+                      size="sm"
                       variant="outline"
                       className="flex-1 border-gray-200 hover:border-green-400 hover:bg-green-50 transition-colors"
                       onClick={() => handleManageSite(site)}
                     >
                       <Edit className="h-4 w-4 mr-1" />
-                      Modifier
+                      Edit
                     </Button>
                     
                     <Button 
@@ -771,16 +771,16 @@ export default function Sites() {
       <Dialog open={manageDialogOpen} onOpenChange={setManageDialogOpen}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-2xl">Modifier le chantier</DialogTitle>
+            <DialogTitle className="text-2xl">Edit Site</DialogTitle>
             <DialogDescription>
-              Mettre à jour les informations du chantier
+              Update site information
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-6 py-4">
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="edit-name" className="text-sm font-medium">
-                  Nom du chantier <span className="text-red-500">*</span>
+                  Site Name <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="edit-name"
@@ -798,7 +798,7 @@ export default function Sites() {
               
               <div className="space-y-2">
                 <Label htmlFor="edit-address" className="text-sm font-medium">
-                  Adresse <span className="text-red-500">*</span>
+                  Address <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="edit-address"
@@ -817,7 +817,7 @@ export default function Sites() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-area" className="text-sm font-medium">
-                    Surface (m²) <span className="text-red-500">*</span>
+                    Area (m²) <span className="text-red-500">*</span>
                   </Label>
                   <Input
                     id="edit-area"
@@ -857,22 +857,22 @@ export default function Sites() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="edit-status" className="text-sm font-medium">Statut</Label>
+                <Label htmlFor="edit-status" className="text-sm font-medium">Status</Label>
                 <select
                   id="edit-status"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   value={manageData.status}
                   onChange={(e) => setManageData({ ...manageData, status: e.target.value })}
                 >
-                  <option value="planning">Planification</option>
-                  <option value="in_progress">En cours</option>
-                  <option value="on_hold">En pause</option>
-                  <option value="completed">Terminé</option>
+                  <option value="planning">Planning</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="on_hold">On Hold</option>
+                  <option value="completed">Completed</option>
                 </select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="edit-progress" className="text-sm font-medium">Progression (%)</Label>
+                <Label htmlFor="edit-progress" className="text-sm font-medium">Progress (%))</Label>
                 <Input
                   id="edit-progress"
                   type="number"
@@ -884,7 +884,7 @@ export default function Sites() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Emplacement sur la carte</Label>
+                <Label className="text-sm font-medium">Location on Map</Label>
                 <div className="h-48 rounded-lg overflow-hidden border-2 border-gray-200">
                   <MapContainer
                     center={editMapPosition ? [editMapPosition.lat, editMapPosition.lng] : [TUNISIA_CENTER.lat, TUNISIA_CENTER.lng]}
@@ -907,18 +907,18 @@ export default function Sites() {
             </div>
 
             <div className="flex gap-3 pt-4">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="flex-1"
                 onClick={() => setManageDialogOpen(false)}
               >
-                Annuler
+                Cancel
               </Button>
-              <Button 
+              <Button
                 className="flex-1 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
                 onClick={handleSaveManage}
               >
-                Enregistrer les modifications
+                Save Changes
               </Button>
             </div>
           </div>
@@ -929,25 +929,25 @@ export default function Sites() {
       <Dialog open={viewDetailsOpen} onOpenChange={setViewDetailsOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="text-2xl">Détails du chantier</DialogTitle>
+            <DialogTitle className="text-2xl">Site Details</DialogTitle>
           </DialogHeader>
           {selectedSite && (
             <div className="space-y-6 py-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div>
-                    <p className="text-sm text-gray-500 mb-1">Nom du chantier</p>
+                    <p className="text-sm text-gray-500 mb-1">Site Name</p>
                     <p className="font-semibold text-gray-900 text-lg">{selectedSite.name}</p>
                   </div>
-                  
+
                   <div>
-                    <p className="text-sm text-gray-500 mb-1">Adresse</p>
+                    <p className="text-sm text-gray-500 mb-1">Address</p>
                     <p className="text-gray-900">{selectedSite.address}</p>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Surface</p>
+                      <p className="text-sm text-gray-500 mb-1">Area</p>
                       <p className="font-semibold text-gray-900">
                         {selectedSite.area.toLocaleString()} m²
                       </p>
@@ -960,21 +960,21 @@ export default function Sites() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="space-y-4">
                   <div>
-                    <p className="text-sm text-gray-500 mb-1">Statut</p>
+                    <p className="text-sm text-gray-500 mb-1">Status</p>
                     <Badge className={`${STATUS_CONFIG[selectedSite.status as keyof typeof STATUS_CONFIG]?.color}`}>
                       {STATUS_CONFIG[selectedSite.status as keyof typeof STATUS_CONFIG]?.label}
                     </Badge>
                   </div>
-                  
-                  {/* Barre de progression personnalisée dans les détails */}
+
+                  {/* Progress bar in details */}
                   <div>
-                    <p className="text-sm text-gray-500 mb-2">Progression</p>
+                    <p className="text-sm text-gray-500 mb-2">Progress</p>
                     <div className="flex items-center gap-3">
                       <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div 
+                        <div
                           className={`h-full ${STATUS_CONFIG[selectedSite.status as keyof typeof STATUS_CONFIG]?.progressColor} transition-all duration-300`}
                           style={{ width: `${selectedSite.progress}%` }}
                         />
@@ -984,9 +984,9 @@ export default function Sites() {
                       </span>
                     </div>
                   </div>
-                  
+
                   <div>
-                    <p className="text-sm text-gray-500 mb-1">Date de début</p>
+                    <p className="text-sm text-gray-500 mb-1">Start Date</p>
                     <p className="font-semibold text-gray-900">
                       {formatDate(selectedSite.workStartDate)}
                     </p>
@@ -996,7 +996,7 @@ export default function Sites() {
 
               {selectedSite.coordinates && (
                 <div>
-                  <p className="text-sm text-gray-500 mb-2">Emplacement</p>
+                  <p className="text-sm text-gray-500 mb-2">Location</p>
                   <div className="h-48 rounded-lg overflow-hidden border-2 border-gray-200">
                     <MapContainer
                       center={[selectedSite.coordinates.lat, selectedSite.coordinates.lng]}
@@ -1013,14 +1013,14 @@ export default function Sites() {
               )}
 
               <div className="flex gap-3 pt-4">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="flex-1"
                   onClick={() => setViewDetailsOpen(false)}
                 >
-                  Fermer
+                  Close
                 </Button>
-                <Button 
+                <Button
                   className="flex-1 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
                   onClick={() => {
                     setViewDetailsOpen(false);
@@ -1028,7 +1028,7 @@ export default function Sites() {
                   }}
                 >
                   <Edit className="h-4 w-4 mr-2" />
-                  Modifier
+                  Edit
                 </Button>
               </div>
             </div>
@@ -1040,35 +1040,35 @@ export default function Sites() {
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-2xl text-red-600">Confirmer la suppression</DialogTitle>
+            <DialogTitle className="text-2xl text-red-600">Confirm Deletion</DialogTitle>
             <DialogDescription className="text-gray-600">
-              Cette action est irréversible. Toutes les données associées à ce chantier seront définitivement supprimées.
+              This action is irreversible. All data associated with this site will be permanently deleted.
             </DialogDescription>
           </DialogHeader>
           {selectedSite && (
             <div className="space-y-4 py-4">
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="font-medium text-gray-900 mb-2">Chantier à supprimer :</p>
-                <p className="text-gray-700"><span className="font-medium">Nom:</span> {selectedSite.name}</p>
-                <p className="text-gray-700"><span className="font-medium">Adresse:</span> {selectedSite.address}</p>
+                <p className="font-medium text-gray-900 mb-2">Site to delete:</p>
+                <p className="text-gray-700"><span className="font-medium">Name:</span> {selectedSite.name}</p>
+                <p className="text-gray-700"><span className="font-medium">Address:</span> {selectedSite.address}</p>
                 <p className="text-gray-700"><span className="font-medium">Budget:</span> {formatBudget(selectedSite.budget)}</p>
               </div>
-              
+
               <div className="flex gap-3">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="flex-1"
                   onClick={() => setDeleteDialogOpen(false)}
                 >
-                  Annuler
+                  Cancel
                 </Button>
-                <Button 
-                  variant="destructive" 
+                <Button
+                  variant="destructive"
                   className="flex-1 hover:bg-red-600"
                   onClick={confirmDelete}
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
-                  Supprimer
+                  Delete
                 </Button>
               </div>
             </div>

@@ -195,7 +195,7 @@ export default function DashboardLayout() {
               className="w-full bg-red-600 hover:bg-red-700 text-white gap-2"
             >
               <LogOut className="h-4 w-4" />
-              Déconnecter
+              Logout
             </Button>
           </div>
         </aside>

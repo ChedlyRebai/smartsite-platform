@@ -3,63 +3,63 @@ import { useState } from "react";
 import Navbar from "../../Navbar";
 
 const navigation = [
-  { name: "Produit", href: "#" },
-  { name: "Fonctionnalités", href: "#" },
-  { name: "Ressources", href: "#" },
-  { name: "Entreprise", href: "#" },
+  { name: "Product", href: "#" },
+  { name: "Features", href: "#" },
+  { name: "Resources", href: "#" },
+  { name: "Company", href: "#" },
 ];
 const stats = [
-  { label: "Chantiers gérés activement", value: "+150" },
-  { label: "Alertes IA envoyées par mois", value: "12,000+" },
-  { label: "Utilisateurs en Tunisie et Maghreb", value: "2,500+" },
+  { label: "Sites actively managed", value: "+150" },
+  { label: "AI alerts sent per month", value: "12,000+" },
+  { label: "Users in Tunisia and Maghreb", value: "2,500+" },
 ];
 const values = [
   {
-    name: "Excellence sur le terrain",
+    name: "Excellence on the field",
     description:
-      "Contrôlez chaque détail de vos chantiers en temps réel avec des outils fiables et intuitifs.",
+      "Control every detail of your construction sites in real time with reliable and intuitive tools.",
   },
   {
-    name: "Partagez l'intelligence",
+    name: "Share intelligence",
     description:
-      "Collaborez facilement entre équipes, ingénieurs, chefs de chantier et direction.",
+      "Collaborate easily between teams, engineers, site managers and management.",
   },
   {
-    name: "Apprentissage continu",
+    name: "Continuous learning",
     description:
-      "L'IA apprend de vos projets pour améliorer les prédictions jour après jour.",
+      "AI learns from your projects to improve predictions day after day.",
   },
   {
-    name: "Support sans faille",
-    description: "Assistance rapide et adaptée aux réalités du BTP en Tunisie.",
+    name: "Flawless support",
+    description: "Fast assistance adapted to the realities of construction in Tunisia.",
   },
   {
-    name: "Responsabilité totale",
+    name: "Total responsibility",
     description:
-      "Transparence sur les coûts, délais et sécurité – plus de surprises.",
+      "Transparency on costs, deadlines and safety – no more surprises.",
   },
   {
-    name: "Équilibre et efficacité",
+    name: "Balance and efficiency",
     description:
-      "Réduisez le stress quotidien tout en boostant la productivité des équipes.",
+      "Reduce daily stress while boosting team productivity.",
   },
 ];
 const team = [
   {
     name: "Chedly Ben Ali",
-    role: "Fondateur & CEO",
+    role: "Founder & CEO",
     imageUrl:
       "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=1024&h=1024&q=80",
   },
-  // Ajoutez plus de membres si besoin
+  // Add more members if needed
 ];
 const blogPosts = [
   {
     id: 1,
-    title: "Comment l'IA prédit les retards sur vos chantiers",
+    title: "How AI predicts delays on your construction sites",
     href: "#",
     description:
-      "Découvrez comment SmartSite analyse les données en temps réel pour alerter avant les problèmes.",
+      "Discover how SmartSite analyzes data in real time to alert before problems occur.",
     imageUrl:
       "https://images.unsplash.com/photo-1496128858413-b36217c2ce36?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3603&q=80",
     date: "15 Jan 2026",
@@ -70,15 +70,15 @@ const blogPosts = [
         "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
     },
   },
-  // Ajoutez plus d'articles si besoin
+  // Add more articles if needed
 ];
 const footerNavigation = {
   main: [
     { name: "Blog", href: "#" },
-    { name: "Carrières", href: "#" },
-    { name: "Presse", href: "#" },
-    { name: "Accessibilité", href: "#" },
-    { name: "Partenaires", href: "#" },
+    { name: "Careers", href: "#" },
+    { name: "Press", href: "#" },
+    { name: "Accessibility", href: "#" },
+    { name: "Partners", href: "#" },
   ],
   social: [
     {
@@ -166,14 +166,14 @@ export default function Home2() {
               <div className="mx-auto max-w-2xl gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
                 <div className="w-full max-w-xl lg:shrink-0 xl:max-w-2xl">
                   <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-                    SmartSite : Gérez vos chantiers avec l'intelligence
-                    artificielle
+                    SmartSite: Manage your construction sites with artificial
+                    intelligence
                   </h1>
                   <p className="relative mt-6 text-lg leading-8 text-gray-600 sm:max-w-md lg:max-w-none">
-                    Suivi en temps réel, prédictions IA des retards et risques,
-                    alertes automatiques, rapports instantanés, application
-                    mobile pour le terrain. Contrôlez coûts, délais et sécurité
-                    comme jamais auparavant.
+                    Real-time tracking, AI predictions of delays and risks,
+                    automatic alerts, instant reports, mobile application
+                    for the field. Control costs, deadlines and safety
+                    like never before.
                   </p>
                 </div>
                 <div className="mt-14 flex justify-end gap-8 sm:-mt-44 sm:justify-start sm:pl-20 lg:mt-0 lg:pl-0">
@@ -233,27 +233,27 @@ export default function Home2() {
         <div className="mx-auto -mt-12 max-w-7xl px-6 sm:mt-0 lg:px-8 xl:-mt-8">
           <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-none">
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-              Notre mission
+              Our mission
             </h2>
             <div className="mt-6 flex flex-col gap-x-8 gap-y-20 lg:flex-row">
               <div className="lg:w-full lg:max-w-2xl lg:flex-auto">
                 <p className="text-xl leading-8 text-gray-600">
-                  Transformer la gestion des chantiers au Maghreb grâce à l'IA :
-                  moins de retards, moins d'accidents, plus de rentabilité.
+                  Transform construction site management in the Maghreb with AI:
+                  fewer delays, fewer accidents, more profitability.
                 </p>
                 <div className="mt-10 max-w-xl text-base leading-7 text-gray-700">
                   <p>
-                    SmartSite centralise toutes vos données chantier
-                    (avancement, ressources, sécurité, budget) et utilise
-                    l'intelligence artificielle pour prédire les risques,
-                    optimiser les plannings et générer des rapports
-                    automatiques. Adapté aux entreprises tunisiennes, du petit
-                    chantier à la grande infrastructure.
+                    SmartSite centralizes all your construction site data
+                    (progress, resources, safety, budget) and uses
+                    artificial intelligence to predict risks,
+                    optimize schedules and generate automatic
+                    reports. Adapted for Tunisian companies, from small
+                    sites to large infrastructure.
                   </p>
                   <p className="mt-10">
-                    Disponible sur web et mobile, même avec connexion limitée
-                    sur le terrain. Essayez gratuitement et prenez le contrôle
-                    dès aujourd'hui.
+                    Available on web and mobile, even with limited connection
+                    on site. Try it for free and take control
+                    today.
                   </p>
                 </div>
               </div>
@@ -347,11 +347,11 @@ export default function Home2() {
         <div className="mx-auto mt-32 max-w-7xl px-6 sm:mt-40 lg:px-8">
           <div className="mx-auto max-w-2xl lg:mx-0">
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-              Nos valeurs
+              Our values
             </h2>
             <p className="mt-6 text-lg leading-8 text-gray-600">
-              Construire l'avenir des chantiers avec précision, innovation et
-              proximité terrain.
+              Building the future of construction sites with precision, innovation and
+              field proximity.
             </p>
           </div>
           <dl className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 text-base leading-7 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
@@ -400,7 +400,7 @@ export default function Home2() {
           </div>
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 className="text-center text-lg font-semibold leading-8 text-gray-900">
-              Déjà adopté par des entreprises du BTP innovantes
+              Already adopted by innovative construction companies
             </h2>
             <div className="mx-auto mt-10 grid max-w-lg grid-cols-4 items-center gap-x-8 gap-y-10 sm:max-w-xl sm:grid-cols-6 sm:gap-x-10 lg:mx-0 lg:max-w-none lg:grid-cols-5">
               <img
@@ -446,11 +446,11 @@ export default function Home2() {
         <div className="mx-auto mt-32 max-w-7xl px-6 sm:mt-48 lg:px-8">
           <div className="mx-auto max-w-2xl lg:mx-0">
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-              Notre équipe
+              Our team
             </h2>
             <p className="mt-6 text-lg leading-8 text-gray-600">
-              Une équipe passionnée par le BTP et l'innovation technologique au
-              service des chantiers tunisiens.
+              A team passionate about construction and technological innovation at the
+              service of Tunisian construction sites.
             </p>
           </div>
           <ul
@@ -477,11 +477,11 @@ export default function Home2() {
         <div className="mx-auto mt-32 max-w-7xl px-6 sm:mt-40 lg:px-8">
           <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-none">
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-              Du blog
+              From the blog
             </h2>
             <p className="mt-2 text-lg leading-8 text-gray-600">
-              Actualités, astuces et retours d'expérience sur la gestion
-              intelligente de chantiers.
+              News, tips and feedback on intelligent
+              construction site management.
             </p>
           </div>
           <div className="mx-auto mt-16 grid max-w-2xl auto-rows-fr grid-cols-1 gap-8 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-3">
@@ -561,7 +561,7 @@ export default function Home2() {
           ))}
         </div>
         <p className="mt-10 text-center text-xs leading-5 text-gray-500">
-          &copy; 2026 SmartSite, Tunisie. Tous droits réservés.
+          &copy; 2026 SmartSite, Tunisia. All rights reserved.
         </p>
       </footer>
     </div>
