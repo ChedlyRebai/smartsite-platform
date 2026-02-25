@@ -4,15 +4,15 @@ import useAddUserModal from "@/app/hooks/use-user-Modal";
 import UserForms from "../../forms/UserForms";
 
 const AddUserModal = () => {
-  const { isOpen, onClose } = useAddUserModal();
+  const { isOpen, onClose,setType,type } = useAddUserModal();
   return (
     <Modal
-      title="Add User"
-      description="Fill in the details to create a new user account"
+      title={type === "add" ? "Add New User" : "Edit User"}
+      description={type === "add" ? "Fill the form to add a new user." : "Update the user information."}
       isOpen={isOpen}
       onChange={onClose}
     >
-      <UserForms />
+      <UserForms type={type} />
     </Modal>
   );
 };

@@ -32,7 +32,7 @@ import {
 
 import { RolesDataTable } from "./_components/roles-data-table";
 
-import { UserDataTable } from "./_components/data-table";
+import { UserDataTable } from "./_components/user-data-table";
 
 import { deleteUser, getAllUsers } from "@/app/action/user.action";
 
@@ -46,12 +46,19 @@ import { PermissionsDataTable } from "./_components/permissions-data-table";
 import { set } from "zod";
 import { getAllStatics } from "@/app/action/statiscs.action";
 import useAddUserModal from "@/app/hooks/use-user-Modal";
+import useAddPermissionModal from "@/app/hooks/use-permission-Modal";
+import useRoleModal from "@/app/hooks/use-role-Modal";
+import useRolePermissionsModal from "@/app/hooks/use-role-permissions-modal";
 
 export default function UserManagement() {
   const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();
   const canManageRoles = user && canEdit(user.role.name, "users");
   const [roles, setRoles] = useState<Role[]>([]);
+  const { setOnUserChange } = useAddUserModal();
+  const { setOnPermissionChange } = useAddPermissionModal();
+  const { setOnRoleChange } = useRoleModal();
+  const { setOnPermissionsChange, setRefreshData } = useRolePermissionsModal();
 
   const [statics, setStatics] = useState({
     totalRoles:0,
@@ -68,6 +75,20 @@ export default function UserManagement() {
     loadPermissions();
     loadUsers();
     loadStatics();
+    setOnUserChange(() => loadUsers);
+    setOnPermissionChange(() => {
+      loadPermissions();
+      // Also refresh the role permissions modal data when permissions change
+      const { refreshData } = useRolePermissionsModal.getState();
+      refreshData();
+    });
+    setOnRoleChange(() => {
+      loadRoles();
+      // Also refresh the role permissions modal data when roles change
+      const { refreshData } = useRolePermissionsModal.getState();
+      refreshData();
+    });
+    setOnPermissionsChange(() => loadRoles);
   }, []);
 
   const loadStatics = async () =>{
@@ -86,13 +107,10 @@ export default function UserManagement() {
       const response = await getAllUsers();
       if (response.status === 200 && Array.isArray(response.data)) {
         setUsers(response.data);
-      } else {
-        // Use mock data for development
-        setUsers(mockTeamMembers);
       }
     } catch (error) {
       console.error("Failed to load users:", error);
-      setUsers(mockTeamMembers);
+      toast.error("Failed to load users");
     } finally {
       setIsLoading(false);
     }
@@ -131,8 +149,10 @@ export default function UserManagement() {
   };
 
   const handleEditPermission = (permission: Permission) => {
-    // toast.info(`Edit permission: ${permission.name}`);
-    // TODO: Implement edit dialog
+    const { setId, setType, onOpen } = useAddPermissionModal.getState();
+    setId(permission._id);
+    setType("edit");
+    onOpen();
   };
 
   const handleDeletePermission = async (permissionId: string) => {
@@ -170,8 +190,10 @@ export default function UserManagement() {
   };
 
   const handleEditRole = (role: Role) => {
-    toast.success(`Edit role: ${role.name}`);
-    // TODO: Implement edit dialog
+    const { setId, setType, onOpen } = useRoleModal.getState();
+    setId(role._id);
+    setType("edit");
+    onOpen();
   };
 
   const handleDeleteRole = async (roleId: string) => {
@@ -319,7 +341,7 @@ export default function UserManagement() {
               {isLoading ? (
                 <div className="text-center py-12">Loading users...</div>
               ) : (
-                <UserDataTable users={users} />
+                <UserDataTable users={users} onDelete={handleDeleteUser} />
               )}
             </TabsContent>
 
@@ -327,7 +349,11 @@ export default function UserManagement() {
               {isLoading ? (
                 <div className="text-center py-12">Loading permissions...</div>
               ) : (
-                <PermissionsDataTable permissions={permissions} />
+                <PermissionsDataTable 
+                  permissions={permissions}
+                  onEdit={handleEditPermission}
+                  onDelete={handleDeletePermission}
+                />
               )}
             </TabsContent>
           </CardContent>

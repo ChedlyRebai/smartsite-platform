@@ -1,48 +1,91 @@
-import { useState } from "react";
-import { data, Link, useNavigate } from "react-router";
-import { Building2, Loader2 } from "lucide-react";
-import { useAuthStore } from "../../store/authStore";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
+"use client";
 
-import { toast } from "sonner";
-import { LoginAction } from "@/app/action/auth.action";
-import axios from "axios";
+import * as React from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
 
+import * as z from "zod";
+
+import { Button } from "@/components/ui/button";
+
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+
+import { useAuthStore } from "@/app/store/authStore";
+import { useNavigate } from "react-router";
+import toast from "react-hot-toast";
+import { Eye, EyeOff } from "lucide-react";
+
+const formSchema = z.object({
+  cin: z
+    .string()
+    .min(5, "CIN is required and must be at least 5 characters.")
+    .max(32, "CIN must be at most 32 characters."),
+  password: z
+    .string()
+    .min(5, "Password is required and must be at least 5 characters.")
+    .max(100, "Password must be at most 100 characters."),
+});
 export default function Login() {
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
-  const [cin, setcin] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [logoAvailable, setLogoAvailable] = useState(true);
+  // const [cin, setcin] = useState("");
+  // const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [logoAvailable, setLogoAvailable] = React.useState(true);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setIsLoading(true);
+  //   try {
+  //     await login(cin, password).then((data: any) => {
+  //       console.log("Login successful!", data);
+  //       toast.success("Login successful!");
+  //       navigate("/dashboard");
+  //     });
+  //     toast.success("Login successful!");
+  //     navigate("/dashboard");
+  //   } catch (error: any) {
+  //     const message =
+  //       error?.message ||
+  //       error?.response?.data?.message ||
+  //       "Invalid credentials. Please try again.";
+  //     toast.error(message);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+  // <Input
+  //id="cin"
+  //type="cin"
+  //placeholder="your.cin@smartsite.com"
+  //value={cin}
+  //onChange={(e) => setcin(e.target.value)}
+  //required
+  //disabled={isLoading}
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      cin: "",
+      password: "",
+    },
+  });
+
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
-      // const res = await axios.post(`http://localhost:3000/auth/login`, {
-      //   cin,
-      //   password,
-      // });
-
-      // console.log(
-      //   `${process.env.LOGIN_API_URL}/login`,
-      //   "ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
-      // );
-      // if (res.status === 200) {
-      //   const expires = new Date(Date.now() + 1000 * 1000 * 1000);
-
-      //   cookieStore.set("session", res.data.token);
-      //   return Promise.resolve({ status: res.status, data: res.data.message });
-      // }
-
-      await login(cin, password).then((data:any) => {
-        console.log("Login successful!",data);
+      await login(data.cin, data.password).then((data: any) => {
+        console.log("Login successful!", data);
         toast.success("Login successful!");
         navigate("/dashboard");
       });
-
       toast.success("Login successful!");
       navigate("/dashboard");
     } catch (error: any) {
@@ -55,15 +98,7 @@ export default function Login() {
       setIsLoading(false);
     }
   };
-  // <Input
-  //id="cin"
-  //type="cin"
-  //placeholder="your.cin@smartsite.com"
-  //value={cin}
-  //onChange={(e) => setcin(e.target.value)}
-  //required
-  //disabled={isLoading}
-
+  const [showPassword, setShowPassword] =React.useState(false);
   return (
     <>
       {/*
@@ -99,7 +134,143 @@ export default function Login() {
 
             <div className="mt-10">
               <div>
-                <form action="#" method="POST" className="space-y-6">
+                <form id="form-rhf-demo" onSubmit={form.handleSubmit(onSubmit)}>
+                  <FieldGroup>
+                    <Controller
+                      name="cin"
+                      control={form.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel htmlFor="form-rhf-demo-title">
+                            CIN
+                          </FieldLabel>
+                          <Input
+                            {...field}
+                            id="form-rhf-demo-cin"
+                            aria-invalid={fieldState.invalid}
+                            placeholder="Enter your CIN"
+                            autoComplete="off"
+                          />
+                          {fieldState.invalid && (
+                            <FieldError errors={[fieldState.error]} />
+                          )}
+                        </Field>
+                      )}
+                    />
+                    <Controller
+                      name="password"
+                      control={form.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel htmlFor="form-rhf-demo-password">
+                            Password
+                          </FieldLabel>
+                          
+                          <div className="relative">
+                            <Input
+                              {...field}
+                              type={showPassword ? "text" : "password"}
+                              id="form-rhf-demo-password"
+                              aria-invalid={fieldState.invalid}
+                              placeholder="Enter your password"
+                              autoComplete="off"
+                              className="pr-10"
+                            />
+
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                            >
+                              {showPassword ? (
+                                <EyeOff size={18} />
+                              ) : (
+                                <Eye size={18} />
+                              )}
+                            </button>
+                          </div>
+                          {fieldState.invalid && (
+                            <FieldError errors={[fieldState.error]} />
+                          )}
+                        </Field>
+                      )}
+                    />
+                  </FieldGroup>
+                </form>
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  form="form-rhf-demo"
+                  className="flex w-full mt-4 justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                >
+                  Submit
+                </Button>
+                {/* <form
+                  onSubmit={form.handleSubmit(onSubmit)}>
+                  <FieldGroup>
+                    <Controller
+                      name="cin"
+                      control={form.control}
+                      render={({ field, fieldState }) => {
+                        return (
+                          <Field data-invalid={fieldState.invalid}>
+                            <FieldLabel htmlFor="cin">CIN</FieldLabel>
+                            <Input
+                              id="cin"
+                              placeholder="Enter your CIN"
+                              autoComplete="off"
+                              {...field}
+                              aria-invalid={fieldState.invalid}
+                            />
+                            {fieldState.invalid && (
+                              <FieldError errors={[fieldState.error]} />
+                            )}
+                          </Field>
+                        );
+                      }}
+                    />
+                    <Controller
+                      name="password"
+                      control={form.control}
+                      render={({ field, fieldState: { error } }) => {
+                        const isInvalid = !!error;
+                        return (
+                          <Field data-invalid={isInvalid}>
+                            <FieldLabel htmlFor="password">Password</FieldLabel>
+                            <Input
+                              id="password"
+                              type="password"
+                              placeholder="Enter your password"
+                              className=" resize-none"
+                              {...field}
+                              aria-invalid={isInvalid}
+                            />
+
+                            {isInvalid && (
+                              <FieldError
+                                errors={
+                                  error?.message
+                                    ? [{ message: error.message }]
+                                    : []
+                                }
+                              />
+                            )}
+                          </Field>
+                        );
+                      }}
+                    />
+                  </FieldGroup>
+                  <Button
+                  
+                    className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                    type="submit"
+                    form="bug-report-form"
+                  >
+                    Submit
+                  </Button>
+                </form> */}
+
+                {/* <form action="#" method="POST" className="space-y-6">
                   <div>
                     <label
                       htmlFor="cin"
@@ -179,7 +350,7 @@ export default function Login() {
                       Sign in
                     </button>
                   </div>
-                </form>
+                </form> */}
               </div>
             </div>
           </div>

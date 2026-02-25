@@ -16,33 +16,38 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: true,
 
       login: async (cin: string, password: string) => {
-        const res = await api.post("/auth/login", {
-          cin,
-          password,
-        });
+        try {
+          const res = await api.post("/auth/login", {
+            cin,
+            password,
+          });
 
-        const token = res.data.access_token;
-        const userWIthToken= res.data
-        // attach token globally
-        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        console.log('mmmmmmmmmmmmmmmmmmmmm',userWIthToken);
+          const token = res.data.access_token;
+          // attach token globally
+          api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+          console.log('Login successful, token:', token);
 
-        // Transform role if it's a string (from API) to match expected format
-        const userData = res.data;
-        if (typeof userData.role === 'string') {
-          userData.role = {
-            _id: '',
-            name: userData.role,
-            permissions: [],
-            createdAt: new Date(),
-            updatedAt: new Date()
-          };
+          set({
+            user: {
+              access_token: res.data.access_token,
+              id: res.data.id,
+              cin: res.data.cin,
+              firstname: res.data.firstname,
+              lastname: res.data.lastname,
+              role: res.data.role,
+            },
+            isAuthenticated: true,
+          });
+          
+          return res.data;
+        } catch (error: any) {
+          console.error('Login failed:', error.response?.data?.message || error.message);
+          set({
+            user: null,
+            isAuthenticated: false,
+          });
+          throw error;
         }
-
-        set({
-          user: userData,
-          isAuthenticated: true,
-        });
       },
 
       register: async (data: RegisterData) => {
@@ -87,6 +92,8 @@ export const useAuthStore = create<AuthState>()(
       // },
 
       logout: () => {
+        // Clear authorization header
+        delete api.defaults.headers.common["Authorization"];
         set({ user: null, isAuthenticated: false });
       },
     }),

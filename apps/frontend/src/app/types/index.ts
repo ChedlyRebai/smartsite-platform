@@ -52,6 +52,7 @@ export interface Permission {
   create: boolean;
   delete: boolean;
   update: boolean;
+  description?: string;
   createdAt: Date;
   updatedAt: Date;
 }

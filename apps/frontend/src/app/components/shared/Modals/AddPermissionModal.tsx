@@ -4,15 +4,19 @@ import useAddPermissionModal from "@/app/hooks/use-permission-Modal";
 import PermissionForms from "../../forms/PermissionForms";
 
 const AddPermissionModal = () => {
-  const { isOpen, onClose } = useAddPermissionModal();
+  const { isOpen, onClose, type, setType } = useAddPermissionModal();
   return (
     <Modal
-      title="Add Permission"
-      description="Fill in the details to create a new permission"
+      title={type === "add" ? "Add New Permission" : "Edit Permission"}
+      description={
+        type === "add"
+          ? "Fill the form to add a new permission."
+          : "Update the permission information."
+      }
       isOpen={isOpen}
       onChange={onClose}
     >
-      <PermissionForms />
+      <PermissionForms type ={type} />
     </Modal>
   );
 };

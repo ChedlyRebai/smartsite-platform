@@ -24,7 +24,7 @@ export interface NavItem {
   label: string;
   href: string;
   icon: LucideIcon;
-  roles: RoleType[];
+  roles?: RoleType[];
 }
 
 
@@ -48,32 +48,21 @@ export const navigationItems: NavItem[] = [
     label: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
-    roles: [
-      "super_admin",
-      "director",
-      "project_manager",
-      "site_manager",
-      "works_manager",
-      "accountant",
-      "procurement_manager",
-      "qhse_manager",
-      "client",
-      "subcontractor",
-      "user",
-    ],
+     roles: [
+       "super_admin",
+       "director",
+       "project_manager",
+       "site_manager",
+       "works_manager",
+       "accountant",
+       "procurement_manager",
+       "qhse_manager",
+       "client",
+       "subcontractor",
+       "user",
+     ],
   },
-  {
-    label: "Permissions",
-    href: "/permissions",
-    icon: Clock ,
-    roles: ["super_admin"],
-  },
-  {
-    label: "Roles",
-    href: "/roles",
-    icon: Users,
-    roles: ["super_admin"],
-  },
+  
   {
     label: "User Management",
     href: "/users",

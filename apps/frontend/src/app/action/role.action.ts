@@ -32,12 +32,13 @@ export const getRoleById = async (id: string) => {
   }
 };
 
-export const createRole = async (roleData: {
-  name: string;
-  description?: string;
-}) => {
+export const createRole = async (
+  name: string,
+  description?: string,
+  permissions?: string[]
+) => {
   try {
-    const res = await axios.post(`${API_URL}`, roleData);
+    const res = await axios.post(`${API_URL}`, {name, description, permissions});
     if (res.status === 201) {
       return Promise.resolve({ status: res.status, data: res.data });
     }
@@ -52,13 +53,12 @@ export const createRole = async (roleData: {
 
 export const updateRole = async (
   id: string,
-  roleData: {
-    name?: string;
-    description?: string;
-  }
+  name?: string,
+  description?: string,
+  permissions?: string[]
 ) => {
   try {
-    const res = await axios.put(`${API_URL}/${id}`, roleData);
+    const res = await axios.put(`${API_URL}/${id}`, {name, description, permissions});
     if (res.status === 200) {
       return Promise.resolve({ status: res.status, data: res.data });
     }

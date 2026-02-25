@@ -1,11 +1,12 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Headers } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtService } from '@nestjs/jwt';
 
 @Controller('users')
 //@UseGuards(JwtAuthGuard)
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(private usersService: UsersService, private jwtService: JwtService) {}
 
   @Post()
   async create(@Body() createUserDto: any) {
@@ -17,6 +18,21 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
+  @Get('mypermissions')
+  async getProfile(@Headers('Authorization') authHeader: string) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return { error: 'No token provided' };
+    }
+    const token = authHeader.split(' ')[1];
+    try {
+      const decoded: any = this.jwtService.verify(token);
+      const userId = decoded.sub;
+      return this.usersService.mypermission(userId);
+    } catch (error) {
+      return { error: 'Invalid token' };
+    }
+  }
+  
   @Get(':id')
   async findById(@Param('id') id: string) {
     return this.usersService.findById(id);

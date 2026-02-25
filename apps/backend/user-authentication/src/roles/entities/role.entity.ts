@@ -7,6 +7,8 @@ import { Permission } from 'src/permissions/entities/permission.entity';
 export class Role extends Document {
   @Prop({ required: true, unique: true, trim: true })
   name: string; 
+  @Prop()
+  description: string; 
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Permission' }], default: [] })
   permissions: Types.ObjectId[] | Permission[];

@@ -11,14 +11,23 @@ export class User extends Document {
   @Prop({ required: true, trim: true })
   lastname: string;
 
-  @Prop({ required: true, unique: true, lowercase: true, trim: true })
+  @Prop({ required: true, unique: true, trim: true })
   cin: string;
 
   @Prop({ required: true })
-  motDePasse: string;
+  password: string;
 
   @Prop({ type: Types.ObjectId, ref: 'Role', required: true })
   role: Types.ObjectId;
+
+  @Prop()
+  email: string;
+
+  @Prop()
+  connected: boolean;
+
+  @Prop()
+  address: string;
 
   @Prop({ default: true })
   estActif: boolean;

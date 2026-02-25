@@ -7,7 +7,7 @@ export class Permission extends Document {
   @Prop({ required: true, unique: true, trim: true })
   name: string;
   @Prop()
-  source: string;
+  href: string;
   @Prop()
   access: boolean;
   @Prop()

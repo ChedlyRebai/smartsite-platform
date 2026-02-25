@@ -35,8 +35,11 @@ export const getPermissionById = async (id: string) => {
 export const createPermission = async (permissionData: {
   name: string;
   description?: string;
-  resource?: string;
-  action?: string;
+  access?: boolean;
+  href?: string;
+  create?: boolean;
+  update?: boolean;
+  delete?: boolean;
 }) => {
   try {
     const res = await axios.post(`${API_URL}`, permissionData);
@@ -57,8 +60,10 @@ export const updatePermission = async (
   permissionData: {
     name?: string;
     description?: string;
-    resource?: string;
-    action?: string;
+    access?: boolean;
+    create?: boolean;
+    update?: boolean;
+    delete?: boolean;
   }
 ) => {
   try {

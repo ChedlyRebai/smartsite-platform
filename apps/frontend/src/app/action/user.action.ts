@@ -38,6 +38,8 @@ export const createUser = async (userData: {
   firstName?: string;
   lastName?: string;
   email?: string;
+  telephone?: string;
+  address?: string;
 }) => {
   try {
     const res = await axios.post(`${API_URL}`, userData);
@@ -56,11 +58,14 @@ export const createUser = async (userData: {
 export const updateUser = async (
   id: string,
   userData: {
+    cin: string;
+    password?: string;
     firstName?: string;
     lastName?: string;
     email?: string;
-    password?: string;
-  }
+    telephone?: string;
+    address?: string;
+  },
 ) => {
   try {
     const res = await axios.put(`${API_URL}/${id}`, userData);

@@ -4,15 +4,15 @@ import useRoleModal from "@/app/hooks/use-role-Modal";
 import RoleForms from "../../forms/RoleForms";
 
 const AddRoleModal = () => {
-  const { isOpen, onClose } = useRoleModal();
+  const { isOpen, onClose,setType,type } = useRoleModal();
   return (
     <Modal
-      title="Add Role"
-      description="Fill in the details to create a new role"
+      title={type === "add" ? "Add New Role" : "Edit Role"}
+      description={type === "add" ? "Fill in the details to create a new role" : "Update the role information"}
       isOpen={isOpen}
       onChange={onClose}
     >
-      <RoleForms />
+      <RoleForms type={type} />
     </Modal>
   );
 };

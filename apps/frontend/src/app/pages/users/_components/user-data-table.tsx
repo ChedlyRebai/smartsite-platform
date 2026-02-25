@@ -21,7 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import {
   AlertDialog,
@@ -34,55 +34,63 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/app/components/ui/alert-dialog";
-
 import {
   ArrowUpDown,
-  ListPlusIcon,
   Edit,
-  Trash2,
-  Shield,
+  ListPlusIcon,
+  SearchIcon,
   Trash,
 } from "lucide-react";
-import { Role, Permission } from "@/app/types";
-import useRoleModal from "@/app/hooks/use-role-Modal";
-import useRolePermissionsModal from "@/app/hooks/use-role-permissions-modal";
 
-interface RolesDataTableProps {
-  roles: Role[];
-  onEdit?: (role: Role) => void;
-  onDelete?: (roleId: string) => void;
-  onAddNew?: () => void;
+import toast from "react-hot-toast";
+import { User } from "@/app/types";
+import useAddUserModal from "@/app/hooks/use-user-Modal";
+import { Badge } from "@/app/components/ui/badge";
+
+interface DataTableProps<TData, TValue> {
+  //columns: ColumnDef<TData, TValue>[];
+  users: User[];
+  onDelete?: (userId: string) => Promise<void> | void;
 }
 
-export function RolesDataTable({
-  roles,
-  onEdit,
+export function UserDataTable<TData, TValue>({
+  users,
   onDelete,
-  onAddNew,
-}: RolesDataTableProps) {
+}: DataTableProps<TData, TValue>) {
+  const [data, setData] = useState<User[]>([]);
+  const [TotalPages, setTotalPages] = useState(0);
+  const [TotalAccount, setTotalAccount] = useState(0);
+
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const { setId, id, onOpen, setType } = useRoleModal();
-  const { 
-    setRoleId, 
-    setRoleName, 
-    onOpen: onOpenPermissions 
-  } = useRolePermissionsModal();
-  const handleDelete = async (roleId: string) => {
+  const { setId, id, onOpen, setType } = useAddUserModal();
+  console.log("users:", users);
+  const handleDelete = async (userId: string) => {
     if (!onDelete) {
       return;
     }
 
-    setDeletingId(roleId);
+    setDeletingId(userId);
     try {
-      await onDelete(roleId);
+      await onDelete(userId);
     } finally {
       setDeletingId(null);
     }
   };
-  const columns: ColumnDef<Role>[] = [
+  const columns: ColumnDef<User>[] = [
+    //     {
+    //     id: '12',
+    //     firstName: 'Leila',
+    //     lastName: 'Mansour',
+    //     email: 'leila.mansour@smartsite.com',
+    //     phone: '+216 98 234 567',
+    //     role: 'user',
+    //     isActive: true,
+    //     createdDate: '2026-01-05',
+    //     lastLoginDate: '2026-02-16',
+    //   },
     {
       accessorKey: "_id",
       header: "ID",
@@ -94,66 +102,112 @@ export function RolesDataTable({
       },
     },
     {
-      accessorKey: "name",
+      accessorKey: "lastname",
+      header: ({ column }) => {
+        return <></>;
+      },
+      cell: ({ row }) => {
+        return <></>;
+      },
+    },
+    {
+      accessorKey: "firstname",
       header: ({ column }) => {
         return (
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Role Name
+            Full name
             <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         );
       },
       cell: ({ row }) => {
-        return (
-          <div className="flex items-center gap-2">
-            <Shield className="h-4 w-4 text-blue-500" />
-            <span className="font-medium">{row.getValue("name")}</span>
-          </div>
-        );
+        const fullname = `${row.getValue("firstname")} ${row.getValue("lastname")}`;
+        return <>{fullname}</>;
       },
     },
-    {
-      accessorKey: "permissions",
-      header: "Permissions",
-      cell: ({ row }) => {
-        const permissions = row.getValue("permissions") as
-          | string[]
-          | Permission[];
-        const permissionCount = Array.isArray(permissions)
-          ? permissions.length
-          : 0;
 
-        return (
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">
-              {permissionCount} permission{permissionCount !== 1 ? "s" : ""}
-            </span>
-          </div>
-        );
-      },
-    },
     {
-      accessorKey: "userCount",
+      accessorKey: "email",
       header: ({ column }) => {
         return (
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Users
+            email
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        );
+      },
+    },
+    {
+      accessorKey: "estActif",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            isActive
             <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         );
       },
       cell: ({ row }) => {
+        const isActive = row.getValue("estActif") as boolean;
         return (
-          <div className="text-center">{row.getValue("userCount") || 0}</div>
+          <Badge
+            className={
+              isActive
+                ? "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
+                : "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"
+            }
+          >
+            {isActive ? "Active" : "Inactive"}
+          </Badge>
         );
       },
     },
+    {
+      accessorKey: "cin",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            cin
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        );
+      },
+    },
+    {
+      accessorKey: "role.name",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            role
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        );
+      },
+      // cell: ({ row }) => {
+      //   const role = row.getValue("role.name") as string;
+      //   return (
+      //     <Badge className="bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">
+      //       {row.getValue("role.name")}
+      //     </Badge>
+      //   );
+      // },
+    },
+
     {
       accessorKey: "createdAt",
       header: ({ column }) => {
@@ -162,32 +216,14 @@ export function RolesDataTable({
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Created At
+            createdDate
             <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         );
       },
       cell: ({ row }) => {
         const date = new Date(row.getValue("createdAt"));
-        return <div className="text-sm">{date.toLocaleDateString()}</div>;
-      },
-    },
-    {
-      accessorKey: "updatedAt",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Updated At
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        );
-      },
-      cell: ({ row }) => {
-        const date = new Date(row.getValue("updatedAt"));
-        return <div className="text-sm">{date.toLocaleDateString()}</div>;
+        return <>{date.toLocaleDateString()}</>;
       },
     },
     {
@@ -205,7 +241,9 @@ export function RolesDataTable({
       // },
       cell: ({ row }) => {
         const id = row.getValue("_id") as string;
-        const name = row.getValue("name") as string;
+        const firstname = row.getValue("firstname") as string | undefined;
+        const lastname = row.getValue("lastname") as string | undefined;
+        const fullName = [firstname, lastname].filter(Boolean).join(" ");
 
         return (
           <>
@@ -215,21 +253,8 @@ export function RolesDataTable({
               }}
               variant="ghost"
               size="sm"
-              title="Edit Role"
             >
               <Edit className="h-4 w-4" />
-            </Button>
-            <Button
-              onClick={() => {
-                setRoleId(id);
-                setRoleName(name);
-                onOpenPermissions();
-              }}
-              variant="ghost"
-              size="sm"
-              title="Manage Permissions"
-            >
-              <Shield className="h-4 w-4 text-blue-600" />
             </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -239,10 +264,10 @@ export function RolesDataTable({
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Delete role</AlertDialogTitle>
+                  <AlertDialogTitle>Delete user</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will permanently delete the role "{name}" and remove it
-                    from the system.
+                    This will permanently delete{fullName ? ` ${fullName}` : " this user"}
+                    and remove the account from the system.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -263,7 +288,7 @@ export function RolesDataTable({
   ];
 
   const table = useReactTable({
-    data: roles,
+    data: users,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -279,28 +304,32 @@ export function RolesDataTable({
     },
   });
 
+  console.log(users);
+
   return (
     <>
-      <div className="flex justify-between items-center py-4 flex-wrap gap-4">
+      <div className="flex justify-between items-center py-4 flex-wrap">
         <Input
-          placeholder="Search roles..."
+          placeholder="Search users..."
           value={globalFilter ?? ""}
           onChange={(event) => setGlobalFilter(event.target.value)}
           className="max-w-sm"
         />
 
-        <Button 
-          onClick={() => {
-            setType("add");
-            onOpen();
-          }} 
+        <Button
+          //   disabled={access.creation === "N"}
           variant="default"
+          className=""
+
+          onClick={()=>{onOpen(),setType("add")}}
         >
           <ListPlusIcon className="mr-2 h-4 w-4" />
-          Add New Role
+          Add New User
         </Button>
       </div>
-      <div className="rounded-md border">
+      <div
+        className={`rounded-md border ${table.getRowModel().rows.length === 0 ? "border-red-500" : ""}`}
+      >
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -320,57 +349,45 @@ export function RolesDataTable({
               </TableRow>
             ))}
           </TableHeader>
+
           <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
+            <>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    Pas de résultats.
+                  </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No roles found.
-                </TableCell>
-              </TableRow>
-            )}
+              )}
+            </>
+            {/* )} */}
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredRowModel().rows.length} role(s) total
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
-      </div>
+      {/* <DataTablePagination
+        totalPages={TotalPages}
+        TotalAccount={TotalAccount}
+        table={table}
+      /> */}
     </>
   );
 }
