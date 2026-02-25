@@ -16,8 +16,11 @@ export default function Dashboard() {
 
   if (!user) return null;
 
+  // Get role name - handle both string and object formats
+  const roleName = typeof user.role === 'string' ? user.role : user.role?.name || 'user';
+
   // Route to appropriate dashboard based on role
-  switch (user.role.name) {
+  switch (roleName) {
     case 'super_admin':
       return <SuperAdminDashboard />;
     case 'director':

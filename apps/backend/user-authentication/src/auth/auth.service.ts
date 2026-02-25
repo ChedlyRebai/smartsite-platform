@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
+import { RolesService } from '../roles/roles.service';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto';
 import { log } from 'console';
@@ -9,6 +10,7 @@ import { log } from 'console';
 export class AuthService {
   constructor(
     private usersService: UsersService,
+    private rolesService: RolesService,
     private jwtService: JwtService,
   ) {}
 
@@ -52,18 +54,33 @@ export class AuthService {
     };
   }
 
-  async register(cin: string, password: string, firstname: string, lastname: string,role:string) {
+  async register(cin: string, password: string, firstname: string, lastname: string, role: string) {
     const existingUser = await this.usersService.findByCin(cin);
     if (existingUser) {
       throw new Error('User already exists');
     }
+
+    // Look up the role by name to get the ObjectId
+    let roleId;
+    if (role) {
+      const roleEntity = await this.rolesService.findByName(role);
+      if (roleEntity) {
+        roleId = roleEntity._id;
+      } else {
+        // If role not found, use a default role or throw error
+        throw new Error(`Role "${role}" not found`);
+      }
+    } else {
+      throw new Error('Role is required');
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     return this.usersService.create({
       cin,
       password: hashedPassword,
       lastname,
       firstname,
-      role
+      role: roleId
     });
   }
 }

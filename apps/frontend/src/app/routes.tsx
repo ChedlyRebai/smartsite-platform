@@ -20,7 +20,6 @@ import Notifications from "./pages/notifications/Notifications";
 import UserManagement from "./pages/users/UserManagement";
 import PendingUsers from "./pages/admin/PendingUsers";
 import Profile from "./pages/profile/Profile";
-import Home from "./pages/Home/Home";
 import Home2 from "./pages/Home/Home2";
 import Pricing from "./pages/pricing/Pricing";
 
@@ -32,15 +31,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <Home />,
+    element: <Home2 />,
   },
   {
     path: "/pricing",
     element: <Pricing />,
-  },
-  {
-    path: "/h",
-    element: <Home2 />,
   },
   {
     path: "/login",

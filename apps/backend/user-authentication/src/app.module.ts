@@ -11,6 +11,7 @@ import { PermissionsModule } from './permissions/permissions.module';
 import { StaticsModule } from './statics/statics.module';
 
 
+
 @Module({
   imports: [
     ConfigModule.forRoot({

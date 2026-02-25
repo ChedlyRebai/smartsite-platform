@@ -2,10 +2,10 @@ import { Menu } from "lucide-react";
 import React, { useState } from "react";
 import { useAuthStore } from "./store/authStore";
 const navigation = [
-  { name: "Produit", href: "#" },
-  { name: "Fonctionnalités", href: "#" },
-  { name: "Ressources", href: "#" },
-  { name: "Entreprise", href: "#" },
+  { name: "Product", href: "#" },
+  { name: "Features", href: "#" },
+  { name: "Resources", href: "#" },
+  { name: "Company", href: "#" },
 ];
 
 const Navbar = () => {
