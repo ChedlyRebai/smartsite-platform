@@ -39,7 +39,12 @@ export class AuthController {
       lastName,
       role,
       email,
+<<<<<<< HEAD
       telephone,
+=======
+      phoneNumber,
+
+>>>>>>> ee5b7420 (feat: enhance registration form with password and confirm password fields)
       adresse,
       companyName,
     } = registerDto;
@@ -50,7 +55,12 @@ export class AuthController {
       lastName,
       role,
       email,
+<<<<<<< HEAD
       telephone,
+=======
+      phoneNumber,
+
+>>>>>>> ee5b7420 (feat: enhance registration form with password and confirm password fields)
       adresse,
       companyName,
     );
@@ -63,7 +73,12 @@ export class AuthController {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
+<<<<<<< HEAD
         telephone: user.telephone,
+=======
+        phoneNumber: user.phoneNumber,
+
+>>>>>>> ee5b7420 (feat: enhance registration form with password and confirm password fields)
         address: user.address,
         role: user.role,
         companyName: user.companyName,

@@ -108,12 +108,18 @@ export class AuthService {
       const clientRole = await this.rolesService.findByName('client');
       if (!clientRole) {
 <<<<<<< HEAD
+<<<<<<< HEAD
         throw new BadRequestException(
           'Default client role not found. Please create a "client" role first.',
         );
 =======
         throw new BadRequestException('Default client role not found. Please create a "client" role first.');
 >>>>>>> c80e20e5 (feat: implement OTP verification and resend functionality in authentication flow)
+=======
+        throw new BadRequestException(
+          'Default client role not found. Please create a "client" role first.',
+        );
+>>>>>>> ee5b7420 (feat: enhance registration form with password and confirm password fields)
       }
       roleId = clientRole._id.toString();
       console.log('🔍 DEBUG: Using default client role:', roleId);
@@ -160,10 +166,14 @@ export class AuthService {
         console.log('✅ OTP envoyé avec succès à', result.email);
       } catch (error) {
 <<<<<<< HEAD
+<<<<<<< HEAD
         console.error("❌ Erreur lors de l'envoi de l'OTP:", error);
 =======
         console.error('❌ Erreur lors de l\'envoi de l\'OTP:', error);
 >>>>>>> c80e20e5 (feat: implement OTP verification and resend functionality in authentication flow)
+=======
+        console.error("❌ Erreur lors de l'envoi de l'OTP:", error);
+>>>>>>> ee5b7420 (feat: enhance registration form with password and confirm password fields)
         // Don't fail registration if email sending fails
       }
     }
@@ -174,10 +184,14 @@ export class AuthService {
   async verifyOTP(cin: string, otp: string) {
     const user = await this.usersService.findByCin(cin);
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
     
 >>>>>>> c80e20e5 (feat: implement OTP verification and resend functionality in authentication flow)
+=======
+
+>>>>>>> ee5b7420 (feat: enhance registration form with password and confirm password fields)
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -227,10 +241,14 @@ export class AuthService {
   async resendOTP(cin: string) {
     const user = await this.usersService.findByCin(cin);
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
     
 >>>>>>> c80e20e5 (feat: implement OTP verification and resend functionality in authentication flow)
+=======
+
+>>>>>>> ee5b7420 (feat: enhance registration form with password and confirm password fields)
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -253,6 +271,7 @@ export class AuthService {
     if (user.email) {
       try {
 <<<<<<< HEAD
+<<<<<<< HEAD
         await this.emailService.sendOTPEmail(user.email, user.firstName, otp);
         console.log('✅ OTP renvoyé avec succès à', user.email);
       } catch (error) {
@@ -267,6 +286,12 @@ export class AuthService {
       } catch (error) {
         console.error('❌ Erreur lors du renvoi de l\'OTP:', error);
 >>>>>>> c80e20e5 (feat: implement OTP verification and resend functionality in authentication flow)
+=======
+        await this.emailService.sendOTPEmail(user.email, user.firstName, otp);
+        console.log('✅ OTP renvoyé avec succès à', user.email);
+      } catch (error) {
+        console.error("❌ Erreur lors du renvoi de l'OTP:", error);
+>>>>>>> ee5b7420 (feat: enhance registration form with password and confirm password fields)
         throw new BadRequestException('Failed to send OTP email');
       }
     } else {
