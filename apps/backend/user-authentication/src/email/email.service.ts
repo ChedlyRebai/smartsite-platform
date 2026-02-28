@@ -152,4 +152,58 @@ export class EmailService {
       throw error;
     }
   }
+
+  async sendPasswordResetEmail(
+    userEmail: string,
+    firstName: string,
+    resetCode: string,
+  ): Promise<void> {
+    console.log('📧 EMAIL SERVICE: Envoi code réinitialisation à', userEmail);
+    
+    const subject = 'Réinitialisez votre mot de passe SmartSite';
+    const htmlContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #4F46E5;">Réinitialisation de mot de passe</h2>
+        <p>Bonjour ${firstName},</p>
+        <p>Vous avez demandé à réinitialiser votre mot de passe SmartSite. Veuillez utiliser le code ci-dessous pour procéder:</p>
+        
+        <div style="background-color: #F3F4F6; border-radius: 8px; padding: 20px; text-align: center; margin: 30px 0;">
+          <h1 style="color: #4F46E5; font-size: 48px; margin: 0; letter-spacing: 8px;">${resetCode}</h1>
+        </div>
+
+        <p style="color: #6B7280;">Ce code est valide pendant <strong>15 minutes</strong>.</p>
+        
+        <div style="background-color: #FEF3C7; border-left: 4px solid #F59E0B; padding: 15px; margin: 20px 0; border-radius: 4px;">
+          <p style="color: #92400E; margin: 0;"><strong>Attention :</strong> Si vous n'avez pas demandé cette réinitialisation, ignorez cet email. Votre compte restera sécurisé.</p>
+        </div>
+
+        <p style="margin-top: 30px; color: #6B7280;">Après avoir réinitialisé votre mot de passe, nous vous recommandons de changer votre mot de passe dans les paramètres de votre compte.</p>
+        
+        <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 30px 0;">
+        <p style="color: #9CA3AF; font-size: 12px;">
+          Ceci est un email automatique, merci de ne pas y répondre.<br>
+          © ${new Date().getFullYear()} SmartSite. Tous droits réservés.
+        </p>
+      </div>
+    `;
+
+    try {
+      const result = await this.transporter.sendMail({
+        from: process.env.EMAIL_USER || 'noreply@smartsite.com',
+        to: userEmail,
+        subject,
+        html: htmlContent,
+      });
+
+      console.log('✅ EMAIL SERVICE: Code réinitialisation envoyé avec succès !');
+      
+      if (!process.env.EMAIL_USER) {
+        console.log('\n📧 PASSWORD RESET EMAIL - Preview URL:', nodemailer.getTestMessageUrl(result));
+        console.log('📧 You can view the email at the URL above.\n');
+      }
+    } catch (error) {
+      console.error('❌ EMAIL SERVICE: Erreur envoi code réinitialisation:', error);
+      throw error;
+    }
+  }
 }

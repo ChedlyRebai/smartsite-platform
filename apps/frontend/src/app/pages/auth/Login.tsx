@@ -205,6 +205,14 @@ export default function Login() {
                 >
                   Se connecter
                 </Button>
+                <p className="mt-4 text-center text-sm text-gray-500">
+                  <a
+                    href="/forgot-password"
+                    className="font-semibold text-indigo-600 hover:text-indigo-500"
+                  >
+                    Mot de passe oublié?
+                  </a>
+                </p>
                 {/* <form
                   onSubmit={form.handleSubmit(onSubmit)}>
                   <FieldGroup>

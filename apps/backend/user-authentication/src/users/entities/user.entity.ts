@@ -72,6 +72,12 @@ export class User extends Document {
 
   @Prop()
   otpExpiresAt?: Date;
+
+  @Prop()
+  passwordResetCode?: string;
+
+  @Prop()
+  passwordResetCodeExpiresAt?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

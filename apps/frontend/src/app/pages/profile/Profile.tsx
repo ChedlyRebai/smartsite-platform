@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import * as z from "zod";
@@ -17,7 +17,12 @@ import {
   Save,
   X,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
 import { Avatar, AvatarFallback } from "../../components/ui/avatar";
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
@@ -27,7 +32,13 @@ import { Label } from "../../components/ui/label";
 import { useAuthStore } from "../../store/authStore";
 import toast from "react-hot-toast";
 import axios from "axios";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { getCurrentUser } from "@/app/action/auth.action";
 
 const profileSchema = z.object({
   firstName: z
@@ -63,14 +74,14 @@ type PasswordFormData = z.infer<typeof passwordSchema>;
 
 export default function Profile() {
   const authUser = useAuthStore((state) => state.user);
-  const getCurrentUser = useAuthStore((state) => state.getCurrentUser);
+  //const getCurrentUser = useAuthStore((state) => state.getCurrentUser);
   const updateProfile = useAuthStore((state) => state.updateProfile);
 
-  const [user, setUser] = React.useState<any>(null);
-  const [isEditing, setIsEditing] = React.useState(false);
-  const [isEditingPassword, setIsEditingPassword] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [isLoadingData, setIsLoadingData] = React.useState(true);
+  const [user, setUser] = useState<any>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isEditingPassword, setIsEditingPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(true);
 
   const profileForm = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
@@ -95,27 +106,19 @@ export default function Profile() {
   });
 
   // Load user data
-  React.useEffect(() => {
+  useEffect(() => {
     loadUserData();
   }, []);
 
   const loadUserData = async () => {
     setIsLoadingData(true);
     try {
-      if (getCurrentUser) {
-        const userData = await getCurrentUser();
-        if (userData && !userData.error) {
-          setUser(userData);
-          profileForm.reset({
-            firstName: userData.firstName || "",
-            lastName: userData.lastName || "",
-            email: userData.email || "",
-            phoneNumber: userData.phoneNumber || "",
-            address: userData.address || "",
-            departement: userData.departement || "",
-            companyName: userData.companyName || "",
-          });
-        }
+      console.log("Fetching current user data...");
+      const userData = (await getCurrentUser(authUser)).data;
+      console.log("User data fetched:", userData);
+      if (userData) {
+        setUser(userData);
+        console.log("Current user data:", userData);
       }
     } catch (error: any) {
       console.error("Error loading user:", error);
@@ -145,7 +148,8 @@ export default function Profile() {
     } catch (error: any) {
       console.error("Error updating profile:", error);
       toast.error(
-        error?.response?.data?.message || "Erreur lors de la mise à jour du profil"
+        error?.response?.data?.message ||
+          "Erreur lors de la mise à jour du profil",
       );
     } finally {
       setIsLoading(false);
@@ -165,7 +169,7 @@ export default function Profile() {
           headers: {
             Authorization: `Bearer ${authUser?.access_token}`,
           },
-        }
+        },
       );
 
       toast.success("Mot de passe changé avec succès!");
@@ -174,7 +178,8 @@ export default function Profile() {
     } catch (error: any) {
       console.error("Error changing password:", error);
       toast.error(
-        error?.response?.data?.message || "Erreur lors du changement de mot de passe"
+        error?.response?.data?.message ||
+          "Erreur lors du changement de mot de passe",
       );
     } finally {
       setIsLoading(false);
@@ -192,7 +197,9 @@ export default function Profile() {
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-500">Impossible de charger les données du profil</p>
+        <p className="text-gray-500">
+          Impossible de charger les données du profil
+        </p>
       </div>
     );
   }
@@ -201,7 +208,9 @@ export default function Profile() {
     <div className="space-y-6 max-w-5xl mx-auto p-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Mon Profil</h1>
-        <p className="text-gray-500 mt-1">Gérez vos informations personnelles</p>
+        <p className="text-gray-500 mt-1">
+          Gérez vos informations personnelles
+        </p>
       </div>
 
       {/* Profile Card */}
@@ -266,7 +275,9 @@ export default function Profile() {
                     <Mail className="h-5 w-5 text-indigo-600" />
                     <div>
                       <p className="text-xs text-gray-500">Email</p>
-                      <p className="font-medium">{user.email || "Non renseigné"}</p>
+                      <p className="font-medium">
+                        {user.email || "Non renseigné"}
+                      </p>
                     </div>
                   </div>
                   {user.phoneNumber && (
@@ -393,7 +404,9 @@ export default function Profile() {
                       control={profileForm.control}
                       render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid}>
-                          <FieldLabel htmlFor="phoneNumber">Téléphone</FieldLabel>
+                          <FieldLabel htmlFor="phoneNumber">
+                            Téléphone
+                          </FieldLabel>
                           <Input {...field} id="phoneNumber" />
                           {fieldState.invalid && (
                             <FieldError errors={[fieldState.error]} />
@@ -425,7 +438,9 @@ export default function Profile() {
                       control={profileForm.control}
                       render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid}>
-                          <FieldLabel htmlFor="departement">Département</FieldLabel>
+                          <FieldLabel htmlFor="departement">
+                            Département
+                          </FieldLabel>
                           <Input {...field} id="departement" />
                           {fieldState.invalid && (
                             <FieldError errors={[fieldState.error]} />
@@ -441,7 +456,9 @@ export default function Profile() {
                       control={profileForm.control}
                       render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid}>
-                          <FieldLabel htmlFor="companyName">Entreprise</FieldLabel>
+                          <FieldLabel htmlFor="companyName">
+                            Entreprise
+                          </FieldLabel>
                           <Input {...field} id="companyName" />
                           {fieldState.invalid && (
                             <FieldError errors={[fieldState.error]} />
@@ -558,8 +575,8 @@ export default function Profile() {
             </form>
           ) : (
             <p className="text-gray-600">
-              Cliquez sur "Changer le mot de passe" pour mettre à jour votre mot de
-              passe.
+              Cliquez sur "Changer le mot de passe" pour mettre à jour votre mot
+              de passe.
             </p>
           )}
         </CardContent>
@@ -581,8 +598,8 @@ export default function Profile() {
                 {user.status === "approved"
                   ? "Approuvé"
                   : user.status === "pending"
-                  ? "En attente"
-                  : "Actif"}
+                    ? "En attente"
+                    : "Actif"}
               </Badge>
             </div>
             <div className="p-4 border rounded-lg">

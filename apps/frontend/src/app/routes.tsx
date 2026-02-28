@@ -3,6 +3,8 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import VerifyOTP from "./pages/auth/VerifyOTP";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
 import Dashboard from "./pages/dashboards/Dashboard";
 import Sites from "./pages/sites/Sites";
 import Projects from "./pages/projects/Projects";
@@ -49,6 +51,14 @@ export const router = createBrowserRouter([
   {
     path: "/verify-otp",
     element: <VerifyOTP />,
+  },
+  {
+    path: "/forgot-password",
+    element: <ForgotPassword />,
+  },
+  {
+    path: "/reset-password",
+    element: <ResetPassword />,
   },
   {
     path: "/",

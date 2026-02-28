@@ -60,6 +60,10 @@ export class UsersService {
     return this.userModel.findOne({ cin }).populate('role').exec();
   }
 
+  async findByEmail(email: string) {
+    return this.userModel.findOne({ email }).populate('role').exec();
+  }
+
   async findById(id: string) {
     return this.userModel.findById(id).populate('role').exec();
   }
