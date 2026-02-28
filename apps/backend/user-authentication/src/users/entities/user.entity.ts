@@ -14,7 +14,7 @@ export class User extends Document {
   @Prop({ required: true, unique: true, trim: true })
   cin: string;
 
-  @Prop({ required: true })
+  @Prop({ required: false }) // Rendre le mot de passe optionnel pour inscription sans mot de passe
   password: string;
 
   @Prop({ type: Types.ObjectId, ref: 'Role', required: true })
@@ -38,19 +38,30 @@ export class User extends Document {
   @Prop()
   departement?: string;
 
+  @Prop()
+  status?: string;
+
+  @Prop()
+  approvedBy?: string;
+
+  @Prop()
+  approvedAt?: Date;
+
+  @Prop()
+  motDePasse?: string;
+
   @Prop([String])
   certifications?: string[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
 
-// Pre-save hook to ensure roles is always an array of ObjectIds or empty
-UserSchema.pre('save', function (next) {
+// Pre-save hook placeholder (sync hook, nothing to do for now)
+UserSchema.pre('save', function () {
   // if (this.roles && !Array.isArray(this.roles)) {
   //   this.roles = "";
   // }
   // if (this.roles && this.roles.length > 0) {
   //   this.roles = this.roles.filter((role) => role && typeof role !== 'string') as Types.ObjectId[] | Role[];
   // }
-  next;
 });

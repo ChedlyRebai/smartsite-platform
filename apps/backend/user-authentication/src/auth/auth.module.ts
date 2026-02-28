@@ -9,6 +9,7 @@ import { UsersModule } from '../users/users.module';
 import { RolesModule } from '../roles/roles.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { EmailModule } from '../email/email.module';
 
 @Module({
   imports: [
@@ -18,10 +19,14 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     }),
     PassportModule,
     UsersModule,
+<<<<<<< HEAD
     RolesModule,
+=======
+    EmailModule,
+>>>>>>> 80efa83f (feat(auth): improve authentication flow and pending users management)
   ],
   providers: [AuthService, JwtStrategy, LocalStrategy],
   controllers: [AuthController],
   exports: [AuthService],
 })
-export class AuthModule {}
+export class AuthModule { }
