@@ -106,6 +106,8 @@ export interface AuthState {
   getPendingUsers?: () => Promise<User[]>;
   approveUser?: (userId: string, password: string) => Promise<User>;
   rejectUser?: (userId: string) => Promise<void>;
+  getCurrentUser?: () => Promise<any>;
+  updateProfile?: (data: any) => Promise<any>;
   logout: () => void;
 }
 

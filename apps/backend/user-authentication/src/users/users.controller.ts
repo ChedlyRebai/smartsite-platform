@@ -46,6 +46,81 @@ export class UsersController {
     }
   }
 
+  @Get('me')
+  async getCurrentUser(@Headers('Authorization') authHeader: string) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return { error: 'No token provided' };
+    }
+    const token = authHeader.split(' ')[1];
+    try {
+      const decoded: any = this.jwtService.verify(token);
+      const userId = decoded.sub;
+      const user = await this.usersService.findById(userId);
+      
+      if (!user) {
+        return { error: 'User not found' };
+      }
+
+      // Return user without password
+      const { password, ...userWithoutPassword } = user.toObject();
+      return userWithoutPassword;
+    } catch (error) {
+      return { error: 'Invalid token' };
+    }
+  }
+
+  @Put('me')
+  async updateCurrentUser(
+    @Headers('Authorization') authHeader: string,
+    @Body() updateData: any,
+  ) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return { error: 'No token provided' };
+    }
+    const token = authHeader.split(' ')[1];
+    try {
+      const decoded: any = this.jwtService.verify(token);
+      const userId = decoded.sub;
+      
+      
+      const { password, role, status, approvedBy, approvedAt, emailVerificationOtp, otpExpiresAt, ...allowedUpdates } = updateData;
+      
+      const updatedUser = await this.usersService.update(userId, allowedUpdates);
+      
+      if (!updatedUser) {
+        return { error: 'Failed to update user' };
+      }
+
+      const { password: pwd, ...userWithoutPassword } = updatedUser.toObject();
+      return userWithoutPassword;
+    } catch (error) {
+      return { error: 'Invalid token' };
+    }
+  }
+
+  @Put('me/password')
+  async changePassword(
+    @Headers('Authorization') authHeader: string,
+    @Body() passwordData: { currentPassword: string; newPassword: string },
+  ) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return { error: 'No token provided' };
+    }
+    const token = authHeader.split(' ')[1];
+    try {
+      const decoded: any = this.jwtService.verify(token);
+      const userId = decoded.sub;
+      
+      return await this.usersService.changePassword(
+        userId,
+        passwordData.currentPassword,
+        passwordData.newPassword,
+      );
+    } catch (error: any) {
+      return { error: error.message || 'Failed to change password' };
+    }
+  }
+
   @Get('pending')
   async findPending() {
     return this.usersService.findPending();

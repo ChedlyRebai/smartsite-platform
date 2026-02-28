@@ -63,6 +63,10 @@ export const router = createBrowserRouter([
         element: <Dashboard />,
       },
       {
+        path: "profile",
+        element: <Profile />,
+      },
+      {
         path: "sites",
         element: <Sites />,
       },

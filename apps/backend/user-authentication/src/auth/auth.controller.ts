@@ -40,11 +40,9 @@ export class AuthController {
       role,
       email,
       phoneNumber,
-
       adresse,
       companyName,
     } = registerDto;
-
     const user = await this.authService.register(
       cin,
       password,
@@ -53,7 +51,6 @@ export class AuthController {
       role,
       email,
       phoneNumber,
-
       adresse,
       companyName,
     );
@@ -67,7 +64,6 @@ export class AuthController {
         lastName: user.lastName,
         email: user.email,
         phoneNumber: user.phoneNumber,
-
         address: user.address,
         role: user.role,
         companyName: user.companyName,
