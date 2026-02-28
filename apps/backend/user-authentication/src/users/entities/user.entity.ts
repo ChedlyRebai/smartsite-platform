@@ -73,12 +73,15 @@ export class User extends Document {
   @Prop()
   otpExpiresAt?: Date;
 
+<<<<<<< HEAD
   @Prop({ default: false })
   passwordChnage: boolean;
 
   @Prop({ default: true })
   firstLogin: boolean;
 
+=======
+>>>>>>> 9c0a5749 (feat: implement password reset functionality with forgot password and resend code features)
   @Prop()
   passwordResetCode?: string;
 

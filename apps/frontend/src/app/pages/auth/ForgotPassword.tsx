@@ -39,9 +39,15 @@ export default function ForgotPassword() {
         "http://localhost:3000/auth/forgot-password",
         {
           email: data.email,
+<<<<<<< HEAD
         },
       );
       
+=======
+        }
+      );
+
+>>>>>>> 9c0a5749 (feat: implement password reset functionality with forgot password and resend code features)
       toast.success("Code de réinitialisation envoyé à votre email!");
       navigate("/reset-password", { state: { email: data.email } });
     } catch (error: any) {
@@ -75,8 +81,12 @@ export default function ForgotPassword() {
               Réinitialiser votre mot de passe
             </h2>
             <p className="mt-2 text-sm leading-6 text-gray-500">
+<<<<<<< HEAD
               Entrez votre adresse email et nous vous enverrons un code de
               réinitialisation.
+=======
+              Entrez votre adresse email et nous vous enverrons un code de réinitialisation.
+>>>>>>> 9c0a5749 (feat: implement password reset functionality with forgot password and resend code features)
             </p>
           </div>
 
@@ -113,9 +123,13 @@ export default function ForgotPassword() {
                 disabled={isLoading}
                 className="w-full mt-6 bg-indigo-600 hover:bg-indigo-700 text-white"
               >
+<<<<<<< HEAD
                 {isLoading
                   ? "Envoi en cours..."
                   : "Envoyer le code de réinitialisation"}
+=======
+                {isLoading ? "Envoi en cours..." : "Envoyer le code de réinitialisation"}
+>>>>>>> 9c0a5749 (feat: implement password reset functionality with forgot password and resend code features)
               </Button>
             </form>
           </div>

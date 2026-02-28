@@ -180,6 +180,73 @@ export default function Login() {
                   <a
                     href="/forgot-password"
                     className="font-semibold text-indigo-600 hover:text-indigo-500"
+<<<<<<< HEAD
+=======
+                  >
+                    Mot de passe oublié?
+                  </a>
+                </p>
+                {/* <form
+                  onSubmit={form.handleSubmit(onSubmit)}>
+                  <FieldGroup>
+                    <Controller
+                      name="cin"
+                      control={form.control}
+                      render={({ field, fieldState }) => {
+                        return (
+                          <Field data-invalid={fieldState.invalid}>
+                            <FieldLabel htmlFor="cin">CIN</FieldLabel>
+                            <Input
+                              id="cin"
+                              placeholder="Enter your CIN"
+                              autoComplete="off"
+                              {...field}
+                              aria-invalid={fieldState.invalid}
+                            />
+                            {fieldState.invalid && (
+                              <FieldError errors={[fieldState.error]} />
+                            )}
+                          </Field>
+                        );
+                      }}
+                    />
+                    <Controller
+                      name="password"
+                      control={form.control}
+                      render={({ field, fieldState: { error } }) => {
+                        const isInvalid = !!error;
+                        return (
+                          <Field data-invalid={isInvalid}>
+                            <FieldLabel htmlFor="password">Password</FieldLabel>
+                            <Input
+                              id="password"
+                              type="password"
+                              placeholder="Enter your password"
+                              className=" resize-none"
+                              {...field}
+                              aria-invalid={isInvalid}
+                            />
+
+                            {isInvalid && (
+                              <FieldError
+                                errors={
+                                  error?.message
+                                    ? [{ message: error.message }]
+                                    : []
+                                }
+                              />
+                            )}
+                          </Field>
+                        );
+                      }}
+                    />
+                  </FieldGroup>
+                  <Button
+                  
+                    className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                    type="submit"
+                    form="bug-report-form"
+>>>>>>> 9c0a5749 (feat: implement password reset functionality with forgot password and resend code features)
                   >
                     Mot de passe oublié?
                   </a>
