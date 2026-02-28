@@ -249,4 +249,27 @@ export class UsersService {
       .sort(() => Math.random() - 0.5)
       .join('');
   }
+
+  // async changePassword(userId: string, currentPassword: string, newPassword: string) {
+  //   const user = await this.userModel.findById(userId).exec();
+    
+  //   if (!user) {
+  //     throw new NotFoundException('User not found');
+  //   }
+
+  //   // Verify current password
+  //   const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+  //   if (!isPasswordValid) {
+  //     throw new UnauthorizedException('Current password is incorrect');
+  //   }
+
+  //   // Hash new password
+  //   const hashedPassword = await bcrypt.hash(newPassword, 10);
+    
+  //   // Update password
+  //   user.password = hashedPassword;
+  //   await user.save();
+
+  //   return { message: 'Password changed successfully' };
+  // }
 }
