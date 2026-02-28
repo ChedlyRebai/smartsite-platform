@@ -6,14 +6,14 @@ import axios from "axios";
 
 
 const api = axios.create({
-  baseURL: "http://localhost:3000",
+  baseURL: "http://localhost:3001",
 });
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
-      isAuthenticated: true,
+      isAuthenticated: false,
 
       login: async (cin: string, password: string) => {
         try {
@@ -50,46 +50,51 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      register: async (data: RegisterData) => {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        const newUser: User = {
-          _id: Date.now().toString(),
-          firstName: data.firstName,
-          lastName: data.lastName,
-          email: data.email,
-          phone: data.phone,
-          role: data.role,
-          isActive: false,
-          createdDate: new Date().toISOString(),
-        };
-
-        
-        // Do not auto-login: new accounts require admin approval
-        set({});
+      // Inscription réelle via backend d'auth (signature compatible avec Register.tsx)
+      register: async (
+        cin: string,
+        password: string,
+        firstname: string,
+        lastname: string,
+        email: string,
+        telephone: string,
+        departement: string,
+        adresse: string,
+        role: string,
+      ) => {
+        const res = await api.post("/auth/register", {
+          cin,
+          password, // généralement vide, mot de passe généré à l'approbation
+          firstname,
+          lastname,
+          email,
+          telephone,
+          departement,
+          adresse,
+          role,
+        });
+        return res.data;
       },
 
-      // getPendingUsers: async () => {
-      //   await new Promise((resolve) => setTimeout(resolve, 500));
-      //   return mockUsers.filter((u) => !u.isActive);
-      // },
+      // Récupérer les utilisateurs en attente (admin)
+      getPendingUsers: async () => {
+        const res = await api.get("/users/pending");
+        return res.data;
+      },
 
-      // approveUser: async (userId: string) => {
-      //   await new Promise((resolve) => setTimeout(resolve, 500));
-      //   const idx = mockUsers.findIndex((u) => u.id === userId);
-      //   if (idx === -1) throw new Error("User not found");
-      //   mockUsers[idx].isActive = true;
-      //   return mockUsers[idx];
-      // },
+      // Approuver un utilisateur (admin)
+      approveUser: async (userId: string, password: string) => {
+        const res = await api.post(`/auth/approve-user/${userId}`, {
+          password,
+        });
+        return res.data;
+      },
 
-      // rejectUser: async (userId: string) => {
-      //   await new Promise((resolve) => setTimeout(resolve, 500));
-      //   const idx = mockUsers.findIndex((u) => u.id === userId);
-      //   if (idx === -1) throw new Error("User not found");
-      //   // remove the user from the mock DB
-      //   mockUsers.splice(idx, 1);
-      // },
+      // Rejeter / supprimer un utilisateur (admin)
+      rejectUser: async (userId: string) => {
+        const res = await api.delete(`/users/${userId}`);
+        return res.data;
+      },
 
       logout: () => {
         // Clear authorization header
@@ -99,6 +104,12 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: "smartsite-auth",
+      onRehydrateStorage: () => (state) => {
+        if (state?.user?.access_token) {
+          api.defaults.headers.common["Authorization"] =
+            `Bearer ${state.user.access_token}`;
+        }
+      },
     },
   ),
 );

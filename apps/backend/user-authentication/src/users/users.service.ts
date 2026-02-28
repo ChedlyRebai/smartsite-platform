@@ -1,39 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import * as bcrypt from 'bcrypt';
+import { Model, Types } from 'mongoose';
 import { User } from './entities/user.entity';
-<<<<<<< HEAD
-import { Role } from 'src/roles/entities/role.entity';
-@Injectable()
-export class UsersService {
-  constructor(
-    @InjectModel(User.name) private userModel: Model<User>,
-    @InjectModel('Role') private Role: Model<Role>,
-  ) {}
-
-  async create(createUserDto: any) {
-    createUserDto.password = await bcrypt.hash(createUserDto.password, 10);
-    const createdUser = new this.userModel(createUserDto);
-
-    return createdUser.save();
-=======
-import { Types } from 'mongoose';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) { }
+  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async create(createUserDto: any) {
     console.log(' DEBUG: createUserDto:', createUserDto);
 
-    // Convertir le role en ObjectId si nécessaire
     if (createUserDto.role && typeof createUserDto.role === 'string') {
       createUserDto.role = new Types.ObjectId(createUserDto.role);
     }
-
-    // Ne PAS hasher le mot de passe ici - il est déjà hashé dans auth.service
-    // Le hashage est fait dans auth.service.ts
 
     try {
       const createdUser = new this.userModel(createUserDto);
@@ -43,12 +22,11 @@ export class UsersService {
       console.log(' DEBUG: Utilisateur créé:', result);
       console.log(' DEBUG: Utilisateur sauvegardé avec ID:', result._id);
       return result;
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ ERREUR SAVE:', error.message);
       console.error('❌ ERREUR DETAILS:', error);
       throw error;
     }
->>>>>>> 80efa83f (feat(auth): improve authentication flow and pending users management)
   }
 
   async mypermission(userId: string) {
@@ -77,13 +55,8 @@ export class UsersService {
   }
 
   async findByCin(cin: string) {
-<<<<<<< HEAD
     console.log('from user service', cin);
-    return await this.userModel.findOne({ cin }).populate('role').exec();
-=======
-    console.log("from user service", cin)
     return this.userModel.findOne({ cin }).populate('role').exec();
->>>>>>> 80efa83f (feat(auth): improve authentication flow and pending users management)
   }
 
   async findById(id: string) {
@@ -91,7 +64,7 @@ export class UsersService {
   }
 
   async findAll() {
-    return await this.userModel.find().populate('role').exec();
+    return this.userModel.find().populate('role').exec();
   }
 
   async findPending() {
@@ -99,13 +72,13 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: any) {
-    return await this.userModel
+    return this.userModel
       .findByIdAndUpdate(id, updateUserDto, { new: true })
       .exec();
   }
 
   async remove(id: string) {
-    return await this.userModel.findByIdAndDelete(id).exec();
+    return this.userModel.findByIdAndDelete(id).exec();
   }
 
   async handleBan(id: string) {
@@ -113,14 +86,11 @@ export class UsersService {
     if (!bannedUser) {
       throw new NotFoundException(`Usser with id ${id} not exist`);
     }
-    if (bannedUser?.estActif) {
-      bannedUser.estActif = false;
-    } else {
-      bannedUser.estActif = true;
-    }
+    bannedUser.estActif = !bannedUser.estActif;
 
     const user = await bannedUser.save();
 
     return user;
   }
 }
+

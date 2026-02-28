@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, Outlet, useNavigate, useLocation } from "react-router";
 import {
   Building2,
@@ -23,7 +23,6 @@ import {
 import { Badge } from "../components/ui/badge";
 import { getNavigationForRole, roleLabels } from "../utils/roleConfig";
 import { mockNotifications } from "../utils/mockData";
-import { getPermissions } from "../action/accesss.action";
 
 export default  function DashboardLayout() {
   const navigate = useNavigate();
@@ -42,22 +41,8 @@ export default  function DashboardLayout() {
     return null;
   }
 
-  const [navigationItems,setNavigationItems]= useState<any[]>([]);
-
-  const navigationItemss = getNavigationForRole(user.role.name);
- 
-  useEffect(()=>{
-    const fetchData= async ()=>{
-      try {
-        const permissions = await getPermissions();
-        console.log('permissions:', permissions.data);
-        setNavigationItems(permissions.data);
-      } catch (error) {
-        console.error("Error fetching permissions:", error);
-      }
-    };
-    fetchData();
-  },[])
+  // Navigation statique en fonction du rôle
+  const navigationItems = getNavigationForRole(user.role.name);
   const unreadNotifications = mockNotifications.filter((n) => !n.read).length;
 
   const getInitials = (nom: string, lastname: string) => {
@@ -179,8 +164,7 @@ export default  function DashboardLayout() {
         >
                <nav className="p-4 space-y-1 overflow-y-auto flex-1">
                 {navigationItems.map((item) => {
-                  // const Icon = item.icon;
-                const isActive = location.pathname.startsWith(item.href);
+                  const isActive = location.pathname.startsWith(item.href);
                   return (
                     <Link
                       key={item.href}
@@ -195,8 +179,7 @@ export default  function DashboardLayout() {
                         }
                       `}
                     >
-                      {/* <Icon className="h-5 w-5" /> */}
-                      <span className="font-medium">{item.name}</span>
+                      <span className="font-medium">{item.label}</span>
                     </Link>
                   );
                 })}

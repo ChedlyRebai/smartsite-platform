@@ -16,14 +16,10 @@ import { JwtService } from '@nestjs/jwt';
 @Controller('users')
 @UseGuards(JwtAuthGuard)
 export class UsersController {
-<<<<<<< HEAD
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
   ) {}
-=======
-  constructor(private usersService: UsersService) { }
->>>>>>> 80efa83f (feat(auth): improve authentication flow and pending users management)
 
   @Post()
   async create(@Body() createUserDto: any) {
@@ -35,7 +31,6 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
-<<<<<<< HEAD
   @Get('mypermissions')
   async getProfile(@Headers('Authorization') authHeader: string) {
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -49,11 +44,11 @@ export class UsersController {
     } catch (error) {
       return { error: 'Invalid token' };
     }
-=======
+  }
+
   @Get('pending')
   async findPending() {
     return this.usersService.findPending();
->>>>>>> 80efa83f (feat(auth): improve authentication flow and pending users management)
   }
 
   @Get(':id')
@@ -76,3 +71,4 @@ export class UsersController {
     return this.usersService.handleBan(id);
   }
 }
+
