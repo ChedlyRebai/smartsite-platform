@@ -98,7 +98,7 @@ export default function Login() {
       setIsLoading(false);
     }
   };
-  const [showPassword, setShowPassword] =React.useState(false);
+  const [showPassword, setShowPassword] = React.useState(false);
   return (
     <>
       {/*
@@ -119,15 +119,15 @@ export default function Login() {
                 className="h-16 w-16 object-contain"
               />
               <h2 className="mt-8 text-2xl font-bold leading-9 tracking-tight text-gray-900">
-                Sign in to your account
+                Connectez-vous à votre compte
               </h2>
               <p className="mt-2 text-sm leading-6 text-gray-500">
-                Not a member?{" "}
+                Pas encore de compte?{" "}
                 <a
-                  href="#"
+                  href="/register"
                   className="font-semibold text-indigo-600 hover:text-indigo-500"
                 >
-                  Start a 14 day free trial
+                  S'inscrire
                 </a>
               </p>
             </div>
@@ -165,7 +165,7 @@ export default function Login() {
                           <FieldLabel htmlFor="form-rhf-demo-password">
                             Password
                           </FieldLabel>
-                          
+
                           <div className="relative">
                             <Input
                               {...field}
@@ -203,7 +203,7 @@ export default function Login() {
                   form="form-rhf-demo"
                   className="flex w-full mt-4 justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                 >
-                  Submit
+                  Se connecter
                 </Button>
                 {/* <form
                   onSubmit={form.handleSubmit(onSubmit)}>
