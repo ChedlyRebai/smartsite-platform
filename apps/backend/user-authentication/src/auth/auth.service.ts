@@ -98,15 +98,22 @@ export class AuthService {
       throw new BadRequestException('User already exists');
     }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> c80e20e5 (feat: implement OTP verification and resend functionality in authentication flow)
     // Find default "client" role if no role provided
     let roleId = role;
     if (!roleId) {
       const clientRole = await this.rolesService.findByName('client');
       if (!clientRole) {
+<<<<<<< HEAD
         throw new BadRequestException(
           'Default client role not found. Please create a "client" role first.',
         );
+=======
+        throw new BadRequestException('Default client role not found. Please create a "client" role first.');
+>>>>>>> c80e20e5 (feat: implement OTP verification and resend functionality in authentication flow)
       }
       roleId = clientRole._id.toString();
       console.log('🔍 DEBUG: Using default client role:', roleId);
@@ -152,7 +159,11 @@ export class AuthService {
         );
         console.log('✅ OTP envoyé avec succès à', result.email);
       } catch (error) {
+<<<<<<< HEAD
         console.error("❌ Erreur lors de l'envoi de l'OTP:", error);
+=======
+        console.error('❌ Erreur lors de l\'envoi de l\'OTP:', error);
+>>>>>>> c80e20e5 (feat: implement OTP verification and resend functionality in authentication flow)
         // Don't fail registration if email sending fails
       }
     }
@@ -162,7 +173,11 @@ export class AuthService {
 
   async verifyOTP(cin: string, otp: string) {
     const user = await this.usersService.findByCin(cin);
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> c80e20e5 (feat: implement OTP verification and resend functionality in authentication flow)
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -211,7 +226,11 @@ export class AuthService {
 
   async resendOTP(cin: string) {
     const user = await this.usersService.findByCin(cin);
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> c80e20e5 (feat: implement OTP verification and resend functionality in authentication flow)
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -233,10 +252,21 @@ export class AuthService {
     // Send OTP email
     if (user.email) {
       try {
+<<<<<<< HEAD
         await this.emailService.sendOTPEmail(user.email, user.firstName, otp);
         console.log('✅ OTP renvoyé avec succès à', user.email);
       } catch (error) {
         console.error("❌ Erreur lors du renvoi de l'OTP:", error);
+=======
+        await this.emailService.sendOTPEmail(
+          user.email,
+          user.firstName,
+          otp,
+        );
+        console.log('✅ OTP renvoyé avec succès à', user.email);
+      } catch (error) {
+        console.error('❌ Erreur lors du renvoi de l\'OTP:', error);
+>>>>>>> c80e20e5 (feat: implement OTP verification and resend functionality in authentication flow)
         throw new BadRequestException('Failed to send OTP email');
       }
     } else {
