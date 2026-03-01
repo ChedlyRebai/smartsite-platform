@@ -13,7 +13,7 @@ import { CreateSiteDto, UpdateSiteDto } from './dto';
 export interface SiteFilters {
   nom?: string;
   localisation?: string;
-  estActif?: boolean;
+  isActif?: boolean;
   budgetMin?: number;
   budgetMax?: number;
   status?: string;
@@ -100,8 +100,8 @@ export class GestionSiteService {
         if (filters.localisation) {
           query.localisation = { $regex: filters.localisation, $options: 'i' };
         }
-        if (filters.estActif !== undefined) {
-          query.estActif = filters.estActif;
+        if (filters.isActif !== undefined) {
+          query.isActif = filters.isActif;
         }
         if (filters.status) {
           query.status = filters.status;
@@ -205,7 +205,7 @@ export class GestionSiteService {
    */
   async findActiveSites(): Promise<Site[]> {
     try {
-      return await this.siteModel.find({ estActif: true }).exec();
+      return await this.siteModel.find({ isActif: true }).exec();
     } catch (error) {
       this.logger.error(
         `Erreur lors de la récupération des sites actifs: ${error.message}`,
@@ -270,14 +270,14 @@ export class GestionSiteService {
   }
 
   /**
-   * Soft delete a site (set estActif to false)
+   * Soft delete a site (set isActif to false)
    */
   async softDelete(id: string): Promise<Site> {
     try {
       const site = await this.siteModel
         .findByIdAndUpdate(
           id,
-          { estActif: false },
+          { isActif: false },
           { new: true },
         )
         .exec();
@@ -349,7 +349,7 @@ export class GestionSiteService {
       const site = await this.siteModel
         .findByIdAndUpdate(
           id,
-          { estActif: true },
+          { isActif: true },
           { new: true },
         )
         .exec();
@@ -383,8 +383,8 @@ export class GestionSiteService {
     try {
       const [total, active, inactive, stats] = await Promise.all([
         this.siteModel.countDocuments().exec(),
-        this.siteModel.countDocuments({ estActif: true }).exec(),
-        this.siteModel.countDocuments({ estActif: false }).exec(),
+        this.siteModel.countDocuments({ isActif: true }).exec(),
+        this.siteModel.countDocuments({ isActif: false }).exec(),
         this.siteModel.aggregate([
           {
             $group: {

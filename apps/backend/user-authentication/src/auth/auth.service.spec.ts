@@ -47,7 +47,7 @@ describe('AuthService', () => {
     it('should return user if credentials are valid', async () => {
       const mockUser = {
         cin: '12345678',
-        motDePasse: '$2b$10$hashed',
+        password: '$2b$10$hashed',
         toObject: () => ({ cin: '12345678', nom: 'Test' }),
       };
       mockUsersService.findByCin.mockResolvedValue(mockUser);

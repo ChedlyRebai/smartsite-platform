@@ -1,5 +1,5 @@
 import { UserCog, Edit, Eye } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -10,11 +10,13 @@ import { useAuthStore } from '../../store/authStore';
 import { canEdit } from '../../utils/permissions';
 import { mockClients } from '../../utils/mockData';
 import { toast } from 'sonner';
+import { getAllClients } from '@/app/action/user.action';
+import { User } from '@/app/types';
 
 export default function Clients() {
   const user = useAuthStore((state) => state.user);
   const canManageClients = user && canEdit(user.role.name, 'clients');
-  const [clients, setClients] = useState(mockClients);
+  const [clients, setClients] = useState<User[]>([] as User[]);
   const [viewDetailsOpen, setViewDetailsOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<any>(null);
@@ -37,14 +39,21 @@ export default function Clients() {
       return;
     }
     setClients(clients.map(c => 
-      c.id === selectedClient.id 
+      c._id === selectedClient._id 
         ? { ...c, name: editData.name, email: editData.email, phone: editData.phone }
         : c
     ));
     setEditOpen(false);
     toast.success('Client updated successfully!');
   };
-
+  
+  useEffect(() => {
+    getAllClients().then((res) => {
+      setClients(res.data)
+      console.log(res.data, "clients" )
+    })
+      ;
+  },[]);
   return (
     <div className="space-y-6">
       <div>
@@ -61,18 +70,18 @@ export default function Clients() {
         <CardContent>
           <div className="space-y-4">
             {clients.map((client) => (
-              <div key={client.id} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+              <div key={client._id} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900">{client.name}</h3>
-                    <p className="text-sm text-gray-500 mt-1">{client.email} • {client.phone}</p>
-                    <div className="flex gap-4 mt-3 text-sm">
-                      <span className="text-gray-600"><strong>Projects:</strong> {client.projects}</span>
-                      <span className="text-gray-600"><strong>Total Value:</strong> ${(client.totalValue / 1000000).toFixed(1)}M</span>
-                    </div>
+                    <h3 className="font-semibold text-gray-900">{client.firstName} {client.lastName}</h3>
+                    <p className="text-sm text-gray-500 mt-1">{client.email} • {client.phoneNumber}</p>
+                       <div className="flex gap-4 mt-3 text-sm">
+                        <span className="text-gray-600"><strong>Projects:</strong> {client.projectsCount}</span>
+                        {/* <span className="text-gray-600"><strong>Total Value:</strong> ${(client.totalValue / 1000000).toFixed(1)}M</span> */}
+                      </div> 
                   </div>
                   <div className="flex gap-2 ml-4">
-                    <Dialog open={viewDetailsOpen && selectedClient?.id === client.id} onOpenChange={setViewDetailsOpen}>
+                    <Dialog open={viewDetailsOpen && selectedClient?._id === client._id} onOpenChange={setViewDetailsOpen}>
                       <DialogTrigger asChild onClick={() => handleViewDetails(client)}>
                         <Button size="sm" variant="outline">
                           <Eye className="h-4 w-4 mr-1" />
@@ -87,7 +96,7 @@ export default function Clients() {
                           <div className="space-y-4">
                             <div>
                               <p className="text-sm text-gray-600">Client Name</p>
-                              <p className="font-semibold text-gray-900">{selectedClient.name}</p>
+                              <p className="font-semibold text-gray-900">{selectedClient.firstName} {selectedClient.lastName}</p>
                             </div>
                             <div>
                               <p className="text-sm text-gray-600">Email</p>
@@ -95,17 +104,17 @@ export default function Clients() {
                             </div>
                             <div>
                               <p className="text-sm text-gray-600">Phone</p>
-                              <p className="font-semibold text-gray-900">{selectedClient.phone}</p>
+                              <p className="font-semibold text-gray-900">{selectedClient.phoneNumber}</p>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                               <div>
                                 <p className="text-sm text-gray-600">Active Projects</p>
-                                <p className="font-semibold text-gray-900">{selectedClient.projects}</p>
+                                <p className="font-semibold text-gray-900">{selectedClient.projectsCount}</p>
                               </div>
-                              <div>
+                              {/* <div>
                                 <p className="text-sm text-gray-600">Total Value</p>
                                 <p className="font-semibold text-gray-900">${(selectedClient.totalValue / 1000000).toFixed(1)}M</p>
-                              </div>
+                              </div> */}
                             </div>
                             <Badge variant="secondary">Active Client</Badge>
                             <Button className="w-full bg-gradient-to-r from-blue-600 to-green-600" onClick={() => setViewDetailsOpen(false)}>
@@ -115,7 +124,7 @@ export default function Clients() {
                         )}
                       </DialogContent>
                     </Dialog>
-                    <Dialog open={editOpen && selectedClient?.id === client.id} onOpenChange={setEditOpen}>
+                    <Dialog open={editOpen && selectedClient?._id === client._id} onOpenChange={setEditOpen}>
                       <DialogTrigger asChild onClick={() => handleEditClient(client)}>
                         <Button size="sm" variant="outline">
                           <Edit className="h-4 w-4 mr-1" />

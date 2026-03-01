@@ -36,6 +36,8 @@ import {
 } from "@/app/components/ui/alert-dialog";
 import {
   ArrowUpDown,
+  BanIcon,
+  CheckIcon,
   Edit,
   ListPlusIcon,
   SearchIcon,
@@ -51,11 +53,13 @@ interface DataTableProps<TData, TValue> {
   //columns: ColumnDef<TData, TValue>[];
   users: User[];
   onDelete?: (userId: string) => Promise<void> | void;
+  onBan?: (userId: string, isActif: boolean) => Promise<void> | void;
 }
 
 export function UserDataTable<TData, TValue>({
   users,
   onDelete,
+  onBan,
 }: DataTableProps<TData, TValue>) {
   const [data, setData] = useState<User[]>([]);
   const [TotalPages, setTotalPages] = useState(0);
@@ -65,8 +69,21 @@ export function UserDataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [banningId, setBaningId] = useState<string | null>(null);
   const { setId, id, onOpen, setType } = useAddUserModal();
   console.log("users:", users);
+
+  const handleBan = async (userId: string) => {
+    if (!onBan) {
+      return;
+    }
+    setBaningId(userId);
+    try {
+      await onBan(userId, false);
+    } finally {
+      setBaningId(null);
+    }
+  };
   const handleDelete = async (userId: string) => {
     if (!onDelete) {
       return;
@@ -102,7 +119,7 @@ export function UserDataTable<TData, TValue>({
       },
     },
     {
-      accessorKey: "lastname",
+      accessorKey: "lastName",
       header: ({ column }) => {
         return <></>;
       },
@@ -111,7 +128,7 @@ export function UserDataTable<TData, TValue>({
       },
     },
     {
-      accessorKey: "firstname",
+      accessorKey: "firstName",
       header: ({ column }) => {
         return (
           <Button
@@ -124,7 +141,7 @@ export function UserDataTable<TData, TValue>({
         );
       },
       cell: ({ row }) => {
-        const fullname = `${row.getValue("firstname")} ${row.getValue("lastname")}`;
+        const fullname = `${row.getValue("firstName")} ${row.getValue("lastName")}`;
         return <>{fullname}</>;
       },
     },
@@ -144,7 +161,7 @@ export function UserDataTable<TData, TValue>({
       },
     },
     {
-      accessorKey: "estActif",
+      accessorKey: "isActif",
       header: ({ column }) => {
         return (
           <Button
@@ -157,7 +174,7 @@ export function UserDataTable<TData, TValue>({
         );
       },
       cell: ({ row }) => {
-        const isActive = row.getValue("estActif") as boolean;
+        const isActive = row.getValue("isActif") as boolean;
         return (
           <Badge
             className={
@@ -241,9 +258,9 @@ export function UserDataTable<TData, TValue>({
       // },
       cell: ({ row }) => {
         const id = row.getValue("_id") as string;
-        const firstname = row.getValue("firstname") as string | undefined;
-        const lastname = row.getValue("lastname") as string | undefined;
-        const fullName = [firstname, lastname].filter(Boolean).join(" ");
+        const firstName = row.getValue("firstName") as string | undefined;
+        const lastName = row.getValue("lastName") as string | undefined;
+        const fullName = [firstName, lastName].filter(Boolean).join(" ");
 
         return (
           <>
@@ -266,7 +283,8 @@ export function UserDataTable<TData, TValue>({
                 <AlertDialogHeader>
                   <AlertDialogTitle>Delete user</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will permanently delete{fullName ? ` ${fullName}` : " this user"}
+                    This will permanently delete
+                    {fullName ? ` ${fullName}` : " this user"}
                     and remove the account from the system.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
@@ -277,6 +295,42 @@ export function UserDataTable<TData, TValue>({
                     disabled={deletingId === id}
                   >
                     {deletingId === id ? "Deleting..." : "Delete"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  {row.getValue("isActif") ? (
+                    <BanIcon className="h-4 w-4 " />
+                  ) : (
+                    <CheckIcon className="h-4 w-4 text-green-600" />
+                  )}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Ban user</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently{" "}
+                    {row.getValue("isActif") ? "ban" : "unban"}
+                    {fullName ? ` ${fullName}` : " this user"}
+                    and {row.getValue("isActif")
+                      ? "disactivate"
+                      : "activate"}{" "}
+                    the account from the system
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => handleBan(id)}
+                    disabled={banningId === id}
+                  >
+                    {" "}
+                    {row.getValue("isActif") ? "Ban" : "Unban"}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -320,8 +374,9 @@ export function UserDataTable<TData, TValue>({
           //   disabled={access.creation === "N"}
           variant="default"
           className=""
-
-          onClick={()=>{onOpen(),setType("add")}}
+          onClick={() => {
+            (onOpen(), setType("add"));
+          }}
         >
           <ListPlusIcon className="mr-2 h-4 w-4" />
           Add New User

@@ -40,7 +40,7 @@ export class GestionSiteController {
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
     @Query('nom') nom?: string,
     @Query('localisation') localisation?: string,
-    @Query('estActif') estActif?: string,
+    @Query('isActif') isActif?: string,
     @Query('status') status?: string,
     @Query('budgetMin') budgetMin?: string,
     @Query('budgetMax') budgetMax?: string,
@@ -51,7 +51,7 @@ export class GestionSiteController {
     const filters: SiteFilters = {
       nom,
       localisation,
-      estActif: estActif !== undefined ? estActif === 'true' : undefined,
+      isActif: isActif !== undefined ? isActif === 'true' : undefined,
       status,
       budgetMin: parsedBudgetMin,
       budgetMax: parsedBudgetMax,
@@ -140,7 +140,7 @@ export class GestionSiteController {
   }
 
   /**
-   * Soft delete a site (set estActif to false)
+   * Soft delete a site (set isActif to false)
    */
   @Delete(':id/soft')
   @HttpCode(HttpStatus.OK)

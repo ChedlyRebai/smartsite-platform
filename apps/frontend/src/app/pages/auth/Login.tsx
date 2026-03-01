@@ -35,41 +35,8 @@ const formSchema = z.object({
 export default function Login() {
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
-  // const [cin, setcin] = useState("");
-  // const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = React.useState(false);
   const [logoAvailable, setLogoAvailable] = React.useState(true);
-
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   setIsLoading(true);
-  //   try {
-  //     await login(cin, password).then((data: any) => {
-  //       console.log("Login successful!", data);
-  //       toast.success("Login successful!");
-  //       navigate("/dashboard");
-  //     });
-  //     toast.success("Login successful!");
-  //     navigate("/dashboard");
-  //   } catch (error: any) {
-  //     const message =
-  //       error?.message ||
-  //       error?.response?.data?.message ||
-  //       "Invalid credentials. Please try again.";
-  //     toast.error(message);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-  // <Input
-  //id="cin"
-  //type="cin"
-  //placeholder="your.cin@smartsite.com"
-  //value={cin}
-  //onChange={(e) => setcin(e.target.value)}
-  //required
-  //disabled={isLoading}
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -98,7 +65,7 @@ export default function Login() {
       setIsLoading(false);
     }
   };
-  const [showPassword, setShowPassword] =React.useState(false);
+  const [showPassword, setShowPassword] = React.useState(false);
   return (
     <>
       {/*
@@ -111,7 +78,7 @@ export default function Login() {
       */}
       <div className="h-screen flex min-h-full flex-1">
         <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
-          <div className="mx-auto w-full max-w-sm lg:w-96">
+          <div className="mx-auto w-full  lg:w-96">
             <div>
               <img
                 src="/logo.png"
@@ -119,15 +86,15 @@ export default function Login() {
                 className="h-16 w-16 object-contain"
               />
               <h2 className="mt-8 text-2xl font-bold leading-9 tracking-tight text-gray-900">
-                Sign in to your account
+                Connectez-vous à votre compte
               </h2>
               <p className="mt-2 text-sm leading-6 text-gray-500">
-                Not a member?{" "}
+                Pas encore de compte?{" "}
                 <a
-                  href="#"
+                  href="/register"
                   className="font-semibold text-indigo-600 hover:text-indigo-500"
                 >
-                  Start a 14 day free trial
+                  S'inscrire
                 </a>
               </p>
             </div>
@@ -165,7 +132,7 @@ export default function Login() {
                           <FieldLabel htmlFor="form-rhf-demo-password">
                             Password
                           </FieldLabel>
-                          
+
                           <div className="relative">
                             <Input
                               {...field}
@@ -203,154 +170,16 @@ export default function Login() {
                   form="form-rhf-demo"
                   className="flex w-full mt-4 justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                 >
-                  Submit
+                  Se connecter
                 </Button>
-                {/* <form
-                  onSubmit={form.handleSubmit(onSubmit)}>
-                  <FieldGroup>
-                    <Controller
-                      name="cin"
-                      control={form.control}
-                      render={({ field, fieldState }) => {
-                        return (
-                          <Field data-invalid={fieldState.invalid}>
-                            <FieldLabel htmlFor="cin">CIN</FieldLabel>
-                            <Input
-                              id="cin"
-                              placeholder="Enter your CIN"
-                              autoComplete="off"
-                              {...field}
-                              aria-invalid={fieldState.invalid}
-                            />
-                            {fieldState.invalid && (
-                              <FieldError errors={[fieldState.error]} />
-                            )}
-                          </Field>
-                        );
-                      }}
-                    />
-                    <Controller
-                      name="password"
-                      control={form.control}
-                      render={({ field, fieldState: { error } }) => {
-                        const isInvalid = !!error;
-                        return (
-                          <Field data-invalid={isInvalid}>
-                            <FieldLabel htmlFor="password">Password</FieldLabel>
-                            <Input
-                              id="password"
-                              type="password"
-                              placeholder="Enter your password"
-                              className=" resize-none"
-                              {...field}
-                              aria-invalid={isInvalid}
-                            />
-
-                            {isInvalid && (
-                              <FieldError
-                                errors={
-                                  error?.message
-                                    ? [{ message: error.message }]
-                                    : []
-                                }
-                              />
-                            )}
-                          </Field>
-                        );
-                      }}
-                    />
-                  </FieldGroup>
-                  <Button
-                  
-                    className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                    type="submit"
-                    form="bug-report-form"
+                <p className="mt-4 text-center text-sm text-gray-500">
+                  <a
+                    href="/forgot-password"
+                    className="font-semibold text-indigo-600 hover:text-indigo-500"
                   >
-                    Submit
-                  </Button>
-                </form> */}
-
-                {/* <form action="#" method="POST" className="space-y-6">
-                  <div>
-                    <label
-                      htmlFor="cin"
-                      className="block text-sm font-medium leading-6 text-gray-900"
-                    >
-                      cin
-                    </label>
-                    <div className="mt-2">
-                      <input
-                        id="cin"
-                        name="cin"
-                        type="string"
-                        autoComplete="cin"
-                        required
-                        value={cin}
-                        disabled={isLoading}
-                        onChange={(e) => setcin(e.target.value)}
-                        className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="password"
-                      className="block text-sm font-medium leading-6 text-gray-900"
-                    >
-                      Password
-                    </label>
-                    <div className="mt-2">
-                      <input
-                        id="password"
-                        name="password"
-                        type="password"
-                        autoComplete="current-password"
-                        required
-                        onChange={(e) => setPassword(e.target.value)}
-                        value={password}
-                        className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <input
-                        id="remember-me"
-                        name="remember-me"
-                        type="checkbox"
-                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
-                      />
-                      <label
-                        htmlFor="remember-me"
-                        className="ml-3 block text-sm leading-6 text-gray-700"
-                      >
-                        Remember me
-                      </label>
-                    </div>
-
-                    <div className="text-sm leading-6">
-                      <a
-                        href="#"
-                        className="font-semibold text-indigo-600 hover:text-indigo-500"
-                      >
-                        Forgot password?
-                      </a>
-                    </div>
-                  </div>
-
-                  <div>
-                    <button
-                      type="submit"
-                      onClick={handleSubmit}
-                      disabled={isLoading}
-                      className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                    >
-                      Sign in
-                    </button>
-                  </div>
-                </form> */}
+                    Mot de passe oublié?
+                  </a>
+                </p>
               </div>
             </div>
           </div>

@@ -34,15 +34,17 @@ export const getUserById = async (id: string) => {
 
 export const createUser = async (userData: {
   cin: string;
-  password: string;
   firstName?: string;
   lastName?: string;
   email?: string;
-  telephone?: string;
+  phoneNumber?: string;
   address?: string;
+  companyName?: string;
+  departement?: string;
+  role?: string;
 }) => {
   try {
-    const res = await axios.post(`${API_URL}`, userData);
+    const res = await axios.post(`${API_URL}/create-with-temp-password`, userData);
     if (res.status === 201) {
       return Promise.resolve({ status: res.status, data: res.data });
     }
@@ -63,7 +65,7 @@ export const updateUser = async (
     firstName?: string;
     lastName?: string;
     email?: string;
-    telephone?: string;
+    phoneNumber?: string;
     address?: string;
   },
 ) => {
@@ -125,3 +127,34 @@ export const removeRoleFromUser = async (userId: string, roleId: string) => {
     });
   }
 };
+
+export const banUser = async (userId: string, data: boolean) => {
+  try {
+    const res = await axios.put(`${API_URL}/ban/${userId}`, { data });
+    if (res.status === 200) {
+      return Promise.resolve({ status: res.status, data: res.data });
+    }
+  } catch (error: any) {
+    console.error("Ban user eror,", error);
+    return Promise.resolve({
+      status: error?.response?.status,
+      data: error?.reponse?.data?.message,
+    });
+  }
+};
+
+
+export const getAllClients = async () =>{
+  try {
+    const res = await axios.get(`${API_URL}/clients`);
+    if(res.status === 200){
+
+      return Promise.resolve({status: res.status, data: res.data})
+    }
+  } catch (error) {
+    return Promise.resolve({
+      status: error?.response?.status,
+      data: error?.response?.data?.message,
+    })
+  }
+}

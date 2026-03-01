@@ -20,7 +20,7 @@ export default function WorksManagerDashboard() {
           Works Management Overview
         </h1>
         <p className="text-gray-500 mt-1">
-          Multi-site supervision - {user?.firstname}
+          Multi-site supervision - {user?.firstName}
         </p>
       </div>
 

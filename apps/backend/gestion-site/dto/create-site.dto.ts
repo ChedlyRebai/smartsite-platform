@@ -30,7 +30,7 @@ export class CreateSiteDto {
 
   @IsBoolean()
   @Prop({ default: true })
-  estActif: boolean;
+  isActif: boolean;
 
   // Frontend fields
   @IsNumber()
@@ -97,7 +97,7 @@ export class UpdateSiteDto {
 
   @IsBoolean()
   @IsOptional()
-  estActif?: boolean;
+  isActif?: boolean;
 
   // Frontend fields
   @IsNumber()

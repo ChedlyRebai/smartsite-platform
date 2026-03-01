@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Headers } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Put,
+  Delete,
+  UseGuards,
+  Headers,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { JwtService } from '@nestjs/jwt';
@@ -6,7 +16,10 @@ import { JwtService } from '@nestjs/jwt';
 @Controller('users')
 //@UseGuards(JwtAuthGuard)
 export class UsersController {
-  constructor(private usersService: UsersService, private jwtService: JwtService) {}
+  constructor(
+    private usersService: UsersService,
+    private jwtService: JwtService,
+  ) {}
 
   @Post()
   async create(@Body() createUserDto: any) {
@@ -32,7 +45,97 @@ export class UsersController {
       return { error: 'Invalid token' };
     }
   }
-  
+
+  @Get('me')
+  async getCurrentUser(@Headers('Authorization') authHeader: string) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return { error: 'No token provided' };
+    }
+    const token = authHeader.split(' ')[1];
+    try {
+      const decoded: any = this.jwtService.verify(token);
+      const userId = decoded.sub;
+      const user = await this.usersService.findById(userId);
+      
+      if (!user) {
+        return { error: 'User not found' };
+      }
+
+      // Return user without password
+      const { password, ...userWithoutPassword } = user.toObject();
+      return userWithoutPassword;
+    } catch (error) {
+      return { error: 'Invalid token' };
+    }
+  }
+
+  @Put('me')
+  async updateCurrentUser(
+    @Headers('Authorization') authHeader: string,
+    @Body() updateData: any,
+  ) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return { error: 'No token provided' };
+    }
+    const token = authHeader.split(' ')[1];
+    try {
+      const decoded: any = this.jwtService.verify(token);
+      const userId = decoded.sub;
+      
+      
+      const { password, role, status, approvedBy, approvedAt, emailVerificationOtp, otpExpiresAt, ...allowedUpdates } = updateData;
+      
+      const updatedUser = await this.usersService.update(userId, allowedUpdates);
+      
+      if (!updatedUser) {
+        return { error: 'Failed to update user' };
+      }
+
+      const { password: pwd, ...userWithoutPassword } = updatedUser.toObject();
+      return userWithoutPassword;
+    } catch (error) {
+      return { error: 'Invalid token' };
+    }
+  }
+
+  @Put('me/password')
+  async changePassword(
+    @Headers('Authorization') authHeader: string,
+    @Body() passwordData: { currentPassword: string; newPassword: string },
+  ) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return { error: 'No token provided' };
+    }
+    const token = authHeader.split(' ')[1];
+    try {
+      const decoded: any = this.jwtService.verify(token);
+      const userId = decoded.sub;
+      
+      return await this.usersService.changePassword(
+        userId,
+        passwordData.currentPassword,
+        passwordData.newPassword,
+      );
+    } catch (error: any) {
+      return { error: error.message || 'Failed to change password' };
+    }
+  }
+
+  @Post('create-with-temp-password')
+  async createUserWithTemporaryPassword(@Body() createUserDto: any): Promise<any> {
+    return this.usersService.createUserWithTemporaryPassword(createUserDto);
+  }
+
+  @Get('pending')
+  async findPending() {
+    return this.usersService.findPending();
+  }
+
+  @Get('clients')
+  async getAllClients() {
+    return this.usersService.getAllclients();
+  }
+
   @Get(':id')
   async findById(@Param('id') id: string) {
     return this.usersService.findById(id);
@@ -47,4 +150,10 @@ export class UsersController {
   async remove(@Param('id') id: string) {
     return this.usersService.remove(id);
   }
+
+  @Put('ban/:id')
+  async ban(@Param('id') id: string) {
+    return this.usersService.handleBan(id);
+  }
 }
+

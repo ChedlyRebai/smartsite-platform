@@ -34,7 +34,7 @@ import { RolesDataTable } from "./_components/roles-data-table";
 
 import { UserDataTable } from "./_components/user-data-table";
 
-import { deleteUser, getAllUsers } from "@/app/action/user.action";
+import { banUser, deleteUser, getAllUsers } from "@/app/action/user.action";
 
 import { mockTeamMembers } from "@/app/utils/mockData";
 
@@ -61,9 +61,9 @@ export default function UserManagement() {
   const { setOnPermissionsChange, setRefreshData } = useRolePermissionsModal();
 
   const [statics, setStatics] = useState({
-    totalRoles:0,
-    totalUsers:0,
-    totalPermissions:0
+    totalRoles: 0,
+    totalUsers: 0,
+    totalPermissions: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
   const [users, setUsers] = useState<User[]>([]);
@@ -91,16 +91,16 @@ export default function UserManagement() {
     setOnPermissionsChange(() => loadRoles);
   }, []);
 
-  const loadStatics = async () =>{
+  const loadStatics = async () => {
     try {
-      const response =await getAllStatics();
-      if(response.status === 200){
+      const response = await getAllStatics();
+      if (response.status === 200) {
         setStatics(response.data);
       }
     } catch (error) {
       console.error("Failed to load statics:", error);
     }
-  }
+  };
   const loadUsers = async () => {
     setIsLoading(true);
     try {
@@ -171,7 +171,7 @@ export default function UserManagement() {
   };
 
   const handleAddNewPermission = () => {
-    toast.success ("Add new permission");
+    toast.success("Add new permission");
     // TODO: Implement create dialog
   };
   const loadRoles = async () => {
@@ -188,7 +188,22 @@ export default function UserManagement() {
       setIsLoading(false);
     }
   };
-
+  const handleBanUser = async (userId: string, isActif: boolean) => {
+    try {
+      const response = await banUser(userId, isActif);
+      if (response.status === 200) {
+        toast.success(
+          isActif ? "User unbanned successfully" : "User banned successfully"
+        );
+        loadUsers();
+      } else {
+        toast.error(response.data || "Failed to update user status");
+      }
+    } catch (error) {
+      console.error("Failed to update user status:", error);
+      toast.error("Failed to update user status");
+    }
+  }
   const handleEditRole = (role: Role) => {
     const { setId, setType, onOpen } = useRoleModal.getState();
     setId(role._id);
@@ -251,18 +266,18 @@ export default function UserManagement() {
       </div>
     );
   }
-  
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
         <p className="text-gray-500 mt-1">
-          Manage user roles, permissions, and access control settings to ensure secure
+          Manage user roles, permissions, and access control settings to ensure
+          secure
         </p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
-
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -287,7 +302,9 @@ export default function UserManagement() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-4xl font-bold text-gray-900">{statics.totalRoles}</p>
+            <p className="text-4xl font-bold text-gray-900">
+              {statics.totalRoles}
+            </p>
             <p className="text-sm text-gray-500 mt-2">
               Active roles in the system
             </p>
@@ -313,13 +330,14 @@ export default function UserManagement() {
       </div>
 
       <Card>
-        <Tabs defaultValue="role">
+        <Tabs defaultValue="users">
           <CardHeader>
             <CardTitle>
               <TabsList>
-                <TabsTrigger value="role">All Roles</TabsTrigger>
-                <TabsTrigger value="users">All users</TabsTrigger>
-                <TabsTrigger value="permissions">All permissions</TabsTrigger>
+                <TabsTrigger value="users">users</TabsTrigger>
+                <TabsTrigger value="role">Roles</TabsTrigger>
+
+                <TabsTrigger value="permissions">permissions</TabsTrigger>
               </TabsList>
             </CardTitle>
           </CardHeader>
@@ -341,7 +359,9 @@ export default function UserManagement() {
               {isLoading ? (
                 <div className="text-center py-12">Loading users...</div>
               ) : (
-                <UserDataTable users={users} onDelete={handleDeleteUser} />
+                <UserDataTable
+                onBan={handleBanUser}
+                users={users} onDelete={handleDeleteUser} />
               )}
             </TabsContent>
 
@@ -349,7 +369,7 @@ export default function UserManagement() {
               {isLoading ? (
                 <div className="text-center py-12">Loading permissions...</div>
               ) : (
-                <PermissionsDataTable 
+                <PermissionsDataTable
                   permissions={permissions}
                   onEdit={handleEditPermission}
                   onDelete={handleDeletePermission}
