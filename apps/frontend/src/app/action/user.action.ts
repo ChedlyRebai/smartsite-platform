@@ -34,15 +34,17 @@ export const getUserById = async (id: string) => {
 
 export const createUser = async (userData: {
   cin: string;
-  password: string;
   firstName?: string;
   lastName?: string;
   email?: string;
   phoneNumber?: string;
   address?: string;
+  companyName?: string;
+  departement?: string;
+  role?: string;
 }) => {
   try {
-    const res = await axios.post(`${API_URL}`, userData);
+    const res = await axios.post(`${API_URL}/create-with-temp-password`, userData);
     if (res.status === 201) {
       return Promise.resolve({ status: res.status, data: res.data });
     }

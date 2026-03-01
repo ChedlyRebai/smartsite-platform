@@ -121,6 +121,11 @@ export class UsersController {
     }
   }
 
+  @Post('create-with-temp-password')
+  async createUserWithTemporaryPassword(@Body() createUserDto: any): Promise<any> {
+    return this.usersService.createUserWithTemporaryPassword(createUserDto);
+  }
+
   @Get('pending')
   async findPending() {
     return this.usersService.findPending();
