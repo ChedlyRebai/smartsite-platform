@@ -83,7 +83,11 @@ const UserForms = ({ type }: { type: "add" | "edit" }) => {
           .min(5, "lastName must be at least 5 characters.")
           .max(32, "lastName must be at most 32 characters."),
         email: z.string().email("Invalid email address"),
+<<<<<<< HEAD
         telephone: z.string(),
+=======
+        phoneNumber: z.string(),
+>>>>>>> 888e7f86 (feat: add user creation with temporary password functionality and email notification)
         companyName: z.string().optional(),
         departement: z.string().optional(),
         address: z.string().optional(),

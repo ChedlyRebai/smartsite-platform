@@ -186,6 +186,7 @@ export default function Login() {
                     Mot de passe oublié?
                   </a>
                 </p>
+<<<<<<< HEAD
                 {/* <form
                   onSubmit={form.handleSubmit(onSubmit)}>
                   <FieldGroup>
@@ -251,6 +252,8 @@ export default function Login() {
                     Mot de passe oublié?
                   </a>
                 </p>
+=======
+>>>>>>> 888e7f86 (feat: add user creation with temporary password functionality and email notification)
               </div>
             </div>
           </div>

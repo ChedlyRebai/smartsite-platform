@@ -207,6 +207,9 @@ export class EmailService {
     }
   }
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 888e7f86 (feat: add user creation with temporary password functionality and email notification)
 
   async sendTemporaryPasswordEmail(
     userEmail: string,
@@ -284,6 +287,9 @@ export class EmailService {
       throw error;
     }
   }
+<<<<<<< HEAD
 =======
 >>>>>>> 9c0a5749 (feat: implement password reset functionality with forgot password and resend code features)
+=======
+>>>>>>> 888e7f86 (feat: add user creation with temporary password functionality and email notification)
 }

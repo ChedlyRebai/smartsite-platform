@@ -137,6 +137,12 @@ export class UsersService {
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
+<<<<<<< HEAD
+=======
+
+    user.password = hashedPassword;
+    await user.save();
+>>>>>>> 888e7f86 (feat: add user creation with temporary password functionality and email notification)
 
     user.password = hashedPassword;
     user.passwordChnage = true;
@@ -178,12 +184,19 @@ export class UsersService {
       firstName: createUserDto.firstName,
       lastName: createUserDto.lastName,
       email: createUserDto.email,
+<<<<<<< HEAD
       telephone: createUserDto.telephone,
       address: createUserDto.address,
       companyName: createUserDto.companyName,
       departement: createUserDto.departement,
       changePassword: false,
       firstLogin: true,
+=======
+      phoneNumber: createUserDto.phoneNumber,
+      address: createUserDto.address,
+      companyName: createUserDto.companyName,
+      departement: createUserDto.departement,
+>>>>>>> 888e7f86 (feat: add user creation with temporary password functionality and email notification)
       password: hashedPassword,
       role: roleId,
       status: 'approved', // Admin-created users are approved by default
@@ -249,6 +262,7 @@ export class UsersService {
       .sort(() => Math.random() - 0.5)
       .join('');
   }
+<<<<<<< HEAD
 
   // async changePassword(userId: string, currentPassword: string, newPassword: string) {
   //   const user = await this.userModel.findById(userId).exec();
@@ -272,4 +286,6 @@ export class UsersService {
 
   //   return { message: 'Password changed successfully' };
   // }
+=======
+>>>>>>> 888e7f86 (feat: add user creation with temporary password functionality and email notification)
 }
