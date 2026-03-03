@@ -148,6 +148,18 @@ export const deleteSite = async (id: string): Promise<void> => {
   }
 };
 
+// Get all team IDs that are assigned to any site (for Teams page to check site assignment)
+export const getAssignedTeamIds = async (): Promise<Record<string, { siteId: string; siteName: string }>> => {
+  try {
+    const response = await api.get('/gestion-sites/teams/assigned-ids');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching assigned team IDs:', error);
+    // Return empty object on error - Teams page will handle gracefully
+    return {};
+  }
+};
+
 // Get site statistics
 export const fetchSiteStatistics = async () => {
   try {

@@ -13,6 +13,7 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
+import { Types } from 'mongoose';
 import { GestionSiteService, SiteFilters, PaginationOptions, PaginatedResult } from './gestion-site.service';
 import { CreateSiteDto, UpdateSiteDto } from './dto';
 
@@ -198,5 +199,28 @@ export class GestionSiteController {
   @Get('teams/all')
   async getAllSitesWithTeams() {
     return this.gestionSiteService.getAllSitesWithTeams();
+  }
+
+  /**
+   * Get all team IDs that are assigned to any site (for Teams page to check site assignment)
+   */
+  @Get('teams/assigned-ids')
+  async getAssignedTeamIds() {
+    const sites = await this.gestionSiteService.getAllSitesWithTeams();
+    
+    // Create a map of teamId -> site info
+    const teamToSiteMap: Record<string, { siteId: string; siteName: string }> = {};
+    sites.forEach((site: any) => {
+      if (site.teamIds) {
+        site.teamIds.forEach((teamId: string) => {
+          teamToSiteMap[teamId] = {
+            siteId: site._id.toString(),
+            siteName: site.nom
+          };
+        });
+      }
+    });
+    
+    return teamToSiteMap;
   }
 }

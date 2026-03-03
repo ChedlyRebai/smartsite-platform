@@ -20,7 +20,6 @@ export class TeamsService {
           select: '-role -password -emailVerificationOtp -otpExpiresAt -passwordResetCode -passwordResetCodeExpiresAt'
         })
         .populate('manager', '-role -password -emailVerificationOtp -otpExpiresAt -passwordResetCode -passwordResetCodeExpiresAt')
-        .populate('site')
         .exec();
     } catch (error) {
       console.error('Error in findAll teams:', error);
@@ -36,7 +35,6 @@ export class TeamsService {
           select: '-role -password -emailVerificationOtp -otpExpiresAt -passwordResetCode -passwordResetCodeExpiresAt'
         })
         .populate('manager', '-role -password -emailVerificationOtp -otpExpiresAt -passwordResetCode -passwordResetCodeExpiresAt')
-        .populate('site')
         .exec();
     } catch (error) {
       console.error('Error in findById team:', error);
@@ -51,7 +49,6 @@ export class TeamsService {
         select: '-role -password -emailVerificationOtp -otpExpiresAt -passwordResetCode -passwordResetCodeExpiresAt'
       })
       .populate('manager', '-role -password -emailVerificationOtp -otpExpiresAt -passwordResetCode -passwordResetCodeExpiresAt')
-      .populate('site')
       .exec();
   }
 
@@ -62,7 +59,6 @@ export class TeamsService {
         select: '-role -password -emailVerificationOtp -otpExpiresAt -passwordResetCode -passwordResetCodeExpiresAt'
       })
       .populate('manager', '-role -password -emailVerificationOtp -otpExpiresAt -passwordResetCode -passwordResetCodeExpiresAt')
-      .populate('site')
       .exec();
   }
 
@@ -81,7 +77,6 @@ export class TeamsService {
         select: '-role -password -emailVerificationOtp -otpExpiresAt -passwordResetCode -passwordResetCodeExpiresAt'
       })
       .populate('manager', '-role -password -emailVerificationOtp -otpExpiresAt -passwordResetCode -passwordResetCodeExpiresAt')
-      .populate('site')
       .exec();
   }
 
@@ -96,7 +91,6 @@ export class TeamsService {
         select: '-role -password -emailVerificationOtp -otpExpiresAt -passwordResetCode -passwordResetCodeExpiresAt'
       })
       .populate('manager', '-role -password -emailVerificationOtp -otpExpiresAt -passwordResetCode -passwordResetCodeExpiresAt')
-      .populate('site')
       .exec();
   }
 
@@ -111,22 +105,20 @@ export class TeamsService {
         select: '-role -password -emailVerificationOtp -otpExpiresAt -passwordResetCode -passwordResetCodeExpiresAt'
       })
       .populate('manager', '-role -password -emailVerificationOtp -otpExpiresAt -passwordResetCode -passwordResetCodeExpiresAt')
-      .populate('site')
       .exec();
   }
 
+  // Note: assignSite method removed - site assignment is now handled by gestion-site service
+  // The site information is stored in the Site document's teamIds array, not in Team's site field
   async assignSite(teamId: string, siteId: string) {
-    return this.teamModel.findByIdAndUpdate(
-      teamId,
-      { site: siteId },
-      { new: true },
-    )
+    // This method is kept for backward compatibility but doesn't update the Team document
+    // Instead, the site should be updated via gestion-site API
+    return this.teamModel.findById(teamId)
       .populate({
         path: 'members',
         select: '-role -password -emailVerificationOtp -otpExpiresAt -passwordResetCode -passwordResetCodeExpiresAt'
       })
       .populate('manager', '-role -password -emailVerificationOtp -otpExpiresAt -passwordResetCode -passwordResetCodeExpiresAt')
-      .populate('site')
       .exec();
   }
 }

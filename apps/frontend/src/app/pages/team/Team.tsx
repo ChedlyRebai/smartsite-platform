@@ -19,6 +19,7 @@ import {
   removeMemberFromTeam 
 } from '../../action/team.action';
 import { getAllUsers } from '../../action/user.action';
+import { getAssignedTeamIds } from '../../action/site.action';
 
 interface TeamData {
   _id: string;
@@ -49,6 +50,9 @@ export default function Team() {
   const [error, setError] = useState<string | null>(null);
   const [useMockData, setUseMockData] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Track which teams are assigned to sites: teamId -> { siteId, siteName }
+  const [teamSiteAssignments, setTeamSiteAssignments] = useState<Record<string, { siteId: string; siteName: string }>>({});
   
   // Dialog states
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -82,9 +86,18 @@ export default function Team() {
     try {
       setLoading(true);
       setError(null);
-      const response = await getAllTeams();
-      console.log('Teams loaded from API:', response.data);
-      setTeams(response.data);
+      
+      // Fetch teams and site assignments in parallel
+      const [teamsResponse, siteAssignments] = await Promise.all([
+        getAllTeams(),
+        getAssignedTeamIds()
+      ]);
+      
+      console.log('Teams loaded from API:', teamsResponse.data);
+      console.log('Site assignments:', siteAssignments);
+      
+      setTeams(teamsResponse.data);
+      setTeamSiteAssignments(siteAssignments);
       setUseMockData(false);
     } catch (err) {
       console.error('Error loading teams, using mock data:', err);
@@ -158,6 +171,11 @@ export default function Team() {
     team.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     team.teamCode?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Helper function to check if a team is assigned to a site
+  const isTeamAssignedToSite = (teamId: string) => {
+    return !!teamSiteAssignments[teamId];
+  };
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n.charAt(0)).join('').substring(0, 2).toUpperCase();
@@ -789,10 +807,10 @@ export default function Team() {
                           <Users className="h-4 w-4" />
                           <span>{team.members?.length || 0} membres</span>
                         </div>
-                        {team.site && (
+                        {isTeamAssignedToSite(team._id) && (
                           <div className="flex items-center gap-1">
                             <Building className="h-4 w-4" />
-                            <span>Site assigned</span>
+                            <span>Site: {teamSiteAssignments[team._id].siteName}</span>
                           </div>
                         )}
                       </div>
