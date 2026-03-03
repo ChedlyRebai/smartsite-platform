@@ -2,7 +2,7 @@ import type { Site } from '../types';
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:3001/api', // Proxy to backend server
+  baseURL: 'http://localhost:3002/api', // Proxy to backend server
 });
 
 // Add auth token to requests

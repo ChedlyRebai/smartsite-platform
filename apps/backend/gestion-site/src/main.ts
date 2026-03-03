@@ -18,7 +18,7 @@ async function bootstrap() {
   // Set global prefix
   app.setGlobalPrefix('api');
   
-  const port = process.env.PORT || 3001;
+  const port = process.env.PORT || 3002;
   await app.listen(port);
   
   console.log(`🚀 Gestion Site API is running on: http://localhost:${port}/api`);
