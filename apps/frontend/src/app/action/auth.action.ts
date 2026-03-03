@@ -1,19 +1,21 @@
 import axios from "axios";
+
+const API_BASE_URL = "http://localhost:3000/api";
+
 export const LoginAction = async (cin: string, password: string) => {
   try {
-    const res = await axios.post(`${process.env.LOGIN_API_URL}/login`, {
+    const res = await axios.post(`${API_BASE_URL}/auth/login`, {
       cin,
       password,
     });
 
     console.log(
-      `${process.env.LOGIN_API_URL}/login`,
-      "ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
+      `${API_BASE_URL}/auth/login`,
+      "Login request sent"
     );
     if (res.status === 200) {
       const expires = new Date(Date.now() + 1000 * 1000 * 1000);
 
-      cookieStore.set("session", res.data.token);
       return Promise.resolve({ status: res.status, data: res.data.message });
     }
   } catch (error: any) {
@@ -27,7 +29,7 @@ export const LoginAction = async (cin: string, password: string) => {
 
 export const getCurrentUser = async (authUser: any) => {
   try {
-    const res = await axios.get("http://localhost:3000/users/me", {
+    const res = await axios.get(`${API_BASE_URL}/users/me`, {
       headers: {
         Authorization: `Bearer ${authUser?.access_token}`,
       },

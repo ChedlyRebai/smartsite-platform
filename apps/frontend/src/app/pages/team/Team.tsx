@@ -20,6 +20,7 @@ import {
 } from '../../action/team.action';
 import { getAllUsers } from '../../action/user.action';
 import { getAssignedTeamIds } from '../../action/site.action';
+import { generateTeamsPDFReport } from '../../utils/teamReport';
 
 interface TeamData {
   _id: string;
@@ -255,6 +256,16 @@ export default function Team() {
     } catch (error) {
       console.error('Error creating team:', error);
       toast.error('Error creating team');
+    }
+  };
+
+  const handleExportPDF = () => {
+    try {
+      generateTeamsPDFReport(teams, teamSiteAssignments);
+      toast.success('PDF report generated successfully!');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error('Error generating PDF report');
     }
   };
 
@@ -508,7 +519,14 @@ export default function Team() {
           </p>
         </div>
         {canManageTeam ? (
-          <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+          <>
+            <Button
+              variant="outline"
+              onClick={handleExportPDF}
+            >
+              Export PDF
+            </Button>
+            <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 shadow-lg hover:shadow-xl transition-all">
                 <Plus className="h-4 w-4 mr-2" />
@@ -559,6 +577,7 @@ export default function Team() {
               </div>
             </DialogContent>
           </Dialog>
+        </>
         ) : (
           <Button disabled className="opacity-50 cursor-not-allowed">
             <Plus className="h-4 w-4 mr-2" />

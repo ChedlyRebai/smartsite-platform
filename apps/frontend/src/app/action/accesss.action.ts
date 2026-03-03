@@ -17,7 +17,7 @@ export const getPermissions = async () => {
       });
     }
     
-    const res = await axios.get(`http://localhost:3000/users/mypermissions`, {
+    const res = await axios.get(`http://localhost:3000/api/users/mypermissions`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
