@@ -9,7 +9,6 @@ import axios from "axios";
 import { Button } from "@/components/ui/button";
 import {
   Field,
-  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -74,6 +73,39 @@ export default function Register() {
   const [rolesLoading, setRolesLoading] = React.useState(false);
   const [rolesError, setRolesError] = React.useState<string | null>(null);
 
+  const form = useForm<RegisterFormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      cin: "",
+      firstname: "",
+      lastname: "",
+      email: "",
+      telephone: "",
+      adresse: "",
+      role: "",
+    },
+  });
+
+  // Récupérer les paramètres de l'URL pour Google
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const email = params.get('email');
+    const google = params.get('google');
+    const error = params.get('error');
+    const firstName = params.get('firstName');
+    const lastName = params.get('lastName');
+
+    if (error === 'no_account' && email) {
+      toast.error(
+        'Aucun compte trouvé avec cet email. Veuillez créer un compte.',
+        { duration: 5000 }
+      );
+      form.setValue('email', email);
+      if (firstName) form.setValue('firstname', firstName);
+      if (lastName) form.setValue('lastname', lastName);
+    }
+  }, []);
+
   // Charger les rôles depuis le backend (et exclure super_admin)
   React.useEffect(() => {
     const loadRoles = async () => {
@@ -98,19 +130,6 @@ export default function Register() {
     };
     loadRoles();
   }, []);
-
-  const form = useForm<RegisterFormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      cin: "",
-      firstname: "",
-      lastname: "",
-      email: "",
-      telephone: "",
-      adresse: "",
-      role: "",
-    },
-  });
 
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);

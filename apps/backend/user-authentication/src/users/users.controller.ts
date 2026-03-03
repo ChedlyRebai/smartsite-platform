@@ -6,15 +6,15 @@ import {
   Param,
   Put,
   Delete,
-  UseGuards,
+  //UseGuards,
   Headers,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+//import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { JwtService } from '@nestjs/jwt';
 
 @Controller('users')
-@UseGuards(JwtAuthGuard)
+//@UseGuards(JwtAuthGuard)      
 export class UsersController {
   constructor(
     private usersService: UsersService,

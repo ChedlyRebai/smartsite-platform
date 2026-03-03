@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
+import * as bcrypt from 'bcrypt';
 import { User } from './entities/user.entity';
 
 @Injectable()
@@ -15,18 +16,27 @@ export class UsersService {
     }
 
     try {
+      if (createUserDto.password) {
+        createUserDto.password = await bcrypt.hash(createUserDto.password, 10);
+      }
       const createdUser = new this.userModel(createUserDto);
       console.log(' DEBUG: createdUser avant save:', createdUser);
-
+      
       const result = await createdUser.save();
+
       console.log(' DEBUG: Utilisateur créé:', result);
       console.log(' DEBUG: Utilisateur sauvegardé avec ID:', result._id);
-      return result;
+      
+      return result;  
     } catch (error: any) {
-      console.error('❌ ERREUR SAVE:', error.message);
       console.error('❌ ERREUR DETAILS:', error);
       throw error;
     }
+  }
+
+  async findByEmail(email: string) {
+    console.log('from user service findByEmail', email);
+    return this.userModel.findOne({ email }).populate('role').exec();
   }
 
   async mypermission(userId: string) {
@@ -55,7 +65,7 @@ export class UsersService {
   }
 
   async findByCin(cin: string) {
-    console.log('from user service', cin);
+    console.log('from user service findByCin', cin);
     return this.userModel.findOne({ cin }).populate('role').exec();
   }
 
@@ -84,7 +94,7 @@ export class UsersService {
   async handleBan(id: string) {
     const bannedUser = await this.userModel.findById(id).exec();
     if (!bannedUser) {
-      throw new NotFoundException(`Usser with id ${id} not exist`);
+      throw new NotFoundException(`User with id ${id} not exist`);
     }
     bannedUser.estActif = !bannedUser.estActif;
 
@@ -93,4 +103,3 @@ export class UsersService {
     return user;
   }
 }
-

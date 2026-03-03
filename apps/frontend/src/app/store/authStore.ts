@@ -3,10 +3,8 @@ import { persist } from "zustand/middleware";
 import type { AuthState, User, RegisterData } from "../types";
 import axios from "axios";
 
-
-
 const api = axios.create({
-  baseURL: "http://localhost:3001",
+  baseURL: "http://localhost:3000",
 });
 
 export const useAuthStore = create<AuthState>()(
@@ -15,15 +13,15 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       isAuthenticated: false,
 
-      login: async (cin: string, password: string) => {
+      login: async (cin: string, password: string, recaptchaToken: string) => {
         try {
           const res = await api.post("/auth/login", {
             cin,
             password,
+            recaptchaToken,
           });
 
           const token = res.data.access_token;
-          // attach token globally
           api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
           console.log('Login successful, token:', token);
 
@@ -50,7 +48,22 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      // Inscription réelle via backend d'auth (signature compatible avec Register.tsx)
+      loginWithGoogle: (user: any, token: string) => {
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        set({
+          user: {
+            access_token: token,
+            id: user.id,
+            cin: user.cin || '',
+            firstname: user.firstname,
+            lastname: user.lastname,
+            email: user.email,
+            role: user.role,
+          },
+          isAuthenticated: true,
+        });
+      },
+
       register: async (
         cin: string,
         password: string,
@@ -64,7 +77,7 @@ export const useAuthStore = create<AuthState>()(
       ) => {
         const res = await api.post("/auth/register", {
           cin,
-          password, // généralement vide, mot de passe généré à l'approbation
+          password,
           firstname,
           lastname,
           email,
@@ -76,13 +89,11 @@ export const useAuthStore = create<AuthState>()(
         return res.data;
       },
 
-      // Récupérer les utilisateurs en attente (admin)
       getPendingUsers: async () => {
         const res = await api.get("/users/pending");
         return res.data;
       },
 
-      // Approuver un utilisateur (admin)
       approveUser: async (userId: string, password: string) => {
         const res = await api.post(`/auth/approve-user/${userId}`, {
           password,
@@ -90,14 +101,12 @@ export const useAuthStore = create<AuthState>()(
         return res.data;
       },
 
-      // Rejeter / supprimer un utilisateur (admin)
       rejectUser: async (userId: string) => {
         const res = await api.delete(`/users/${userId}`);
         return res.data;
       },
 
       logout: () => {
-        // Clear authorization header
         delete api.defaults.headers.common["Authorization"];
         set({ user: null, isAuthenticated: false });
       },

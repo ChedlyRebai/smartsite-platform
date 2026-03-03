@@ -1,9 +1,10 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { EmailService } from '../email/email.service';
 import * as bcrypt from 'bcrypt';
-import { LoginDto } from './dto';
+import axios from 'axios';
+import { ConfigService } from '@nestjs/config'; // AJOUTER CET IMPORT
 
 @Injectable()
 export class AuthService {
@@ -11,7 +12,34 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private emailService: EmailService,
+    private configService: ConfigService, // AJOUTER CETTE DÉPENDANCE
   ) {}
+
+  async validateRecaptcha(token: string): Promise<boolean> {
+    try {
+      const secretKey = this.configService.get('RECAPTCHA_SECRET_KEY');
+      if (!secretKey) {
+        console.log('RECAPTCHA_SECRET_KEY not configured, skipping validation');
+        return true;
+      }
+
+      const response = await axios.post(
+        'https://www.google.com/recaptcha/api/siteverify',
+        null,
+        {
+          params: {
+            secret: secretKey,
+            response: token,
+          },
+        },
+      );
+
+      return response.data.success;
+    } catch (error) {
+      console.error('reCAPTCHA validation error:', error);
+      return false;
+    }
+  }
 
   async validateUser(cin: string, password: string): Promise<any> {
     if (!cin || !password) {
@@ -47,10 +75,12 @@ export class AuthService {
 
   async login(user: any) {
     console.log('Login user:', user);
+    
+    // CORRECTION: Utiliser 'role' au lieu de 'roles'
     const payload = {
       cin: user.cin,
       sub: user._id,
-      roles: user.roles || [],
+      role: user.role, // ← CHANGER 'roles' en 'role'
     };
     console.log('JWT Payload:', payload);
 
@@ -159,4 +189,3 @@ export class AuthService {
     return updatedUser;
   }
 }
-

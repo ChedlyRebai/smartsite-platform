@@ -9,16 +9,31 @@ export class AuthController {
 
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
-    console.log('user:', loginDto);
+    console.log('Login attempt:', loginDto.cin);
+    
+    // Valider le token reCAPTCHA
+    if (!loginDto.recaptchaToken) {
+      throw new UnauthorizedException('reCAPTCHA token is required');
+    }
+
+    // Valider reCAPTCHA
+    const isValidRecaptcha = await this.authService.validateRecaptcha(loginDto.recaptchaToken);
+    if (!isValidRecaptcha) {
+      throw new UnauthorizedException('reCAPTCHA validation failed');
+    }
+
     const user = await this.authService.validateUser(
       loginDto.cin,
       loginDto.password,
     );
-    console.log('valdiate user:', user);
+    
+    console.log('User validated:', user ? 'Yes' : 'No');
+    
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    // CORRECTION: Appeler login avec 1 seul argument
     return this.authService.login(user);
   }
 

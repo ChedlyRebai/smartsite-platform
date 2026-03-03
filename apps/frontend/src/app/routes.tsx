@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from "react-router";
 import DashboardLayout from "./layouts/DashboardLayout";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import GoogleCallback from "./pages/auth/GoogleCallback"; // Ajouter cet import
 import Dashboard from "./pages/dashboards/Dashboard";
 import Sites from "./pages/sites/Sites";
 import Projects from "./pages/projects/Projects";
@@ -24,7 +25,7 @@ import Home2 from "./pages/Home/Home2";
 import Pricing from "./pages/pricing/Pricing";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const isAuthenticated = true;
+  const isAuthenticated = true; // À remplacer par votre logique d'authentification
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
 }
 
@@ -46,6 +47,10 @@ export const router = createBrowserRouter([
     element: <Register />,
   },
   {
+    path: "/google-callback", // AJOUTER CETTE ROUTE
+    element: <GoogleCallback />,
+  },
+  {
     path: "/",
     element: (
       <ProtectedRoute>
@@ -61,17 +66,7 @@ export const router = createBrowserRouter([
         path: "sites",
         element: <Sites />,
       },
-      
-    
       {
-        path: "projects",
-        element: <Projects />,
-      },
-       {
-        path: "projects",
-        element: <Projects />,
-      },
-       {
         path: "projects",
         element: <Projects />,
       },
