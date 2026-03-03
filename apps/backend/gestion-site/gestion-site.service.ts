@@ -41,6 +41,7 @@ export class GestionSiteService {
 
   constructor(
     @InjectModel(Site.name) private siteModel: Model<Site>,
+    @InjectModel(Team.name) private teamModel: Model<Team>,
     @InjectConnection() private connection: Connection,
   ) {}
 

@@ -1271,8 +1271,21 @@ export default function Sites() {
                   {siteTeams.map((team: any) => (
                     <div key={team._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <div>
-                        <p className="font-medium">{team.firstName} {team.lastName}</p>
-                        <p className="text-sm text-gray-500">{team.email}</p>
+                        {/* Handle both old format (UserSimple) and new format (Team) */}
+                        {team.name ? (
+                          <>
+                            <p className="font-medium">{team.name}</p>
+                            <p className="text-sm text-gray-500">{team.description || 'Équipe'}</p>
+                            {team.members && team.members.length > 0 && (
+                              <p className="text-xs text-gray-400">{team.members.length} membre(s)</p>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <p className="font-medium">{team.firstName} {team.lastName}</p>
+                            <p className="text-sm text-gray-500">{team.email}</p>
+                          </>
+                        )}
                       </div>
                       <Button size="sm" variant="destructive" onClick={() => handleRemoveTeam(team._id)}>
                         Retirer
