@@ -1,0 +1,128 @@
+{
+  "info": {
+    "name": "Rôles et Permissions - Exemples pour Postman",
+    "description": "Corps JSON pour créer les rôles et permissions"
+  },
+  "roles": [
+    {
+      "name": "admin",
+      "description": "Administrateur système - accès total"
+    },
+    {
+      "name": "manager",
+      "description": "Gestionnaire - gestion des équipes et sites"
+    },
+    {
+      "name": "chef_equipe",
+      "description": "Chef d'équipe - responsable d'une équipe sur un chantier"
+    },
+    {
+      "name": "worker",
+      "description": "Ouvrier - utilisateur simple"
+    },
+    {
+      "name": "client",
+      "description": "Client - peut voir les projets et sites"
+    },
+    {
+      "name": "fournisseur",
+      "description": "Fournisseur - gestion des matériaux"
+    }
+  ],
+  "permissions": [
+    {
+      "name": "gestion_users",
+      "description": "Gestion des utilisateurs"
+    },
+    {
+      "name": "gestion_roles",
+      "description": "Gestion des rôles"
+    },
+    {
+      "name": "gestion_sites",
+      "description": "Gestion des sites/chantiers"
+    },
+    {
+      "name": "gestion_equipes",
+      "description": "Gestion des équipes"
+    },
+    {
+      "name": "gestion_projets",
+      "description": "Gestion des projets"
+    },
+    {
+      "name": "gestion_materiaux",
+      "description": "Gestion des matériaux"
+    },
+    {
+      "name": "gestion_finance",
+      "description": "Gestion financière"
+    },
+    {
+      "name": "gestion_incidents",
+      "description": "Gestion des incidents"
+    },
+    {
+      "name": "gestion_clients",
+      "description": "Gestion des clients"
+    },
+    {
+      "name": "gestion_fournisseurs",
+      "description": "Gestion des fournisseurs"
+    }
+  ],
+  "examples": {
+    "create_admin_role": {
+      "method": "POST",
+      "url": "{{baseUrl}}/roles",
+      "body": {
+        "name": "admin",
+        "description": "Administrateur système - accès total"
+      }
+    },
+    "create_manager_role": {
+      "method": "POST",
+      "url": "{{baseUrl}}/roles",
+      "body": {
+        "name": "manager",
+        "description": "Gestionnaire de chantier"
+      }
+    },
+    "create_chef_equipe_role": {
+      "method": "POST",
+      "url": "{{baseUrl}}/roles",
+      "body": {
+        "name": "chef_equipe",
+        "description": "Chef d'équipe sur chantier"
+      }
+    },
+    "create_permission": {
+      "method": "POST",
+      "url": "{{baseUrl}}/permissions",
+      "body": {
+        "name": "gestion_equipes",
+        "description": "Permission de gérer les équipes"
+      }
+    },
+    "assign_permission_to_role": {
+      "method": "POST",
+      "url": "{{baseUrl}}/roles/ROLE_ID/permissions/PERMISSION_ID",
+      "body": {}
+    },
+    "create_user_with_role": {
+      "method": "POST",
+      "url": "{{baseUrl}}/users",
+      "body": {
+        "cin": "12345678",
+        "firstName": "Mohamed",
+        "lastName": "Ben Ali",
+        "email": "mohamed@example.com",
+        "phoneNumber": "+21612345678",
+        "address": "Tunis, Tunisia",
+        "departement": "Construction",
+        "role": "ROLE_ID_HERE",
+        "password": "password123"
+      }
+    }
+  }
+}

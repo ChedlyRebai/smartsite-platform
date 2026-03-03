@@ -1,17 +1,27 @@
 import { useState, useEffect } from 'react';
-import { Plus, MapPin, Search, Filter, Trash2, Edit, ChevronRight, AlertCircle, CheckCircle2, Clock, PauseCircle } from 'lucide-react';
+import { Plus, MapPin, Search, Filter, Trash2, Edit, ChevronRight, AlertCircle, CheckCircle2, Clock, PauseCircle, Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Badge } from '../../components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../../components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../components/ui/select';
 import { useAuthStore } from '../../store/authStore';
-import { mockSites } from '../../utils/mockData';
+import { mockSites, mockTeamMembers } from '../../utils/mockData';
 import { toast } from 'sonner';
 import type { Site } from '../../types';
-import { fetchSites, createSite, updateSite, deleteSite } from '../../action/site.action';
+import { fetchSites, createSite, updateSite, deleteSite, assignTeamToSite, removeTeamFromSite, getTeamsAssignedToSite } from '../../action/site.action';
+import { getAllUsers, assignUserToSite } from '../../action/user.action';
+import { getAllTeams, getTeamById, assignSiteToTeam } from '../../action/team.action';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import type { LatLngExpression } from 'leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -23,8 +33,8 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Tunisia center coordinates
-const TUNISIA_CENTER = { lat: 33.8869, lng: 9.5375 };
+// Tunisia center coordinates - proper tuple type for Leaflet
+const TUNISIA_CENTER: LatLngExpression = [33.8869, 9.5375];
 
 // Status configuration for consistent styling
 const STATUS_CONFIG = {
@@ -80,6 +90,7 @@ export default function Sites() {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [viewDetailsOpen, setViewDetailsOpen] = useState(false);
   const [manageDialogOpen, setManageDialogOpen] = useState(false);
+  const [teamDialogOpen, setTeamDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [selectedSite, setSelectedSite] = useState<Site | null>(null);
@@ -89,11 +100,50 @@ export default function Sites() {
 
   // Validation errors
   const [errors, setErrors] = useState<{ name?: string; address?: string; area?: string; budget?: string }>({});
+  const [selectedTeam, setSelectedTeam] = useState<string>('');
+  const [availableTeams, setAvailableTeams] = useState<Array<{_id: string; name: string}>>([]);
 
   // Fetch sites from API
   useEffect(() => {
     loadSites();
   }, [selectedStatus]);
+
+  // Load available teams when add dialog opens
+  useEffect(() => {
+    if (addDialogOpen) {
+      loadAvailableTeams();
+    }
+  }, [addDialogOpen]);
+
+  const loadAvailableTeams = async () => {
+    try {
+      const response = await getAllTeams();
+      // Check if response is successful and data is an array
+      if (!response || response.status !== 200 || !Array.isArray(response.data)) {
+        console.error('Invalid response:', response);
+        // Fallback to mock data
+        setAvailableTeams(mockTeamMembers.map(user => ({
+          _id: user._id,
+          name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email
+        })));
+        return;
+      }
+      // Load all teams from the database
+      const teams = response.data
+        .map((team: any) => ({ 
+          _id: team._id, 
+          name: team.name
+        }));
+      setAvailableTeams(teams);
+    } catch (err) {
+      console.error('Error loading teams, using mock data:', err);
+      // Fallback to mock data
+      setAvailableTeams(mockTeamMembers.map(user => ({
+        _id: user._id,
+        name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email
+      })));
+    }
+  };
 
   const loadSites = async () => {
     try {
@@ -199,6 +249,80 @@ export default function Sites() {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Team management state
+  const [siteTeams, setSiteTeams] = useState<any[]>([]);
+  const [selectedUserId, setSelectedUserId] = useState('');
+  const [loadingTeams, setLoadingTeams] = useState(false);
+
+  // Handle open team dialog
+  const handleOpenTeamDialog = async (site: Site) => {
+    setSelectedSite(site);
+    setLoadingTeams(true);
+    try {
+      const teams = await getTeamsAssignedToSite(site.id);
+      setSiteTeams(teams || []);
+    } catch (error) {
+      console.error('Error fetching teams:', error);
+      setSiteTeams([]);
+    }
+    setLoadingTeams(false);
+    setTeamDialogOpen(true);
+  };
+
+  // Handle assign team to site
+  const handleAssignTeam = async () => {
+    if (!selectedSite || !selectedUserId) {
+      toast.error('Please select a team to assign');
+      return;
+    }
+    
+    // Get the team details to check if it has members
+    const team = availableTeams.find((t: any) => t._id === selectedUserId);
+    if (!team) {
+      toast.error('Team not found');
+      return;
+    }
+    
+    // Check if team has members - this is a requirement
+    // We need to fetch the team details to check members count
+    try {
+      const teamDetails = await getTeamById(selectedUserId);
+      if (teamDetails && teamDetails.data && teamDetails.data.members) {
+        const memberCount = teamDetails.data.members.length;
+        if (memberCount === 0) {
+          toast.error('This team has no members. Please add members to the team before assigning it to a site.');
+          return;
+        }
+      }
+      
+      // First, assign team to site in gestion-sites (site knows about the team)
+      await assignTeamToSite(selectedSite.id, selectedUserId);
+      
+      // Also update the team to record which site it's assigned to (team knows about the site)
+      await assignSiteToTeam(selectedUserId, selectedSite.id);
+      
+      toast.success('Team assigned successfully');
+      const teams = await getTeamsAssignedToSite(selectedSite.id);
+      setSiteTeams(teams || []);
+      setSelectedUserId('');
+    } catch (error: any) {
+      toast.error(error?.message || 'Error assigning team');
+    }
+  };
+
+  // Handle remove team from site
+  const handleRemoveTeam = async (userId: string) => {
+    if (!selectedSite) return;
+    try {
+      await removeTeamFromSite(selectedSite.id, userId);
+      toast.success('Team removed successfully');
+      const teams = await getTeamsAssignedToSite(selectedSite.id);
+      setSiteTeams(teams || []);
+    } catch (error: any) {
+      toast.error(error?.message || 'Error removing team');
+    }
+  };
+
   const handleAddSite = async () => {
     if (!validateForm()) {
       toast.error('Please correct the form errors');
@@ -239,8 +363,20 @@ export default function Sites() {
         
         const createdSite = await createSite(site);
         setSites([...sites, createdSite]);
+        
+        // Assign team to site if selected
+        if (selectedTeam && createdSite.id) {
+          try {
+            await assignTeamToSite(createdSite.id, selectedTeam);
+            toast.success('Site created and team assigned successfully!');
+          } catch (teamError) {
+            console.error('Error assigning team to site:', teamError);
+            toast.warning('Site created but team assignment failed');
+          }
+        } else {
+          toast.success('Site added successfully!');
+        }
         resetAddForm();
-        toast.success('Site added successfully!');
       }
     } catch (error) {
       console.error('Error creating site:', error);
@@ -252,6 +388,7 @@ export default function Sites() {
     setNewSite({ name: '', address: '', area: '', budget: '' });
     setMapPosition(null);
     setErrors({});
+    setSelectedTeam('');
     setAddDialogOpen(false);
   };
 
@@ -468,20 +605,47 @@ export default function Sites() {
                       )}
                     </div>
                   </div>
-                  
+
+                  <div className="space-y-2">
+                    <Label htmlFor="team" className="text-sm font-medium">
+                      Team <span className="text-gray-500">(Optional)</span>
+                    </Label>
+                    <Select value={selectedTeam} onValueChange={setSelectedTeam}>
+                      <SelectTrigger id="team" className="w-full">
+                        <SelectValue placeholder="Select a team" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableTeams.length > 0 ? (
+                          availableTeams.map((team) => (
+                            <SelectItem key={team._id} value={team._id}>
+                              {team.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="no-teams" disabled>
+                            No teams available
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-gray-500">
+                      Assign a team to this site (Workers / Team Leader)
+                    </p>
+                  </div>
+
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">
                       Location on Map <span className="text-red-500">*</span>
                     </Label>
                     <div className="h-64 rounded-lg overflow-hidden border-2 border-gray-200 hover:border-blue-400 transition-colors">
                       <MapContainer
-                        center={[TUNISIA_CENTER.lat, TUNISIA_CENTER.lng]}
+                        center={TUNISIA_CENTER}
                         zoom={7}
                         style={{ height: '100%', width: '100%' }}
                       >
                         <TileLayer
                           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                          attribution="&copy; OpenStreetMap contributors"
                         />
                         <MapPicker position={mapPosition} setPosition={setMapPosition} />
                       </MapContainer>
@@ -750,6 +914,16 @@ export default function Sites() {
                       <Edit className="h-4 w-4 mr-1" />
                       Edit
                     </Button>
+
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1 border-blue-200 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                      onClick={() => handleOpenTeamDialog(site)}
+                    >
+                      <Users className="h-4 w-4 mr-1" />
+                      Team
+                    </Button>
                     
                     <Button 
                       size="sm" 
@@ -887,7 +1061,7 @@ export default function Sites() {
                 <Label className="text-sm font-medium">Location on Map</Label>
                 <div className="h-48 rounded-lg overflow-hidden border-2 border-gray-200">
                   <MapContainer
-                    center={editMapPosition ? [editMapPosition.lat, editMapPosition.lng] : [TUNISIA_CENTER.lat, TUNISIA_CENTER.lng]}
+                    center={editMapPosition ? [editMapPosition.lat, editMapPosition.lng] : TUNISIA_CENTER}
                     zoom={editMapPosition ? 15 : 7}
                     style={{ height: '100%', width: '100%' }}
                   >
@@ -1073,6 +1247,42 @@ export default function Sites() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Team Dialog */}
+      <Dialog open={teamDialogOpen} onOpenChange={setTeamDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">Team Management</DialogTitle>
+            <DialogDescription>
+              Site: {selectedSite?.name}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <h3 className="font-semibold text-lg">Assigned Teams</h3>
+              {loadingTeams ? (
+                <p className="text-gray-500">Chargement...</p>
+              ) : siteTeams.length === 0 ? (
+                <p className="text-gray-500">No team assigned</p>
+              ) : (
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {siteTeams.map((team: any) => (
+                    <div key={team._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div>
+                        <p className="font-medium">{team.firstName} {team.lastName}</p>
+                        <p className="text-sm text-gray-500">{team.email}</p>
+                      </div>
+                      <Button size="sm" variant="destructive" onClick={() => handleRemoveTeam(team._id)}>
+                        Retirer
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

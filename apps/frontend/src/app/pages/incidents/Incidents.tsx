@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 
 export default function Incidents() {
   const user = useAuthStore((state) => state.user);
-  const canManageIncidents = user && canEdit(user.role.name, 'incidents');
+  const canManageIncidents = user && canEdit(user.role?.name || user.role || 'client', 'incidents');
   const [incidents, setIncidents] = useState(mockIncidents);
   const [newIncident, setNewIncident] = useState({ type: '', description: '', severity: 'medium' });
 

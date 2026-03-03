@@ -42,7 +42,7 @@ export default  function DashboardLayout() {
   }
 
   // Navigation statique en fonction du rôle
-  const navigationItems = getNavigationForRole(user.role.name);
+  const navigationItems = getNavigationForRole(user.role?.name || user.role || 'client');
   const unreadNotifications = mockNotifications.filter((n) => !n.read).length;
 
   const getInitials = (nom: string, lastName: string) => {

@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 
 export default function Finance() {
   const user = useAuthStore((state) => state.user);
-  const canManageFinance = user && canEdit(user.role.name, 'finance');
+  const canManageFinance = user && canEdit(user.role?.name || 'client', 'finance');
   const [transactions, setTransactions] = useState([
     { id: 1, description: 'Material Purchase', amount: 50000, type: 'expense', date: '2026-02-15', reference: 'MAT-001', vendor: 'ABC Suppliers', category: 'Materials' },
     { id: 2, description: 'Client Payment', amount: 100000, type: 'income', date: '2026-02-14', reference: 'INV-2026-001', vendor: 'BuildCorp Ltd', category: 'Project Income' },

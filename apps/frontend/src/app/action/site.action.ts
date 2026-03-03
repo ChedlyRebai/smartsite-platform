@@ -169,3 +169,49 @@ export const fetchActiveSites = async (): Promise<Site[]> => {
     throw error;
   }
 };
+
+// ============ TEAM ASSIGNMENT API ============
+
+// Assign a team to a site
+export const assignTeamToSite = async (siteId: string, userId: string): Promise<Site> => {
+  try {
+    const response = await api.post(`/gestion-sites/${siteId}/teams`, { userId });
+    return mapBackendSiteToFrontend(response.data);
+  } catch (error: any) {
+    console.error('Error assigning team to site:', error);
+    throw error.response?.data || error;
+  }
+};
+
+// Remove a team from a site
+export const removeTeamFromSite = async (siteId: string, userId: string): Promise<Site> => {
+  try {
+    const response = await api.delete(`/gestion-sites/${siteId}/teams/${userId}`);
+    return mapBackendSiteToFrontend(response.data);
+  } catch (error: any) {
+    console.error('Error removing team from site:', error);
+    throw error.response?.data || error;
+  }
+};
+
+// Get teams assigned to a site
+export const getTeamsAssignedToSite = async (siteId: string): Promise<any[]> => {
+  try {
+    const response = await api.get(`/gestion-sites/${siteId}/teams`);
+    return response.data;
+  } catch (error: any) {
+    console.error('Error getting teams:', error);
+    throw error.response?.data || error;
+  }
+};
+
+// Get all sites with their teams
+export const getAllSitesWithTeams = async (): Promise<Site[]> => {
+  try {
+    const response = await api.get('/gestion-sites/teams/all');
+    return response.data.map(mapBackendSiteToFrontend);
+  } catch (error: any) {
+    console.error('Error getting sites with teams:', error);
+    throw error.response?.data || error;
+  }
+};

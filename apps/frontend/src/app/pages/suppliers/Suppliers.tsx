@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 
 export default function Suppliers() {
   const user = useAuthStore((state) => state.user);
-  const canManageSuppliers = user && canEdit(user.role.name, 'suppliers');
+  const canManageSuppliers = user && canEdit(user.role?.name || user.role || 'client', 'suppliers');
   const [suppliers, setSuppliers] = useState(mockSuppliers);
   const [newSupplier, setNewSupplier] = useState({ name: '', category: '', email: '', phone: '' });
   const [contactDialogOpen, setContactDialogOpen] = useState(false);

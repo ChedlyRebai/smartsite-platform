@@ -157,4 +157,46 @@ export class GestionSiteController {
   async restore(@Param('id') id: string) {
     return this.gestionSiteService.restore(id);
   }
+
+  // ============ TEAM ASSIGNMENT ENDPOINTS ============
+
+  /**
+   * Assign a team to a site
+   */
+  @Post(':id/teams')
+  @HttpCode(HttpStatus.OK)
+  async assignTeam(
+    @Param('id') siteId: string,
+    @Body() body: { userId: string },
+  ) {
+    return this.gestionSiteService.assignTeamToSite(siteId, body.userId);
+  }
+
+  /**
+   * Remove a team from a site
+   */
+  @Delete(':id/teams/:userId')
+  @HttpCode(HttpStatus.OK)
+  async removeTeam(
+    @Param('id') siteId: string,
+    @Param('userId') userId: string,
+  ) {
+    return this.gestionSiteService.removeTeamFromSite(siteId, userId);
+  }
+
+  /**
+   * View teams assigned to a site
+   */
+  @Get(':id/teams')
+  async getTeams(@Param('id') siteId: string) {
+    return this.gestionSiteService.getTeamsAssignedToSite(siteId);
+  }
+
+  /**
+   * Get all sites with their assigned teams
+   */
+  @Get('teams/all')
+  async getAllSitesWithTeams() {
+    return this.gestionSiteService.getAllSitesWithTeams();
+  }
 }

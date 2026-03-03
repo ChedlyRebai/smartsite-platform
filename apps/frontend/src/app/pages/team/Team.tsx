@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Plus, Search, UserCog, Mail, Phone, Edit, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, Search, Users, Edit, Trash2, User, Building } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -8,275 +8,587 @@ import { Badge } from '../../components/ui/badge';
 import { Avatar, AvatarFallback } from '../../components/ui/avatar';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../../components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
-import { useAuthStore } from '../../store/authStore';
-import { canEdit } from '../../utils/permissions';
 import { mockTeamMembers } from '../../utils/mockData';
-import { roleLabels } from '../../utils/roleConfig';
 import { toast } from 'sonner';
-import type { Role, RoleType } from '../../types/index';
+import { 
+  getAllTeams, 
+  createTeam, 
+  updateTeam, 
+  deleteTeam, 
+  addMemberToTeam, 
+  removeMemberFromTeam 
+} from '../../action/team.action';
+import { getAllUsers } from '../../action/user.action';
+
+interface TeamData {
+  _id: string;
+  name: string;
+  description?: string;
+  members: any[];
+  manager?: any;
+  site?: any;
+  isActive: boolean;
+  teamCode?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+interface UserData {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
 
 export default function Team() {
-  const user = useAuthStore((state) => state.user);
-  const canManageTeam = user && canEdit(user.role.name, 'team');
-  const [members, setMembers] = useState([...mockTeamMembers]);
+  // Allow all users to manage teams - set to true always
+  const canManageTeam = true;
+  
+  const [teams, setTeams] = useState<TeamData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [useMockData, setUseMockData] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [newMember, setNewMember] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    role: 'user' as RoleType,
-  });
+  
+  // Dialog states
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [memberBeingEdited, setMemberBeingEdited] = useState<number | null>(null);
-  const [editData, setEditData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    role: 'user' as RoleType,
-  });
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  
+  // Form states
+  const [newTeam, setNewTeam] = useState({ name: '', description: '', teamCode: '' });
+  const [editTeam, setEditTeam] = useState<TeamData | null>(null);
+  const [teamToDelete, setTeamToDelete] = useState<TeamData | null>(null);
+  const [selectedTeamView, setSelectedTeamView] = useState<TeamData | null>(null);
+  
+  // Available users for adding members
+  const [availableUsers, setAvailableUsers] = useState<UserData[]>([]);
+  const [memberDialogOpen, setMemberDialogOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState('');
 
-  const filteredMembers = members.filter(member =>
-    `${member.firstName} ${member.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    member.email.toLowerCase().includes(searchTerm.toLowerCase())
+  // Statistics
+  const totalTeams = teams.length;
+  const activeTeams = teams.filter(t => t.isActive).length;
+  const inactiveTeams = totalTeams - activeTeams;
+  const totalMembers = teams.reduce((sum, team) => sum + (team.members?.length || 0), 0);
+
+  // Fetch teams from API
+  useEffect(() => {
+    loadTeams();
+  }, []);
+
+  const loadTeams = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await getAllTeams();
+      console.log('Teams loaded from API:', response.data);
+      setTeams(response.data);
+      setUseMockData(false);
+    } catch (err) {
+      console.error('Error loading teams, using mock data:', err);
+      setError('Backend not available, using mock data');
+      // Create mock teams for demo
+      setTeams([
+        {
+          _id: '1',
+          name: 'Team A',
+          description: 'Main construction team',
+          members: mockTeamMembers.slice(0, 3),
+          isActive: true,
+          teamCode: 'TEAM-A'
+        },
+        {
+          _id: '2',
+          name: 'Team B',
+          description: 'Maintenance team',
+          members: mockTeamMembers.slice(3, 5),
+          isActive: true,
+          teamCode: 'TEAM-B'
+        }
+      ]);
+      setUseMockData(true);
+      toast.warning('Offline mode - demo data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load available users when member dialog opens
+  useEffect(() => {
+    if (memberDialogOpen) {
+      loadAvailableUsers();
+    }
+  }, [memberDialogOpen]);
+
+  const loadAvailableUsers = async () => {
+    try {
+      const response = await getAllUsers();
+      if (response && response.status === 200 && Array.isArray(response.data)) {
+        // Normalize user data to ensure consistent field names
+        const normalizedUsers = response.data.map((user: any) => ({
+          _id: user._id,
+          firstName: user.firstName || user.firstname || user.nom || '',
+          lastName: user.lastName || user.lastname || user.prenom || '',
+          email: user.email || ''
+        }));
+        setAvailableUsers(normalizedUsers);
+      } else {
+        setAvailableUsers(mockTeamMembers.map(u => ({
+          _id: u._id,
+          firstName: u.firstName,
+          lastName: u.lastName,
+          email: u.email
+        })));
+      }
+    } catch (err) {
+      console.error('Error loading users:', err);
+      setAvailableUsers(mockTeamMembers.map(u => ({
+        _id: u._id,
+        firstName: u.firstName,
+        lastName: u.lastName,
+        email: u.email
+      })));
+    }
+  };
+
+  const filteredTeams = teams.filter(team =>
+    team.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    team.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    team.teamCode?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const getInitials = (firstName: string, lastName: string) => {
-    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n.charAt(0)).join('').substring(0, 2).toUpperCase();
   };
 
-  const handleAddMember = () => {
-    if (!newMember.firstName || !newMember.lastName || !newMember.email) {
-      toast.error('All fields are required');
+  const handleAddTeam = async () => {
+    // Validation
+    const trimmedName = newTeam.name.trim();
+    const trimmedDescription = newTeam.description.trim();
+    const trimmedCode = newTeam.teamCode.trim();
+    
+    if (!trimmedName) {
+      toast.error('Team name is required');
       return;
     }
-    const member = {
-      id: members.length + 1,
-      firstName: newMember.firstName,
-      lastName: newMember.lastName,
-      email: newMember.email,
-      phone: newMember.phone,
-      role: newMember.role,
-      isActive: true,
-      joinDate: new Date().toISOString(),
-      lastLoginDate: new Date().toISOString(),
-      createdDate: new Date().toISOString(),
-    };
-   // setMembers([...members, member]);
-    setNewMember({ firstName: '', lastName: '', email: '', phone: '', role: 'user' });
-    toast.success('Team member added successfully!');
+    
+    if (trimmedName.length < 2) {
+      toast.error('Team name must be at least 2 characters');
+      return;
+    }
+    
+    if (trimmedName.length > 50) {
+      toast.error('Team name must not exceed 50 characters');
+      return;
+    }
+    
+    // Check for duplicate team name
+    const duplicateName = teams.find(
+      t => t.name.toLowerCase() === trimmedName.toLowerCase()
+    );
+    if (duplicateName) {
+      toast.error('A team with this name already exists');
+      return;
+    }
+    
+    // Validate team code if provided
+    if (trimmedCode) {
+      if (trimmedCode.length > 20) {
+        toast.error('Team code must not exceed 20 characters');
+        return;
+      }
+      // Check for duplicate team code
+      const duplicateCode = teams.find(
+        t => t.teamCode?.toLowerCase() === trimmedCode.toLowerCase()
+      );
+      if (duplicateCode) {
+        toast.error('A team with this code already exists');
+        return;
+      }
+    }
+    
+    try {
+      if (useMockData) {
+        const team: TeamData = {
+          _id: String(teams.length + 1),
+          name: trimmedName,
+          description: trimmedDescription,
+          teamCode: trimmedCode,
+          members: [],
+          isActive: true,
+          createdAt: new Date().toISOString()
+        };
+        setTeams([...teams, team]);
+        toast.success('Team added successfully!');
+      } else {
+        const response = await createTeam({
+          name: trimmedName,
+          description: trimmedDescription,
+          teamCode: trimmedCode,
+          isActive: true
+        });
+        setTeams([...teams, response.data]);
+        toast.success('Team created successfully!');
+      }
+      setNewTeam({ name: '', description: '', teamCode: '' });
+      setAddDialogOpen(false);
+    } catch (error) {
+      console.error('Error creating team:', error);
+      toast.error('Error creating team');
+    }
   };
 
-  const handleRemoveMember = (memberId: number, memberName: string) => {
-    //setMembers(members.filter(m => m._id !== memberId));
-    toast.success(`${memberName} has been removed from the team`);
-  };
-
-  const handleEditMember = (member: typeof mockTeamMembers[0]) => {
-    //setMemberBeingEdited(member.id);
-    setEditData({
-      firstName: member.firstName,
-      lastName: member.lastName,
-      email: member.email,
-      phone: member.phone,
-      role: member.role.name,
-    });
+  const handleEditTeam = (team: TeamData) => {
+    setEditTeam(team);
     setEditDialogOpen(true);
   };
 
-  const handleSaveMemberEdit = () => {
-    if (!editData.firstName || !editData.lastName || !editData.email) {
-      toast.error('All fields are required');
+  const handleSaveEdit = async () => {
+    if (!editTeam) return;
+    
+    // Validation
+    const trimmedName = editTeam.name.trim();
+    const trimmedDescription = editTeam.description?.trim() || '';
+    const trimmedCode = editTeam.teamCode?.trim() || '';
+    
+    if (!trimmedName) {
+      toast.error('Team name is required');
       return;
     }
-    // setMembers(members.map(m =>
-    //   m.id === memberBeingEdited
-    //     ? {
-    //         ...m,
-    //         firstName: editData.firstName,
-    //         lastName: editData.lastName,
-    //         email: editData.email,
-    //         phone: editData.phone,
-    //         role: editData.role,
-    //       }
-    //     : m
-    // ));
-    setEditDialogOpen(false);
-    setMemberBeingEdited(null);
-    toast.success('Team member updated successfully!');
+    
+    if (trimmedName.length < 2) {
+      toast.error('Team name must be at least 2 characters');
+      return;
+    }
+    
+    if (trimmedName.length > 50) {
+      toast.error('Team name must not exceed 50 characters');
+      return;
+    }
+    
+    // Check for duplicate team name (excluding current team)
+    const duplicateName = teams.find(
+      t => t._id !== editTeam._id && t.name.toLowerCase() === trimmedName.toLowerCase()
+    );
+    if (duplicateName) {
+      toast.error('A team with this name already exists');
+      return;
+    }
+    
+    // Validate team code if provided
+    if (trimmedCode) {
+      if (trimmedCode.length > 20) {
+        toast.error('Team code must not exceed 20 characters');
+        return;
+      }
+      // Check for duplicate team code (excluding current team)
+      const duplicateCode = teams.find(
+        t => t._id !== editTeam._id && t.teamCode?.toLowerCase() === trimmedCode.toLowerCase()
+      );
+      if (duplicateCode) {
+        toast.error('A team with this code already exists');
+        return;
+      }
+    }
+    
+    try {
+      if (useMockData) {
+        const updatedTeam = {
+          ...editTeam,
+          name: trimmedName,
+          description: trimmedDescription,
+          teamCode: trimmedCode
+        };
+        setTeams(teams.map(t => t._id === editTeam._id ? updatedTeam : t));
+        toast.success('Team updated successfully!');
+      } else {
+        const response = await updateTeam(editTeam._id, {
+          name: trimmedName,
+          description: trimmedDescription,
+          teamCode: trimmedCode,
+          isActive: editTeam.isActive
+        });
+        setTeams(teams.map(t => t._id === editTeam._id ? response.data : t));
+        toast.success('Team updated successfully!');
+      }
+      setEditDialogOpen(false);
+      setEditTeam(null);
+    } catch (error) {
+      console.error('Error updating team:', error);
+      toast.error('Error updating team');
+    }
+  };
+
+  const handleDeleteTeam = (team: TeamData) => {
+    setTeamToDelete(team);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!teamToDelete) return;
+    
+    try {
+      if (useMockData) {
+        setTeams(teams.filter(t => t._id !== teamToDelete._id));
+        toast.success('Team deleted successfully!');
+      } else {
+        await deleteTeam(teamToDelete._id);
+        setTeams(teams.filter(t => t._id !== teamToDelete._id));
+        toast.success('Team deleted successfully!');
+      }
+    } catch (error) {
+      console.error('Error deleting team:', error);
+      toast.error('Error deleting team');
+    } finally {
+      setDeleteDialogOpen(false);
+      setTeamToDelete(null);
+    }
+  };
+
+  const handleViewTeam = (team: TeamData) => {
+    setSelectedTeamView(team);
+    setViewDialogOpen(true);
+  };
+
+  const handleAddMember = async () => {
+    if (!selectedTeamView || !selectedUserId) {
+      toast.error('Please select a member to add');
+      return;
+    }
+    
+    // Check if user is already a member
+    const isAlreadyMember = selectedTeamView.members?.some(
+      (m: any) => m._id === selectedUserId
+    );
+    if (isAlreadyMember) {
+      toast.error('This user is already a member of the team');
+      return;
+    }
+    
+    try {
+      if (useMockData) {
+        const userToAdd = availableUsers.find(u => u._id === selectedUserId);
+        if (userToAdd) {
+          const updatedTeam = {
+            ...selectedTeamView,
+            members: [...selectedTeamView.members, userToAdd]
+          };
+          setTeams(teams.map(t => t._id === selectedTeamView._id ? updatedTeam : t));
+          setSelectedTeamView(updatedTeam);
+        }
+        toast.success('Member added successfully!');
+      } else {
+        const response = await addMemberToTeam(selectedTeamView._id, selectedUserId);
+        setTeams(teams.map(t => t._id === selectedTeamView._id ? response.data : t));
+        setSelectedTeamView(response.data);
+        toast.success('Member added successfully!');
+      }
+      setSelectedUserId('');
+      setMemberDialogOpen(false);
+    } catch (error) {
+      console.error('Error adding member:', error);
+      toast.error('Error adding member');
+    }
+  };
+
+  const handleRemoveMember = async (memberId: string) => {
+    if (!selectedTeamView) return;
+    
+    try {
+      if (useMockData) {
+        const updatedTeam = {
+          ...selectedTeamView,
+          members: selectedTeamView.members.filter((m: any) => m._id !== memberId)
+        };
+        setTeams(teams.map(t => t._id === selectedTeamView._id ? updatedTeam : t));
+        setSelectedTeamView(updatedTeam);
+        toast.success('Member removed successfully!');
+      } else {
+        const response = await removeMemberFromTeam(selectedTeamView._id, memberId);
+        setTeams(teams.map(t => t._id === selectedTeamView._id ? response.data : t));
+        setSelectedTeamView(response.data);
+        toast.success('Member removed successfully!');
+      }
+    } catch (error) {
+      console.error('Error removing member:', error);
+      toast.error('Error removing member');
+    }
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-blue-100 text-sm">Total Teams</p>
+                <p className="text-2xl font-bold">{totalTeams}</p>
+              </div>
+              <div className="bg-white/20 rounded-full p-2">
+                <Users className="h-6 w-6" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-green-100 text-sm">Active Teams</p>
+                <p className="text-2xl font-bold">{activeTeams}</p>
+              </div>
+              <div className="bg-white/20 rounded-full p-2">
+                <Building className="h-6 w-6" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-orange-100 text-sm">Inactive Teams</p>
+                <p className="text-2xl font-bold">{inactiveTeams}</p>
+              </div>
+              <div className="bg-white/20 rounded-full p-2">
+                <Users className="h-6 w-6" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-purple-100 text-sm">Total Members</p>
+                <p className="text-2xl font-bold">{totalMembers}</p>
+              </div>
+              <div className="bg-white/20 rounded-full p-2">
+                <User className="h-6 w-6" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Team Management</h1>
-          <p className="text-gray-500 mt-1">Manage your construction team members</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Teams</h1>
+          <p className="text-sm sm:text-base text-gray-500 mt-1">
+            {filteredTeams.length} team{filteredTeams.length !== 1 ? 's' : ''} • 
+            <span className="ml-1">
+              {teams.filter(t => t.isActive).length} active{teams.filter(t => t.isActive).length !== 1 ? 's' : ''}
+            </span>
+          </p>
         </div>
         {canManageTeam ? (
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Team Member
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add New Team Member</DialogTitle>
-              <DialogDescription>
-                Add a new member to your construction team
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="first-name">First Name</Label>
-                  <Input
-                    id="first-name"
-                    placeholder="John"
-                    value={newMember.firstName}
-                    onChange={(e) => setNewMember({ ...newMember, firstName: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="last-name">Last Name</Label>
-                  <Input
-                    id="last-name"
-                    placeholder="Doe"
-                    value={newMember.lastName}
-                    onChange={(e) => setNewMember({ ...newMember, lastName: e.target.value })}
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="john@example.com"
-                  value={newMember.email}
-                  onChange={(e) => setNewMember({ ...newMember, email: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
-                <Input
-                  id="phone"
-                  placeholder="+216 12 345 678"
-                  value={newMember.phone}
-                  onChange={(e) => setNewMember({ ...newMember, phone: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="role">Role</Label>
-                <Select
-                  value={newMember.role}
-                  onValueChange={(value) => setNewMember({ ...newMember, role: value as RoleType })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(roleLabels).map(([key, label]) => (
-                      <SelectItem key={key} value={key}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button 
-                className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
-                onClick={handleAddMember}
-              >
-                Add Member
+          <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 shadow-lg hover:shadow-xl transition-all">
+                <Plus className="h-4 w-4 mr-2" />
+                New Team
               </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Create New Team</DialogTitle>
+                <DialogDescription>
+                  Fill in the information below to create a new team
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="team-name">Team Name *</Label>
+                  <Input
+                    id="team-name"
+                    placeholder="Team A"
+                    value={newTeam.name}
+                    onChange={(e) => setNewTeam({ ...newTeam, name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="team-code">Team Code</Label>
+                  <Input
+                    id="team-code"
+                    placeholder="TEAM-A"
+                    value={newTeam.teamCode}
+                    onChange={(e) => setNewTeam({ ...newTeam, teamCode: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="team-description">Description</Label>
+                  <Input
+                    id="team-description"
+                    placeholder="Description of the team"
+                    value={newTeam.description}
+                    onChange={(e) => setNewTeam({ ...newTeam, description: e.target.value })}
+                  />
+                </div>
+                <Button 
+                  className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
+                  onClick={handleAddTeam}
+                >
+                  Create Team
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         ) : (
           <Button disabled className="opacity-50 cursor-not-allowed">
             <Plus className="h-4 w-4 mr-2" />
-            Add Team Member (No Permission)
+            Add Team (No Permission)
           </Button>
         )}
       </div>
 
-      {/* Edit Member Dialog */}
+      {/* Edit Team Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Team Member</DialogTitle>
+            <DialogTitle>Edit Team</DialogTitle>
             <DialogDescription>
-              Update member information
+              Update team information
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-first-name">First Name</Label>
-                <Input
-                  id="edit-first-name"
-                  placeholder="John"
-                  value={editData.firstName}
-                  onChange={(e) => setEditData({ ...editData, firstName: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-last-name">Last Name</Label>
-                <Input
-                  id="edit-last-name"
-                  placeholder="Doe"
-                  value={editData.lastName}
-                  onChange={(e) => setEditData({ ...editData, lastName: e.target.value })}
-                />
-              </div>
-            </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-email">Email</Label>
+              <Label htmlFor="edit-team-name">Team Name *</Label>
               <Input
-                id="edit-email"
-                type="email"
-                placeholder="john@example.com"
-                value={editData.email}
-                onChange={(e) => setEditData({ ...editData, email: e.target.value })}
+                id="edit-team-name"
+                value={editTeam?.name || ''}
+                onChange={(e) => setEditTeam(editTeam ? { ...editTeam, name: e.target.value } : null)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-phone">Phone</Label>
+              <Label htmlFor="edit-team-code">Team Code</Label>
               <Input
-                id="edit-phone"
-                placeholder="+216 12 345 678"
-                value={editData.phone}
-                onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
+                id="edit-team-code"
+                value={editTeam?.teamCode || ''}
+                onChange={(e) => setEditTeam(editTeam ? { ...editTeam, teamCode: e.target.value } : null)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-role">Role</Label>
-              <Select
-                value={editData.role}
-                onValueChange={(value) => setEditData({ ...editData, role: value as RoleType })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select role" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(roleLabels).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="edit-team-description">Description</Label>
+              <Input
+                id="edit-team-description"
+                value={editTeam?.description || ''}
+                onChange={(e) => setEditTeam(editTeam ? { ...editTeam, description: e.target.value } : null)}
+              />
             </div>
             <div className="flex gap-2">
               <Button 
                 className="flex-1 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
-                onClick={handleSaveMemberEdit}
+                onClick={handleSaveEdit}
               >
-                Save Changes
+                Save
               </Button>
               <Button 
                 variant="outline" 
@@ -290,81 +602,231 @@ export default function Team() {
         </DialogContent>
       </Dialog>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search team members..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmer la suppression</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete the team "{teamToDelete?.name}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-2">
+            <Button 
+              variant="destructive" 
+              className="flex-1"
+              onClick={confirmDelete}
+            >
+              Delete
+            </Button>
+            <Button 
+              variant="outline" 
+              className="flex-1"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              Cancel
+            </Button>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {filteredMembers.map((member) => (
-              <Card key={member._id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-12 w-12">
-                        <AvatarFallback className="bg-gradient-to-br from-blue-600 to-green-600 text-white">
-                          {getInitials(member.firstName, member.lastName)}
+        </DialogContent>
+      </Dialog>
+
+      {/* View Team Details Dialog */}
+      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{selectedTeamView?.name}</DialogTitle>
+            <DialogDescription>
+              {selectedTeamView?.description}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Badge variant={selectedTeamView?.isActive ? 'secondary' : 'destructive'}>
+                {selectedTeamView?.isActive ? 'Active' : 'Inactive'}
+              </Badge>
+              {selectedTeamView?.teamCode && (
+                <Badge variant="outline">{selectedTeamView.teamCode}</Badge>
+              )}
+            </div>
+            
+            <div className="border-t pt-4">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-semibold flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Members ({selectedTeamView?.members?.length || 0})
+                </h4>
+                {canManageTeam && (
+                  <Dialog open={memberDialogOpen} onOpenChange={setMemberDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Plus className="h-3 w-3 mr-1" />
+                        Add
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Add Member</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a member" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableUsers
+                              .filter(u => !selectedTeamView?.members?.some((m: any) => m._id === u._id))
+                              .map(user => (
+                                <SelectItem key={user._id} value={user._id}>
+                                  {user.firstName} {user.lastName} ({user.email})
+                                </SelectItem>
+                              ))
+                            }
+                          </SelectContent>
+                        </Select>
+                        <Button 
+                          className="w-full" 
+                          onClick={handleAddMember}
+                          disabled={!selectedUserId}
+                        >
+                          Add Member
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                )}
+              </div>
+              <div className="space-y-2 max-h-60 overflow-y-auto">
+                {selectedTeamView?.members?.map((member: any) => (
+                  <div key={member._id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="text-xs bg-blue-100 text-blue-600">
+                          {member.firstName?.charAt(0)}{member.lastName?.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <h3 className="font-semibold text-gray-900">{member.firstName} {member.lastName}</h3>
-                        <p className="text-sm text-gray-500">{roleLabels[member.role.name]}</p>
+                        <p className="text-sm font-medium">{member.firstName} {member.lastName}</p>
+                        <p className="text-xs text-gray-500">{member.email}</p>
                       </div>
                     </div>
-                    <Badge variant={member.isActive ? 'secondary' : 'destructive'}>
-                      {member.isActive ? 'Active' : 'Inactive'}
-                    </Badge>
-                  </div>
-
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Mail className="h-4 w-4" />
-                      <span className="truncate">{member.email}</span>
-                    </div>
-                    {member.phone && (
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <Phone className="h-4 w-4" />
-                        <span>{member.phone}</span>
-                      </div>
+                    {canManageTeam && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        className="text-red-500 hover:text-red-700"
+                        onClick={() => handleRemoveMember(member._id)}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
                     )}
                   </div>
-
-                  <div className="flex gap-2 mt-4 pt-4 border-t">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex-1"
-                      onClick={() => handleEditMember(member)}
-                    >
-                      <Edit className="h-3 w-3 mr-1" />
-                      Edit
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
-                      //onClick={() => handleRemoveMember(member._id, `${member.firstName} ${member.lastName}`)}
-                    >
-                      <Trash2 className="h-3 w-3 mr-1" />
-                      Remove
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                ))}
+                {(!selectedTeamView?.members || selectedTeamView.members.length === 0) && (
+                  <p className="text-sm text-gray-500 text-center py-4">No members in this team</p>
+                )}
+              </div>
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        </DialogContent>
+      </Dialog>
+
+      {/* Teams Grid */}
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      ) : (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search teams..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {filteredTeams.length === 0 ? (
+              <div className="text-center py-12">
+                <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500">No teams found</p>
+              </div>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {filteredTeams.map((team) => (
+                  <Card key={team._id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleViewTeam(team)}>
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-12 w-12">
+                            <AvatarFallback className="bg-gradient-to-br from-blue-600 to-green-600 text-white">
+                              {getInitials(team.name)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <h3 className="font-semibold text-gray-900">{team.name}</h3>
+                            {team.teamCode && (
+                              <p className="text-xs text-gray-500">{team.teamCode}</p>
+                            )}
+                          </div>
+                        </div>
+                        <Badge variant={team.isActive ? 'secondary' : 'destructive'}>
+                          {team.isActive ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </div>
+
+                      {team.description && (
+                        <p className="text-sm text-gray-600 mb-4 line-clamp-2">{team.description}</p>
+                      )}
+
+                      <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
+                        <div className="flex items-center gap-1">
+                          <Users className="h-4 w-4" />
+                          <span>{team.members?.length || 0} membres</span>
+                        </div>
+                        {team.site && (
+                          <div className="flex items-center gap-1">
+                            <Building className="h-4 w-4" />
+                            <span>Site assigned</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex gap-2 pt-4 border-t" onClick={(e) => e.stopPropagation()}>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex-1"
+                          onClick={() => handleEditTeam(team)}
+                        >
+                          <Edit className="h-3 w-3 mr-1" />
+                          Modifier
+                        </Button>
+                        {canManageTeam && (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => handleDeleteTeam(team)}
+                          >
+                            <Trash2 className="h-3 w-3 mr-1" />
+                            Delete
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

@@ -49,6 +49,15 @@ export class Site extends Document {
   @Prop({ type: Types.ObjectId, ref: 'User', default: null })
   updatedBy?: Types.ObjectId;
 
+  // Team assignment fields
+  // References to individual users (foremen/workers) - uses UserSimple
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'UserSimple' }], default: [] })
+  teams: Types.ObjectId[];
+
+  // References to MongoDB Teams (team documents)
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Team' }], default: [] })
+  teamIds: Types.ObjectId[];
+
   // Virtual for formatted budget
   get formattedBudget(): string {
     return new Intl.NumberFormat('fr-FR', {

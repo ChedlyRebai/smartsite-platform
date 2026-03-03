@@ -17,14 +17,48 @@ export class UsersService {
     @InjectModel(User.name) private userModel: Model<User>,
     private emailService: EmailService,
     private rolesService: RolesService,
-  ) {
-  }
+  ) {}
 
+  // ✅ CREATE USER (CORRIGÉ AVEC HASH PASSWORD)
   async create(createUserDto: any) {
     console.log(' DEBUG: createUserDto:', createUserDto);
 
+    // Handle role - accept either role ID or role name
     if (createUserDto.role && typeof createUserDto.role === 'string') {
-      createUserDto.role = new Types.ObjectId(createUserDto.role);
+      // Check if it's a valid ObjectId (24 hex characters)
+      const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(createUserDto.role);
+      
+      if (isValidObjectId) {
+        // It's a valid ObjectId, use it directly
+        createUserDto.role = new Types.ObjectId(createUserDto.role);
+      } else {
+        // It's likely a role name, try to find the role
+        try {
+          const role = await this.rolesService.findByName(createUserDto.role);
+          if (role) {
+            createUserDto.role = role._id;
+          } else {
+            // Role not found by name, try to find "client" as default
+            const defaultRole = await this.rolesService.findByName('client');
+            if (defaultRole) {
+              createUserDto.role = defaultRole._id;
+            } else {
+              throw new BadRequestException('Invalid role. Please provide a valid role ID or create roles first.');
+            }
+          }
+        } catch (err) {
+          console.log('Role lookup failed, using default');
+        }
+      }
+    }
+
+    // ✅ HASH PASSWORD
+    if (createUserDto.password) {
+      const salt = await bcrypt.genSalt(10);
+      createUserDto.password = await bcrypt.hash(
+        createUserDto.password,
+        salt,
+      );
     }
 
     try {
@@ -33,7 +67,6 @@ export class UsersService {
 
       const result = await createdUser.save();
       console.log(' DEBUG: Utilisateur créé:', result);
-      console.log(' DEBUG: Utilisateur sauvegardé avec ID:', result._id);
       return result;
     } catch (error: any) {
       console.error('❌ ERREUR SAVE:', error.message);
@@ -55,20 +88,14 @@ export class UsersService {
       .sort({ name: 1 })
       .exec();
 
-    if (!user) {
-      return { error: 'User not found' };
-    }
-
-    if (!user.role) {
-      return { error: 'Role not found' };
-    }
+    if (!user) return { error: 'User not found' };
+    if (!user.role) return { error: 'Role not found' };
 
     const role = user.role as any;
     return { permissions: role.permissions || [] };
   }
 
   async findByCin(cin: string) {
-    console.log('from user service', cin);
     return this.userModel.findOne({ cin }).populate('role').exec();
   }
 
@@ -81,7 +108,13 @@ export class UsersService {
   }
 
   async findAll() {
-    return this.userModel.find().populate('role').exec();
+    try {
+      return await this.userModel.find().populate('role').exec();
+    } catch (error) {
+      console.error('Error in findAll:', error);
+      // If populate fails, return users without populated role
+      return this.userModel.find().select('-password').exec();
+    }
   }
 
   async findPending() {
@@ -89,6 +122,15 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: any) {
+    // ⚠️ hash si password modifié
+    if (updateUserDto.password) {
+      const salt = await bcrypt.genSalt(10);
+      updateUserDto.password = await bcrypt.hash(
+        updateUserDto.password,
+        salt,
+      );
+    }
+
     return this.userModel
       .findByIdAndUpdate(id, updateUserDto, { new: true })
       .exec();
@@ -98,16 +140,21 @@ export class UsersService {
     return this.userModel.findByIdAndDelete(id).exec();
   }
 
+  // Update password directly (used for password migration)
+  async updatePassword(id: string, newPassword: string) {
+    return this.userModel
+      .findByIdAndUpdate(id, { password: newPassword }, { new: true })
+      .exec();
+  }
+
   async handleBan(id: string) {
     const bannedUser = await this.userModel.findById(id).exec();
     if (!bannedUser) {
-      throw new NotFoundException(`Usser with id ${id} not exist`);
+      throw new NotFoundException(`User with id ${id} not exist`);
     }
+
     bannedUser.isActif = !bannedUser.isActif;
-
-    const user = await bannedUser.save();
-
-    return user;
+    return await bannedUser.save();
   }
 
   async getAllclients() {
@@ -123,21 +170,18 @@ export class UsersService {
     newPassword: string,
   ) {
     const user = await this.userModel.findById(userId).exec();
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
+    if (!user) throw new NotFoundException('User not found');
 
     const isPasswordValid = await bcrypt.compare(
       currentPassword,
       user.password,
     );
+
     if (!isPasswordValid) {
       throw new UnauthorizedException('Current password is incorrect');
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-
     user.password = hashedPassword;
     await user.save();
 
@@ -148,15 +192,16 @@ export class UsersService {
     const existingUser = await this.userModel
       .findOne({ cin: createUserDto.cin })
       .exec();
+
     if (existingUser) {
       throw new BadRequestException('User with this CIN already exists');
     }
 
     const temporaryPassword = this.generateTemporaryPassword();
-
     const hashedPassword = await bcrypt.hash(temporaryPassword, 10);
 
     let roleId = createUserDto.role;
+
     if (!roleId) {
       const clientRole = await this.rolesService.findByName('client');
       if (!clientRole) {
@@ -171,56 +216,40 @@ export class UsersService {
       roleId = new Types.ObjectId(roleId);
     }
 
-    // Prepare user data
     const userData = {
-      cin: createUserDto.cin,
-      firstName: createUserDto.firstName,
-      lastName: createUserDto.lastName,
-      email: createUserDto.email,
-      phoneNumber: createUserDto.phoneNumber,
-      address: createUserDto.address,
-      companyName: createUserDto.companyName,
-      departement: createUserDto.departement,
+      ...createUserDto,
       password: hashedPassword,
       role: roleId,
-      status: 'approved', // Admin-created users are approved by default
+      status: 'approved',
       isActif: true,
-      emailVerified: true, // Admin-created users emails are pre-verified
+      emailVerified: true,
     };
 
-    try {
-      // Create the user
-      const createdUser = new this.userModel(userData);
-      const result = await createdUser.save();
-      console.log('✅ User created successfully:', result._id);
+    const createdUser = new this.userModel(userData);
+    const result = await createdUser.save();
 
-      // Send email with temporary password
-      if (result.email) {
-        try {
-          await this.emailService.sendTemporaryPasswordEmail(
-            result.email,
-            result.firstName,
-            result.lastName,
-            result.cin,
-            temporaryPassword,
-          );
-          console.log(' Temporary password email sent to', result.email);
-        } catch (error) {
-          console.error(' Failed to send temporary password email:', error);
-        }
+    if (result.email) {
+      try {
+        await this.emailService.sendTemporaryPasswordEmail(
+          result.email,
+          result.firstName,
+          result.lastName,
+          result.cin,
+          temporaryPassword,
+        );
+      } catch (error) {
+        console.error(' Failed to send email:', error);
       }
-
-      const userObj = result.toObject ? result.toObject() : result;
-      const { password, ...userWithoutPassword } = userObj;
-
-      return {
-        success: true,
-        message: 'User created successfully. Temporary password sent to email.',
-        user: userWithoutPassword,
-      };
-    } catch (error: any) {
-      throw new BadRequestException(error.message || 'Failed to create user');
     }
+
+    const userObj = result.toObject ? result.toObject() : result;
+    const { password, ...userWithoutPassword } = userObj;
+
+    return {
+      success: true,
+      message: 'User created successfully. Temporary password sent to email.',
+      user: userWithoutPassword,
+    };
   }
 
   private generateTemporaryPassword(): string {
@@ -245,5 +274,166 @@ export class UsersService {
       .split('')
       .sort(() => Math.random() - 0.5)
       .join('');
+  }
+
+  // ============ TEAM ASSIGNMENT METHODS ============
+
+  /**
+   * Assign a manager to a user (team member)
+   */
+  async assignManager(userId: string, managerId: string): Promise<any> {
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new NotFoundException('Utilisateur non trouvé');
+    }
+
+    const manager = await this.userModel.findById(managerId).exec();
+    if (!manager) {
+      throw new NotFoundException('Gestionnaire non trouvé');
+    }
+
+    // Update user's manager
+    user.manager = new Types.ObjectId(managerId);
+    await user.save();
+
+    return {
+      message: 'Gestionnaire affecté avec succès',
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        manager: manager._id,
+        managerName: `${manager.firstName} ${manager.lastName}`
+      }
+    };
+  }
+
+  /**
+   * Modify a user's manager
+   */
+  async modifyManager(userId: string, newManagerId: string): Promise<any> {
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new NotFoundException('Utilisateur non trouvé');
+    }
+
+    const newManager = await this.userModel.findById(newManagerId).exec();
+    if (!newManager) {
+      throw new NotFoundException('Nouveau gestionnaire non trouvé');
+    }
+
+    user.manager = new Types.ObjectId(newManagerId);
+    await user.save();
+
+    return {
+      message: 'Gestionnaire modifié avec succès',
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        manager: newManager._id,
+        managerName: `${newManager.firstName} ${newManager.lastName}`
+      }
+    };
+  }
+
+  /**
+   * View a user's manager
+   */
+  async getManager(userId: string): Promise<any> {
+    const user = await this.userModel.findById(userId)
+      .populate('manager', 'firstName lastName email cin phoneNumber')
+      .exec();
+
+    if (!user) {
+      throw new NotFoundException('Utilisateur non trouvé');
+    }
+
+    if (!user.manager) {
+      return { message: 'Aucun gestionnaire affecté', manager: null };
+    }
+
+    return {
+      manager: user.manager
+    };
+  }
+
+  /**
+   * Set responsibilities for a user
+   */
+  async setResponsibilities(userId: string, responsibilities: string): Promise<any> {
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new NotFoundException('Utilisateur non trouvé');
+    }
+
+    user.responsibilities = responsibilities;
+    await user.save();
+
+    return {
+      message: 'Responsabilités mises à jour avec succès',
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        responsibilities: user.responsibilities
+      }
+    };
+  }
+
+  /**
+   * Get users by site (team members assigned to a site)
+   */
+  async getUsersBySite(siteId: string): Promise<any[]> {
+    return this.userModel.find({ assignedSite: new Types.ObjectId(siteId) })
+      .populate('manager', 'firstName lastName email')
+      .populate('role', 'name')
+      .exec();
+  }
+
+  /**
+   * Assign user to a site
+   */
+  async assignToSite(userId: string, siteId: string): Promise<any> {
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new NotFoundException('Utilisateur non trouvé');
+    }
+
+    user.assignedSite = new Types.ObjectId(siteId);
+    await user.save();
+
+    return {
+      message: 'Utilisateur affecté au site avec succès',
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        assignedSite: user.assignedSite
+      }
+    };
+  }
+
+  /**
+   * Remove user from a site
+   */
+  async removeFromSite(userId: string): Promise<any> {
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new NotFoundException('Utilisateur non trouvé');
+    }
+
+    user.assignedSite = undefined;
+    await user.save();
+
+    return {
+      message: 'Utilisateur retiré du site avec succès',
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        assignedSite: null
+      }
+    };
   }
 }

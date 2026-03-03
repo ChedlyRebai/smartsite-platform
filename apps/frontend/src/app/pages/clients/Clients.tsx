@@ -15,7 +15,7 @@ import { User } from '@/app/types';
 
 export default function Clients() {
   const user = useAuthStore((state) => state.user);
-  const canManageClients = user && canEdit(user.role.name, 'clients');
+  const canManageClients = user && canEdit(user.role?.name || 'client', 'clients');
   const [clients, setClients] = useState<User[]>([] as User[]);
   const [viewDetailsOpen, setViewDetailsOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
