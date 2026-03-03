@@ -8,6 +8,7 @@ import {
 import { InjectModel, InjectConnection } from '@nestjs/mongoose';
 import { Model, Connection, Types } from 'mongoose';
 import { Site } from './entities/site.entity';
+import { Team } from './entities/team.entity';
 import { CreateSiteDto, UpdateSiteDto } from './dto';
 import { HttpException, HttpStatus } from '@nestjs/common';
 
