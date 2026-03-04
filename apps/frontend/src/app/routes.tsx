@@ -12,6 +12,8 @@ import Planning from "./pages/planning/Planning";
 import Team from "./pages/team/Team";
 import Clients from "./pages/clients/Clients";
 import Suppliers from "./pages/suppliers/Suppliers";
+import CatalogueArticles from "./pages/fournisseurs/CatalogueArticles";
+import GestionFournisseurs from "./pages/fournisseurs/GestionFournisseurs";
 import Materials from "./pages/materials/Materials";
 import Finance from "./pages/finance/Finance";
 import QHSE from "./pages/qhse/QHSE";
@@ -110,6 +112,14 @@ export const router = createBrowserRouter([
       {
         path: "suppliers",
         element: <Suppliers />,
+      },
+      {
+        path: "catalogue-articles",
+        element: <CatalogueArticles />,
+      },
+      {
+        path: "gestion-fournisseurs",
+        element: <GestionFournisseurs />,
       },
       {
         path: "materials",

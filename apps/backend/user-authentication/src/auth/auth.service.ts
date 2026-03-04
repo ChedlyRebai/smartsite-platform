@@ -97,17 +97,28 @@ export class AuthService {
       throw new BadRequestException('User already exists');
     }
 
-    // Find default "client" role if no role provided
+    // Find role by name or use provided role ID
     let roleId = role;
-    if (!roleId) {
-      const clientRole = await this.rolesService.findByName('client');
-      if (!clientRole) {
-        throw new BadRequestException(
-          'Default client role not found. Please create a "client" role first.',
-        );
+    if (roleId && typeof roleId === 'string') {
+      // Check if it's a role name (like "client") and find the corresponding ObjectId
+      const foundRole = await this.rolesService.findByName(roleId);
+      if (foundRole) {
+        roleId = foundRole._id.toString();
+        console.log('🔍 DEBUG: Found role by name:', roleId);
+      } else if (!roleId.match(/^[0-9a-fA-F]{24}$/)) {
+        // If not a valid ObjectId and role not found, create default client role
+        console.log('🔍 DEBUG: Role not found, checking for default client role');
+        const clientRole = await this.rolesService.findByName('client');
+        if (clientRole) {
+          roleId = clientRole._id.toString();
+          console.log('🔍 DEBUG: Using default client role:', roleId);
+        } else {
+          // Create a basic client role if it doesn't exist
+          console.log('🔍 DEBUG: Creating default client role');
+          const newRole = await this.rolesService.create({ name: 'client', description: 'Client user role' });
+          roleId = newRole._id.toString();
+        }
       }
-      roleId = clientRole._id.toString();
-      console.log('🔍 DEBUG: Using default client role:', roleId);
     }
 
     const hashedPassword = password
