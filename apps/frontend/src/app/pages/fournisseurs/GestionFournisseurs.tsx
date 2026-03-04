@@ -66,6 +66,56 @@ export default function GestionFournisseurs() {
     telephoneContact: '',
   });
 
+  // Validation errors state
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Validation function
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    // Required fields
+    if (!formData.nom?.trim()) {
+      newErrors.nom = 'Le nom du fournisseur est obligatoire';
+    }
+
+    // Email validation
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Adresse email invalide';
+    }
+
+    // Phone validation (international format)
+    if (formData.telephone && !/^[+]?[\d\s]{8,}$/.test(formData.telephone.replace(/\s/g, ''))) {
+      newErrors.telephone = 'Numéro de téléphone invalide';
+    }
+
+    // IBAN validation (basic check - starts with country code)
+    if (formData.iban && !/^[A-Z]{2}\d{2}[A-Z0-9]+$/.test(formData.iban.replace(/\s/g, ''))) {
+      newErrors.iban = 'IBAN invalide (ex: TN59 1234...)';
+    }
+
+    // Number ranges
+    if (formData.noteFiabilite !== undefined && (formData.noteFiabilite < 0 || formData.noteFiabilite > 5)) {
+      newErrors.noteFiabilite = 'La note doit être entre 0 et 5';
+    }
+    if (formData.noteQualite !== undefined && (formData.noteQualite < 0 || formData.noteQualite > 5)) {
+      newErrors.noteQualite = 'La note doit être entre 0 et 5';
+    }
+    if (formData.noteRespectDelais !== undefined && (formData.noteRespectDelais < 0 || formData.noteRespectDelais > 5)) {
+      newErrors.noteRespectDelais = 'La note doit être entre 0 et 5';
+    }
+
+    if (formData.remise !== undefined && (formData.remise < 0 || formData.remise > 100)) {
+      newErrors.remise = 'La remise doit être entre 0 et 100%';
+    }
+
+    if (formData.delaiLivraison !== undefined && formData.delaiLivraison < 0) {
+      newErrors.delaiLivraison = 'Le délai ne peut pas être négatif';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   // Categories disponibles
   const categoriesOptions = [
     'béton', 'fer', 'acier', 'électricité', 'plomberie', 
@@ -124,6 +174,7 @@ export default function GestionFournisseurs() {
       telephoneContact: '',
     });
     setSelectedFournisseur(null);
+    setErrors({});
   };
 
   const handleOpenDialog = (fournisseur?: Fournisseur) => {
@@ -137,8 +188,9 @@ export default function GestionFournisseurs() {
   };
 
   const handleSave = async () => {
-    if (!formData.nom) {
-      toast.error('Le nom du fournisseur est obligatoire');
+    // Validate form before saving
+    if (!validateForm()) {
+      toast.error('Veuillez corriger les erreurs avant de sauvegarder');
       return;
     }
 
@@ -153,6 +205,7 @@ export default function GestionFournisseurs() {
       toast.success(selectedFournisseur ? 'Fournisseur mis à jour' : 'Fournisseur créé');
       setDialogOpen(false);
       resetForm();
+      setErrors({});
       loadFournisseurs();
     } else {
       toast.error('Erreur lors de la sauvegarde');
@@ -265,7 +318,9 @@ export default function GestionFournisseurs() {
                           value={formData.nom || ''}
                           onChange={(e) => setFormData({...formData, nom: e.target.value})}
                           placeholder="Société des Ciments"
+                          className={errors.nom ? 'border-red-500' : ''}
                         />
+                        {errors.nom && <p className="text-red-500 text-xs">{errors.nom}</p>}
                       </div>
                       <div className="space-y-2">
                         <Label>Statut</Label>
@@ -324,7 +379,9 @@ export default function GestionFournisseurs() {
                           value={formData.telephone || ''}
                           onChange={(e) => setFormData({...formData, telephone: e.target.value})}
                           placeholder="71 234 567"
+                          className={errors.telephone ? 'border-red-500' : ''}
                         />
+                        {errors.telephone && <p className="text-red-500 text-xs">{errors.telephone}</p>}
                       </div>
                       <div className="space-y-2">
                         <Label>Email</Label>
@@ -333,7 +390,9 @@ export default function GestionFournisseurs() {
                           value={formData.email || ''}
                           onChange={(e) => setFormData({...formData, email: e.target.value})}
                           placeholder="contact@fournisseur.tn"
+                          className={errors.email ? 'border-red-500' : ''}
                         />
+                        {errors.email && <p className="text-red-500 text-xs">{errors.email}</p>}
                       </div>
                     </div>
 
@@ -528,7 +587,10 @@ export default function GestionFournisseurs() {
                         <Input 
                           value={formData.iban || ''}
                           onChange={(e) => setFormData({...formData, iban: e.target.value})}
+                          placeholder="TN59 1234 5678..."
+                          className={errors.iban ? 'border-red-500' : ''}
                         />
+                        {errors.iban && <p className="text-red-500 text-xs">{errors.iban}</p>}
                       </div>
                       <div className="space-y-2">
                         <Label>Banque</Label>
@@ -560,7 +622,9 @@ export default function GestionFournisseurs() {
                           type="number"
                           value={formData.delaiLivraison || 0}
                           onChange={(e) => setFormData({...formData, delaiLivraison: parseInt(e.target.value)})}
+                          className={errors.delaiLivraison ? 'border-red-500' : ''}
                         />
+                        {errors.delaiLivraison && <p className="text-red-500 text-xs">{errors.delaiLivraison}</p>}
                       </div>
                     </div>
 
@@ -573,7 +637,9 @@ export default function GestionFournisseurs() {
                           max="100"
                           value={formData.remise || 0}
                           onChange={(e) => setFormData({...formData, remise: parseFloat(e.target.value)})}
+                          className={errors.remise ? 'border-red-500' : ''}
                         />
+                        {errors.remise && <p className="text-red-500 text-xs">{errors.remise}</p>}
                       </div>
                     </div>
                   </TabsContent>
@@ -615,7 +681,9 @@ export default function GestionFournisseurs() {
                             max="5"
                             value={formData.noteFiabilite || 0}
                             onChange={(e) => setFormData({...formData, noteFiabilite: parseFloat(e.target.value)})}
+                            className={errors.noteFiabilite ? 'border-red-500' : ''}
                           />
+                          {errors.noteFiabilite && <p className="text-red-500 text-xs">{errors.noteFiabilite}</p>}
                           <div className="flex gap-1 mt-1">
                             {[1,2,3,4,5].map(star => (
                               <Star 
@@ -634,7 +702,9 @@ export default function GestionFournisseurs() {
                             max="5"
                             value={formData.noteQualite || 0}
                             onChange={(e) => setFormData({...formData, noteQualite: parseFloat(e.target.value)})}
+                            className={errors.noteQualite ? 'border-red-500' : ''}
                           />
+                          {errors.noteQualite && <p className="text-red-500 text-xs">{errors.noteQualite}</p>}
                           <div className="flex gap-1 mt-1">
                             {[1,2,3,4,5].map(star => (
                               <Star 
@@ -653,7 +723,9 @@ export default function GestionFournisseurs() {
                             max="5"
                             value={formData.noteRespectDelais || 0}
                             onChange={(e) => setFormData({...formData, noteRespectDelais: parseFloat(e.target.value)})}
+                            className={errors.noteRespectDelais ? 'border-red-500' : ''}
                           />
+                          {errors.noteRespectDelais && <p className="text-red-500 text-xs">{errors.noteRespectDelais}</p>}
                           <div className="flex gap-1 mt-1">
                             {[1,2,3,4,5].map(star => (
                               <Star 
