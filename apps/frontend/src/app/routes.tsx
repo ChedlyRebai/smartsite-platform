@@ -5,6 +5,7 @@ import Register from "./pages/auth/Register";
 import VerifyOTP from "./pages/auth/VerifyOTP";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
+import ChangePasswordFirstLogin from "./pages/auth/ChangePasswordFirstLogin";
 import Dashboard from "./pages/dashboards/Dashboard";
 import Sites from "./pages/sites/Sites";
 import Projects from "./pages/projects/Projects";
@@ -72,6 +73,10 @@ export const router = createBrowserRouter([
       {
         path: "dashboard",
         element: <Dashboard />,
+      },
+      {
+        path: "change-password-first-login",
+        element: <ChangePasswordFirstLogin />,
       },
       {
         path: "profile",

@@ -51,10 +51,14 @@ export default function Login() {
       await login(data.cin, data.password).then((data: any) => {
         console.log("Login successful!", data);
         toast.success("Login successful!");
-        navigate("/dashboard");
+        
+        // Check if this is the first login
+        if (data.firstLogin) {
+          navigate("/change-password-first-login");
+        } else {
+          navigate("/dashboard");
+        }
       });
-      toast.success("Login successful!");
-      navigate("/dashboard");
     } catch (error: any) {
       const message =
         error?.message ||

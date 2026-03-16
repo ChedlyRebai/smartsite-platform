@@ -139,8 +139,9 @@ export class UsersService {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     user.password = hashedPassword;
+    user.passwordChnage = true;
+    user.firstLogin = false;
     await user.save();
-
     return { message: 'Password changed successfully' };
   }
 
@@ -181,6 +182,8 @@ export class UsersService {
       address: createUserDto.address,
       companyName: createUserDto.companyName,
       departement: createUserDto.departement,
+      changePassword: false,
+      firstLogin: true,
       password: hashedPassword,
       role: roleId,
       status: 'approved', // Admin-created users are approved by default

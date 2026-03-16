@@ -86,6 +86,7 @@ export interface AuthState {
     firstName: string;
     lastName: string;
     role: UserRole;
+    firstLogin?: boolean;
   };
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;

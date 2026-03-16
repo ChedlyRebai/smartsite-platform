@@ -64,6 +64,7 @@ export class AuthService {
       lastName: userData.lastName,
       firstName: userData.firstName,
       role: userData.role || null,
+      firstLogin: userData.firstLogin || false,
     };
   }
 

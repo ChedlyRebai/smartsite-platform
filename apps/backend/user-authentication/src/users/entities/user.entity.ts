@@ -73,6 +73,12 @@ export class User extends Document {
   @Prop()
   otpExpiresAt?: Date;
 
+  @Prop({ default: false })
+  passwordChnage: boolean;
+
+  @Prop({ default: true })
+  firstLogin: boolean;
+
   @Prop()
   passwordResetCode?: string;
 
