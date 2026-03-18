@@ -38,6 +38,7 @@ const mapBackendSiteToFrontend = (backendSite: any): Site => {
     progress: backendSite.progress || 0,
     createdAt: backendSite.createdAt || new Date().toISOString(),
     updatedAt: backendSite.updatedAt || new Date().toISOString(),
+    teams: backendSite.teamIds || [],
   };
 };
 

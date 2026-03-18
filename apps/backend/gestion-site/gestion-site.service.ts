@@ -253,6 +253,11 @@ export class GestionSiteService {
         updateData.updatedBy = userId;
       }
 
+      // Auto-complete: If progress is 100%, set status to 'completed'
+      if (updateData.progress !== undefined && updateData.progress >= 100) {
+        updateData.status = 'completed';
+      }
+
       const updatedSite = await this.siteModel
         .findByIdAndUpdate(id, updateData, { new: true })
         .exec();
@@ -553,8 +558,8 @@ export class GestionSiteService {
     try {
       return await this.siteModel.find()
         .populate({
-          path: 'teams',
-          select: 'firstName lastName email phoneNumber'
+          path: 'teamIds',
+          select: 'name description teamCode'
         })
         .exec();
     } catch (error) {

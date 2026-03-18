@@ -151,6 +151,14 @@ export interface Site {
   progress: number;
   createdAt: string;
   updatedAt: string;
+  teams?: SiteTeam[];
+}
+
+export interface SiteTeam {
+  _id: string;
+  name: string;
+  description?: string;
+  teamCode?: string;
 }
 
 export interface Task {

@@ -108,12 +108,28 @@ export class TeamsService {
       .exec();
   }
 
-  // Note: assignSite method removed - site assignment is now handled by gestion-site service
-  // The site information is stored in the Site document's teamIds array, not in Team's site field
+  // Note: assignSite method - updates the Team document with the assigned site
   async assignSite(teamId: string, siteId: string) {
-    // This method is kept for backward compatibility but doesn't update the Team document
-    // Instead, the site should be updated via gestion-site API
-    return this.teamModel.findById(teamId)
+    return this.teamModel.findByIdAndUpdate(
+      teamId,
+      { site: siteId },
+      { new: true }
+    )
+      .populate({
+        path: 'members',
+        select: '-role -password -emailVerificationOtp -otpExpiresAt -passwordResetCode -passwordResetCodeExpiresAt'
+      })
+      .populate('manager', '-role -password -emailVerificationOtp -otpExpiresAt -passwordResetCode -passwordResetCodeExpiresAt')
+      .exec();
+  }
+
+  // Remove site assignment from team
+  async removeSite(teamId: string) {
+    return this.teamModel.findByIdAndUpdate(
+      teamId,
+      { $unset: { site: 1 } },
+      { new: true }
+    )
       .populate({
         path: 'members',
         select: '-role -password -emailVerificationOtp -otpExpiresAt -passwordResetCode -passwordResetCodeExpiresAt'

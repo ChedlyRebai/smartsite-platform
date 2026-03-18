@@ -1,19 +1,9 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import type { Site } from '../types';
+import type { Site, SiteTeam } from '../types';
 
 export interface SiteWithTeams extends Site {
-  teams?: TeamInfo[];
-}
-
-export interface TeamInfo {
-  _id: string;
-  name: string;
-  teamLeader?: {
-    firstName: string;
-    lastName: string;
-  };
-  members?: number;
+  teams?: SiteTeam[];
 }
 
 export const exportSitesToPDF = (sites: SiteWithTeams[], fileName: string = 'sites-report.pdf'): void => {
@@ -46,6 +36,11 @@ export const exportSitesToPDF = (sites: SiteWithTeams[], fileName: string = 'sit
   
   doc.text(`Total Sites: ${totalSites} | In Progress: ${inProgress} | Completed: ${completed} | Planning: ${planning}`, 14, 38);
   
+  // Add TND note
+  doc.setFontSize(8);
+  doc.setTextColor(100, 100, 100);
+  doc.text('Budget in Tunisian Dinar (TND)', 14, 44);
+  
   // Sites table data
   const tableData = sites.map(site => {
     const statusLabels: Record<string, string> = {
@@ -58,11 +53,7 @@ export const exportSitesToPDF = (sites: SiteWithTeams[], fileName: string = 'sit
     
     // Format teams assigned to this site
     const teamsText = site.teams && site.teams.length > 0 
-      ? site.teams.map(t => {
-          const leader = t.teamLeader ? ` (Leader: ${t.teamLeader.firstName} ${t.teamLeader.lastName})` : '';
-          const members = t.members ? ` - ${t.members} members` : '';
-          return `${t.name}${leader}${members}`;
-        }).join('\n')
+      ? site.teams.map(t => t.name || t._id).join(', ')
       : 'No team assigned';
     
     return [
@@ -71,16 +62,16 @@ export const exportSitesToPDF = (sites: SiteWithTeams[], fileName: string = 'sit
       statusLabels[site.status] || site.status,
       `${site.progress}%`,
       site.area.toLocaleString() + ' m²',
-      site.budget ? `$${(site.budget / 1000).toFixed(0)}K` : '-',
+      site.budget ? site.budget.toLocaleString('fr-TN', { style: 'currency', currency: 'TND' }) : '-',
       teamsText
     ];
   });
   
   // Create the main table
   autoTable(doc, {
-    head: [['Site Name', 'Address', 'Status', 'Progress', 'Area', 'Budget', 'Assigned Teams']],
+    head: [['Site Name', 'Address', 'Status', 'Progress', 'Area', 'Budget (TND)', 'Assigned Teams']],
     body: tableData,
-    startY: 45,
+    startY: 50,
     headStyles: {
       fillColor: [41, 128, 185],
       textColor: 255,
@@ -178,7 +169,7 @@ export const exportSingleSiteToPDF = (site: SiteWithTeams): void => {
     ['Status:', statusLabels[site.status] || site.status],
     ['Progress:', `${site.progress}%`],
     ['Area:', `${site.area.toLocaleString()} m²`],
-    ['Budget:', site.budget ? `$${site.budget.toLocaleString()}` : '-'],
+    ['Budget:', site.budget ? site.budget.toLocaleString('fr-TN', { style: 'currency', currency: 'TND' }) : '-'],
     ['Start Date:', site.workStartDate ? new Date(site.workStartDate).toLocaleDateString() : '-'],
     ['End Date:', site.workEndDate ? new Date(site.workEndDate).toLocaleDateString() : '-'],
   ];
@@ -201,13 +192,13 @@ export const exportSingleSiteToPDF = (site: SiteWithTeams): void => {
   
   if (site.teams && site.teams.length > 0) {
     const teamData = site.teams.map(team => [
-      team.name,
-      team.teamLeader ? `${team.teamLeader.firstName} ${team.teamLeader.lastName}` : 'No leader',
-      team.members ? team.members.toString() : '0'
+      team.name || 'Team',
+      team.description || '-',
+      team.teamCode || '-'
     ]);
     
     autoTable(doc, {
-      head: [['Team Name', 'Team Leader', 'Members']],
+      head: [['Team Name', 'Description', 'Team Code']],
       body: teamData,
       startY: yPos,
       headStyles: {

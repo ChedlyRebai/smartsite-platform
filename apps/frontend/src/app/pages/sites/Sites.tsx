@@ -13,6 +13,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../../components/ui/dropdown-menu';
 import { useAuthStore } from '../../store/authStore';
 import { mockSites, mockTeamMembers } from '../../utils/mockData';
 import { toast } from 'sonner';
@@ -20,7 +26,8 @@ import type { Site } from '../../types';
 import { fetchSites, createSite, updateSite, deleteSite, assignTeamToSite, removeTeamFromSite, getTeamsAssignedToSite, getAllSitesWithTeams } from '../../action/site.action';
 import { getAllUsers, assignUserToSite } from '../../action/user.action';
 import { getAllTeams, getTeamById, assignSiteToTeam } from '../../action/team.action';
-import { exportSitesToPDF, exportSingleSiteToPDF, type SiteWithTeams } from '../../utils/pdfExport';
+import { exportSitesToPDF, exportSingleSiteToPDF } from '../../utils/pdfExport';
+import { exportSitesToCSV, exportSitesToExcel, exportSitesToJSON } from '../../utils/exportUtils';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import type { LatLngExpression } from 'leaflet';
 import L from 'leaflet';
@@ -84,7 +91,7 @@ export default function Sites() {
   const canManageSites = true;
   const [searchTerm, setSearchTerm] = useState('');
   const [sites, setSites] = useState<Site[]>([]);
-  const [sitesWithTeams, setSitesWithTeams] = useState<SiteWithTeams[]>([]);
+  const [sitesWithTeams, setSitesWithTeams] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [useMockData, setUseMockData] = useState(false);
@@ -164,7 +171,7 @@ export default function Sites() {
       console.log('Sites loaded from API:', response.data);
       console.log('Sites with teams:', sitesWithTeamsData);
       setSites(response.data);
-      setSitesWithTeams(sitesWithTeamsData as SiteWithTeams[]);
+      setSitesWithTeams(sitesWithTeamsData as Site[]);
       setUseMockData(false);
     } catch (err) {
       console.error('Error loading sites, using mock data:', err);
@@ -504,13 +511,57 @@ export default function Sites() {
     return <Icon className={`h-4 w-4 ${config.color.split(' ')[0]}`} />;
   };
 
-  // Handle PDF export
-  const handleExportPDF = () => {
-    if (sitesWithTeams.length > 0) {
-      exportSitesToPDF(sitesWithTeams, `smartsite-sites-${new Date().toISOString().split('T')[0]}.pdf`);
-      toast.success('PDF exported successfully!');
-    } else {
-      toast.error('No sites to export');
+  // Handle PDF export - always fetch fresh data from MongoDB
+  const handleExportPDF = async () => {
+    try {
+      // Fetch fresh data directly from the API
+      const sitesData = await getAllSitesWithTeams();
+      
+      if (sitesData && sitesData.length > 0) {
+        exportSitesToPDF(sitesData as Site[], `smartsite-sites-${new Date().toISOString().split('T')[0]}.pdf`);
+        toast.success('PDF exported successfully with ' + sitesData.length + ' sites!');
+      } else {
+        toast.error('No sites found in database');
+      }
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      toast.error('Failed to export PDF - please ensure backend is running');
+    }
+  };
+
+  // Handle export in different formats
+  const handleExport = async (format: 'pdf' | 'csv' | 'excel' | 'json') => {
+    try {
+      const sitesData = await getAllSitesWithTeams();
+      
+      if (!sitesData || sitesData.length === 0) {
+        toast.error('No sites found in database');
+        return;
+      }
+
+      const dateStr = new Date().toISOString().split('T')[0];
+      
+      switch (format) {
+        case 'pdf':
+          exportSitesToPDF(sitesData as Site[], `smartsite-sites-${dateStr}.pdf`);
+          toast.success('PDF exported with ' + sitesData.length + ' sites!');
+          break;
+        case 'csv':
+          exportSitesToCSV(sitesData as Site[], `smartsite-sites-${dateStr}.csv`);
+          toast.success('CSV exported with ' + sitesData.length + ' sites!');
+          break;
+        case 'excel':
+          exportSitesToExcel(sitesData as Site[], `smartsite-sites-${dateStr}.xls`);
+          toast.success('Excel exported with ' + sitesData.length + ' sites!');
+          break;
+        case 'json':
+          exportSitesToJSON(sitesData as Site[], `smartsite-sites-${dateStr}.json`);
+          toast.success('JSON exported with ' + sitesData.length + ' sites!');
+          break;
+      }
+    } catch (error) {
+      console.error('Error exporting:', error);
+      toast.error('Failed to export - please ensure backend is running');
     }
   };
 
@@ -529,14 +580,35 @@ export default function Sites() {
         </div>
         {canManageSites ? (
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={handleExportPDF}
-              className="border-green-600 text-green-600 hover:bg-green-50"
-            >
-              <FileDown className="h-4 w-4 mr-2" />
-              Export PDF
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="border-green-600 text-green-600 hover:bg-green-50"
+                >
+                  <FileDown className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => handleExport('pdf')}>
+                  <FileDown className="h-4 w-4 mr-2" />
+                  PDF
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExport('excel')}>
+                  <FileDown className="h-4 w-4 mr-2" />
+                  Excel
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExport('csv')}>
+                  <FileDown className="h-4 w-4 mr-2" />
+                  CSV
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExport('json')}>
+                  <FileDown className="h-4 w-4 mr-2" />
+                  JSON
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 shadow-lg hover:shadow-xl transition-all">
