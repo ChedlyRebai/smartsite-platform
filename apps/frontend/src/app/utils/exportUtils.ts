@@ -25,7 +25,13 @@ const formatBudget = (budget: number): string => {
 // Format teams for export
 const formatTeams = (teams: SiteTeam[] | undefined): string => {
   if (!teams || teams.length === 0) return 'No team assigned';
-  return teams.map(t => t.name || 'Team').join(', ');
+  return teams.map(t => {
+    // Try different possible field names for team name
+    if (t.name) return t.name;
+    if (t.teamCode) return t.teamCode;
+    if (t._id) return `Team ${t._id.substring(0, 8)}`;
+    return 'Team';
+  }).join(', ');
 };
 
 // Prepare site data for export

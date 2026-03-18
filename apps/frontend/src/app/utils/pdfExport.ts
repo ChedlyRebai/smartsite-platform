@@ -53,7 +53,12 @@ export const exportSitesToPDF = (sites: SiteWithTeams[], fileName: string = 'sit
     
     // Format teams assigned to this site
     const teamsText = site.teams && site.teams.length > 0 
-      ? site.teams.map(t => t.name || t._id).join(', ')
+      ? site.teams.map(t => {
+          if (t.name) return t.name;
+          if (t.teamCode) return t.teamCode;
+          if (t._id) return `Team ${t._id.substring(0, 8)}`;
+          return 'Team';
+        }).join(', ')
       : 'No team assigned';
     
     return [

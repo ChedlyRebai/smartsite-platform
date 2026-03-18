@@ -534,6 +534,9 @@ export default function Sites() {
     try {
       const sitesData = await getAllSitesWithTeams();
       
+      console.log('Sites data for export:', sitesData);
+      console.log('First site teams:', sitesData[0]?.teams);
+      
       if (!sitesData || sitesData.length === 0) {
         toast.error('No sites found in database');
         return;
