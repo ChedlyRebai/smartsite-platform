@@ -6,7 +6,7 @@ import axios from "axios";
 
 
 const api = axios.create({
-  baseURL: "http://localhost:3001",
+  baseURL: "http://localhost:3000",
 });
 
 export const useAuthStore = create<AuthState>()(
@@ -32,9 +32,10 @@ export const useAuthStore = create<AuthState>()(
               access_token: res.data.access_token,
               id: res.data.id,
               cin: res.data.cin,
-              firstname: res.data.firstname,
-              lastname: res.data.lastname,
+              firstName: res.data.firstName,
+              lastName: res.data.lastName,
               role: res.data.role,
+              firstLogin: res.data.firstLogin,
             },
             isAuthenticated: true,
           });
@@ -54,24 +55,30 @@ export const useAuthStore = create<AuthState>()(
       register: async (
         cin: string,
         password: string,
-        firstname: string,
-        lastname: string,
+        firstName: string,
+        lastName: string,
         email: string,
-        telephone: string,
-        departement: string,
-        adresse: string,
-        role: string,
+        telephone?: string,
+        departement?: string,
+        address?: string,
+        role?: string,
+        companyName?: string,
+        preferredLanguage?: string,
+        certifications?: string[],
       ) => {
         const res = await api.post("/auth/register", {
           cin,
           password, // généralement vide, mot de passe généré à l'approbation
-          firstname,
-          lastname,
+          firstName,
+          lastName,
           email,
           telephone,
           departement,
-          adresse,
+          adresse: address,
           role,
+          companyName,
+          preferredLanguage,
+          certifications,
         });
         return res.data;
       },

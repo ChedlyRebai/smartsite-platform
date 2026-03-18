@@ -45,8 +45,8 @@ export default  function DashboardLayout() {
   const navigationItems = getNavigationForRole(user.role.name);
   const unreadNotifications = mockNotifications.filter((n) => !n.read).length;
 
-  const getInitials = (nom: string, lastname: string) => {
-    return `${nom.charAt(0)}${lastname.charAt(0)}`.toUpperCase();
+  const getInitials = (nom: string, lastName: string) => {
+    return `${nom.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
 
   return (
@@ -108,12 +108,12 @@ export default  function DashboardLayout() {
                 <Button variant="ghost" className="gap-2">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="bg-gradient-to-br from-blue-600 to-green-600 text-white">
-                      {getInitials(user.firstname || "", user.lastname || "")}
+                      {getInitials(user.firstName || "", user.lastName || "")}
                     </AvatarFallback>
                   </Avatar>
                   <div className="hidden md:flex flex-col items-start">
                     <span className="text-sm font-semibold">
-                      {user.firstname} {user.lastname}
+                      {user.firstName} {user.lastName}
                     </span>
                     <span className="text-xs text-gray-500">
                       {/* {roleLabels[user.role]} */}
@@ -126,7 +126,7 @@ export default  function DashboardLayout() {
                 <DropdownMenuLabel>
                   <div className="flex flex-col">
                     <span>
-                      {user.firstname} {user.lastname}
+                      {user.firstName} {user.lastName}
                     </span>
                     <span className="text-xs font-normal text-gray-500">
                       {user.cin}

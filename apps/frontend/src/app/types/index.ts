@@ -29,10 +29,31 @@ export interface User {
   email?: string;
   phone?: string;
   role: UserRole;
+  telephone: string;
+  cin: string;
+  profilePicture?: string;
   isActive: boolean;
+  preferredLanguage?: string;
+  projectsCount?: number;
+  companyName?: string;
   createdDate: string;
   lastLoginDate?: string;
   avatar?: string;
+  address?: string;
+  departement?: string;
+  status?: string;
+  certifications?: string[];
+}
+
+export interface Permisssion {
+  _id: string;
+  name: string;
+  href: string;
+  access: boolean;
+  create: boolean;
+  delete: boolean;
+  update: boolean;
+  description?: string;
 }
 
 export interface Role {
@@ -62,16 +83,37 @@ export interface AuthState {
     access_token: string;
     id: string;
     cin: string;
-    firstname: string;
-    lastname: string;
+    firstName: string;
+    lastName: string;
     role: UserRole;
+    firstLogin?: boolean;
   };
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (cin: string, password: string, firstname: string, lastname: string, email: string, telephone: string, departement: string, adresse: string, role: string) => Promise<void>;
+  register: (
+    cin: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+    email: string,
+    telephone?: string,
+
+    departement?: string,
+
+    preferredLanguage?: string,
+    certifications?: string[],
+
+  
+    address?: string,
+    role?: string,
+    companyName?: string,
+   
+ ) => Promise<void>;
   getPendingUsers?: () => Promise<User[]>;
   approveUser?: (userId: string, password: string) => Promise<User>;
   rejectUser?: (userId: string) => Promise<void>;
+  getCurrentUser?: () => Promise<any>;
+  updateProfile?: (data: any) => Promise<any>;
   logout: () => void;
 }
 

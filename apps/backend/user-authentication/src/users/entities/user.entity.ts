@@ -6,17 +6,20 @@ import { Role } from 'src/roles/entities/role.entity';
 @Schema({ timestamps: true })
 export class User extends Document {
   @Prop({ required: true, trim: true })
-  firstname: string;
+  firstName: string;
 
   @Prop({ required: true, trim: true })
-  lastname: string;
+  lastName: string;
 
   @Prop({ required: true, unique: true, trim: true })
   cin: string;
 
-  @Prop({ required: false }) // Rendre le mot de passe optionnel pour inscription sans mot de passe
+  @Prop({ required: false }) 
   password: string;
 
+  @Prop()
+  profilePicture?: string;
+  
   @Prop({ type: Types.ObjectId, ref: 'Role', required: true })
   role: Types.ObjectId;
 
@@ -27,10 +30,16 @@ export class User extends Document {
   connected: boolean;
 
   @Prop()
+  preferredLanguage?: string;
+
+  @Prop()
+  projectsCount?: number;
+
+  @Prop()
   address: string;
 
   @Prop({ default: true })
-  estActif: boolean;
+  isActif: boolean;
 
   @Prop()
   telephone?: string;
@@ -47,11 +56,36 @@ export class User extends Document {
   @Prop()
   approvedAt?: Date;
 
-  @Prop()
-  motDePasse?: string;
+  
 
   @Prop([String])
   certifications?: string[];
+
+  @Prop()
+  companyName?: string;
+
+  @Prop({ default: false })
+  emailVerified: boolean;
+
+  @Prop()
+  emailVerificationOtp?: string;
+
+  @Prop()
+  otpExpiresAt?: Date;
+
+
+  @Prop({ default: false })
+  passwordChnage: boolean;
+
+  @Prop({ default: true })
+  firstLogin: boolean;
+
+
+  @Prop()
+  passwordResetCode?: string;
+
+  @Prop()
+  passwordResetCodeExpiresAt?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

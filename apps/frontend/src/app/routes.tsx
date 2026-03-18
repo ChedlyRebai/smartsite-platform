@@ -2,6 +2,10 @@ import { createBrowserRouter, Navigate } from "react-router";
 import DashboardLayout from "./layouts/DashboardLayout";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import VerifyOTP from "./pages/auth/VerifyOTP";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
+import ChangePasswordFirstLogin from "./pages/auth/ChangePasswordFirstLogin";
 import Dashboard from "./pages/dashboards/Dashboard";
 import Sites from "./pages/sites/Sites";
 import Projects from "./pages/projects/Projects";
@@ -22,6 +26,8 @@ import PendingUsers from "./pages/admin/PendingUsers";
 import Profile from "./pages/profile/Profile";
 import Home2 from "./pages/Home/Home2";
 import Pricing from "./pages/pricing/Pricing";
+import ClientsNew from "./pages/clients/ClientsNew";
+import KanbanBoardPage from "./pages/planning/Planning";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = true;
@@ -46,6 +52,18 @@ export const router = createBrowserRouter([
     element: <Register />,
   },
   {
+    path: "/verify-otp",
+    element: <VerifyOTP />,
+  },
+  {
+    path: "/forgot-password",
+    element: <ForgotPassword />,
+  },
+  {
+    path: "/reset-password",
+    element: <ResetPassword />,
+  },
+  {
     path: "/",
     element: (
       <ProtectedRoute>
@@ -56,6 +74,14 @@ export const router = createBrowserRouter([
       {
         path: "dashboard",
         element: <Dashboard />,
+      },
+      {
+        path: "change-password-first-login",
+        element: <ChangePasswordFirstLogin />,
+      },
+      {
+        path: "profile",
+        element: <Profile />,
       },
       {
         path: "sites",
@@ -77,7 +103,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "planning",
-        element: <Planning />,
+        element: <KanbanBoardPage />,
       },
       {
         path: "team",
@@ -85,7 +111,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "clients",
-        element: <Clients />,
+        element: <ClientsNew />,
       },
       {
         path: "suppliers",

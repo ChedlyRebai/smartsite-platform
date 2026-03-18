@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@syncfusion/ej2-react-kanban": "^32.2.7",
+    "gantt-task-react": "^0.3.9"
+  }
+}

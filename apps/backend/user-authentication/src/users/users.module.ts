@@ -5,6 +5,8 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { User, UserSchema } from './entities/user.entity';
 import { Role, RoleSchema } from 'src/roles/entities/role.entity';
+import { EmailModule } from 'src/email/email.module';
+import { RolesModule } from 'src/roles/roles.module';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { Role, RoleSchema } from 'src/roles/entities/role.entity';
       secret: 'smartiste',
       signOptions: { expiresIn: '24h' },
     }),
+    EmailModule,
+    RolesModule
   ],
   providers: [UsersService],
   controllers: [UsersController],

@@ -55,7 +55,7 @@ const mapFrontendSiteToBackend = (site: Partial<Site>): any => {
     workEndDate: site.workEndDate,
     projectId: site.projectId,
     coordinates: site.coordinates,
-    estActif: true, // Required field for backend
+    isActif: true, // Required field for backend
   };
 };
 
@@ -65,7 +65,7 @@ export interface SiteFilters {
   nom?: string;
   localisation?: string;
   status?: string;
-  estActif?: boolean;
+  isActif?: boolean;
   budgetMin?: number;
   budgetMax?: number;
 }
@@ -88,7 +88,7 @@ export const fetchSites = async (filters?: SiteFilters): Promise<PaginatedSitesR
     if (filters?.nom) params.nom = filters.nom;
     if (filters?.localisation) params.localisation = filters.localisation;
     if (filters?.status && filters.status !== 'all') params.status = filters.status;
-    if (filters?.estActif !== undefined) params.estActif = filters.estActif.toString();
+    if (filters?.isActif !== undefined) params.isActif = filters.isActif.toString();
     if (filters?.budgetMin) params.budgetMin = filters.budgetMin.toString();
     if (filters?.budgetMax) params.budgetMax = filters.budgetMax.toString();
 

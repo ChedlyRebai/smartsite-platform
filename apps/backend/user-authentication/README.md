@@ -70,6 +70,28 @@ $ mau deploy
 
 With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
 
+### Deploy On Vercel
+
+This service is configured to run as a Vercel Serverless Function via `api/index.ts`.
+
+1. Set the project root to this folder: `apps/backend/user-authentication`.
+2. Configure environment variables in Vercel Project Settings:
+  - `MONGODB_URI`
+  - `JWT_SECRET`
+  - `EMAIL_USER` (optional)
+  - `EMAIL_PASSWORD` (optional)
+  - `EMAIL_PASS` (if used by your fallback SMTP flow)
+  - `CORS_ORIGIN` (optional, comma-separated origins)
+3. Deploy using Vercel CLI or Git integration.
+
+Useful commands:
+
+```bash
+npm install
+npm run build
+vercel
+```
+
 ## Resources
 
 Check out a few resources that may come in handy when working with NestJS:

@@ -99,8 +99,8 @@ export default function PendingUsers() {
                 >
                   <div>
                     <div className="font-semibold">
-                      {(u as any).firstname || (u as any).firstName}{" "}
-                      {(u as any).lastname || (u as any).lastName}
+                      {(u as any).firstName || (u as any).firstName}{" "}
+                      {(u as any).lastName || (u as any).lastName}
                     </div>
                     <div className="text-sm text-gray-600 space-y-1">
                       <div>

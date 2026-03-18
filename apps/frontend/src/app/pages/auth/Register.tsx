@@ -9,19 +9,12 @@ import axios from "axios";
 import { Button } from "@/components/ui/button";
 import {
   Field,
-  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import {
   Card,
   CardContent,
@@ -34,35 +27,51 @@ import { useNavigate } from "react-router";
 import toast from "react-hot-toast";
 import { roleLabels } from "@/app/utils/roleConfig";
 
-const formSchema = z.object({
-  cin: z
-    .string()
-    .min(5, "CIN est requis et doit contenir au moins 5 caractères.")
-    .max(32, "CIN ne doit pas dépasser 32 caractères."),
-  firstname: z
-    .string()
-    .min(2, "Le prénom est requis et doit contenir au moins 2 caractères.")
-    .max(50, "Le prénom ne doit pas dépasser 50 caractères."),
-  lastname: z
-    .string()
-    .min(2, "Le nom est requis et doit contenir au moins 2 caractères.")
-    .max(50, "Le nom ne doit pas dépasser 50 caractères."),
-  email: z
-    .string()
-    .email("Veuillez entrer une adresse email valide.")
-    .min(5, "L'email est requis."),
-  telephone: z
-    .string()
-    .min(8, "Le téléphone est requis et doit contenir au moins 8 caractères.")
-    .max(20, "Le téléphone ne doit pas dépasser 20 caractères."),
-  adresse: z
-    .string()
-    .min(5, "L'adresse est requise et doit contenir au moins 5 caractères.")
-    .max(200, "L'adresse ne doit pas dépasser 200 caractères."),
-  role: z
-    .string()
-    .min(1, "Le rôle est requis."),
-});
+const formSchema = z
+  .object({
+    cin: z
+      .string()
+      .min(5, "CIN est requis et doit contenir au moins 5 caractères.")
+      .max(32, "CIN ne doit pas dépasser 32 caractères."),
+    firstName: z
+      .string()
+      .min(2, "Le prénom est requis et doit contenir au moins 2 caractères.")
+      .max(50, "Le prénom ne doit pas dépasser 50 caractères."),
+    lastName: z
+      .string()
+      .min(2, "Le nom est requis et doit contenir au moins 2 caractères.")
+      .max(50, "Le nom ne doit pas dépasser 50 caractères."),
+    email: z
+      .string()
+      .email("Veuillez entrer une adresse email valide.")
+      .min(5, "L'email est requis."),
+    telephone: z
+      .string()
+      .min(8, "Le téléphone doit contenir au moins 8 caractères.")
+      .max(20, "Le téléphone ne doit pas dépasser 20 caractères.")
+      .optional()
+      .or(z.literal("")),
+    address: z
+      .string()
+      .min(5, "L'adresse doit contenir au moins 5 caractères.")
+      .max(200, "L'adresse ne doit pas dépasser 200 caractères.")
+      .optional()
+      .or(z.literal("")),
+
+    companyName: z
+      .string()
+      .max(200, "Le nom de l'entreprise ne doit pas dépasser 200 caractères.")
+      .optional()
+      .or(z.literal("")),
+    password: z
+      .string()
+      .min(6, "Password must be at least 8 characters")
+      .max(100, "Password must be less than 100 characters"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Les mots de passe ne correspondent pas.",
+  });
 
 type RegisterFormData = z.infer<typeof formSchema>;
 
@@ -103,12 +112,14 @@ export default function Register() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       cin: "",
-      firstname: "",
-      lastname: "",
+      firstName: "",
+      lastName: "",
       email: "",
+      password: "",
+      confirmPassword: "",
       telephone: "",
-      adresse: "",
-      role: "",
+      address: "",
+      companyName: "",
     },
   });
 
@@ -117,17 +128,24 @@ export default function Register() {
     try {
       await register(
         data.cin,
-        "", // PAS de mot de passe - sera généré lors de l'approbation
-        data.firstname,
-        data.lastname,
+        data.password, // mot de passe vide à l'inscription, généré à l'approbation
+        data.firstName,
+        data.lastName,
         data.email,
-        data.telephone,
-        "", // pas de département
-        data.adresse,
-        data.role
+        data.telephone || "",
+        data.address || "",
+        data.companyName || "",
       );
-      toast.success("Inscription réussie! Votre compte est en attente d'approbation. Vous recevrez un email avec vos identifiants.");
-      navigate("/login");
+      toast.success(
+        "Inscription réussie! Un code de vérification a été envoyé à votre email.",
+      );
+      // Redirect to OTP verification page with user data
+      navigate("/verify-otp", {
+        state: {
+          cin: data.cin,
+          email: data.email,
+        },
+      });
     } catch (error: any) {
       console.error("Erreur inscription:", error);
       const message =
@@ -173,7 +191,10 @@ export default function Register() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-6"
+                >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FieldGroup>
                       <Controller
@@ -222,14 +243,16 @@ export default function Register() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FieldGroup>
                       <Controller
-                        name="firstname"
+                        name="firstName"
                         control={form.control}
                         render={({ field, fieldState }) => (
                           <Field data-invalid={fieldState.invalid}>
-                            <FieldLabel htmlFor="firstname">Prénom *</FieldLabel>
+                            <FieldLabel htmlFor="firstName">
+                              Prénom *
+                            </FieldLabel>
                             <Input
                               {...field}
-                              id="firstname"
+                              id="firstName"
                               placeholder="Entrez votre prénom"
                               aria-invalid={fieldState.invalid}
                             />
@@ -243,15 +266,112 @@ export default function Register() {
 
                     <FieldGroup>
                       <Controller
-                        name="lastname"
+                        name="lastName"
                         control={form.control}
                         render={({ field, fieldState }) => (
                           <Field data-invalid={fieldState.invalid}>
-                            <FieldLabel htmlFor="lastname">Nom *</FieldLabel>
+                            <FieldLabel htmlFor="lastName">Nom *</FieldLabel>
                             <Input
                               {...field}
-                              id="lastname"
+                              id="lastName"
                               placeholder="Entrez votre nom"
+                              aria-invalid={fieldState.invalid}
+                            />
+                            {fieldState.invalid && (
+                              <FieldError errors={[fieldState.error]} />
+                            )}
+                          </Field>
+                        )}
+                      />
+                    </FieldGroup>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FieldGroup>
+                      <Controller
+                        name="password"
+                        control={form.control}
+                        render={({ field, fieldState }) => (
+                          <Field data-invalid={fieldState.invalid}>
+                            <FieldLabel htmlFor="password">
+                              Password *
+                            </FieldLabel>
+                            <Input
+                              {...field}
+                              id="password"
+                              type="password"
+                              placeholder="Entrez votre prénom"
+                              aria-invalid={fieldState.invalid}
+                            />
+                            {fieldState.invalid && (
+                              <FieldError errors={[fieldState.error]} />
+                            )}
+                          </Field>
+                        )}
+                      />
+                    </FieldGroup>
+
+                    <FieldGroup>
+                      <Controller
+                        name="confirmPassword"
+                        control={form.control}
+                        render={({ field, fieldState }) => (
+                          <Field data-invalid={fieldState.invalid}>
+                            <FieldLabel htmlFor="confirmPassword">
+                              Confirmez le mot de passe *
+                            </FieldLabel>
+                            <Input
+                              type="password"
+                              {...field}
+                              id="confirmPassword"
+                              placeholder="Confirmez votre mot de passe"
+                              aria-invalid={fieldState.invalid}
+                            />
+                            {fieldState.invalid && (
+                              <FieldError errors={[fieldState.error]} />
+                            )}
+                          </Field>
+                        )}
+                      />
+                    </FieldGroup>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FieldGroup>
+                      <Controller
+                        name="telephone"
+                        control={form.control}
+                        render={({ field, fieldState }) => (
+                          <Field data-invalid={fieldState.invalid}>
+                            <FieldLabel htmlFor="telephone">
+                              Téléphone
+                            </FieldLabel>
+                            <Input
+                              {...field}
+                              id="telephone"
+                              placeholder="Entrez votre téléphone"
+                              aria-invalid={fieldState.invalid}
+                            />
+                            {fieldState.invalid && (
+                              <FieldError errors={[fieldState.error]} />
+                            )}
+                          </Field>
+                        )}
+                      />
+                    </FieldGroup>
+                    <FieldGroup>
+                      <Controller
+                        name="companyName"
+                        control={form.control}
+                        render={({ field, fieldState }) => (
+                          <Field data-invalid={fieldState.invalid}>
+                            <FieldLabel htmlFor="companyName">
+                              Entreprise
+                            </FieldLabel>
+                            <Input
+                              {...field}
+                              id="companyName"
+                              placeholder="Nom de votre entreprise"
                               aria-invalid={fieldState.invalid}
                             />
                             {fieldState.invalid && (
@@ -265,35 +385,14 @@ export default function Register() {
 
                   <FieldGroup>
                     <Controller
-                      name="telephone"
+                      name="address"
                       control={form.control}
                       render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid}>
-                          <FieldLabel htmlFor="telephone">Téléphone</FieldLabel>
+                          <FieldLabel htmlFor="address">Adresse</FieldLabel>
                           <Input
                             {...field}
-                            id="telephone"
-                            placeholder="Entrez votre téléphone"
-                            aria-invalid={fieldState.invalid}
-                          />
-                          {fieldState.invalid && (
-                            <FieldError errors={[fieldState.error]} />
-                          )}
-                        </Field>
-                      )}
-                    />
-                  </FieldGroup>
-
-                  <FieldGroup>
-                    <Controller
-                      name="adresse"
-                      control={form.control}
-                      render={({ field, fieldState }) => (
-                        <Field data-invalid={fieldState.invalid}>
-                          <FieldLabel htmlFor="adresse">Adresse</FieldLabel>
-                          <Input
-                            {...field}
-                            id="adresse"
+                            id="address"
                             placeholder="Entrez votre adresse"
                             aria-invalid={fieldState.invalid}
                           />
@@ -305,49 +404,10 @@ export default function Register() {
                     />
                   </FieldGroup>
 
-                  <FieldGroup>
-                    <Controller
-                      name="role"
-                      control={form.control}
-                      render={({ field, fieldState }) => (
-                        <Field data-invalid={fieldState.invalid}>
-                          <FieldLabel htmlFor="role">Rôle *</FieldLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Sélectionnez un rôle" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {rolesLoading && (
-                                <SelectItem value="__loading" disabled>
-                                  Chargement des rôles...
-                                </SelectItem>
-                              )}
-                              {rolesError && !rolesLoading && (
-                                <SelectItem value="__error" disabled>
-                                  {rolesError}
-                                </SelectItem>
-                              )}
-                              {!rolesLoading &&
-                                !rolesError &&
-                                roles.map((role) => (
-                                  <SelectItem key={role._id} value={role._id}>
-                                    {roleLabels[role.name] || role.name}
-                                  </SelectItem>
-                                ))}
-                            </SelectContent>
-                          </Select>
-                          {fieldState.invalid && (
-                            <FieldError errors={[fieldState.error]} />
-                          )}
-                        </Field>
-                      )}
-                    />
-                  </FieldGroup>
-
                   <Button
                     type="submit"
                     disabled={isLoading}
-                    className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                    className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                   >
                     {isLoading ? (
                       <>

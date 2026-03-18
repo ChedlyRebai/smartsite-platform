@@ -19,7 +19,7 @@ export class Site extends Document {
   description?: string;
 
   @Prop({ default: true, index: true })
-  estActif: boolean;
+  isActif: boolean;
 
   // Frontend fields
   @Prop({ type: Number, default: 0 })

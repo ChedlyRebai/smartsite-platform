@@ -53,7 +53,7 @@ describe('UsersService', () => {
         cin: '87654321',
         nom: 'New',
         prenom: 'User',
-        motDePasse: 'hashed',
+        password: 'hashed',
       };
       expect(service.create).toBeDefined();
     });

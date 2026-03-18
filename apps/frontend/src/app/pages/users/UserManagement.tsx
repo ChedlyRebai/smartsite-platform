@@ -188,12 +188,12 @@ export default function UserManagement() {
       setIsLoading(false);
     }
   };
-  const handleBanUser = async (userId: string, estActif: boolean) => {
+  const handleBanUser = async (userId: string, isActif: boolean) => {
     try {
-      const response = await banUser(userId, estActif);
+      const response = await banUser(userId, isActif);
       if (response.status === 200) {
         toast.success(
-          estActif ? "User unbanned successfully" : "User banned successfully"
+          isActif ? "User unbanned successfully" : "User banned successfully"
         );
         loadUsers();
       } else {

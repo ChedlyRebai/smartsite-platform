@@ -1,4 +1,12 @@
-import { Controller, Post, Body, UnauthorizedException, Param, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UnauthorizedException,
+  Param,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
@@ -27,25 +35,26 @@ export class AuthController {
     const {
       cin,
       password,
-      firstname,
-      lastname,
+      firstName,
+      lastName,
       role,
       email,
-      telephone,
-      departement,
-      adresse,
-    } = registerDto;
 
+      telephone,
+    adresse,
+      companyName,
+    } = registerDto;
     const user = await this.authService.register(
       cin,
       password,
-      firstname,
-      lastname,
+      firstName,
+      lastName,
       role,
       email,
+
       telephone,
-      departement,
-      adresse,
+    adresse,
+      companyName,
     );
 
     return {
@@ -53,13 +62,16 @@ export class AuthController {
       user: {
         id: user._id,
         cin: user.cin,
-        firstname: user.firstname,
-        lastname: user.lastname,
+        firstName: user.firstName,
+        lastName: user.lastName,
         email: user.email,
+
         telephone: user.telephone,
-        departement: user.departement,
+
+
         address: user.address,
         role: user.role,
+        companyName: user.companyName,
       },
     };
   }
@@ -81,5 +93,36 @@ export class AuthController {
       message: 'User approved successfully',
       user: updatedUser,
     };
+  }
+
+  @Post('verify-otp')
+  async verifyOTP(@Body() body: { cin: string; otp: string }) {
+    return this.authService.verifyOTP(body.cin, body.otp);
+  }
+
+  @Post('resend-otp')
+  async resendOTP(@Body() body: { cin: string }) {
+    return this.authService.resendOTP(body.cin);
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body() body: { email: string }) {
+    return this.authService.forgotPassword(body.email);
+  }
+
+  @Post('reset-password')
+  async resetPassword(
+    @Body() body: { email: string; resetCode: string; newPassword: string },
+  ) {
+    return this.authService.resetPassword(
+      body.email,
+      body.resetCode,
+      body.newPassword,
+    );
+  }
+
+  @Post('resend-reset-code')
+  async resendResetCode(@Body() body: { email: string }) {
+    return this.authService.resendResetCode(body.email);
   }
 }
