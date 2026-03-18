@@ -7,7 +7,7 @@ export class Milestone extends Document {
   title: string;
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Task' }], required: true })
-  milestoneId: Types.ObjectId[] | Task[];
+  tasks: Types.ObjectId[] | Task[];
 
   @Prop()
   description: string;

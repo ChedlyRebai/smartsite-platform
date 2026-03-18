@@ -1,26 +1,49 @@
-import { Injectable } from '@nestjs/common';
+import { Body, Injectable } from '@nestjs/common';
 import { CreateMilestoneDto } from './dto/create-milestone.dto';
 import { UpdateMilestoneDto } from './dto/update-milestone.dto';
+import { Milestone } from './entities/milestone.entity';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Task } from '@/task/entities/task.entity';
 
 @Injectable()
 export class MilestoneService {
-  create(createMilestoneDto: CreateMilestoneDto) {
-    return 'This action adds a new milestone';
+  constructor(
+  @InjectModel(Milestone.name) private milestoneModel: Model<Milestone>,
+  @InjectModel(Task.name) private taskModel: Model<Task>,
+  
+){
+
+  }
+  async create(createMilestoneDto: CreateMilestoneDto) {
+    const newMilestone=await this.milestoneModel.create(createMilestoneDto);
+    return newMilestone;
   }
 
-  findAll() {
-    return `This action returns all milestone`;
+  async findAll() {
+    const milestones=await this.milestoneModel.find().populate('tasks').exec();
+    return milestones;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} milestone`;
+  async findOne(id: number) {
+    const milestone = await this.milestoneModel.findById(id).populate("tasks").exec();
+    return milestone;
   }
 
-  update(id: number, updateMilestoneDto: UpdateMilestoneDto) {
-    return `This action updates a #${id} milestone`;
+  async update(id: number, updateMilestoneDto: UpdateMilestoneDto) {
+    const updatedMilestone=await this.milestoneModel.findByIdAndUpdate(id, updateMilestoneDto, { new: true }).populate("tasks").exec();
+    if(!updatedMilestone){
+      throw new Error(`Milestone with id ${id} not found`);
+    }
+
+    return updatedMilestone;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} milestone`;
+  async remove(id: number) {
+    const milestone = await this.milestoneModel.findByIdAndDelete(id).exec();
+    if (!milestone) {
+      throw new Error(`Milestone with id ${id} not found`);
+    }
+    return milestone;
   }
 }
