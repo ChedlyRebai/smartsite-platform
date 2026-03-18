@@ -27,6 +27,7 @@ import Profile from "./pages/profile/Profile";
 import Home2 from "./pages/Home/Home2";
 import Pricing from "./pages/pricing/Pricing";
 import ClientsNew from "./pages/clients/ClientsNew";
+import KanbanBoardPage from "./pages/planning/Planning";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = true;
@@ -102,7 +103,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "planning",
-        element: <Planning />,
+        element: <KanbanBoardPage />,
       },
       {
         path: "team",
