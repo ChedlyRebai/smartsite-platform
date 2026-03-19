@@ -4,7 +4,6 @@ import * as React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import * as z from "zod";
-import axios from "axios";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -49,6 +48,17 @@ const availableRoles: RoleType[] = [
   "user"
 ];
 
+const phoneCountryCodes = [
+  { label: "Tunisie (+216)", value: "+216" },
+  { label: "France (+33)", value: "+33" },
+  { label: "Maroc (+212)", value: "+212" },
+  { label: "Algérie (+213)", value: "+213" },
+  { label: "Belgique (+32)", value: "+32" },
+  { label: "Suisse (+41)", value: "+41" },
+  { label: "Canada (+1)", value: "+1" },
+  { label: "USA (+1)", value: "+1" },
+];
+
 const formSchema = z.object({
   cin: z
     .string()
@@ -68,9 +78,25 @@ const formSchema = z.object({
     .min(5, "L'email est requis."),
   telephone: z
     .string()
-    .min(8, "Le téléphone est requis et doit contenir au moins 8 caractères.")
-    .max(20, "Le téléphone ne doit pas dépasser 20 caractères."),
-  adresse: z
+    .regex(/^\d{6,14}$/, "Numéro invalide (6 à 14 chiffres)."),
+  phoneCountryCode: z
+    .string()
+    .min(2, "Veuillez choisir un indicatif pays."),
+  country: z
+    .string()
+    .min(2, "Le pays est requis.")
+    .max(56, "Le pays est trop long."),
+  city: z
+    .string()
+    .min(2, "La ville est requise.")
+    .max(80, "Le nom de la ville est trop long.")
+    .regex(/^[A-Za-zÀ-ÖØ-öø-ÿ' -]+$/, "Ville invalide."),
+  postalCode: z
+    .string()
+    .min(3, "Le code postal est requis.")
+    .max(12, "Le code postal est invalide.")
+    .regex(/^[A-Za-z0-9 -]+$/, "Code postal invalide."),
+  addressLine: z
     .string()
     .min(5, "L'adresse est requise et doit contenir au moins 5 caractères.")
     .max(200, "L'adresse ne doit pas dépasser 200 caractères."),
@@ -100,23 +126,31 @@ export default function Register() {
       lastname: "",
       email: "",
       telephone: "",
-      adresse: "",
+      phoneCountryCode: "+216",
+      country: "",
+      city: "",
+      postalCode: "",
+      addressLine: "",
       role: "",
+      acceptTerms: false,
+      acceptReglement: false,
     },
   });
 
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
     try {
+      const fullAddress = `${data.addressLine}, ${data.city}, ${data.postalCode}, ${data.country}`;
+      const fullPhone = `${data.phoneCountryCode} ${data.telephone}`;
       await register(
         data.cin,
         "", // PAS de mot de passe - sera généré lors de l'approbation
         data.firstname,
         data.lastname,
         data.email,
-        data.telephone,
+        fullPhone,
         "", // pas de département
-        data.adresse,
+        fullAddress,
         data.role
       );
       toast.success("Inscription réussie! Votre compte est en attente d'approbation. Vous recevrez un email avec vos identifiants.");
@@ -256,38 +290,137 @@ export default function Register() {
                     </FieldGroup>
                   </div>
 
-                  <FieldGroup>
-                    <Controller
-                      name="telephone"
-                      control={form.control}
-                      render={({ field, fieldState }) => (
-                        <Field data-invalid={fieldState.invalid}>
-                          <FieldLabel htmlFor="telephone">Téléphone</FieldLabel>
-                          <Input
-                            {...field}
-                            id="telephone"
-                            placeholder="Entrez votre téléphone"
-                            aria-invalid={fieldState.invalid}
-                          />
-                          {fieldState.invalid && (
-                            <FieldError errors={[fieldState.error]} />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FieldGroup>
+                      <Controller
+                        name="phoneCountryCode"
+                        control={form.control}
+                        render={({ field, fieldState }) => (
+                          <Field data-invalid={fieldState.invalid}>
+                            <FieldLabel htmlFor="phoneCountryCode">Pays (indicatif) *</FieldLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <SelectTrigger id="phoneCountryCode">
+                                <SelectValue placeholder="Indicatif" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {phoneCountryCodes.map((item) => (
+                                  <SelectItem key={`${item.label}-${item.value}`} value={item.value}>
+                                    {item.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            {fieldState.invalid && (
+                              <FieldError errors={[fieldState.error]} />
+                            )}
+                          </Field>
+                        )}
+                      />
+                    </FieldGroup>
+
+                    <div className="md:col-span-2">
+                      <FieldGroup>
+                        <Controller
+                          name="telephone"
+                          control={form.control}
+                          render={({ field, fieldState }) => (
+                            <Field data-invalid={fieldState.invalid}>
+                              <FieldLabel htmlFor="telephone">Téléphone *</FieldLabel>
+                              <Input
+                                {...field}
+                                id="telephone"
+                                placeholder="12345678"
+                                aria-invalid={fieldState.invalid}
+                              />
+                              <FieldDescription>
+                                Saisir uniquement les chiffres, l'indicatif est choisi à gauche.
+                              </FieldDescription>
+                              {fieldState.invalid && (
+                                <FieldError errors={[fieldState.error]} />
+                              )}
+                            </Field>
                           )}
-                        </Field>
-                      )}
-                    />
-                  </FieldGroup>
+                        />
+                      </FieldGroup>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FieldGroup>
+                      <Controller
+                        name="country"
+                        control={form.control}
+                        render={({ field, fieldState }) => (
+                          <Field data-invalid={fieldState.invalid}>
+                            <FieldLabel htmlFor="country">Pays *</FieldLabel>
+                            <Input
+                              {...field}
+                              id="country"
+                              placeholder="Tunisie"
+                              aria-invalid={fieldState.invalid}
+                            />
+                            {fieldState.invalid && (
+                              <FieldError errors={[fieldState.error]} />
+                            )}
+                          </Field>
+                        )}
+                      />
+                    </FieldGroup>
+
+                    <FieldGroup>
+                      <Controller
+                        name="city"
+                        control={form.control}
+                        render={({ field, fieldState }) => (
+                          <Field data-invalid={fieldState.invalid}>
+                            <FieldLabel htmlFor="city">Ville *</FieldLabel>
+                            <Input
+                              {...field}
+                              id="city"
+                              placeholder="Tunis"
+                              aria-invalid={fieldState.invalid}
+                            />
+                            {fieldState.invalid && (
+                              <FieldError errors={[fieldState.error]} />
+                            )}
+                          </Field>
+                        )}
+                      />
+                    </FieldGroup>
+
+                    <FieldGroup>
+                      <Controller
+                        name="postalCode"
+                        control={form.control}
+                        render={({ field, fieldState }) => (
+                          <Field data-invalid={fieldState.invalid}>
+                            <FieldLabel htmlFor="postalCode">Code postal *</FieldLabel>
+                            <Input
+                              {...field}
+                              id="postalCode"
+                              placeholder="1000"
+                              aria-invalid={fieldState.invalid}
+                            />
+                            {fieldState.invalid && (
+                              <FieldError errors={[fieldState.error]} />
+                            )}
+                          </Field>
+                        )}
+                      />
+                    </FieldGroup>
+                  </div>
 
                   <FieldGroup>
                     <Controller
-                      name="adresse"
+                      name="addressLine"
                       control={form.control}
                       render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid}>
-                          <FieldLabel htmlFor="adresse">Adresse</FieldLabel>
+                          <FieldLabel htmlFor="addressLine">Adresse (rue / numéro) *</FieldLabel>
                           <Input
                             {...field}
-                            id="adresse"
-                            placeholder="Entrez votre adresse"
+                            id="addressLine"
+                            placeholder="Rue de ..., N 15"
                             aria-invalid={fieldState.invalid}
                           />
                           {fieldState.invalid && (

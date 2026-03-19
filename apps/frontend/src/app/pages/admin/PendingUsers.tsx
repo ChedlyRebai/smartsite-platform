@@ -21,6 +21,19 @@ function generateRandomPassword(): string {
   return password;
 }
 
+function getUserCreatedAtLabel(user: any): string {
+  const raw =
+    user?.createdDate ??
+    user?.createdAt ??
+    user?.created_at ??
+    user?.dateCreation ??
+    user?.date_creation;
+  if (!raw) return "N/A";
+  const d = new Date(raw);
+  if (Number.isNaN(d.getTime())) return "N/A";
+  return d.toLocaleString("fr-FR");
+}
+
 export default function PendingUsers() {
   const getPendingUsers = useAuthStore((s) => s.getPendingUsers);
   const approveUser = useAuthStore((s) => s.approveUser);
@@ -266,10 +279,6 @@ Le motif doit être:
                         {(u as any).telephone || (u as any).phone || "N/A"}
                       </div>
                       <div>
-                        <span className="font-medium">Département:</span>{" "}
-                        {(u as any).departement || (u as any).department || "N/A"}
-                      </div>
-                      <div>
                         <span className="font-medium">Adresse:</span>{" "}
                         {(u as any).address || (u as any).adresse || "N/A"}
                       </div>
@@ -283,9 +292,7 @@ Le motif doit être:
                       </div>
                       <div className="text-xs text-gray-400">
                         <span className="font-medium">Créé le:</span>{" "}
-                        {u.createdDate
-                          ? new Date(u.createdDate).toLocaleString()
-                          : "N/A"}
+                        {getUserCreatedAtLabel(u)}
                       </div>
                     </div>
                   </div>
@@ -335,10 +342,9 @@ Le motif doit être:
               <p><span className="font-semibold">Email :</span> {selectedUser.email || "N/A"}</p>
               <p><span className="font-semibold">Téléphone :</span> {(selectedUser as any).telephone || (selectedUser as any).phone || "N/A"}</p>
               <p><span className="font-semibold">Adresse :</span> {(selectedUser as any).address || (selectedUser as any).adresse || "N/A"}</p>
-              <p><span className="font-semibold">Département :</span> {(selectedUser as any).departement || (selectedUser as any).department || "N/A"}</p>
               <p><span className="font-semibold">Rôle :</span> {getRoleLabel(selectedUser.role) || "Rôle non défini"}</p>
               <p><span className="font-semibold">Statut :</span> {(selectedUser as any).status || "pending"}</p>
-              <p><span className="font-semibold">Créé le :</span> {selectedUser.createdDate ? new Date(selectedUser.createdDate).toLocaleString() : "N/A"}</p>
+              <p><span className="font-semibold">Créé le :</span> {getUserCreatedAtLabel(selectedUser)}</p>
             </div>
           )}
         </DialogContent>
