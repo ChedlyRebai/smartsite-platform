@@ -21,7 +21,10 @@ export class MilestoneController {
   findOne(@Param('id') id: string) {
     return this.milestoneService.findOne(+id);
   }
-
+   @Get('project/:projectId')
+   getMilesSToneByProjectId(@Param('projectId') projectId:string){
+     return this.milestoneService.getMilestonesByProjectId(projectId);
+   }
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateMilestoneDto: UpdateMilestoneDto) {
     return this.milestoneService.update(+id, updateMilestoneDto);
