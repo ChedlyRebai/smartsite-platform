@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/ca
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
 import { Progress } from "../../components/ui/progress";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Input } from "../../components/ui/input";
 import { toast } from "react-hot-toast";
@@ -64,6 +65,11 @@ export default function SuperAdminProjectsDashboard() {
   const [projectManagerFilter, setProjectManagerFilter] = useState<string>("all");
   const [urgentTasks, setUrgentTasks] = useState<Task[]>([]);
   const [notifications, setNotifications] = useState<string[]>([]);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [statsDetailsOpen, setStatsDetailsOpen] = useState(false);
+  const [statsTitle, setStatsTitle] = useState("");
+  const [statsItems, setStatsItems] = useState<string[]>([]);
 
   // Vérifier si l'utilisateur est bien un Super Admin
   useEffect(() => {
@@ -313,6 +319,46 @@ export default function SuperAdminProjectsDashboard() {
     avgProgress: projects.length > 0 ? Math.round(projects.reduce((sum, p) => sum + p.progress, 0) / projects.length) : 0
   };
 
+  const openProjectDetails = (project: Project) => {
+    setSelectedProject(project);
+    setDetailsOpen(true);
+  };
+
+  const openStatsDetails = (type: "total" | "en_cours" | "termines" | "retard" | "urgent" | "pms") => {
+    switch (type) {
+      case "total":
+        setStatsTitle("Détail - Total Projets");
+        setStatsItems(projects.map((p) => `${p.name} - ${p.projectManagerName}`));
+        break;
+      case "en_cours":
+        setStatsTitle("Détail - Projets En Cours");
+        setStatsItems(projects.filter((p) => p.status === "en_cours").map((p) => `${p.name} - ${p.projectManagerName}`));
+        break;
+      case "termines":
+        setStatsTitle("Détail - Projets Terminés");
+        setStatsItems(projects.filter((p) => p.status === "terminé").map((p) => `${p.name} - ${p.projectManagerName}`));
+        break;
+      case "retard":
+        setStatsTitle("Détail - Projets En Retard");
+        setStatsItems(projects.filter((p) => p.status === "en_retard").map((p) => `${p.name} - ${p.projectManagerName}`));
+        break;
+      case "urgent":
+        setStatsTitle("Détail - Tâches Urgentes");
+        setStatsItems(
+          urgentTasks.map((t) => {
+            const project = projects.find((p) => p.id === t.projectId);
+            return `${t.title} - ${project?.name ?? "Projet inconnu"} (${t.status})`;
+          }),
+        );
+        break;
+      case "pms":
+        setStatsTitle("Détail - Project Managers");
+        setStatsItems(uniqueProjectManagers.map((pm) => `${pm} - ${projects.filter((p) => p.assignedToName === pm).length} projet(s)`));
+        break;
+    }
+    setStatsDetailsOpen(true);
+  };
+
   return (
     <div className="space-y-6 p-6">
       {/* Header avec notifications */}
@@ -355,7 +401,7 @@ export default function SuperAdminProjectsDashboard() {
 
       {/* Statistiques globales */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <Card>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => openStatsDetails("total")}>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
               <Target className="h-8 w-8 text-blue-500" />
@@ -367,7 +413,7 @@ export default function SuperAdminProjectsDashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => openStatsDetails("en_cours")}>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
               <Clock className="h-8 w-8 text-orange-500" />
@@ -379,7 +425,7 @@ export default function SuperAdminProjectsDashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => openStatsDetails("termines")}>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
               <CheckCircle className="h-8 w-8 text-green-500" />
@@ -391,7 +437,7 @@ export default function SuperAdminProjectsDashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => openStatsDetails("retard")}>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-8 w-8 text-red-500" />
@@ -403,7 +449,7 @@ export default function SuperAdminProjectsDashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => openStatsDetails("urgent")}>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
               <AlertCircle className="h-8 w-8 text-red-600" />
@@ -415,7 +461,7 @@ export default function SuperAdminProjectsDashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => openStatsDetails("pms")}>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
               <Users className="h-8 w-8 text-purple-500" />
@@ -562,7 +608,16 @@ export default function SuperAdminProjectsDashboard() {
           ) : (
             <div className="space-y-4">
               {filteredProjects.map((project) => (
-                <div key={project.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div
+                  key={project.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => openProjectDetails(project)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") openProjectDetails(project);
+                  }}
+                  className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+                >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
@@ -602,7 +657,14 @@ export default function SuperAdminProjectsDashboard() {
                     </div>
 
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openProjectDetails(project);
+                        }}
+                      >
                         <Eye className="h-4 w-4 mr-1" />
                         Détails
                       </Button>
@@ -614,6 +676,74 @@ export default function SuperAdminProjectsDashboard() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Détails du projet</DialogTitle>
+          </DialogHeader>
+          {selectedProject && (
+            <div className="space-y-4 text-sm">
+              <div>
+                <p className="font-semibold text-base">{selectedProject.name}</p>
+                <p className="text-gray-600">{selectedProject.description}</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <p><span className="font-medium">Project Manager:</span> {selectedProject.assignedToName}</p>
+                <p><span className="font-medium">Statut:</span> {selectedProject.status}</p>
+                <p><span className="font-medium">Priorité:</span> {selectedProject.priority}</p>
+                <p><span className="font-medium">Deadline:</span> {new Date(selectedProject.deadline).toLocaleDateString()}</p>
+                <p><span className="font-medium">Progression:</span> {selectedProject.progress}%</p>
+                <p><span className="font-medium">Créé le:</span> {new Date(selectedProject.createdAt).toLocaleDateString()}</p>
+              </div>
+
+              <div>
+                <p className="font-medium mb-2">Tâches ({selectedProject.tasks.length})</p>
+                {selectedProject.tasks.length === 0 ? (
+                  <p className="text-gray-500">Aucune tâche pour ce projet.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {selectedProject.tasks.map((task) => (
+                      <div key={task.id} className="p-2 border rounded-md">
+                        <div className="flex items-center justify-between">
+                          <p className="font-medium">{task.title}</p>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={getPriorityColor(task.priority)}>{task.priority}</Badge>
+                            <Badge variant={getStatusColor(task.status)}>{task.status}</Badge>
+                          </div>
+                        </div>
+                        <p className="text-xs text-gray-600 mt-1">
+                          Deadline: {new Date(task.deadline).toLocaleDateString()}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={statsDetailsOpen} onOpenChange={setStatsDetailsOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{statsTitle}</DialogTitle>
+          </DialogHeader>
+          {statsItems.length === 0 ? (
+            <p className="text-sm text-gray-500">Aucune donnée à afficher.</p>
+          ) : (
+            <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+              {statsItems.map((item, index) => (
+                <div key={`${item}-${index}`} className="text-sm p-2 border rounded-md">
+                  {item}
+                </div>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
