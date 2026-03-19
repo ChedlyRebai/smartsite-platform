@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Permission } from 'src/permissions/entities/permission.entity';
-import { Role } from 'src/roles/entities/role.entity';
-import { User } from 'src/users/entities/user.entity';
+import { Permission } from '../permissions/entities/permission.entity';
+import { Role } from '../roles/entities/role.entity';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class StaticsService {
