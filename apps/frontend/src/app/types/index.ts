@@ -196,7 +196,7 @@ export interface Task {
 
   milestoneId: string;
 
-  assignedUsers: string;
+  assignedUsers: string[];
 
   priority: string;
 

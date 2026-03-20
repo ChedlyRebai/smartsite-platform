@@ -98,7 +98,7 @@ export class TaskService {
       ])
       .exec();
       const columns= response.map((group,i) => ({
-      id: `col-${i}`, // or use uuid/v4 for random unique id
+      id: `${group.title}`, // or use uuid/v4 for random unique id
       title: group.title,
       color: getColorForStatus(group.status),
       tasks: group.tasks,

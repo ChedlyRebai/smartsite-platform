@@ -32,6 +32,7 @@ import MyTasks from "./pages/planning/Planning";
 import PLaningProjects from "./pages/planning/PLaningProjects";
 import ProjectMilestone from "./pages/planning/ProjectMilestone";
 import MilestoneTasks from "./pages/planning/MilestoneTasks";
+import MyTask from "./pages/planning/MyTask";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = true;
@@ -93,7 +94,7 @@ export const router = createBrowserRouter([
       },
       {
         path:"my-task",
-        element:<MyTasks/>
+        element:<MyTask/>
       },
     
       {

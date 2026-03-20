@@ -74,7 +74,11 @@ import { useJsLoaded } from "@/hooks/use-js-loaded";
 import { CardHeader, CardTitle, CardContent, Card } from "@/components/ui/card";
 import { Task, TaskStatusEnum } from "@/app/types";
 import { useQuery } from "@tanstack/react-query";
-import { deleteTask, getTasksBYMilestoneId } from "@/app/action/planing.action";
+import {
+  deleteTask,
+  getTasksBYMilestoneId,
+  updateTask,
+} from "@/app/action/planing.action";
 import { useParams } from "react-router";
 import useTaskModal from "@/app/hooks/use-task-modal";
 import { de } from "zod/v4/locales";
@@ -231,37 +235,54 @@ export function MyKanbanBoard() {
     }
   }
 
-  function handleMoveCardToColumn(columnId: string, index: number, card: Task) {
-    setColumns((previousColumns) =>
-      previousColumns.map((column) => {
-        if (column.id === columnId) {
-          console.log(column.tasks);
-          // Remove the card from the column (if it exists) before reinserting it.
-          const updatedItems = column.tasks.filter(
-            ({ _id }) => _id !== card._id,
-          );
-          console.log(card);
-          card.status = column.title;
-          return {
-            ...column,
-            tasks: [
-              // Items before the insertion index.
-              ...updatedItems.slice(0, index),
-              // Insert the card.
-              card,
-              // Items after the insertion index.
-              ...updatedItems.slice(index),
-            ],
-          };
-        } else {
-          // Remove the card from other columns.
-          return {
-            ...column,
-            tasks: column.tasks.filter(({ _id }) => _id !== card._id),
-          };
-        }
-      }),
-    );
+  async function handleMoveCardToColumn(columnId: string, index: number, card: Task) {
+    // const { data, isSuccess } = useQuery({
+    //   queryKey: ["moveTask", card._id],
+    //   queryFn: async () => {
+    //     card.status = columnId as TaskStatusEnum;
+    //     const response = await updateTask(card._id, card);
+    //     return response.data;
+    //   },
+    // });
+    card.status = columnId as TaskStatusEnum;
+    const response=await updateTask(card._id, card);
+
+    console.log(response);
+
+    if (response.status === 200) {
+      setColumns((previousColumns) =>
+        previousColumns.map((column) => {
+          if (column.id === columnId) {
+            console.log(column.tasks);
+            // Remove the card from the column (if it exists) before reinserting it.
+            const updatedItems = column.tasks.filter(
+              ({ _id }) => _id !== card._id,
+            );
+
+            console.log(card);
+            card.status = column.title;
+
+            return {
+              ...column,
+              tasks: [
+                //   Items before the insertion index.
+                ...updatedItems.slice(0, index),
+                //    Insert the card.
+                card,
+                //    Items after the insertion index.
+                ...updatedItems.slice(index),
+              ],
+            };
+          } else {
+            //    Remove the card from other columns.
+            return {
+              ...column,
+              tasks: column.tasks.filter(({ _id }) => _id !== card._id),
+            };
+          }
+        }),
+      );
+    }
   }
 
   function handleUpdateCardTitle(cardId: string, cardTitle: string) {
@@ -623,8 +644,7 @@ function MyKanbanBoardColumn({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <KanbanBoardColumnIconButton ref={moreOptionsButtonReference}>
-                  <MoreHorizontalIcon />
-
+                  {/* <MoreHorizontalIcon /> */}
                   <span className="sr-only">
                     More options for {column.title}
                   </span>
@@ -802,7 +822,7 @@ function MyKanbanBoardCard({
       ref={kanbanBoardCardReference}
     >
       <KanbanBoardCardDescription
-      className="cursor-pointer hover:underline  w-fit"
+        className="cursor-pointer hover:underline  w-fit"
         onClick={() => {
           setId(card._id);
           (setType("edit"), onOpen());
@@ -829,11 +849,11 @@ function MyKanbanBoardCard({
           // }}
           tooltip="Delete card"
         >
-          
-
-          <AlertDialog open={openDeleteModal} onOpenChange={setOpenDeleteModal} >
+          <AlertDialog open={openDeleteModal} onOpenChange={setOpenDeleteModal}>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive"><Trash2Icon /></Button>
+              <Button variant="destructive">
+                <Trash2Icon />
+              </Button>
             </AlertDialogTrigger>
             <AlertDialogContent size="sm">
               <AlertDialogHeader>
@@ -846,8 +866,18 @@ function MyKanbanBoardCard({
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel onClick={()=>{setOpenDeleteModal(false)}} variant="outline">Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={() => onDeleteCard(card._id)} variant="destructive">
+                <AlertDialogCancel
+                  onClick={() => {
+                    setOpenDeleteModal(false);
+                  }}
+                  variant="outline"
+                >
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => onDeleteCard(card._id)}
+                  variant="destructive"
+                >
                   Delete
                 </AlertDialogAction>
               </AlertDialogFooter>
