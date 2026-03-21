@@ -3,17 +3,6 @@ import { fetchSites } from "@/app/action/site.action";
 import { useQuery } from "@tanstack/react-query";
 
 import {
-  Plus,
-  MapPin,
-  Search,
-  Filter,
-  Trash2,
-  Edit,
-  ChevronRight,
-  AlertCircle,
-  CheckCircle2,
-  Clock,
-  PauseCircle,
   Warehouse,
 } from "lucide-react";
 import {
@@ -23,24 +12,8 @@ import {
   CardTitle,
 } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import { Badge } from "../../components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../../components/ui/dialog";
-import { useAuthStore } from "../../store/authStore";
-import { mockSites } from "../../utils/mockData";
-import { toast } from "sonner";
 import type { Site } from "../../types";
-import { createSite, updateSite, deleteSite } from "../../action/site.action";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
-import L from "leaflet";
+
 import "leaflet/dist/leaflet.css";
 import { useState } from "react";
 import { Link } from "react-router";
@@ -63,7 +36,7 @@ const PLaningProjects = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Planing</h1>
           <p className="text-gray-500 mt-1">
-            Manage site relationships and orders
+            Manage site relationships and order
           </p>
         </div>
       </div>
