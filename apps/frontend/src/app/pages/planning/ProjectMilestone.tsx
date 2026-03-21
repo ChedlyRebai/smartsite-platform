@@ -20,16 +20,19 @@ import { getMilestonesByProjectId } from "@/app/action/milestone.action";
 import useMilestoneModal from "@/app/hooks/use-milestone-modal";
 
 const ProjectMilestone = () => {
-  //const [milestones, setMilestones] = useState<Milestone[]>([]);
   const { isOpen, setProjectId, onOpen } = useMilestoneModal();
   const { projectId } = useParams();
   console.log("project id from milestone page", projectId);
-  const { data:milestones , isPending, isLoading, isError } = useQuery({
-    queryKey: ["milestoneData",projectId],
+  const {
+    data: milestones,
+    isPending,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["milestones", projectId],
     queryFn: () => getMilestonesByProjectId(projectId || ""),
   });
 
-  
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -52,9 +55,11 @@ const ProjectMilestone = () => {
               className="cursor-pointer"
               onClick={() => {
                 setProjectId(projectId);
-                console.log("project id from milestone page on click", projectId);
+                console.log(
+                  "project id from milestone page on click",
+                  projectId,
+                );
                 onOpen();
-               
               }}
             >
               <PlusIcon />
@@ -75,8 +80,13 @@ const ProjectMilestone = () => {
                       {milestone.description}
                     </p>
                     <p className="text-sm text-gray-600 mt-2">
-                      {typeof (milestone.startDate) =="object" ? milestone.startDate?.toLocaleDateString() : milestone.startDate} •{" "}
-                      {typeof (milestone.endDate) =="object" ? milestone.endDate?.toLocaleDateString() : milestone.endDate}
+                      {typeof milestone.startDate == "object"
+                        ? milestone.startDate?.toLocaleDateString()
+                        : milestone.startDate}{" "}
+                      •{" "}
+                      {typeof milestone.endDate == "object"
+                        ? milestone.endDate?.toLocaleDateString()
+                        : milestone.endDate}
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-2">

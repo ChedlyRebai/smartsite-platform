@@ -2,9 +2,7 @@ import { fetchSites } from "@/app/action/site.action";
 
 import { useQuery } from "@tanstack/react-query";
 
-import {
-  Warehouse,
-} from "lucide-react";
+import { Warehouse } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -60,8 +58,10 @@ const PLaningProjects = () => {
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-2">
-                    <Button  size="sm" variant="outline">
-                     <Link to={`/project-milestone/${site.id}`} >Milestones</Link>
+                    <Button size="sm" variant="outline">
+                      <Link to={`/project-milestone/${site.id}`}>
+                        Milestones
+                      </Link>
                     </Button>
                   </div>
                 </div>

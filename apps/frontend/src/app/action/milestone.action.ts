@@ -8,8 +8,8 @@ export const getMilestonesByProjectId = async (projectId: string) => {
   return data;
 };
 
-export const createMilestone = async (milestone: Milestone) => {
-  const { data } = await planingApi.post(`/milestone`, milestone);
+export const createMilestone = async (milestone: Milestone,projectId:string) => {
+  const { data } = await planingApi.post(`/milestone/project/${projectId}`, milestone);
   return data;
 };
 

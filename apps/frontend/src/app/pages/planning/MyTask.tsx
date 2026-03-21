@@ -744,7 +744,7 @@ function MyKanbanBoardCard({
   }
 
   //const { isOpen, onOpen, onClose, setType, setId, id } = useTaskModal();
-  const {task,isOpen,onOpen,onClose,setTask}=useTaskDetailsModal();
+  const { task, isOpen, onOpen, onClose, setTask } = useTaskDetailsModal();
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   return isEditingTitle ? (
     <form onBlur={handleBlur} onSubmit={handleSubmit}>
@@ -823,9 +823,9 @@ function MyKanbanBoardCard({
           </span>
         </div>
       )}
-      <KanbanBoardCardButtonGroup disabled={isActive}>
-       
-      </KanbanBoardCardButtonGroup>
+      <KanbanBoardCardButtonGroup
+        disabled={isActive}
+      ></KanbanBoardCardButtonGroup>
     </KanbanBoardCard>
   );
 }
@@ -938,9 +938,7 @@ function MyNewKanbanBoardCard({
       </form>
     </>
   ) : (
-    <KanbanBoardColumnFooter>
-      
-    </KanbanBoardColumnFooter>
+    <KanbanBoardColumnFooter></KanbanBoardColumnFooter>
   );
 }
 

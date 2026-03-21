@@ -26,12 +26,13 @@ import { Controller, useForm } from "react-hook-form";
 import * as z from "zod";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { TaskStatusEnum, User } from "@/app/types";
+import { Milestone } from "@/app/types";
 import useMilestoneModal from "@/app/hooks/use-milestone-modal";
 import axios from "axios";
-import { createMilestone } from "@/app/action/planing.action";
+import { createMilestone } from "@/app/action/milestone.action";
 import { da } from "zod/v4/locales";
 import toast from "react-hot-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const todayAtMidnight = () => {
   const today = new Date();
@@ -73,6 +74,8 @@ const formSchema = z
     }
   });
 
+type FormValues = z.infer<typeof formSchema>;
+
 const AddMilestoneForms = ({ type }: { type: "edit" | "add" }) => {
   // const milestoneId = "69bc78a30912805125e58f72";
 
@@ -82,9 +85,8 @@ const AddMilestoneForms = ({ type }: { type: "edit" | "add" }) => {
   const [openStartDate, setOpenStartDate] = useState(false);
   const [openEndDate, setOpenEndDate] = useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm({
     resolver: zodResolver(formSchema),
-    mode: "onChange",
     defaultValues: {
       title: "",
       description: "",
@@ -93,93 +95,55 @@ const AddMilestoneForms = ({ type }: { type: "edit" | "add" }) => {
     },
   });
 
+  //const queryClient = useQueryClient();
   // useEffect(() => {}, [type, id]);
+  const queryClient = useQueryClient();
 
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    // console.log(data);
-    // console.log("Project id from milestone form", projectId);
-    if(type === "add"){
-      try {
-        console.log("Creating milestone with data:", projectId);
-        const res = await createMilestone({
-          title: data.title,
-          description: data.description,
-          projectId: projectId as string,
-          startDate: data.startDate,
-          endDate: data.endDate,
-        });
-        //console.log(res);
-        if(res.status ===201 || res.status ===200){
-          toast.success("Milestone created successfully");
-          onClose();
-          form.reset()
-        }
-      } catch (error) {
-        toast.error("Failed to create milestone");
+  const mutation = useMutation({
+    mutationFn: (milestone: Milestone) => createMilestone(milestone,projectId as string),
+    onSuccess: () => {
+      toast.success("Milestone created successfully!");
+      if (projectId) {
+        queryClient.invalidateQueries({ queryKey: ["milestones", projectId!] });
       }
-    }
-    // if (type === "add" && !milestoneId) {
-    //   toast.error("Milestone id is missing in route.");
-    //   return;
-    // }
-    // console.log("Form data to submit:", data);
-    // try {
-    //   if (type === "add") {
-    //     console.log("Creating milestone with data:", data);
-    //     const res = await createTask({
-    //       title: data.title,
-    //       description: data.description,
-    //       milestoneId: milestoneId as string,
-    //       status: data.status,
-    //       assignedUsers: data.assignedUsers,
-    //       startDate: data.startDate,
-    //       endDate: data.endDate,
-    //     });
-    //     if (res.status === 201 || res.status === 200) {
-    //       toast.success("Milestone created successfully");
-    //       form.reset({
-    //         id: undefined,
-    //         title: "",
-    //         description: "",
-    //         status: TaskStatusEnum.BACKLOG,
-    //         assignedUsers: [],
-    //         startDate: new Date(),
-    //         endDate: new Date(),
-    //       });
-    //       onClose();
-    //       onTaskChange();
-    //     } else {
-    //       toast.error("Failed to create milestone");
-    //     }
-    //   } else {
-    //     if (!data.id) {
-    //       toast.error("Milestone id is missing.");
-    //       return;
-    //     }
-    //     const res = await updateTask(data.id, {
-    //       title: data.title,
-    //       description: data.description,
-    //       status: data.status,
-    //       assignedUsers: data.assignedUsers,
-    //       startDate: data.startDate,
-    //       endDate: data.endDate,
-    //     });
-    //     if (res.status === 200) {
-    //       toast.success("Milestone updated successfully");
-    //       onClose();
-    //       onTaskChange();
-    //     } else {
-    //       toast.error("Failed to update milestone");
-    //     }
-    //   }
-    // } catch {
-    //   toast.error("Failed to save milestone. Please try again.");
-    // }
-  };
+      onClose();
+    },
+    onError: (error: any) => {
+      toast.error("Failed to create milestone");
+      console.error(error);
+    },
+  });
+
+  const onSubmit = (data: FormValues) => mutation.mutate(data);
+
+  // const onSubmi = async (data: z.infer<typeof formSchema>) => {
+  //   // console.log(data);
+  //   // console.log("Project id from milestone form", projectId);
+  //   if (type === "add") {
+  //     try {
+  //       console.log("Creating milestone with data:", projectId);
+  //       const res = await createMilestone({
+  //         title: data.title,
+  //         description: data.description,
+  //         projectId: projectId as string,
+  //         startDate: data.startDate,
+  //         endDate: data.endDate,
+  //       });
+  //       //console.log(res);
+  //       if (res.status === 201 || res.status === 200) {
+  //         toast.success("Milestone created successfully");
+  //         onClose();
+  //         form.reset();
+  //       }
+  //     } catch (error) {
+  //       toast.error("Failed to create milestone");
+  //     }
+  //   }
+  // };
 
   return (
     <>
-    {projectId}ssssss
+      
       <form id="form-rhf-demo" onSubmit={form.handleSubmit(onSubmit)}>
         <FieldGroup>
           <Controller
@@ -312,7 +276,6 @@ const AddMilestoneForms = ({ type }: { type: "edit" | "add" }) => {
           />
         </FieldGroup>
       </form>
-
       <Field className="justify-end" orientation="horizontal">
         <Button type="button" variant="outline" onClick={() => form.reset()}>
           Reset
