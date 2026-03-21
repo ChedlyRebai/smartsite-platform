@@ -18,7 +18,7 @@ const useMilestoneModal = create<MilestoneModalStore>((set) => ({
   id: undefined,
   projectId:undefined,
   type: "add",
-  setProjectId:(id)=> ({projectId:id}),
+  setProjectId:(id)=> set({projectId:id}),
   setType: (type) => set({ type }),
   isOpen: false,
   setId: (id) => set({ id }),

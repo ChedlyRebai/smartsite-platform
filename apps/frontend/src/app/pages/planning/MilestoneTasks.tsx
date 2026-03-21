@@ -109,7 +109,7 @@ export default function MilestoneTasks() {
           <div className="flex justify-between items-center">
             <CardTitle className="flex tasks-center gap-2">
               <Warehouse className="h-5 w-5" />
-              Milestone Management
+              Milestone Tasks
             </CardTitle>
 
             <Button
@@ -872,7 +872,7 @@ function MyKanbanBoardCard({
         >
           <AlertDialog open={openDeleteModal} onOpenChange={setOpenDeleteModal}>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive">
+              <Button variant="outline" className="rounded-full my-auto ">
                 <Trash2Icon />
               </Button>
             </AlertDialogTrigger>

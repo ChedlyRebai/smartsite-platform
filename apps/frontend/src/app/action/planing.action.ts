@@ -87,7 +87,9 @@ export const updateTask = async (taskId: string, task: UpdateTaskPayload) => {
 
 export const createMilestone=async (milestone : Milestone) =>{
     try {
+        console.log("createing milestone from action:",milestone)
         const response = await axios.post(`${baseUrl}/milestone`,milestone);
+        console.log(response)
         return Promise.resolve({status:response.status,data:response.data})
     } catch (error) {
         console.log('Error creating milestone:', error);

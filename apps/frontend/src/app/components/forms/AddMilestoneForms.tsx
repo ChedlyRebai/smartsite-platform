@@ -19,16 +19,19 @@ import {
   InputGroupText,
 } from "@/components/ui/input-group";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
 
+import { useState } from "react";
+
+import { Controller, useForm } from "react-hook-form";
 import * as z from "zod";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-
 import { TaskStatusEnum, User } from "@/app/types";
-
 import useMilestoneModal from "@/app/hooks/use-milestone-modal";
+import axios from "axios";
+import { createMilestone } from "@/app/action/planing.action";
+import { da } from "zod/v4/locales";
+import toast from "react-hot-toast";
 
 const todayAtMidnight = () => {
   const today = new Date();
@@ -47,7 +50,6 @@ const formSchema = z
       .string()
       .max(500, "Description must be at most 500 characters.")
       .optional(),
-    status: z.nativeEnum(TaskStatusEnum),
     //assignedUsers: z.array(z.string()).optional(),
     startDate: z.date(),
     endDate: z.date(),
@@ -75,31 +77,47 @@ const AddMilestoneForms = ({ type }: { type: "edit" | "add" }) => {
   // const milestoneId = "69bc78a30912805125e58f72";
 
   const { id, onClose, onOpen, projectId } = useMilestoneModal();
-  const [availableUsers, setAvailableUsers] = useState<User[]>([]);
+  //const [availableUsers, setAvailableUsers] = useState<User[]>([]);
   //console.log("milestone from milestone form",milestoneId);
-  const [openStartDate, setOpenStartDate] = React.useState(false);
-  const [openEndDate, setOpenEndDate] = React.useState(false);
+  const [openStartDate, setOpenStartDate] = useState(false);
+  const [openEndDate, setOpenEndDate] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    mode: "onChange",
     defaultValues: {
-      id: undefined,
       title: "",
       description: "",
-     
       startDate: new Date(),
       endDate: new Date(),
     },
   });
 
-  
-
- 
-  useEffect(() => {
-    
-  }, [type, id]);
+  // useEffect(() => {}, [type, id]);
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    // console.log(data);
+    // console.log("Project id from milestone form", projectId);
+    if(type === "add"){
+      try {
+        console.log("Creating milestone with data:", projectId);
+        const res = await createMilestone({
+          title: data.title,
+          description: data.description,
+          projectId: projectId as string,
+          startDate: data.startDate,
+          endDate: data.endDate,
+        });
+        //console.log(res);
+        if(res.status ===201 || res.status ===200){
+          toast.success("Milestone created successfully");
+          onClose();
+          form.reset()
+        }
+      } catch (error) {
+        toast.error("Failed to create milestone");
+      }
+    }
     // if (type === "add" && !milestoneId) {
     //   toast.error("Milestone id is missing in route.");
     //   return;
@@ -161,6 +179,7 @@ const AddMilestoneForms = ({ type }: { type: "edit" | "add" }) => {
 
   return (
     <>
+    {projectId}ssssss
       <form id="form-rhf-demo" onSubmit={form.handleSubmit(onSubmit)}>
         <FieldGroup>
           <Controller
@@ -215,13 +234,14 @@ const AddMilestoneForms = ({ type }: { type: "edit" | "add" }) => {
             )}
           />
 
-       
           <Controller
             name="startDate"
             control={form.control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="milestone-start-date">Start date</FieldLabel>
+                <FieldLabel htmlFor="milestone-start-date">
+                  Start date
+                </FieldLabel>
                 <Popover
                   open={openStartDate}
                   onOpenChange={setOpenStartDate}
@@ -229,7 +249,7 @@ const AddMilestoneForms = ({ type }: { type: "edit" | "add" }) => {
                 >
                   <PopoverTrigger asChild>
                     <Button type="button" variant="outline">
-                       {field.value?.toLocaleDateString() || "Select date"} 
+                      {field.value?.toLocaleDateString() || "Select date"}
                     </Button>
                   </PopoverTrigger>
 
@@ -266,7 +286,7 @@ const AddMilestoneForms = ({ type }: { type: "edit" | "add" }) => {
                 >
                   <PopoverTrigger asChild>
                     <Button type="button" variant="outline" className="ml-auto">
-                       {field.value?.toLocaleDateString() || "Select date"} 
+                      {field.value?.toLocaleDateString() || "Select date"}
                     </Button>
                   </PopoverTrigger>
 

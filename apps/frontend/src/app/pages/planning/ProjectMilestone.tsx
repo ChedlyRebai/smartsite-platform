@@ -48,14 +48,16 @@ const ProjectMilestone = () => {
           <div className="flex justify-between items-center">
             <CardTitle className="flex items-center gap-2">
               <Warehouse className="h-5 w-5" />
-              Planing Management
+              Project Milestone
             </CardTitle>
 
             <Button
               className="cursor-pointer"
               onClick={() => {
-                onOpen();
                 setProjectId(projectId);
+                console.log("project id from milestone page on click", projectId);
+                onOpen();
+               
               }}
             >
               <PlusIcon />

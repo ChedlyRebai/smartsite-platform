@@ -44,7 +44,7 @@ const PLaningProjects = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Warehouse className="h-5 w-5" />
-            Planing Management
+            Projects
           </CardTitle>
         </CardHeader>
         <CardContent>

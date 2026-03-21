@@ -21,16 +21,16 @@ export interface UserRole {
 }
 
 export interface Milestone {
-  _id: string;
-  title: string;
-  tasks: Task[];
-  description: string;
-  projectId: string;
-  siteId: string;
-  createdBy: string;
-  updatedBy: string;
-  startDate: Date;
-  endDate: Date;
+  _id?: string;
+  title?: string;
+  tasks?: Task[];
+  description?: string;
+  projectId?: string;
+  siteId?: string;
+  createdBy?: string;
+  updatedBy?: string;
+  startDate?: Date;
+  endDate?: Date;
 }
 
 export interface User {
