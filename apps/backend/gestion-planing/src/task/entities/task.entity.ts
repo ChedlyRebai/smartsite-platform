@@ -1,6 +1,7 @@
 import { StatusEnum } from '@/StatusEnum';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
+import { TaskTypeEnum } from './TaskTypeEnum';
 
 @Schema({ timestamps: true })
 export class Task extends Document {
@@ -20,6 +21,10 @@ export class Task extends Document {
   @Prop()
   priority: string;
 
+
+  @Prop({ type:String,enum:TaskTypeEnum,default:TaskTypeEnum.TASK })
+  type:string;
+
   @Prop()
   projectId: string;
 
@@ -31,8 +36,11 @@ export class Task extends Document {
   @Prop()
   updatedBy: string;
 
-  @Prop({ type:Types.ObjectId, ref :'TaskStage' })
-  status: Types.ObjectId;
+  @Prop({ type:String,enum:StatusEnum,default:StatusEnum.BACKLOG })
+  status: StatusEnum;
+
+  @Prop({ type: Types.ObjectId, ref: 'TaskStage' })
+  stageStatus: Types.ObjectId;
 
   @Prop({ default: 0 })
   progress: number;

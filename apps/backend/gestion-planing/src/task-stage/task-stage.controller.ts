@@ -11,6 +11,11 @@ export class TaskStageController {
     return await this.taskStageService.findAll();
   }
 
+  @Get('project/:projectId')
+  async findByprojectId(@Param('projectId') projectId: string) {
+    const taskStages = await this.taskStageService.findByProjectId(projectId);
+    return taskStages;
+  }
   @Post("project/:projectId")
   async create(@Param("projectId") projectId:string , @Body() taskStage:TaskStage){
     return this.taskStageService.create(projectId,taskStage)

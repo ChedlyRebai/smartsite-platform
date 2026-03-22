@@ -17,6 +17,10 @@ export class TaskStageService {
     return await this.taskStageModel.findById(id).exec();
   }
 
+  async findByProjectId(projectId:string){
+    return await this.taskStageModel.find({projectId}).exec();
+  }
+
   async findAll() {
     return await this.taskStageModel.find().exec();
   }
