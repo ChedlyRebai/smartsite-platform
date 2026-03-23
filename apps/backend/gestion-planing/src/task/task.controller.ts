@@ -18,19 +18,29 @@ import { GetUser } from '@/auth/get-user.decorator';
 @Controller('task')
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}
-  // localhost:3002/task/milestone/69bc78a30912805125e58f72
+  // /milestone/69bc78a30912805125e58f72
+  // 'localhost:3002/task/milestone/:milestoneId/task-stage/:taskStageId'
   @Post('/milestone/:milestoneId/task-stage/:taskStageId')
   create(
     @Body() createTaskDto: CreateTaskDto,
     @Param('milestoneId') milestoneId: string,
     @Param('taskStageId') taskStageId: string,
   ) {
-    return this.taskService.create(createTaskDto, milestoneId,taskStageId);
+    return this.taskService.create(createTaskDto, milestoneId, taskStageId);
   }
 
   @Get()
   findAll() {
     return this.taskService.findAll();
+  }
+
+  //${baseUrl}/task/${taskId}/task-stage/${colunId}
+  @Put('/:taskId/task-stage/:colunId')
+  updateTaskStage(
+    @Param('taskId') taskId: string,
+    @Param('colunId') colunId: string,
+  ) {
+    return this.taskService.updateNew(taskId, colunId);
   }
 
   @UseGuards(JwtGuard)

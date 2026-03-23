@@ -6,6 +6,7 @@ import RolePermissionsModal from "../components/shared/Modals/RolePermissionsMod
 import AddTaskModal from "../components/shared/Modals/AddTaskModal";
 import TaskDetailModal from "../components/shared/Modals/TaskDetailModal";
 import AddMilestoneModal from "../components/shared/Modals/AddMilestoneModal";
+import AddTaskStageModal from "../components/shared/Modals/AddTaskStageModal";
 
 const ModalProvider = () => {
   return (
@@ -17,6 +18,7 @@ const ModalProvider = () => {
       <RolePermissionsModal />
       <TaskDetailModal/>
       <AddMilestoneModal/>
+      <AddTaskStageModal/>
     </>
   );
 };

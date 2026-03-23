@@ -95,6 +95,19 @@ export interface Permisssion {
   description?: string;
 }
 
+export interface TaskStage {
+  _id?: string;
+  name: string;
+  description?: string;
+  color?: string;
+  order?: number;
+  milestoneId?: string;
+  projectId?: string;
+  tasks?: Task[];
+  createdBy?: string;
+  updatedBy?: string;
+}
+
 export interface Role {
   _id: string;
   name: string;
@@ -107,7 +120,8 @@ export interface Role {
 export interface Permission {
   _id: string;
   name: string;
-  source: boolean;
+
+  href: string;
   access: boolean;
   create: boolean;
   delete: boolean;
@@ -130,19 +144,18 @@ export interface AuthState {
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (
-    
-        cin: string,
-        password: string,
-        firstName: string,
-        lastName: string,
-        email: string,
-        telephone?: string,
-        departement?: string,
-        address?: string,
-        role?: string,
-        companyName?: string,
-        preferredLanguage?: string,
-        certifications?: string[],
+    cin: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+    email: string,
+    telephone?: string,
+    departement?: string,
+    address?: string,
+    role?: string,
+    companyName?: string,
+    preferredLanguage?: string,
+    certifications?: string[],
   ) => Promise<void>;
   getPendingUsers?: () => Promise<User[]>;
   approveUser?: (userId: string, password: string) => Promise<User>;
@@ -213,7 +226,7 @@ export interface Site {
 // }
 
 export interface Task {
-  _id : string;
+  _id: string;
   title?: string;
 
   description?: string;
@@ -310,3 +323,18 @@ export interface DashboardStats {
   safetyIncidents: number;
   pendingTasks: number;
 }
+
+
+export const KANBAN_BOARD_CIRCLE_COLORS_MAP = {
+  primary: 'bg-kanban-board-circle-primary',
+  gray: 'bg-kanban-board-circle-gray',
+  red: 'bg-kanban-board-circle-red',
+  yellow: 'bg-kanban-board-circle-yellow',
+  green: 'bg-kanban-board-circle-green',
+  cyan: 'bg-kanban-board-circle-cyan',
+  blue: 'bg-kanban-board-circle-blue',
+  indigo: 'bg-kanban-board-circle-indigo',
+  violet: 'bg-kanban-board-circle-violet',
+  purple: 'bg-kanban-board-circle-purple',
+  pink: 'bg-kanban-board-circle-pink',
+};

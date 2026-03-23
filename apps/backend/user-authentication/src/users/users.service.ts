@@ -64,7 +64,8 @@ export class UsersService {
     }
 
     const role = user.role as any;
-    return { permissions: role.permissions || [] };
+    console.log("************************************************",role.permissions);
+    return  role.permissions || [] ;
   }
 
   async findByCin(cin: string) {

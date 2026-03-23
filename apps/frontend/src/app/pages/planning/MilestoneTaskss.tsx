@@ -1,6 +1,7 @@
 /* eslint-disable unicorn/no-null */
 
 import {
+  CircleIcon,
   Link,
   MoreHorizontalIcon,
   PenIcon,
@@ -69,20 +70,19 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { uuid } from "zod";
 import { useJsLoaded } from "@/hooks/use-js-loaded";
 import { CardHeader, CardTitle, CardContent, Card } from "@/components/ui/card";
 import { Task, TaskStatusEnum } from "@/app/types";
 import { useQuery } from "@tanstack/react-query";
 import {
   deleteTask,
-  getTasksBYMilestoneId,
   updateTask,
+  updateTAskNew,
 } from "@/app/action/planing.action";
 import { useParams } from "react-router";
 import useTaskModal from "@/app/hooks/use-task-modal";
-import { de } from "zod/v4/locales";
 import { getTaskSTagesByMilestoneId } from "@/app/action/task.actions";
+import useTaskStageModal from "@/app/hooks/use-task-stage-modal";
 
 type Column = {
   _id: string;
@@ -170,12 +170,15 @@ export function MyKanbanBoard() {
 
   const { data } = useQuery({
     queryKey: ["getTaskSTagesByMilestoneId", milestoneId],
-    queryFn: () => getTaskSTagesByMilestoneId(milestoneId || "").then((data) => {
-      console.log("Fetched columns data:", data);
-      setColumns(data);
-    }),
+    queryFn: () =>
+      getTaskSTagesByMilestoneId(milestoneId || "").then((data) => {
+        console.log("fetching tasks by milestone id:", milestoneId);
+        console.log("Fetched columns data:", data);
+        setColumns(data);
+      }),
   });
-  // Scroll to the right when a new column is added.
+
+  // Scroll to the right when a new column is added
   const scrollContainerReference = useRef<HTMLDivElement>(null);
 
   function scrollRight() {
@@ -189,27 +192,25 @@ export function MyKanbanBoard() {
   Column logic
   */
 
-  // const handleAddColumn = (name?: TaskStatusEnum) => {
-  //   if (name) {
-  //     flushSync(() => {
-  //       setColumns((previousColumns:Column) => [
-  //         ...previousColumns,
-  //         {
-  //           _id: uuid.toString(),
-  //           name,
-  //           description: "",
-            
-  //           order: previousColumns,
-  //           color:
-  //             KANBAN_BOARD_CIRCLE_COLORS[previousColumns.length] ?? "primary",
-  //           tasks: [],
-  //         },
-  //       ]);
-  //     });
-  //   }
-
-  //   scrollRight();
-  // };
+  const handleAddColumn = (name?: TaskStatusEnum) => {
+    if (name) {
+      //  flushSync(() => {
+      //    setColumns((previousColumns:Column) => [
+      //      ...previousColumns,
+      //      {
+      //        _id: uuid.toString(),
+      //        name,
+      //        description: "",
+      //        order: previousColumns,
+      //        color:
+      //          KANBAN_BOARD_CIRCLE_COLORS[previousColumns.length] ?? "primary",
+      //        tasks: [],
+      //      },
+      //    ]);
+      //  });
+    }
+    scrollRight();
+  };
 
   function handleDeleteColumn(columnId: string) {
     flushSync(() => {
@@ -277,6 +278,7 @@ export function MyKanbanBoard() {
     columnId: string,
     index: number,
     card: Task,
+    // oldColumnId?: string,
   ) {
     // const { data, isSuccess } = useQuery({
     //   queryKey: ["moveTask", card._id],
@@ -286,8 +288,19 @@ export function MyKanbanBoard() {
     //     return response.data;
     //   },
     // });
+
+    console.log(
+      "Moving card",
+      card._id,
+      "to column",
+      columnId,
+      "at index",
+      index,
+    );
+    const response = await updateTAskNew(card._id, columnId);
+
     card.status = columnId as TaskStatusEnum;
-    const response = await updateTask(card._id, card);
+    //const response = await updateTask(card._id, card);
 
     console.log(response);
 
@@ -300,7 +313,6 @@ export function MyKanbanBoard() {
             const updatedItems = column.tasks.filter(
               ({ _id }) => _id !== card._id,
             );
-
             console.log(card);
             card.status = column.name;
 
@@ -521,12 +533,14 @@ export function MyKanbanBoard() {
   }
 
   const jsLoaded = useJsLoaded();
-
+  const { isOpen, onOpen, setMilestoneid, onClose, setType } =
+    useTaskStageModal();
   return (
     <KanbanBoard ref={scrollContainerReference}>
       {columns.map((column) =>
         jsLoaded ? (
           <MyKanbanBoardColumn
+            
             activeCardId={activeCardId}
             column={column}
             key={column._id}
@@ -548,8 +562,22 @@ export function MyKanbanBoard() {
         <MyNewKanbanBoardColumn onAddColumn={handleAddColumn} />
       ) : (
         <Skeleton className="h-9 w-10.5 flex-shrink-0" />
-      )} */}
+      )}  */}
 
+      <div className="w-64 flex-shrink-0 rounded-lg border-2   flex justify-center items-center border-dashed bg-sidebar py-2 h-2/3 max-h-full">
+        <Button
+          onClick={() => {
+            setMilestoneid(milestoneId);
+            setType("add");
+            onOpen();
+          }}
+          variant="link"
+          className="w-16 h-16"
+          size="lg"
+        >
+          <PlusIcon className="  w-full h-full text-[200px] text-gray-500" />
+        </Button>
+      </div>
       <KanbanBoardExtraMargin />
     </KanbanBoard>
   );
@@ -679,7 +707,10 @@ function MyKanbanBoardColumn({
         ) : (
           <>
             <KanbanBoardColumnTitle columnId={column._id}>
-              <KanbanColorCircle color={column.color} />
+              {/* <KanbanColorCircle color={"primary"} /> */}
+              <CircleIcon
+                className={`text-${column.color} size-3 mx-2 rounded-full bg-${column.color}`}
+              />
               {column.name}
             </KanbanBoardColumnTitle>
 
@@ -721,10 +752,13 @@ function MyKanbanBoardColumn({
           <KanbanBoardColumnListItem
             cardId={card._id}
             key={card._id}
+            color={column.color}
+            className={`text-${column.color} h-full  ${kanbanBoardColumnListItemClassNames}`}
             onDropOverListItem={handleDropOverListItem(card._id)}
           >
             <MyKanbanBoardCard
               card={card}
+              bordercolor={column.color}
               isActive={activeCardId === card._id}
               onCardBlur={onCardBlur}
               onCardKeyDown={onCardKeyDown}
@@ -748,12 +782,14 @@ function MyKanbanBoardCard({
   card,
   isActive,
   onCardBlur,
+  bordercolor,
   onCardKeyDown,
   onDeleteCard,
   onUpdateCardTitle,
 }: {
   card: Task;
   isActive: boolean;
+  bordercolor: string;
   onCardBlur: () => void;
   onCardKeyDown: (
     event: KeyboardEvent<HTMLButtonElement>,
@@ -842,6 +878,7 @@ function MyKanbanBoardCard({
     </form>
   ) : (
     <KanbanBoardCard
+      color={bordercolor}
       data={card}
       isActive={isActive}
       onBlur={onCardBlur}

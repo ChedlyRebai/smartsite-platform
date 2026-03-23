@@ -7,7 +7,7 @@ export const getTasksByMilestoneId = async (milestoneId: string) => {
   const { data } = await planingApi.get(`/task/milestone/${milestoneId}`);
   return data;
 };
-
+//localhost:3002/task/milestone/:milestoneId/task-stage/:taskStageId'
 export const createTask = async (task: CreateTaskPayload) => {
   const { data } = await planingApi.post(`/task`, task);
   return data;
@@ -26,6 +26,12 @@ export const getCurrentUserTask = async () => {
   const { data } = await planingApi.get(`/task/my-tasks`);
   return data;
 };
+
+
+export const getAllTaskStagesByMilestoneId= async (milestoneId) =>{
+  const {data} = await planingApi.get(`task-stage/milestone/${milestoneId}`);
+  return data
+}
 
 export const getTaskSTagesByMilestoneId = async (milestoneId: string) => {
   //http://localhost:3002/task-stage/milestone/69bc788e0912805125e58f70

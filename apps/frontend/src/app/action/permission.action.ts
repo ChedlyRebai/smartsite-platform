@@ -1,6 +1,7 @@
 import axios from "axios";
+import { useAuthStore } from "../store/authStore";
 
-const API_URL =  "https://smartsite-platform-auth.vercel.app/permissions";
+const API_URL = "https://smartsite-platform-auth.vercel.app/permissions";
 
 export const getAllPermissions = async () => {
   try {
@@ -64,7 +65,7 @@ export const updatePermission = async (
     create?: boolean;
     update?: boolean;
     delete?: boolean;
-  }
+  },
 ) => {
   try {
     const res = await axios.put(`${API_URL}/${id}`, permissionData);
@@ -93,4 +94,15 @@ export const deletePermission = async (id: string) => {
       data: error?.response?.data?.message,
     });
   }
+};
+
+export const getMynavigationAccess = async () => {
+  const token = useAuthStore.getState().user.access_token;
+  const { data } = await axios.get(`http://localhost:3000/users/mypermissions`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return data;
 };

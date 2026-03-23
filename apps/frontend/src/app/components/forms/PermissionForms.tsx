@@ -48,6 +48,7 @@ const PERMISSION_CATEGORIES = [
   { name: "Map View", href: "/map" },
   { name: "Notifications", href: "/notifications" },
   { name: "Pending Approvals", href: "/admin/pending-users" },
+  {name: "My Tasks", href: "/my-task"}  
   
 ];
 

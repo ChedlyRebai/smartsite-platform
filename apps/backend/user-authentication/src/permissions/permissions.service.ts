@@ -12,6 +12,11 @@ export class PermissionsService {
     return createdPermission.save();
   }
 
+  // async getNvigationAccess(userId:string){
+  //   const navigationItems=await this.permissionModel.find({ users: userId }).exec();
+  //   return navigationItems;
+  // }
+
   async findAll() {
     return this.permissionModel.find().exec();
   }

@@ -21,10 +21,13 @@ import {
   DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu";
 import { Badge } from "../components/ui/badge";
-import { getNavigationForRole, roleLabels } from "../utils/roleConfig";
 import { mockNotifications } from "../utils/mockData";
+import { navigationItems } from "../utils/roleConfig";
+import { useQuery } from "@tanstack/react-query";
+import { getMynavigationAccess } from "../action/permission.action";
+import { Permission } from "../types";
 
-export default  function DashboardLayout() {
+export default function DashboardLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuthStore();
@@ -35,14 +38,18 @@ export default  function DashboardLayout() {
     logout();
     navigate("/login");
   };
-  console.log(user, "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu");
+
+  const {data:navigationItems}= useQuery({
+    queryKey:["getMynavigationAccess"],
+    queryFn:() => getMynavigationAccess()
+  })
+
+  console.log(navigationItems, "dataaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
   if (!user) {
     navigate("/login");
     return null;
   }
 
-  // Navigation statique en fonction du rôle
-  const navigationItems = getNavigationForRole(user.role.name);
   const unreadNotifications = mockNotifications.filter((n) => !n.read).length;
 
   const getInitials = (nom: string, lastName: string) => {
@@ -162,15 +169,15 @@ export default  function DashboardLayout() {
             w-64 pt-16 lg:pt-0 flex flex-col
           `}
         >
-               <nav className="p-4 space-y-1 overflow-y-auto flex-1">
-                {navigationItems.map((item) => {
-                  const isActive = location.pathname.startsWith(item.href);
-                  return (
-                    <Link
-                      key={item.href}
-                      to={item.href}
-                      onClick={() => setSidebarOpen(false)}
-                      className={`
+          <nav className="p-4 space-y-1 overflow-y-auto flex-1">
+            {navigationItems && navigationItems.map((item:Permission) => {
+              const isActive = location.pathname.startsWith(item?.href || "");
+              return (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  onClick={() => setSidebarOpen(false)}
+                  className={`
                         flex items-center gap-3 px-4 py-3 rounded-lg transition-all
                         ${
                           isActive
@@ -178,13 +185,12 @@ export default  function DashboardLayout() {
                             : "text-gray-700 hover:bg-gray-100"
                         }
                       `}
-                    >
-                      <span className="font-medium">{item.label}</span>
-                    </Link>
-                  );
-                })}
-              </nav>  
-
+                >
+                  <span className="font-medium">{item.name}</span>
+                </Link>
+              );
+            })}
+          </nav>
           {/* Logout Button at Bottom */}
           <div className="p-4 border-t border-gray-200">
             <Button
@@ -194,7 +200,8 @@ export default  function DashboardLayout() {
               <LogOut className="h-4 w-4" />
               Logout
             </Button>
-          </div>
+          </div>{" "}
+          
         </aside>
 
         {/* Overlay for mobile */}

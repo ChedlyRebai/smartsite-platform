@@ -26,9 +26,9 @@ export class TaskStageService {
       .find({ milestoneId }).sort({order:1})
       .select('_id name order color')
       .populate('tasks')
-      .exec();
+      .exec()
   }
-
+  
 
   
 

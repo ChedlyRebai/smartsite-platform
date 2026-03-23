@@ -45,7 +45,7 @@ export const roleLabels: Record<RoleType, string> = {
   user: "SmartSite User",
 };
 
-export const navigationItems: NavItem[] = [
+export const  : NavItem[] = [
   {
     label: "Dashboard",
     href: "/dashboard",
@@ -239,9 +239,9 @@ export const navigationItems: NavItem[] = [
   },
 ];
 
-export const getNavigationForRole = (role: RoleType): NavItem[] => {
-  return navigationItems.filter((item) => item.roles.includes(role));
-};
+// export const getNavigationForRole = (role: RoleType): NavItem[] => {
+//   return navigationItems.filter((item) => item.roles.includes(role));
+// };
 
 
 
