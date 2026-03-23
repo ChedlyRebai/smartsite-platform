@@ -7,7 +7,7 @@ export const getTasksByMilestoneId = async (milestoneId: string) => {
   const { data } = await planingApi.get(`/task/milestone/${milestoneId}`);
   return data;
 };
-
+//localhost:3002/task/milestone/:milestoneId/task-stage/:taskStageId'
 export const createTask = async (task: CreateTaskPayload) => {
   const { data } = await planingApi.post(`/task`, task);
   return data;

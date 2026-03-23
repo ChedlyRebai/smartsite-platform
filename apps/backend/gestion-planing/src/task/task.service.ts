@@ -7,29 +7,36 @@ import { Model } from 'mongoose';
 import { Task } from '@/task/entities/task.entity';
 import { Milestone } from '@/milestone/entities/milestone.entity';
 import { TaskStage } from '@/task-stage/entities/TaskStage.entities';
+import { Console, log } from 'console';
 @Injectable()
 export class TaskService {
   constructor(
     @InjectModel(Milestone.name) private milestoneModel: Model<Milestone>,
     @InjectModel(Task.name) private taskModel: Model<Task>,
-     @InjectModel(TaskStage.name) private taskSTageModel: Model<TaskStage>,
+    @InjectModel(TaskStage.name) private taskSTageModel: Model<TaskStage>,
   ) {}
-  async create(createTaskDto: CreateTaskDto, milestoneId: string,taskStageId :string) {
+
+  async create(
+    createTaskDto: CreateTaskDto,
+    milestoneId: string,
+    taskStageId: string,
+  ) {
     const response = await this.milestoneModel.findById(milestoneId).exec();
     if (!response) {
       throw new Error(`Milestone with id ${milestoneId} not found`);
     }
-    
+
     const newTask = await this.taskModel.create({
       ...createTaskDto,
       milestoneId,
     });
 
-    await this.taskSTageModel.findByIdAndUpdate(taskStageId, {
-      $push: { tasks: newTask._id },
-    }).exec();
+    await this.taskSTageModel
+      .findByIdAndUpdate(taskStageId, {
+        $push: { tasks: newTask._id },
+      })
+      .exec();
 
-    
     response.tasks.push(newTask._id);
     await response.save();
     return newTask;
@@ -40,17 +47,18 @@ export class TaskService {
     if (!response) {
       throw new Error(`Milestone with id ${milestoneId} not found`);
     }
-    
+
     const newTask = await this.taskModel.create({
       ...createTaskDto,
       milestoneId,
     });
 
-    await this.taskSTageModel.findByIdAndUpdate("69c0561d9fc8a9ce45f45bee", {
-      $push: { tasks: newTask._id },
-    }).exec();
+    await this.taskSTageModel
+      .findByIdAndUpdate('69c0561d9fc8a9ce45f45bee', {
+        $push: { tasks: newTask._id },
+      })
+      .exec();
 
-    
     response.tasks.push(newTask._id);
     await response.save();
     return newTask;
@@ -73,7 +81,32 @@ export class TaskService {
       throw new Error(`Error fetching task: ${error.message}`);
     }
   }
+  async updateNew(taskId: string, taskStageId: string) {
+    //const response= await this.taskModel.findByIdAndUpdate(taskId, {task})
+    console.log(`Updating task ${taskId} to new stage ${taskStageId}`);
+    const task = await this.taskModel.findByIdAndUpdate(taskId, {
+      status: taskStageId,
+    });
+    const oldTaskSTage = await this.taskSTageModel.findByIdAndUpdate(
+      task?.status,
+      {
+        $pull: {
+          tasks: task?._id,
+        },
+      },
+    );
+    console.log(`Old task stage after pull: ${oldTaskSTage}`);
 
+    if (!task) {
+      throw new Error(`Task with id ${taskId} not found`);
+    }
+
+    const res = await this.taskSTageModel.findByIdAndUpdate(taskStageId, {
+      $push: { tasks: task._id },
+    });
+    console.log(res);
+    return res;
+  }
   async update(id: number, updateTaskDto: UpdateTaskDto) {
     try {
       const response = await this.taskModel
@@ -90,7 +123,17 @@ export class TaskService {
 
   async remove(id: number) {
     try {
+      //const taskSTage= await this.taskSTageModel.findByIdAndUpdate()
       const response = await this.taskModel.findByIdAndDelete(id).exec();
+      const taskSTage = await this.taskSTageModel.findByIdAndUpdate(
+        response?.status,
+        {
+          $pull: {
+            tasks: response?._id,
+          },
+        },
+      );
+
       if (!response) {
         throw new Error(`Task with id ${id} not found`);
       }
@@ -107,24 +150,23 @@ export class TaskService {
 
     return await this.taskModel
       .find({
-        $or: [
-          { assignedUsers: userId },
-          { assignedUsers: { $in: [userId] } },
-        ],
+        $or: [{ assignedUsers: userId }, { assignedUsers: { $in: [userId] } }],
       })
       .exec();
   }
-  
+
   async getMyTasks(userId: string) {
     try {
       const response = await this.taskModel
         .aggregate([
-          { $match: { 
-            $or: [
-              { assignedUsers: userId },
-              { assignedUsers: { $in: [userId] } },
-            ]
-           } },
+          {
+            $match: {
+              $or: [
+                { assignedUsers: userId },
+                { assignedUsers: { $in: [userId] } },
+              ],
+            },
+          },
           {
             $group: {
               _id: '$status',
@@ -140,7 +182,6 @@ export class TaskService {
             },
           },
           //where: { userId: { $in: [userId] } },
-
         ])
         .exec();
       const columns = response.map((group, i) => ({

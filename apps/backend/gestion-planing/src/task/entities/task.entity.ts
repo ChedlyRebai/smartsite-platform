@@ -28,17 +28,19 @@ export class Task extends Document {
 
   @Prop()
   siteId: string;
+  
   @Prop()
   createdBy: string;
 
   @Prop()
   updatedBy: string;
 
-  @Prop({ type: String, enum: StatusEnum, default: StatusEnum.BACKLOG })
-  status: StatusEnum;
+  // @Prop({ type: String, enum: StatusEnum, default: StatusEnum.BACKLOG })
+  // status: StatusEnum;
+
 
   @Prop({ type: Types.ObjectId, ref: 'TaskStage' })
-  stageStatus: Types.ObjectId;
+  status: Types.ObjectId;
 
   @Prop({ default: 0 })
   progress: number;

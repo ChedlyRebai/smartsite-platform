@@ -33,6 +33,7 @@ export const createTask = async (task: CreateTaskPayload,milestoneId:string,task
         console.log(task);
         //http://localhost:3002/task/milestone/69bc78a30912805125e58f72
         //@Post('/milestone/:milestoneId/task-stage/:taskStageId')
+        //localhost:3002/task/milestone/:milestoneId/task-stage/:taskStageId'
         console.log(`${baseUrl}/task/milestone/${milestoneId}/task-stage/${taskStageId}`,task);
         const response = await axios.post(`${baseUrl}/task/milestone/${milestoneId}/task-stage/${taskStageId}`,task);
         return Promise.resolve({ status: response.status, data: response.data });
@@ -50,6 +51,19 @@ export const getTaskById = async (taskId: string) => {
         return Promise.resolve({ status: response.status, data: response.data });
     } catch (error) {
         console.log("Error fetching task details:", error);
+        return Promise.reject(error);
+    }
+};
+
+
+
+export const updateTAskNew = async (taskId: string, colunId: string) => {
+    try {
+        //http://localhost:3002/task/69c14a43581bafc76e389b69/task-stage/69c056599fc8a9ce45f45bf6
+        const response = await axios.put(`${baseUrl}/task/${taskId}/task-stage/${colunId}`);
+        return Promise.resolve({ status: response.status, data: response.data });
+    } catch (error) {
+        console.log("Error updating task:", error);
         return Promise.reject(error);
     }
 };

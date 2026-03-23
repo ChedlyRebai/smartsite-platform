@@ -733,6 +733,7 @@ export function KanbanBoardCard({
           : 'group relative',
         isActive && 'rotate-1 transform shadow-lg',
         className,
+        
       )}
       draggable
       onDragStart={event => {

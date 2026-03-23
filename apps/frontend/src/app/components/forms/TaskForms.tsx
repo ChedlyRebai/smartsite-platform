@@ -36,6 +36,7 @@ import {
 import {
   CreateTaskPayload,
   Task,
+  TaskStage,
   TaskStatusEnum,
   UpdateTaskPayload,
   User,
@@ -74,7 +75,7 @@ const formSchema = z
       .string()
       .max(500, "Description must be at most 500 characters.")
       .optional(),
-    status: z.nativeEnum(TaskStatusEnum),
+    status: z.string().optional(),
     assignedUsers: z.array(z.string()).optional(),
     startDate: z.date(),
     endDate: z.date(),
@@ -114,7 +115,7 @@ const TaskForms = ({ type }: { type: "edit" | "add" }) => {
       id: undefined,
       title: "",
       description: "",
-      status: TaskStatusEnum.BACKLOG,
+      status: undefined,
       assignedUsers: [],
       startDate: new Date(),
       endDate: new Date(),
@@ -124,7 +125,9 @@ const TaskForms = ({ type }: { type: "edit" | "add" }) => {
   const mutation = useMutation({
     mutationFn: (task: CreateTaskPayload | UpdateTaskPayload) => {
       if (type === "add") {
-        return createTask(task, milestoneId, "69c0561d9fc8a9ce45f45bee");
+        console.log("Creating task with data:", task);
+      //  console.log();
+        return createTask(task, milestoneId, task.status as string);
       }
 
       if (type === "edit" && taskId) {
@@ -134,7 +137,7 @@ const TaskForms = ({ type }: { type: "edit" | "add" }) => {
 
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["milestoneTasksData", milestoneId],
+        queryKey: ["getTaskSTagesByMilestoneId", milestoneId],
       });
       toast.success("Task created successfully");
       onClose();
@@ -376,7 +379,7 @@ const TaskForms = ({ type }: { type: "edit" | "add" }) => {
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor="form-rhf-demo-status">Status</FieldLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select onValueChange={field.onChange} value={field.value} >
                   <SelectTrigger className="w-full" id="form-rhf-demo-status">
                     <SelectValue placeholder="Select a status" />
                   </SelectTrigger>
@@ -389,7 +392,7 @@ const TaskForms = ({ type }: { type: "edit" | "add" }) => {
 
                     {taskStages &&
                       taskStages.length > 0 &&
-                      taskStages.map((taskStage) => (
+                      taskStages.map((taskStage:TaskStage) => (
                         <SelectItem key={taskStage._id} value={taskStage._id}>
                           {taskStage.name}
                         </SelectItem>
