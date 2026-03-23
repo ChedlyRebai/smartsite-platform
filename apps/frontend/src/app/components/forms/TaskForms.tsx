@@ -51,17 +51,14 @@ import { getAllUsers } from "@/app/action/user.action";
 import { data, useParams } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAllTaskStages } from "@/app/action/taskStage.action";
+import { getAllTaskStagesByMilestoneId } from "@/app/action/task.actions";
+import { PlusIcon } from "lucide-react";
+import useTaskStageModal from "@/app/hooks/use-task-stage-modal";
 
 const todayAtMidnight = () => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   return today;
-};
-
-const toMidnight = (date: Date) => {
-  const normalized = new Date(date);
-  normalized.setHours(0, 0, 0, 0);
-  return normalized;
 };
 
 const formSchema = z
@@ -126,7 +123,7 @@ const TaskForms = ({ type }: { type: "edit" | "add" }) => {
     mutationFn: (task: CreateTaskPayload | UpdateTaskPayload) => {
       if (type === "add") {
         console.log("Creating task with data:", task);
-      //  console.log();
+        //  console.log();
         return createTask(task, milestoneId, task.status as string);
       }
 
@@ -190,92 +187,33 @@ const TaskForms = ({ type }: { type: "edit" | "add" }) => {
 
   useEffect(() => {
     loadUsers();
-    loadTaskData();
+   // loadTaskData();
   }, [type, taskId]);
 
   const { data: taskStages } = useQuery({
     queryKey: ["getAllTaskStages"],
-    queryFn: () => getAllTaskStages(),
+    queryFn: () => getAllTaskStagesByMilestoneId(milestoneId),
   });
-  // const onSubmi = async (data: z.infer<typeof formSchema>) => {
-  //   if (type === "add" && !milestoneId) {
-  //     toast.error("Milestone id is missing in route.");
-  //     return;
-  //   }
-  //   console.log("Form data to submit:", data);
-
-  //   try {
-  //     if (type === "add") {
-  //       console.log("Creating task with data:", data);
-  //       const res = await createTask({
-  //         title: data.title,
-  //         description: data.description,
-  //         milestoneId: milestoneId as string,
-  //         status: data.status,
-  //         assignedUsers: data.assignedUsers,
-  //         startDate: data.startDate,
-  //         endDate: data.endDate,
-  //       });
-
-  //       if (res.status === 201 || res.status === 200) {
-  //         toast.success("Task created successfully");
-  //         form.reset({
-  //           id: undefined,
-  //           title: "",
-  //           description: "",
-  //           status: TaskStatusEnum.BACKLOG,
-  //           assignedUsers: [],
-  //           startDate: new Date(),
-  //           endDate: new Date(),
-  //         });
-  //         onClose();
-  //         onTaskChange();
-  //       } else {
-  //         toast.error("Failed to create task");
-  //       }
-  //     } else {
-  //       if (!data.id) {
-  //         toast.error("Task id is missing.");
-  //         return;
-  //       }
-
-  //       const res = await updateTask(data.id, {
-  //         title: data.title,
-  //         description: data.description,
-  //         status: data.status,
-  //         assignedUsers: data.assignedUsers,
-  //         startDate: data.startDate,
-  //         endDate: data.endDate,
-  //       });
-
-  //       if (res.status === 200) {
-  //         toast.success("Task updated successfully");
-  //         onClose();
-  //         onTaskChange();
-  //       } else {
-  //         toast.error("Failed to update task");
-  //       }
-  //     }
-  //   } catch {
-  //     toast.error("Failed to save task. Please try again.");
-  //   }
-  // };
+  const {
+    onOpen: onOpenTaskStageModal,
+    setMilestoneid: setTaskstageMilestoneId,
+  } = useTaskStageModal();
 
   return (
     <>
-      <form id="form-rhf-demo" onSubmit={form.handleSubmit(onSubmit)}>
+      <form id="form-rhf-TaskForms" onSubmit={form.handleSubmit(onSubmit)}>
         <FieldGroup>
           <Controller
             name="title"
             control={form.control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="form-rhf-demo-title">
+                <FieldLabel htmlFor="form-rhf-TaskForms-title">
                   Task Title
                 </FieldLabel>
                 <Input
                   {...field}
-                  id="form-rhf-demo-title"
+                  id="form-rhf-TaskForms-title"
                   aria-invalid={fieldState.invalid}
                   placeholder="Enter task title"
                   autoComplete="off"
@@ -291,13 +229,13 @@ const TaskForms = ({ type }: { type: "edit" | "add" }) => {
             control={form.control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="form-rhf-demo-description">
+                <FieldLabel htmlFor="form-rhf-TaskForms-description">
                   Description
                 </FieldLabel>
                 <InputGroup>
                   <InputGroupTextarea
                     {...field}
-                    id="form-rhf-demo-description"
+                    id="form-rhf-TaskForms-description"
                     placeholder="Enter task description"
                     rows={6}
                     className="min-h-24 resize-none"
@@ -378,9 +316,9 @@ const TaskForms = ({ type }: { type: "edit" | "add" }) => {
             control={form.control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="form-rhf-demo-status">Status</FieldLabel>
-                <Select onValueChange={field.onChange} value={field.value} >
-                  <SelectTrigger className="w-full" id="form-rhf-demo-status">
+                <FieldLabel htmlFor="form-rhf-TaskForms-status">Status</FieldLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className="w-full" id="form-rhf-TaskForms-status">
                     <SelectValue placeholder="Select a status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -392,11 +330,22 @@ const TaskForms = ({ type }: { type: "edit" | "add" }) => {
 
                     {taskStages &&
                       taskStages.length > 0 &&
-                      taskStages.map((taskStage:TaskStage) => (
+                      taskStages.map((taskStage: TaskStage) => (
                         <SelectItem key={taskStage._id} value={taskStage._id}>
                           {taskStage.name}
                         </SelectItem>
                       ))}
+
+                    <Button
+                      variant="secondary"
+                      className="w-full cursor-pointer"
+                      onClick={() => {
+                        setTaskstageMilestoneId(milestoneId);
+                        onOpenTaskStageModal();
+                      }}
+                    >
+                      <PlusIcon /> Add new stage
+                    </Button>
                   </SelectContent>
                 </Select>
                 {fieldState.invalid && (
@@ -449,44 +398,7 @@ const TaskForms = ({ type }: { type: "edit" | "add" }) => {
               <Field data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor="task-end-date">End date</FieldLabel>
 
-                {/* <Popover
-                  modal={false}
-                  open={openEndDate}
-                  onOpenChange={setOpenEndDate}
-                >
-                  <PopoverTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      id="task-end-date"
-                      className="justify-start font-normal"
-                    >
-                      {field.value
-                        ? field.value.toLocaleDateString()
-                        : "Select date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent
-                    className="w-auto overflow-hidden p-0"
-                    align="start"
-                  >
-                    <Calendar
-                      initialFocus
-                      mode="single"
-                      selected={field.value}
-                      defaultMonth={field.value}
-                      captionLayout="dropdown"
-                      disabled={(date) =>
-                        toMidnight(date) < toMidnight(form.watch("startDate"))
-                      }
-                      onSelect={(selectedDate) => {
-                        if (!selectedDate) return;
-                        field.onChange(selectedDate);
-                        setOpenEndDate(false);
-                      }}
-                    />
-                  </PopoverContent>
-                </Popover> */}
+                
 
                 <Popover
                   open={openEndDate}
@@ -526,7 +438,7 @@ const TaskForms = ({ type }: { type: "edit" | "add" }) => {
         <Button type="button" variant="outline" onClick={() => form.reset()}>
           Reset
         </Button>
-        <Button type="submit" form="form-rhf-demo">
+        <Button type="submit" form="form-rhf-TaskForms">
           Submit
         </Button>
       </Field>

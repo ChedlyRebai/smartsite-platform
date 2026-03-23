@@ -27,6 +27,12 @@ export const getCurrentUserTask = async () => {
   return data;
 };
 
+
+export const getAllTaskStagesByMilestoneId= async (milestoneId) =>{
+  const {data} = await planingApi.get(`task-stage/milestone/${milestoneId}`);
+  return data
+}
+
 export const getTaskSTagesByMilestoneId = async (milestoneId: string) => {
   //http://localhost:3002/task-stage/milestone/69bc788e0912805125e58f70
   console.log("Fetching task stages for milestone ID:", milestoneId);

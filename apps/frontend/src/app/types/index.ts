@@ -96,12 +96,12 @@ export interface Permisssion {
 }
 
 export interface TaskStage {
-  _id: string;
+  _id?: string;
   name: string;
   description?: string;
   color?: string;
   order?: number;
-  milestoneId: string;
+  milestoneId?: string;
   projectId?: string;
   tasks?: Task[];
   createdBy?: string;
