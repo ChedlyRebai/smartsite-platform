@@ -4,14 +4,6 @@ import {
   FieldLabel,
   FieldError,
 } from "@/components/ui/field";
-
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-
 import {
   InputGroup,
   InputGroupTextarea,
@@ -19,13 +11,11 @@ import {
   InputGroupText,
 } from "@/components/ui/input-group";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
 import * as z from "zod";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { Checkbox } from "../ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -35,20 +25,10 @@ import {
 } from "@/components/ui/select";
 import {
   CreateTaskPayload,
-  Task,
-  TaskStage,
-  TaskStatusEnum,
+  KANBAN_BOARD_CIRCLE_COLORS_MAP,
   UpdateTaskPayload,
-  User,
 } from "@/app/types";
-import useTaskModal from "@/app/hooks/use-task-modal";
-import {
-  createTask,
-  getTaskById,
-  updateTask,
-} from "@/app/action/planing.action";
-import { getAllUsers } from "@/app/action/user.action";
-import { data, useParams } from "react-router";
+import { createTask, updateTask } from "@/app/action/planing.action";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createTaskStage,
@@ -67,14 +47,11 @@ const formSchema = z.object({
     .max(500, "Description must be at most 500 characters.")
     .optional(),
   order: z.coerce.number().default(0),
-  //assignedUsers: z.array(z.string()).optional(),
   color: z.string(),
 });
 
 const TaskStageForm = ({ type }: { type: "edit" | "add" }) => {
   const queryClient = useQueryClient();
-  // const milestoneId = "69bc78a30912805125e58f72";
-
   const {
     id: taskId,
     onClose,
@@ -99,11 +76,8 @@ const TaskStageForm = ({ type }: { type: "edit" | "add" }) => {
   const mutation = useMutation({
     mutationFn: (task: CreateTaskPayload | UpdateTaskPayload) => {
       if (type === "add") {
-        console.log("Creating task with data:", task);
-        //  console.log();
         return createTask(task, milestoneId, task.status as string);
       }
-
       if (type === "edit" && taskId) {
         return updateTask(taskId as string, task);
       }
@@ -122,10 +96,7 @@ const TaskStageForm = ({ type }: { type: "edit" | "add" }) => {
   });
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    console.log("Form data to submit:", data);
-    console.log("milestone id", milestoneId);
     const reponse = await createTaskStage(data, milestoneId as string);
-    console.log("Task stage creation response:", reponse);
     if (reponse.status === 201 || reponse.status === 200) {
       toast.success("Task stage created successfully");
       onClose();
@@ -137,76 +108,6 @@ const TaskStageForm = ({ type }: { type: "edit" | "add" }) => {
     }
   };
 
-  useEffect(() => {}, []);
-
-  const { data: taskStages } = useQuery({
-    queryKey: ["getAllTaskStages"],
-    queryFn: () => getAllTaskStages(),
-  });
-  // const onSubmi = async (data: z.infer<typeof formSchema>) => {
-  //   if (type === "add" && !milestoneId) {
-  //     toast.error("Milestone id is missing in route.");
-  //     return;
-  //   }
-  //   console.log("Form data to submit:", data);
-
-  //   try {
-  //     if (type === "add") {
-  //       console.log("Creating task with data:", data);
-  //       const res = await createTask({
-  //         title: data.title,
-  //         description: data.description,
-  //         milestoneId: milestoneId as string,
-  //         status: data.status,
-  //         assignedUsers: data.assignedUsers,
-  //         startDate: data.startDate,
-  //         endDate: data.endDate,
-  //       });
-
-  //       if (res.status === 201 || res.status === 200) {
-  //         toast.success("Task created successfully");
-  //         form.reset({
-  //           id: undefined,
-  //           title: "",
-  //           description: "",
-  //           status: TaskStatusEnum.BACKLOG,
-  //           assignedUsers: [],
-  //           startDate: new Date(),
-  //           endDate: new Date(),
-  //         });
-  //         onClose();
-  //         onTaskChange();
-  //       } else {
-  //         toast.error("Failed to create task");
-  //       }
-  //     } else {
-  //       if (!data.id) {
-  //         toast.error("Task id is missing.");
-  //         return;
-  //       }
-
-  //       const res = await updateTask(data.id, {
-  //         title: data.title,
-  //         description: data.description,
-  //         status: data.status,
-  //         assignedUsers: data.assignedUsers,
-  //         startDate: data.startDate,
-  //         endDate: data.endDate,
-  //       });
-
-  //       if (res.status === 200) {
-  //         toast.success("Task updated successfully");
-  //         onClose();
-  //         onTaskChange();
-  //       } else {
-  //         toast.error("Failed to update task");
-  //       }
-  //     }
-  //   } catch {
-  //     toast.error("Failed to save task. Please try again.");
-  //   }
-  // };
-
   return (
     <>
       <form id="form-rhf-TaskStageForm" onSubmit={form.handleSubmit(onSubmit)}>
@@ -216,7 +117,9 @@ const TaskStageForm = ({ type }: { type: "edit" | "add" }) => {
             control={form.control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="form-rhf-TaskStageForm-name">Task Title</FieldLabel>
+                <FieldLabel htmlFor="form-rhf-TaskStageForm-name">
+                  Task Title
+                </FieldLabel>
                 <Input
                   {...field}
                   id="form-rhf-TaskStageForm-name"
@@ -267,14 +170,26 @@ const TaskStageForm = ({ type }: { type: "edit" | "add" }) => {
             control={form.control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="form-rhf-TaskStageForm-">Color</FieldLabel>
-                <Input
-                  {...field}
-                  id="form-rhf-TaskStageForm-"
-                  aria-invalid={fieldState.invalid}
-                  placeholder="Enter Color"
-                  autoComplete="off"
-                />
+                <FieldLabel htmlFor="form-rhf-TaskForms-color">
+                  Color
+                </FieldLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger
+                    className="w-full"
+                    id="form-rhf-TaskForms-color"
+                  >
+                    <SelectValue placeholder="Select a color" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(KANBAN_BOARD_CIRCLE_COLORS_MAP).map(
+                      ([colorName, value]) => (
+                        <SelectItem key={colorName} value={colorName}>
+                          {colorName}
+                        </SelectItem>
+                      ),
+                    )}
+                  </SelectContent>
+                </Select>
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
                 )}
@@ -287,7 +202,9 @@ const TaskStageForm = ({ type }: { type: "edit" | "add" }) => {
             control={form.control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="form-rhf-TaskStageForm-order">order</FieldLabel>
+                <FieldLabel htmlFor="form-rhf-TaskStageForm-order">
+                  order
+                </FieldLabel>
                 <Input
                   type="number"
                   {...field}

@@ -40,7 +40,7 @@ export default  function DashboardLayout() {
     navigate("/login");
     return null;
   }
-
+  
   // Navigation statique en fonction du rôle
   const navigationItems = getNavigationForRole(user.role.name);
   const unreadNotifications = mockNotifications.filter((n) => !n.read).length;
