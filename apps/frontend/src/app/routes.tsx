@@ -27,12 +27,13 @@ import Profile from "./pages/profile/Profile";
 import Home2 from "./pages/Home/Home2";
 import Pricing from "./pages/pricing/Pricing";
 import ClientsNew from "./pages/clients/ClientsNew";
-import KanbanBoardPage from "./pages/planning/MyTask";
-import MyTasks from "./pages/planning/Planning";
+
 import PLaningProjects from "./pages/planning/PLaningProjects";
 import ProjectMilestone from "./pages/planning/ProjectMilestone";
 import MilestoneTasks from "./pages/planning/MilestoneTasks";
 import MyTask from "./pages/planning/MyTask";
+import GanttChart from "./pages/planning/GanttManage";
+import MilestoneTaskss from "./pages/planning/MilestoneTaskss";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = true;
@@ -118,6 +119,10 @@ export const router = createBrowserRouter([
         element: <MilestoneTasks />,
       },
       {
+        path: "milestone-tasksC/:milestoneId",
+        element: <MilestoneTaskss />,
+      },
+      {
         path: "project-milestone/:projectId",
         element: <ProjectMilestone />,
       },
@@ -164,6 +169,10 @@ export const router = createBrowserRouter([
       {
         path: "notifications",
         element: <Notifications />,
+      },
+      {
+        path:"gantt",
+        element:<GanttChart/>
       },
       {
         path: "users",

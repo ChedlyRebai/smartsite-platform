@@ -1,16 +1,31 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
-import { MessagePattern } from '@nestjs/microservices';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  UnauthorizedException,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { JwtGuard } from '@/auth/jwt.guard/jwt.guard';
+import { GetUser } from '@/auth/get-user.decorator';
 
 @Controller('task')
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}
-
-  @Post()
-  create(@Body() createTaskDto: CreateTaskDto) {
-    return this.taskService.create(createTaskDto);
+  // localhost:3002/task/milestone/69bc78a30912805125e58f72
+  @Post('/milestone/:milestoneId/task-stage/:taskStageId')
+  create(
+    @Body() createTaskDto: CreateTaskDto,
+    @Param('milestoneId') milestoneId: string,
+    @Param('taskStageId') taskStageId: string,
+  ) {
+    return this.taskService.create(createTaskDto, milestoneId,taskStageId);
   }
 
   @Get()
@@ -18,24 +33,35 @@ export class TaskController {
     return this.taskService.findAll();
   }
 
+  @UseGuards(JwtGuard)
+  @Get('/my-tasks')
+  getMytasks(@GetUser() user: any) {
+    const userId = user?.sub || user?.userId || user?.id || user?._id;
+    console.log('Extracted user ID from token payload:', user);
+    if (!userId) {
+      throw new UnauthorizedException('User ID missing in token payload');
+    }
 
-  @Get("milestone/:milestoneId")
-  findBYmilestoneId(@Param("milestoneId") milestoneId:string){
+    return this.taskService.getMyTasks(userId);
+  }
+
+  @Get('milestone/:milestoneId')
+  findBYmilestoneId(@Param('milestoneId') milestoneId: string) {
     return this.taskService.getTasksBYMilestoneId(milestoneId);
-  }  
+  }
 
   @Get(':id')
-  findOne(@Param("id") id: number) {
+  findOne(@Param('id') id: number) {
     return this.taskService.findOne(id);
   }
 
   @Put(':id')
-  update(@Param("id") id: number, @Body() updateTaskDto: UpdateTaskDto) {
+  update(@Param('id') id: number, @Body() updateTaskDto: UpdateTaskDto) {
     return this.taskService.update(id, updateTaskDto);
   }
 
   @Delete(':id')
-  remove(@Param("id") id: number) {
+  remove(@Param('id') id: number) {
     return this.taskService.remove(id);
   }
 }

@@ -79,6 +79,8 @@ import { useParams } from "react-router";
 import useTaskModal from "@/app/hooks/use-task-modal";
 import { de } from "zod/v4/locales";
 import useTaskDetailsModal from "@/app/hooks/use-task-details-modal";
+import { useAuthStore } from "@/app/store/authStore";
+import { getCurrentUserTask } from "@/app/action/task.actions";
 
 type Column = {
   id: string;
@@ -89,6 +91,10 @@ type Column = {
 };
 
 export default function MyTask() {
+  const { milestoneId } = useParams();
+  console.log("my token")
+  console.log(localStorage.getItem("smartsite"));
+  
   return (
     <div className="space-y-6">
       <div className="flex tasks-center justify-between">
@@ -124,13 +130,14 @@ export default function MyTask() {
 
 export function MyKanbanBoard() {
   const [columns, setColumns] = useState<Column[]>([]);
-
+  const {user,getCurrentUser}=useAuthStore();
+  console.log(user.access_token);
   const { milestoneId } = useParams();
-
+  
   const { data, isLoading } = useQuery({
-    queryKey: ["milestoneTasksData"],
+    queryKey: ["getCurrentUserTask"],
     queryFn: async () => {
-      const response = await getTasksBYMilestoneId("69bc78a30912805125e58f72");
+      const response = await getCurrentUserTask();
       console.log(response);
       setColumns(response);
     },
@@ -744,7 +751,7 @@ function MyKanbanBoardCard({
   }
 
   //const { isOpen, onOpen, onClose, setType, setId, id } = useTaskModal();
-  const {task,isOpen,onOpen,onClose,setTask}=useTaskDetailsModal();
+  const { task, isOpen, onOpen, onClose, setTask } = useTaskDetailsModal();
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   return isEditingTitle ? (
     <form onBlur={handleBlur} onSubmit={handleSubmit}>
@@ -823,9 +830,9 @@ function MyKanbanBoardCard({
           </span>
         </div>
       )}
-      <KanbanBoardCardButtonGroup disabled={isActive}>
-       
-      </KanbanBoardCardButtonGroup>
+      <KanbanBoardCardButtonGroup
+        disabled={isActive}
+      ></KanbanBoardCardButtonGroup>
     </KanbanBoardCard>
   );
 }
@@ -938,9 +945,7 @@ function MyNewKanbanBoardCard({
       </form>
     </>
   ) : (
-    <KanbanBoardColumnFooter>
-      
-    </KanbanBoardColumnFooter>
+    <KanbanBoardColumnFooter></KanbanBoardColumnFooter>
   );
 }
 

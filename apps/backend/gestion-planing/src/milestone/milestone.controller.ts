@@ -15,9 +15,9 @@ import { UpdateMilestoneDto } from './dto/update-milestone.dto';
 export class MilestoneController {
   constructor(private readonly milestoneService: MilestoneService) {}
 
-  @Post()
-  create(@Body() createMilestoneDto: CreateMilestoneDto) {
-    return this.milestoneService.create(createMilestoneDto);
+  @Post("/project/:projectId")
+  create(@Body() createMilestoneDto: CreateMilestoneDto,@Param('projectId') projectId:string) {
+    return this.milestoneService.create(createMilestoneDto,projectId);
   }
 
   @Get()

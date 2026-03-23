@@ -16,8 +16,8 @@ export class MilestoneService {
 ){
 
   }
-  async create(createMilestoneDto: CreateMilestoneDto) {
-    const newMilestone=await this.milestoneModel.create(createMilestoneDto);
+  async create(createMilestoneDto: CreateMilestoneDto,projectId:string) {
+    const newMilestone=await this.milestoneModel.create({...createMilestoneDto,projectId:projectId});
     return newMilestone;
   }
 

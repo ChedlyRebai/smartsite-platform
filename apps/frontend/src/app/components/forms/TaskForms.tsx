@@ -33,7 +33,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { TaskStatusEnum, User } from "@/app/types";
+import {
+  CreateTaskPayload,
+  Task,
+  TaskStatusEnum,
+  UpdateTaskPayload,
+  User,
+} from "@/app/types";
 import useTaskModal from "@/app/hooks/use-task-modal";
 import {
   createTask,
@@ -41,7 +47,9 @@ import {
   updateTask,
 } from "@/app/action/planing.action";
 import { getAllUsers } from "@/app/action/user.action";
-import { useParams } from "react-router";
+import { data, useParams } from "react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getAllTaskStages } from "@/app/action/taskStage.action";
 
 const todayAtMidnight = () => {
   const today = new Date();
@@ -91,15 +99,15 @@ const formSchema = z
   });
 
 const TaskForms = ({ type }: { type: "edit" | "add" }) => {
- 
- // const milestoneId = "69bc78a30912805125e58f72";
-  
-  const { id, onClose, onTaskChange,milestoneId } = useTaskModal();
+  const queryClient = useQueryClient();
+  // const milestoneId = "69bc78a30912805125e58f72";
+
+  const { id: taskId, onClose, onTaskChange, milestoneId } = useTaskModal();
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
-  console.log("milestone from task form",milestoneId);
+  console.log("milestone from task form", milestoneId);
   const [openStartDate, setOpenStartDate] = React.useState(false);
   const [openEndDate, setOpenEndDate] = React.useState(false);
-
+  console.log("milestone id from TAskForm", milestoneId);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -113,6 +121,32 @@ const TaskForms = ({ type }: { type: "edit" | "add" }) => {
     },
   });
 
+  const mutation = useMutation({
+    mutationFn: (task: CreateTaskPayload | UpdateTaskPayload) => {
+      if (type === "add") {
+        return createTask(task, milestoneId, "69c0561d9fc8a9ce45f45bee");
+      }
+
+      if (type === "edit" && taskId) {
+        return updateTask(taskId as string, task);
+      }
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["milestoneTasksData", milestoneId],
+      });
+      toast.success("Task created successfully");
+      onClose();
+    },
+    onError: () => {
+      toast.error("Failed to create task , please try again");
+    },
+  });
+
+  const onSubmit = async (data: z.infer<typeof formSchema>) =>
+    mutation.mutate(data);
+
   const loadUsers = async () => {
     try {
       const response = await getAllUsers();
@@ -125,12 +159,12 @@ const TaskForms = ({ type }: { type: "edit" | "add" }) => {
   };
 
   const loadTaskData = async () => {
-    if (type !== "edit" || !id) {
+    if (type !== "edit" || !taskId) {
       return;
     }
 
     try {
-      const res = await getTaskById(String(id));
+      const res = await getTaskById(String(taskId));
       if (res.status === 200) {
         form.reset({
           id: res.data._id,
@@ -154,71 +188,75 @@ const TaskForms = ({ type }: { type: "edit" | "add" }) => {
   useEffect(() => {
     loadUsers();
     loadTaskData();
-  }, [type, id]);
+  }, [type, taskId]);
 
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    if (type === "add" && !milestoneId) {
-      toast.error("Milestone id is missing in route.");
-      return;
-    }
-    console.log("Form data to submit:", data);
+  const { data: taskStages } = useQuery({
+    queryKey: ["getAllTaskStages"],
+    queryFn: () => getAllTaskStages(),
+  });
+  // const onSubmi = async (data: z.infer<typeof formSchema>) => {
+  //   if (type === "add" && !milestoneId) {
+  //     toast.error("Milestone id is missing in route.");
+  //     return;
+  //   }
+  //   console.log("Form data to submit:", data);
 
-    try {
-      if (type === "add") {
-        console.log("Creating task with data:", data);
-        const res = await createTask({
-          title: data.title,
-          description: data.description,
-          milestoneId: milestoneId as string,
-          status: data.status,
-          assignedUsers: data.assignedUsers,
-          startDate: data.startDate,
-          endDate: data.endDate,
-        });
+  //   try {
+  //     if (type === "add") {
+  //       console.log("Creating task with data:", data);
+  //       const res = await createTask({
+  //         title: data.title,
+  //         description: data.description,
+  //         milestoneId: milestoneId as string,
+  //         status: data.status,
+  //         assignedUsers: data.assignedUsers,
+  //         startDate: data.startDate,
+  //         endDate: data.endDate,
+  //       });
 
-        if (res.status === 201 || res.status === 200) {
-          toast.success("Task created successfully");
-          form.reset({
-            id: undefined,
-            title: "",
-            description: "",
-            status: TaskStatusEnum.BACKLOG,
-            assignedUsers: [],
-            startDate: new Date(),
-            endDate: new Date(),
-          });
-          onClose();
-          onTaskChange();
-        } else {
-          toast.error("Failed to create task");
-        }
-      } else {
-        if (!data.id) {
-          toast.error("Task id is missing.");
-          return;
-        }
+  //       if (res.status === 201 || res.status === 200) {
+  //         toast.success("Task created successfully");
+  //         form.reset({
+  //           id: undefined,
+  //           title: "",
+  //           description: "",
+  //           status: TaskStatusEnum.BACKLOG,
+  //           assignedUsers: [],
+  //           startDate: new Date(),
+  //           endDate: new Date(),
+  //         });
+  //         onClose();
+  //         onTaskChange();
+  //       } else {
+  //         toast.error("Failed to create task");
+  //       }
+  //     } else {
+  //       if (!data.id) {
+  //         toast.error("Task id is missing.");
+  //         return;
+  //       }
 
-        const res = await updateTask(data.id, {
-          title: data.title,
-          description: data.description,
-          status: data.status,
-          assignedUsers: data.assignedUsers,
-          startDate: data.startDate,
-          endDate: data.endDate,
-        });
+  //       const res = await updateTask(data.id, {
+  //         title: data.title,
+  //         description: data.description,
+  //         status: data.status,
+  //         assignedUsers: data.assignedUsers,
+  //         startDate: data.startDate,
+  //         endDate: data.endDate,
+  //       });
 
-        if (res.status === 200) {
-          toast.success("Task updated successfully");
-          onClose();
-          onTaskChange();
-        } else {
-          toast.error("Failed to update task");
-        }
-      }
-    } catch {
-      toast.error("Failed to save task. Please try again.");
-    }
-  };
+  //       if (res.status === 200) {
+  //         toast.success("Task updated successfully");
+  //         onClose();
+  //         onTaskChange();
+  //       } else {
+  //         toast.error("Failed to update task");
+  //       }
+  //     }
+  //   } catch {
+  //     toast.error("Failed to save task. Please try again.");
+  //   }
+  // };
 
   return (
     <>
@@ -343,11 +381,19 @@ const TaskForms = ({ type }: { type: "edit" | "add" }) => {
                     <SelectValue placeholder="Select a status" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.values(TaskStatusEnum).map((status) => (
+                    {/* {Object.values(TaskStatusEnum).map((status) => (
                       <SelectItem key={status} value={status}>
                         {status}
                       </SelectItem>
-                    ))}
+                    ))} */}
+
+                    {taskStages &&
+                      taskStages.length > 0 &&
+                      taskStages.map((taskStage) => (
+                        <SelectItem key={taskStage._id} value={taskStage._id}>
+                          {taskStage.name}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
                 {fieldState.invalid && (
@@ -375,7 +421,7 @@ const TaskForms = ({ type }: { type: "edit" | "add" }) => {
 
                   <PopoverContent className="w-auto p-0 z-50 pointer-events-auto">
                     <Calendar
-                    disabled={(date) => date < todayAtMidnight()}
+                      disabled={(date) => date < todayAtMidnight()}
                       mode="single"
                       selected={field.value}
                       onSelect={(date) => {
@@ -399,7 +445,7 @@ const TaskForms = ({ type }: { type: "edit" | "add" }) => {
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor="task-end-date">End date</FieldLabel>
-                
+
                 {/* <Popover
                   modal={false}
                   open={openEndDate}
@@ -452,7 +498,7 @@ const TaskForms = ({ type }: { type: "edit" | "add" }) => {
 
                   <PopoverContent className="w-auto p-0 z-50 pointer-events-auto">
                     <Calendar
-                    disabled={(date) => date < form.watch("startDate")}
+                      disabled={(date) => date < form.watch("startDate")}
                       mode="single"
                       selected={field.value}
                       onSelect={(date) => {

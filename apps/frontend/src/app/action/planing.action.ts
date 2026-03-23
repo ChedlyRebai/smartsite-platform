@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Milestone } from "../types";
+import { CreateTaskPayload, Milestone, UpdateTaskPayload } from "../types";
 
 
 const baseUrl = process.env.PLANNING_URL || 'http://localhost:3002';
@@ -26,44 +26,23 @@ export const getTasksBYMilestoneId= async (milestoneId:string) =>{
     }
 }
 
-export interface CreateTaskPayload {
-    title: string;
-    description?: string;
-    milestoneId: string;
-    status?: string;
-    priority?: string;
-    projectId?: string;
-    siteId?: string;
-    assignedUsers?: string[];
-    startDate?: Date;
-    endDate?: Date;
-}
 
-export interface UpdateTaskPayload {
-    title?: string;
-    description?: string;
-    status?: string;
-    priority?: string;
-    projectId?: string;
-    siteId?: string;
-    assignedUsers?: string[];
-    progress?: number;
-    startDate?: Date;
-    endDate?: Date;
-}
-
-export const createTask = async (task: CreateTaskPayload) => {
+export const createTask = async (task: CreateTaskPayload,milestoneId:string,taskStageId:string) => {
     try {
         console.log('Creating task with data');
         console.log(task);
         //http://localhost:3002/task/milestone/69bc78a30912805125e58f72
-        const response = await axios.post(`${baseUrl}/task`,task);
+        //@Post('/milestone/:milestoneId/task-stage/:taskStageId')
+        console.log(`${baseUrl}/task/milestone/${milestoneId}/task-stage/${taskStageId}`,task);
+        const response = await axios.post(`${baseUrl}/task/milestone/${milestoneId}/task-stage/${taskStageId}`,task);
         return Promise.resolve({ status: response.status, data: response.data });
     } catch (error) {
         console.log("Error creating task:", error);
         return Promise.reject(error);
     }
 };
+
+
 
 export const getTaskById = async (taskId: string) => {
     try {
@@ -85,17 +64,7 @@ export const updateTask = async (taskId: string, task: UpdateTaskPayload) => {
     }
 };
 
-export const createMilestone=async (milestone : Milestone) =>{
-    try {
-        console.log("createing milestone from action:",milestone)
-        const response = await axios.post(`${baseUrl}/milestone`,milestone);
-        console.log(response)
-        return Promise.resolve({status:response.status,data:response.data})
-    } catch (error) {
-        console.log('Error creating milestone:', error);
-        return Promise.reject(error);
-    }
-}
+
 
 export const getMilestoneDetails=async (milestoneId:string) =>{
     try {

@@ -2,6 +2,7 @@ import { RouterProvider } from "react-router";
 import toast, { Toaster } from "react-hot-toast";
 import { router } from "./routes";
 import ModalProvider from "./provider/ModalProvider";
+import "@svar-ui/react-gantt/all.css";
 import {
   QueryClient,
   QueryClientProvider,

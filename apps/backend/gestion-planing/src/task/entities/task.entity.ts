@@ -1,6 +1,7 @@
 import { StatusEnum } from '@/StatusEnum';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
+import { TaskTypeEnum } from './TaskTypeEnum';
 
 @Schema({ timestamps: true })
 export class Task extends Document {
@@ -10,15 +11,17 @@ export class Task extends Document {
   @Prop()
   description: string;
 
-  @Prop({ type: Types.ObjectId , ref: 'Milestone',required:true })
+  @Prop({ type: Types.ObjectId, ref: 'Milestone', required: true })
   milestoneId: Types.ObjectId;
 
-  
   @Prop({ type: [String], default: [] })
   assignedUsers: string;
 
   @Prop()
   priority: string;
+
+  @Prop({ type: String, enum: TaskTypeEnum, default: TaskTypeEnum.TASK })
+  type: string;
 
   @Prop()
   projectId: string;
@@ -31,8 +34,11 @@ export class Task extends Document {
   @Prop()
   updatedBy: string;
 
-  @Prop({ type:String,enum:StatusEnum,default:StatusEnum.BACKLOG })
+  @Prop({ type: String, enum: StatusEnum, default: StatusEnum.BACKLOG })
   status: StatusEnum;
+
+  @Prop({ type: Types.ObjectId, ref: 'TaskStage' })
+  stageStatus: Types.ObjectId;
 
   @Prop({ default: 0 })
   progress: number;
@@ -42,6 +48,11 @@ export class Task extends Document {
 
   @Prop()
   endDate: Date;
- 
+
+  @Prop({ type: Types.ObjectId, ref: 'Task', required: false })
+  parent: Types.ObjectId;
+
+  @Prop({ type: [Types.ObjectId], ref: 'Task', required: false })
+  subtasks: Types.ObjectId[];
 }
 export const TaskSchema = SchemaFactory.createForClass(Task);
