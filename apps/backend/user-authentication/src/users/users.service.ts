@@ -10,6 +10,7 @@ import { User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { EmailService } from '../email/email.service';
 import { RolesService } from '../roles/roles.service';
+import path from 'path';
 
 @Injectable()
 export class UsersService {
@@ -17,7 +18,34 @@ export class UsersService {
     @InjectModel(User.name) private userModel: Model<User>,
     private emailService: EmailService,
     private rolesService: RolesService,
-  ) {
+  ) {}
+
+  async accestOthisSite(userId: string, url: string) {
+    const response = await this.userModel
+      .findById(userId)
+      .populate({
+        path: 'role',
+        populate: {
+          path: 'permissions',
+          match: { href: url },
+        },
+      })
+      .exec();
+
+    if (!response) {
+      return { error: 'User not found' };
+    }
+
+    if (!response.role) {
+      return { error: 'Role not found' };
+    }
+
+    const role = response.role as any;
+    console.log(
+      '************************************************',
+      role.permissions,
+    );
+    return role.permissions || [];
   }
 
   async create(createUserDto: any) {
@@ -64,8 +92,11 @@ export class UsersService {
     }
 
     const role = user.role as any;
-    console.log("************************************************",role.permissions);
-    return  role.permissions || [] ;
+    console.log(
+      '************************************************',
+      role.permissions,
+    );
+    return role.permissions || [];
   }
 
   async findByCin(cin: string) {
@@ -253,7 +284,7 @@ export class UsersService {
 
   // async changePassword(userId: string, currentPassword: string, newPassword: string) {
   //   const user = await this.userModel.findById(userId).exec();
-    
+
   //   if (!user) {
   //     throw new NotFoundException('User not found');
   //   }
@@ -266,7 +297,7 @@ export class UsersService {
 
   //   // Hash new password
   //   const hashedPassword = await bcrypt.hash(newPassword, 10);
-    
+
   //   // Update password
   //   user.password = hashedPassword;
   //   await user.save();

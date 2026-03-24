@@ -30,7 +30,26 @@ export class UsersController {
   async findAll() {
     return this.usersService.findAll();
   }
+  //http://localhost:3000/users/mypermissions/${url}
 
+  @Get('acessurl/:url')
+  async getMyPermissionsByUrl(
+    @Headers('Authorization') authHeader: string,
+    @Param('url') url: string,
+  ) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return { error: 'No token provided' };
+    }
+    const token = authHeader.split(' ')[1];
+    try {
+      const decoded: any = this.jwtService.verify(token);
+      const userId = decoded.sub;
+      console.log('DEBUG: userId:', userId, 'url:', url);
+      return this.usersService.accestOthisSite(userId, url);
+    } catch (error) {
+      return { error: 'Invalid token' };
+    }
+  }
   @Get('mypermissions')
   async getProfile(@Headers('Authorization') authHeader: string) {
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -56,7 +75,7 @@ export class UsersController {
       const decoded: any = this.jwtService.verify(token);
       const userId = decoded.sub;
       const user = await this.usersService.findById(userId);
-      
+
       if (!user) {
         return { error: 'User not found' };
       }
@@ -81,12 +100,23 @@ export class UsersController {
     try {
       const decoded: any = this.jwtService.verify(token);
       const userId = decoded.sub;
-      
-      
-      const { password, role, status, approvedBy, approvedAt, emailVerificationOtp, otpExpiresAt, ...allowedUpdates } = updateData;
-      
-      const updatedUser = await this.usersService.update(userId, allowedUpdates);
-      
+
+      const {
+        password,
+        role,
+        status,
+        approvedBy,
+        approvedAt,
+        emailVerificationOtp,
+        otpExpiresAt,
+        ...allowedUpdates
+      } = updateData;
+
+      const updatedUser = await this.usersService.update(
+        userId,
+        allowedUpdates,
+      );
+
       if (!updatedUser) {
         return { error: 'Failed to update user' };
       }
@@ -110,7 +140,7 @@ export class UsersController {
     try {
       const decoded: any = this.jwtService.verify(token);
       const userId = decoded.sub;
-      
+
       return await this.usersService.changePassword(
         userId,
         passwordData.currentPassword,
@@ -122,7 +152,9 @@ export class UsersController {
   }
 
   @Post('create-with-temp-password')
-  async createUserWithTemporaryPassword(@Body() createUserDto: any): Promise<any> {
+  async createUserWithTemporaryPassword(
+    @Body() createUserDto: any,
+  ): Promise<any> {
     return this.usersService.createUserWithTemporaryPassword(createUserDto);
   }
 
@@ -156,4 +188,3 @@ export class UsersController {
     return this.usersService.handleBan(id);
   }
 }
-
