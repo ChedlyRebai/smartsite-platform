@@ -3,18 +3,9 @@ import axios from "axios";
 const API_URL = "https://smartsite-platform-auth.vercel.app/users";
 
 export const getAllUsers = async () => {
-  try {
-    const res = await axios.get(`${API_URL}`);
-    if (res.status === 200) {
-      return Promise.resolve({ status: res.status, data: res.data });
-    }
-  } catch (error: any) {
-    console.error("Get users error:", error?.response?.data?.message);
-    return Promise.resolve({
-      status: error?.response?.status,
-      data: error?.response?.data?.message,
-    });
-  }
+  
+    const {data} = await axios.get(`${API_URL}`);
+    return data;
 };
 
 export const getUserById = async (id: string) => {

@@ -34,6 +34,8 @@ import MilestoneTasks from "./pages/planning/MilestoneTasks";
 import MyTask from "./pages/planning/MyTask";
 import GanttChart from "./pages/planning/GanttManage";
 import MilestoneTaskss from "./pages/planning/MilestoneTaskss";
+import NotFound from "./pages/Error/NotFound";
+import { PermissionLoader } from "./components/shared/PermissionLoader";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = true;
@@ -72,9 +74,9 @@ export const router = createBrowserRouter([
   {
     path: "/",
     element: (
-      <ProtectedRoute>
+      <PermissionLoader>
         <DashboardLayout />
-      </ProtectedRoute>
+      </PermissionLoader>
     ),
     children: [
       {
@@ -94,19 +96,19 @@ export const router = createBrowserRouter([
         element: <Sites />,
       },
       {
-        path:"my-task",
-        element:<MyTask/>
+        path: "my-task",
+        element: <MyTask />,
       },
-    
+
       {
         path: "projects",
         element: <Projects />,
       },
-       {
+      {
         path: "projects",
         element: <Projects />,
       },
-       {
+      {
         path: "projects",
         element: <Projects />,
       },
@@ -171,8 +173,8 @@ export const router = createBrowserRouter([
         element: <Notifications />,
       },
       {
-        path:"gantt",
-        element:<GanttChart/>
+        path: "gantt",
+        element: <GanttChart />,
       },
       {
         path: "users",
@@ -190,19 +192,6 @@ export const router = createBrowserRouter([
   },
   {
     path: "*",
-    element: (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <h1 className="text-6xl font-bold text-gray-900 mb-4">404</h1>
-          <p className="text-xl text-gray-600 mb-4">Page not found</p>
-          <a
-            href="/dashboard"
-            className="text-blue-600 hover:text-blue-700 font-semibold"
-          >
-            Return to Dashboard
-          </a>
-        </div>
-      </div>
-    ),
+    element: <NotFound />,
   },
 ]);

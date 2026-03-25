@@ -21,32 +21,32 @@ export class UsersService {
   ) {}
 
   async accestOthisSite(userId: string, url: string) {
-  const user = await this.userModel
-    .findById(userId)
-    .select('role') // fetch only role
-    .populate({
-      path: 'role',
-      select: 'permissions',
-      populate: {
-        path: 'permissions',
-        match: { href: url },
-        select: 'name access href create update delete',
-      },
-    })
-    .lean() // ⚡ performance boost
-    .exec();
+    const user = await this.userModel
+      .findById(userId)
+      .select('role') // fetch only role
+      .populate({
+        path: 'role',
+        select: 'permissions',
+        populate: {
+          path: 'permissions',
+          match: { href: url },
+          select: 'name access href create update delete',
+        },
+      })
+      .lean() // ⚡ performance boost
+      .exec();
 
-  if (!user) {
-    throw new NotFoundException('User not found');
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (!user.role) {
+      throw new NotFoundException('Role not found');
+    }
+    const role = user.role as any;
+
+    return role.permissions ?? [];
   }
-
-  if (!user.role) {
-    throw new NotFoundException('Role not found');
-  }
-  const role = user.role as any;
-
-  return role.permissions ?? [];
-}
 
   async create(createUserDto: any) {
     console.log(' DEBUG: createUserDto:', createUserDto);
@@ -113,7 +113,15 @@ export class UsersService {
   }
 
   async findAll() {
-    return this.userModel.find().populate('role').exec();
+    return this.userModel
+      .find()
+      .select('name email address firstName lastName cin isActive createdAt')
+      .populate({
+        path: 'role',
+        select: 'name',
+      })
+      .lean()
+      .exec();
   }
 
   async findPending() {

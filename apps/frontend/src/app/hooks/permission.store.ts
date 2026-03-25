@@ -1,4 +1,3 @@
-
 import { create } from "zustand";
 
 type Permission = {
@@ -9,50 +8,19 @@ type Permission = {
   delete: boolean;
 };
 
-type Store = {
+type PermissionStore = {
   permissions: Record<string, Permission>;
-
-  setPermissions: (data: Permission[]) => void;
-
-  canAccess: (route: string) => boolean;
-  canCreate: (route: string) => boolean;
-  canUpdate: (route: string) => boolean;
-  canDelete: (route: string) => boolean;
+  setPermissions: (perms: Permission[]) => void;
 };
 
-const normalize = (route: string) => {
-  const parts = route.split("/").filter(Boolean);
-  return parts.length ? `/${parts[0]}` : "/";
-};
-
-export const usePermissionStore = create<Store>((set, get) => ({
+export const usePermissionStore = create<PermissionStore>((set) => ({
   permissions: {},
 
-  setPermissions: (data) => {
-    const map: Record<string, Permission> = {};
-    data.forEach((p) => {
-      map[p.href] = p;
-    });
-    set({ permissions: map });
-  },
-
-  canAccess: (route) => {
-    const base = normalize(route);
-    return get().permissions[base]?.access === true;
-  },
-
-  canCreate: (route) => {
-    const base = normalize(route);
-    return get().permissions[base]?.create === true;
-  },
-
-  canUpdate: (route) => {
-    const base = normalize(route);
-    return get().permissions[base]?.update === true;
-  },
-
-  canDelete: (route) => {
-    const base = normalize(route);
-    return get().permissions[base]?.delete === true;
-  },
+  setPermissions: (perms) =>
+    set({
+      permissions: (perms ?? []).reduce((acc, p) => {
+        acc[p.href] = p;
+        return acc;
+      }, {} as Record<string, Permission>),
+    }),
 }));

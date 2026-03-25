@@ -10,15 +10,10 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
-
 import { Button } from "../../components/ui/button";
-
 import { useAuthStore } from "../../store/authStore";
-
 import { canEdit } from "../../utils/permissions";
-
-import { useNavigate } from "react-router";
-
+import { data, useNavigate } from "react-router";
 import { toast } from "react-hot-toast";
 
 import { Permission, Role, User } from "@/app/types";
@@ -31,20 +26,14 @@ import {
 } from "@/app/action/role.action";
 
 import { RolesDataTable } from "./_components/roles-data-table";
-
 import { UserDataTable } from "./_components/user-data-table";
-
 import { banUser, deleteUser, getAllUsers } from "@/app/action/user.action";
-
-import { mockTeamMembers } from "@/app/utils/mockData";
-
 import {
   accessPermissionByurl,
   deletePermission,
   getAllPermissions,
 } from "@/app/action/permission.action";
 import { PermissionsDataTable } from "./_components/permissions-data-table";
-import { set } from "zod";
 import { getAllStatics } from "@/app/action/statiscs.action";
 import useAddUserModal from "@/app/hooks/use-user-Modal";
 import useAddPermissionModal from "@/app/hooks/use-permission-Modal";
@@ -52,48 +41,40 @@ import useRoleModal from "@/app/hooks/use-role-Modal";
 import useRolePermissionsModal from "@/app/hooks/use-role-permissions-modal";
 import { useQuery } from "@tanstack/react-query";
 import Forbidden from "../Error/Forbidden";
+import { usePermissionStore } from "@/app/hooks/permission.store";
 
 export default function UserManagement() {
   const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();
   const canManageRoles = user && canEdit(user.role.name, "users");
-  const [roles, setRoles] = useState<Role[]>([]);
-  const { setOnUserChange } = useAddUserModal();
-  const { setOnPermissionChange } = useAddPermissionModal();
-  const { setOnRoleChange } = useRoleModal();
-  const { setOnPermissionsChange, setRefreshData } = useRolePermissionsModal();
-
   const [statics, setStatics] = useState({
     totalRoles: 0,
     totalUsers: 0,
     totalPermissions: 0,
   });
-  const [isLoading, setIsLoading] = useState(true);
-  const [users, setUsers] = useState<User[]>([]);
-  const canManagePermissions = user && canEdit(user.role.name, "users");
-  const [permissions, setPermissions] = useState<Permission[]>([]);
-  // const access = await accessPermissionByurl("users");
-  // console.log("Access permissions for /dashboard/users:", access);
+  //const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
-    loadRoles();
-    loadPermissions();
-    loadUsers();
     loadStatics();
-    setOnUserChange(() => loadUsers);
-    setOnPermissionChange(() => {
-      loadPermissions();
-      // Also refresh the role permissions modal data when permissions change
-      const { refreshData } = useRolePermissionsModal.getState();
-      refreshData();
-    });
-    setOnRoleChange(() => {
-      loadRoles();
-      // Also refresh the role permissions modal data when roles change
-      const { refreshData } = useRolePermissionsModal.getState();
-      refreshData();
-    });
-    setOnPermissionsChange(() => loadRoles);
   }, []);
+
+  const { data, isError, error } = useQuery({
+    queryKey: ["statics"],
+    queryFn: () => getAllStatics(),
+    staleTime: Infinity,
+  });
+
+  useEffect(() => {
+    if (data) {
+      setStatics(data.data);
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (isError) {
+      toast.error("Failed to load statics");
+    }
+  }, [isError, error]);
 
   const loadStatics = async () => {
     try {
@@ -105,27 +86,17 @@ export default function UserManagement() {
       console.error("Failed to load statics:", error);
     }
   };
-  const loadUsers = async () => {
-    setIsLoading(true);
-    try {
-      const response = await getAllUsers();
-      if (response.status === 200 && Array.isArray(response.data)) {
-        setUsers(response.data);
-      }
-    } catch (error) {
-      console.error("Failed to load users:", error);
-      toast.error("Failed to load users");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { data: users, isLoading:isUsersLoading } = useQuery({
+    queryKey: ["users"],
+    queryFn: () => getAllUsers(),
+  });
 
   const handleDeleteUser = async (userId: string) => {
     try {
       const response = await deleteUser(userId);
       if (response.status === 200) {
         toast.success("User deleted successfully");
-        loadUsers();
+        //loadUsers();
       } else {
         toast.error(response.data || "Failed to delete user");
       }
@@ -135,22 +106,11 @@ export default function UserManagement() {
     }
   };
 
-  const loadPermissions = async () => {
-    setIsLoading(true);
-    try {
-      const response = await getAllPermissions();
-      if (response.status === 200 && Array.isArray(response.data)) {
-        setPermissions(response.data);
-      } else {
-        toast.error("Failed to load permissions");
-      }
-    } catch (error) {
-      console.error("Failed to load permissions:", error);
-      toast.error("Failed to load permissions");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { data: permissionsList , isLoading: isPermissionLoading } = useQuery({
+    queryKey: ["permissions"],
+    queryFn: getAllPermissions,
+    staleTime: Infinity,
+  });
 
   const handleEditPermission = (permission: Permission) => {
     const { setId, setType, onOpen } = useAddPermissionModal.getState();
@@ -164,7 +124,7 @@ export default function UserManagement() {
       const response = await deletePermission(permissionId);
       if (response.status === 200) {
         toast.success("Permission deleted successfully");
-        loadPermissions();
+        // loadPermissions();
       } else {
         toast.error(response.data || "Failed to delete permission");
       }
@@ -178,20 +138,24 @@ export default function UserManagement() {
     toast.success("Add new permission");
     // TODO: Implement create dialog
   };
-  const loadRoles = async () => {
-    setIsLoading(true);
-    try {
-      const response = await getAllRoles();
-      if (response.status === 200 && Array.isArray(response.data)) {
-        setRoles(response.data);
-      }
-    } catch (error) {
-      console.error("Failed to load roles:", error);
-      toast.error("Failed to load roles");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // const loadRoles = async () => {
+  //   setIsLoading(true);
+  //   try {
+  //     const response = await getAllRoles();
+  //     if (response.status === 200 && Array.isArray(response.data)) {
+  //       setRoles(response.data);
+  //     }
+  //   } catch (error) {
+  //     console.error("Failed to load roles:", error);
+  //     toast.error("Failed to load roles");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+  const { data: roles,isLoading:isRoleLoading } = useQuery({
+    queryKey: ["roles"],
+    queryFn: () => getAllRoles(),
+  });
   const handleBanUser = async (userId: string, isActif: boolean) => {
     try {
       const response = await banUser(userId, isActif);
@@ -199,7 +163,7 @@ export default function UserManagement() {
         toast.success(
           isActif ? "User unbanned successfully" : "User banned successfully",
         );
-        loadUsers();
+        // loadUsers();
       } else {
         toast.error(response.data || "Failed to update user status");
       }
@@ -220,7 +184,7 @@ export default function UserManagement() {
       const response = await deleteRole(roleId);
       if (response.status === 200) {
         toast.success("Role deleted successfully");
-        loadRoles();
+        // loadRoles();
       } else {
         toast.error(response.data || "Failed to delete role");
       }
@@ -235,19 +199,26 @@ export default function UserManagement() {
     // TODO: Implement create dialog
   };
 
-  const { data: accessData } = useQuery({
-    queryKey: ["access", "users"],
-    queryFn: () => accessPermissionByurl("users"),
-  });
+  // const { data: accessData, isLoading: isAccessLoading } = useQuery({
+  //   queryKey: ["access", "users"],
+  //   queryFn: () => accessPermissionByurl("users"),
 
-  if (accessData) {
-    if (!accessData.access) {
-      return (
-        <Forbidden/>
-      );
-    }
+  // });
+
+  // console.log("Access permissions for /dashboard/users:", accessData);
+  // if (accessData && !isAccessLoading) {
+  //   if (!accessData.access) {
+  //     return (
+  //       <Forbidden/>
+  //     );
+  //   }
+  // }
+
+  const access = usePermissionStore((s) => s.permissions);
+  console.log("Access permissions for /dashboard/users:", access["users"]);
+  if (!access["users"]?.access) {
+    return <Forbidden />;
   }
-
   if (!canManageRoles) {
     return (
       <div className="space-y-6">
@@ -360,7 +331,7 @@ export default function UserManagement() {
           </CardHeader>
           <CardContent>
             <TabsContent value="role">
-              {isLoading ? (
+              {isRoleLoading ? (
                 <div className="text-center py-12">Loading roles...</div>
               ) : (
                 <RolesDataTable
@@ -373,7 +344,7 @@ export default function UserManagement() {
             </TabsContent>
 
             <TabsContent value="users">
-              {isLoading ? (
+              {isUsersLoading ? (
                 <div className="text-center py-12">Loading users...</div>
               ) : (
                 <UserDataTable
@@ -385,11 +356,11 @@ export default function UserManagement() {
             </TabsContent>
 
             <TabsContent value="permissions">
-              {isLoading ? (
+              {isPermissionLoading ? (
                 <div className="text-center py-12">Loading permissions...</div>
               ) : (
                 <PermissionsDataTable
-                  permissions={permissions}
+                  permissions={permissionsList}
                   onEdit={handleEditPermission}
                   onDelete={handleDeletePermission}
                 />
