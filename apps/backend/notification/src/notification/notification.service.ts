@@ -14,15 +14,11 @@ export class NotificationService {
   }
 
   async getNotiFicationByUserId(userId: string) {
-    return await this.notifModel.find({ userId }).exec();
+    return await this.notifModel.find({ recipentId:userId }).exec();
   }
 
-  async createNotification(userId: string, message: string) {
-    const newNotification = new this.notifModel({
-      userId,
-      message,
-      read: false,
-    });
+  async createNotification(notification: Notification) {
+    const newNotification = new this.notifModel(notification);
     return await newNotification.save();
   }
   

@@ -1,18 +1,18 @@
 
-import { Controller, Get, Param, Post, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { JwtGuard } from 'src/auth/jwt.guard/jwt.guard';
 import { GetUser } from 'src/auth/get-user.decorator';
+import { Notification } from 'src/entities/notification.entity';
 
 @Controller('notification')
 export class NotificationController {
   constructor(private notificationService: NotificationService) {}
 
   @Post()
-  async createNotification() {
-    const userId = '123';
-    const message = 'You have a new notification!';
-    return await this.notificationService.createNotification(userId, message);
+  async createNotification(@Body() notification : Notification) {
+
+    return await this.notificationService.createNotification(notification);
   }
 
   @Get()
@@ -35,6 +35,8 @@ export class NotificationController {
     if (!userId) {
       throw new UnauthorizedException('User ID missing in token payload');
     }
+
+    return await this.notificationService.getNotiFicationByUserId(userId);
 
   }
 }
