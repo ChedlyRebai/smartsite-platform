@@ -14,14 +14,14 @@ export class NotificationService {
   }
 
   async getNotiFicationByUserId(userId: string) {
-    return await this.notifModel.find({ recipentId:userId }).exec();
+    return await this.notifModel.find({ recipentId: userId }).exec();
   }
 
   async createNotification(notification: Notification) {
     const newNotification = new this.notifModel(notification);
     return await newNotification.save();
   }
-  
+
   async markAsRead(notificationId: string) {
     return await this.notifModel.findByIdAndUpdate(notificationId, {
       isRead: true,
@@ -33,15 +33,20 @@ export class NotificationService {
   }
 
   async getUnreadNotificationsByUserId(userId: string) {
-    return await this.notifModel.find({ recipentId:userId, isRead: false }).exec();
+    return await this.notifModel
+      .find({ recipentId: userId, isRead: false })
+      .exec();
   }
 
   async getReadNotificationsByUserId(userId: string) {
-    return await this.notifModel.find({ recipentId:userId, isRead: true }).exec();
+    return await this.notifModel
+      .find({ recipentId: userId, isRead: true })
+      .exec();
   }
 
-  async getUnreadNotificationLengthByserId(userId:string){
-    return await this.notifModel.countDocuments({ recipentId:userId, isRead: false }).exec();
+  async getUnreadNotificationLengthByserId(userId: string) {
+    return await this.notifModel
+      .countDocuments({ recipentId: userId, isRead: false })
+      .exec();
   }
-
 }

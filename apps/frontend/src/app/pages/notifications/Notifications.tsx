@@ -77,7 +77,9 @@ export default function Notifications() {
     queryKey: ["unreadNotifications"],
     queryFn: () => getUnreadNotifications(),
   });
-  console.log(myNotifcations);
+  
+  console.log("unread notif",unreadNotifs);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -119,13 +121,13 @@ export default function Notifications() {
             </TabsList>
 
             <TabsContent value="unread" className="space-y-3 mt-4">
-              {unreadNotifs.length === 0 ? (
+              {unreadNotifs && unreadNotifs.length === 0 ? (
                 <div className="text-center py-12 text-gray-500">
                   <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300" />
                   <p>No unread notifications</p>
                 </div>
               ) : (
-                unreadNotifs.map((notification) => (
+                unreadNotifs && unreadNotifs.map((notification) => (
                   <div
                     key={notification.id}
                     className={`flex items-start gap-4 p-4 border rounded-lg ${getBackgroundColor(notification.type)}`}
@@ -175,7 +177,7 @@ export default function Notifications() {
             </TabsContent>
 
             <TabsContent value="all" className="space-y-3 mt-4">
-              {[...myNotifcations].map((notification) => (
+              {myNotifcations && [...myNotifcations].map((notification) => (
                 <div
                   key={notification.id}
                   className={`flex items-start gap-4 p-4 border rounded-lg ${

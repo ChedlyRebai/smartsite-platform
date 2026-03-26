@@ -1,5 +1,4 @@
 import { useAuthStore } from "@/app/store/authStore";
-import { AuthController } from "./../../../backend/user-authentication/src/auth/auth.controller";
 import axios from "axios";
 
 const {} = useAuthStore;
@@ -7,7 +6,6 @@ export const planingApi = axios.create({
   baseURL: process.env.PLANNING_URL || "http://localhost:3002",
   headers: {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${localStorage.getItem("smartsite")}`,
   },
 });
 
@@ -20,7 +18,6 @@ export const NotificationApi = axios.create({
   baseURL: process.env.NOTIFICATION_URL || "http://localhost:3004/notification",
   headers: {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${localStorage.getItem("smartsite")}`,
   },
 });
 
