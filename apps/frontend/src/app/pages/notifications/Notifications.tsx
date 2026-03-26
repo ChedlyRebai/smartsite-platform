@@ -1,11 +1,10 @@
 import { Bell, CheckCircle, AlertTriangle, Info, X } from "lucide-react";
-import { useState } from "react";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "../../components/ui/card";
+} from "../../components/ui/card";  
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
 import {
@@ -20,7 +19,6 @@ import { useQuery } from "@tanstack/react-query";
 import { getMyNotifications } from "@/app/action/notification.action";
 
 export default function Notifications() {
-  //const [notifications, setNotifications] = useState(mockNotifications);
 
   const getIcon = (type: string) => {
     switch (type) {

@@ -32,4 +32,16 @@ export class NotificationService {
     return await this.notifModel.findByIdAndDelete(notificationId);
   }
 
+  async getUnreadNotificationsByUserId(userId: string) {
+    return await this.notifModel.find({ recipentId:userId, isRead: false }).exec();
+  }
+
+  async getReadNotificationsByUserId(userId: string) {
+    return await this.notifModel.find({ recipentId:userId, isRead: true }).exec();
+  }
+
+  async getUnreadNotificationLengthByserId(userId:string){
+    return await this.notifModel.countDocuments({ recipentId:userId, isRead: false }).exec();
+  }
+
 }
