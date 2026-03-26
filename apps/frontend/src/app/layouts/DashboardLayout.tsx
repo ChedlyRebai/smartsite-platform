@@ -21,10 +21,10 @@ import {
   DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu";
 import { Badge } from "../components/ui/badge";
-import { mockNotifications } from "../utils/mockData";
 import { useQuery } from "@tanstack/react-query";
 import { getMynavigationAccess } from "../action/permission.action";
 import { Permission } from "../types";
+import { getUnreadNotificationCount } from "../action/notification.action";
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
@@ -49,8 +49,11 @@ export default function DashboardLayout() {
     return null;
   }
 
-  const unreadNotifications = mockNotifications.filter((n) => !n.read).length;
-
+  //const unreadNotifications = mockNotifications.filter((n) => !n.read).length;
+  const {data:unredDataLength} = useQuery({
+    queryKey:["unreadNotificationsLength"],
+    queryFn:() => getUnreadNotificationCount()
+  })
   const getInitials = (nom: string, lastName: string) => {
     return `${nom.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
@@ -101,9 +104,9 @@ export default function DashboardLayout() {
               onClick={() => navigate("/notifications")}
             >
               <Bell className="h-5 w-5" />
-              {unreadNotifications > 0 && (
+              {unredDataLength > 0 && (
                 <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center bg-red-500 text-white text-xs">
-                  {unreadNotifications}
+                  {unredDataLength}
                 </Badge>
               )}
             </Button>
