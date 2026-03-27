@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -77,5 +78,11 @@ export class NotificationController {
     return await this.notificationService.getUnreadNotificationLengthByserId(
       userId,
     );
+  }
+
+
+  @Delete(':id')
+  async deleteNotification(@Param('id') id: string) {
+    return await this.notificationService.deleteNotificationById(id);
   }
 }

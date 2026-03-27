@@ -1,4 +1,11 @@
-import { Bell, CheckCircle, AlertTriangle, Info, X, CircleIcon } from "lucide-react";
+import {
+  Bell,
+  CheckCircle,
+  AlertTriangle,
+  Info,
+  X,
+  CircleIcon,
+} from "lucide-react";
 import {
   Card,
   CardContent,
@@ -48,7 +55,7 @@ export default function Notifications() {
     }
   };
 
-  const getCircleVAriant  = (type: string) => {
+  const getCircleVAriant = (type: string) => {
     switch (type) {
       case "critical":
         return "bg-red-50 border-red-200";
@@ -166,7 +173,7 @@ export default function Notifications() {
                           </div>
                         ) : (
                           <div className="flex-1">
-                            <h3 className="font-semibold text-gray-900">
+                            <h3 className="font-extrabold text-gray-900">
                               {notification.title}
                             </h3>
                             <p className="text-sm text-gray-600 mt-1">
@@ -195,18 +202,12 @@ export default function Notifications() {
 
                           
                         </Badge> */}
-
-                        
                       </div>
                     </div>
 
-                    {
-                      !notification.read && (
-                        <CircleIcon  className="size-4 rounded-full text-gray-200 bg-gray-200 self-start my-auto"/>
-                          
-                      
-                      ) 
-                    }
+                    {!notification.read && (
+                      <CircleIcon className="size-4 rounded-full text-gray-200 bg-gray-200 self-start my-auto" />
+                    )}
                     <Button
                       variant="ghost"
                       size="icon"
@@ -236,19 +237,35 @@ export default function Notifications() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1">
-                          <h3
-                            className={`font-semibold ${notification.read ? "text-gray-600" : "text-gray-900"}`}
-                          >
-                            {notification.title}
-                          </h3>
-                          <p className="text-sm text-gray-600 mt-1">
-                            {notification.message}
-                          </p>
-                          <p className="text-xs text-gray-400 mt-2">
-                            {new Date(notification.createdAt).toLocaleString()}
-                          </p>
-                        </div>
+                        {notification.read ? (
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-gray-900">
+                              {notification.title}
+                            </h3>
+                            <p className="text-sm text-gray-600 mt-1">
+                              {notification.message}
+                            </p>
+                            <p className="text-xs text-gray-400 mt-2">
+                              {new Date(
+                                notification.createdAt,
+                              ).toLocaleString()}
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="flex-1">
+                            <h3 className="font-extrabold text-gray-900">
+                              {notification.title}
+                            </h3>
+                            <p className="text-sm text-gray-600 mt-1">
+                              {notification.message}
+                            </p>
+                            <p className="text-xs text-gray-400 mt-2">
+                              {new Date(
+                                notification.createdAt,
+                              ).toLocaleString()}
+                            </p>
+                          </div>
+                        )}
                         <Badge
                           variant={
                             notification.type === "critical"
