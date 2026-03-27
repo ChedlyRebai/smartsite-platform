@@ -38,7 +38,7 @@ export default function DashboardLayout() {
     navigate("/login");
   };
 
-  const {data:navigationItems}= useQuery({
+  const {data:navigationItems = [] as Permission[] , isError :navigItemsError }= useQuery({
     queryKey:["getMynavigationAccess"],
     queryFn:() => getMynavigationAccess()
   })
@@ -50,7 +50,7 @@ export default function DashboardLayout() {
   }
 
   //const unreadNotifications = mockNotifications.filter((n) => !n.read).length;
-  const {data:unredDataLength} = useQuery({
+  const {data:unredDataLength,isError:UnreadError} = useQuery({
     queryKey:["unreadNotificationsLength"],
     queryFn:() => getUnreadNotificationCount()
   })
@@ -58,6 +58,17 @@ export default function DashboardLayout() {
     return `${nom.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
 
+  // if(navigItemsError || UnreadError){
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center">
+  //       <p className="text-red-500 text-lg">Error loading data. Please try again later.</p>
+  //     </div>
+  //   );
+  // }
+
+  if(navigItemsError || UnreadError){
+    console.error(navigItemsError , UnreadError, "errrrrrrrrrrrrrrrrrrrrrrrrrrrr");
+  }
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}

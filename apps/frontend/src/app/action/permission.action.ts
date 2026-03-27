@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useAuthStore } from "../store/authStore";
+import { Permission } from "../utils/permissions";
 
 const API_URL = "https://smartsite-platform-auth.vercel.app/permissions";
 
@@ -114,5 +115,5 @@ export const getMynavigationAccess = async () => {
     },
   );
 
-  return data;
+  return data || [] as Permission[];
 };

@@ -1,4 +1,4 @@
-import { Bell, CheckCircle, AlertTriangle, Info, X } from "lucide-react";
+import { Bell, CheckCircle, AlertTriangle, Info, X, CircleIcon } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -48,9 +48,20 @@ export default function Notifications() {
     }
   };
 
+  const getCircleVAriant  = (type: string) => {
+    switch (type) {
+      case "critical":
+        return "bg-red-50 border-red-200";
+      case "warning":
+        return "bg-orange-50 border-orange-200";
+      case "success":
+        return "bg-green-50 border-green-200";
+      default:
+        return "bg-blue-50 border-blue-200";
+    }
+  };
   const handleMarkAllAsRead = () => {
-    
-    console.log(res, "ressssssssssssssssssssssss");
+    //console.log(res, "ressssssssssssssssssssssss");
     toast.success("All notifications marked as read");
   };
 
@@ -78,8 +89,8 @@ export default function Notifications() {
     queryKey: ["unreadNotifications"],
     queryFn: () => getUnreadNotifications(),
   });
-  
-  console.log("unread notif",unreadNotifs);
+
+  console.log("unread notif", unreadNotifs);
 
   return (
     <div className="space-y-6">
@@ -128,7 +139,8 @@ export default function Notifications() {
                   <p>No unread notifications</p>
                 </div>
               ) : (
-                unreadNotifs && unreadNotifs.map((notification) => (
+                unreadNotifs &&
+                unreadNotifs.map((notification) => (
                   <div
                     key={notification.id}
                     className={`flex items-start gap-4 p-4 border rounded-lg ${getBackgroundColor(notification.type)}`}
@@ -138,8 +150,96 @@ export default function Notifications() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
+                        {notification.read ? (
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-gray-900">
+                              {notification.title}
+                            </h3>
+                            <p className="text-sm text-gray-600 mt-1">
+                              {notification.message}
+                            </p>
+                            <p className="text-xs text-gray-400 mt-2">
+                              {new Date(
+                                notification.createdAt,
+                              ).toLocaleString()}
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-gray-900">
+                              {notification.title}
+                            </h3>
+                            <p className="text-sm text-gray-600 mt-1">
+                              {notification.message}
+                            </p>
+                            <p className="text-xs text-gray-400 mt-2">
+                              {new Date(
+                                notification.createdAt,
+                              ).toLocaleString()}
+                            </p>
+                          </div>
+                        )}
+
+                        {/* <Badge
+                          variant={
+                            notification.type === "critical"
+                              ? "destructive"
+                              : notification.type === "warning"
+                                ? "destructive"
+                                : notification.type === "success"
+                                  ? "secondary"
+                                  : "default"
+                          }
+                        >
+                          {notification.type}
+
+                          
+                        </Badge> */}
+
+                        
+                      </div>
+                    </div>
+
+                    {
+                      !notification.read && (
+                        <CircleIcon  className="size-4 rounded-full text-gray-200 bg-gray-200 self-start my-auto"/>
+                          
+                      
+                      ) 
+                    }
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="flex-shrink-0 my-auto"
+                      //onClick={() => handleDeleteNotification(notification.id)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))
+              )}
+            </TabsContent>
+
+            <TabsContent value="all" className="space-y-3 mt-4">
+              {myNotifcations &&
+                [...myNotifcations].map((notification) => (
+                  <div
+                    key={notification.id}
+                    className={`flex items-start gap-4 p-4 border rounded-lg ${
+                      notification.read
+                        ? "bg-gray-50 opacity-75"
+                        : getBackgroundColor(notification.type)
+                    }`}
+                  >
+                    <div className="flex-shrink-0 mt-1">
+                      {getIcon(notification.type)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
                         <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900">
+                          <h3
+                            className={`font-semibold ${notification.read ? "text-gray-600" : "text-gray-900"}`}
+                          >
                             {notification.title}
                           </h3>
                           <p className="text-sm text-gray-600 mt-1">
@@ -173,63 +273,7 @@ export default function Notifications() {
                       <X className="h-4 w-4" />
                     </Button>
                   </div>
-                ))
-              )}
-            </TabsContent>
-
-            <TabsContent value="all" className="space-y-3 mt-4">
-              {myNotifcations && [...myNotifcations].map((notification) => (
-                <div
-                  key={notification.id}
-                  className={`flex items-start gap-4 p-4 border rounded-lg ${
-                    notification.read
-                      ? "bg-gray-50 opacity-75"
-                      : getBackgroundColor(notification.type)
-                  }`}
-                >
-                  <div className="flex-shrink-0 mt-1">
-                    {getIcon(notification.type)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1">
-                        <h3
-                          className={`font-semibold ${notification.read ? "text-gray-600" : "text-gray-900"}`}
-                        >
-                          {notification.title}
-                        </h3>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {notification.message}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-2">
-                          {new Date(notification.createdAt).toLocaleString()}
-                        </p>
-                      </div>
-                      <Badge
-                        variant={
-                          notification.type === "critical"
-                            ? "destructive"
-                            : notification.type === "warning"
-                              ? "destructive"
-                              : notification.type === "success"
-                                ? "secondary"
-                                : "default"
-                        }
-                      >
-                        {notification.type}
-                      </Badge>
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="flex-shrink-0"
-                    //onClick={() => handleDeleteNotification(notification.id)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
+                ))}
             </TabsContent>
           </Tabs>
         </CardContent>
