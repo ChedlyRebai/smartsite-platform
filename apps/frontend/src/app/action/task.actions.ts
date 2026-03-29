@@ -27,6 +27,9 @@ export const getCurrentUserTask = async () => {
   return data;
 };
 
+export const getTaskByTeamid = async (teamId : string)=>{
+  const {data} = await planingApi.get(`/task/team/${teamId}`);
+}
 
 export const getAllTaskStagesByMilestoneId= async (milestoneId) =>{
   const {data} = await planingApi.get(`task-stage/milestone/${milestoneId}`);
