@@ -201,14 +201,15 @@ export default function GestionFournisseurs() {
       result = await createFournisseur(formData);
     }
 
-    if (result) {
+    // Handle the new return type { status, data?, message? }
+    if (result && (result.status === 200 || result.status === 201)) {
       toast.success(selectedFournisseur ? 'Fournisseur mis à jour' : 'Fournisseur créé');
       setDialogOpen(false);
       resetForm();
       setErrors({});
       loadFournisseurs();
     } else {
-      toast.error('Erreur lors de la sauvegarde');
+      toast.error(result?.message || 'Erreur lors de la sauvegarde');
     }
   };
 

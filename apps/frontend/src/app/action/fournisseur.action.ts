@@ -82,18 +82,24 @@ export async function getFournisseurById(
 
 export async function createFournisseur(
   data: Partial<Fournisseur>,
-): Promise<Fournisseur | null> {
+): Promise<{ status: number; data?: any; message?: string }> {
   try {
     const response = await fetch(`${API_URL}/fournisseurs`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    if (!response.ok) throw new Error("Failed to create fournisseur");
-    return await response.json();
-  } catch (error) {
+    const result = await response.json();
+    if (!response.ok) {
+      return {
+        status: response.status,
+        message: result.message || "Failed to create fournisseur",
+      };
+    }
+    return { status: response.status, data: result };
+  } catch (error: any) {
     console.error("Error creating fournisseur:", error);
-    return null;
+    return { status: 500, message: error.message || "Network error" };
   }
 }
 

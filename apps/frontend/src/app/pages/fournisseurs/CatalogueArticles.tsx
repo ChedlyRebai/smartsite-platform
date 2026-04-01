@@ -7,12 +7,19 @@ import { Label } from '../../components/ui/label';
 import { Badge } from '../../components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../../components/ui/dialog';
 import { toast } from 'sonner';
+import { useAuthStore } from '../../store/authStore';
+import { canEdit, canView } from '../../utils/permissions';
 import { Article, getArticles, createArticle, deleteArticle } from '../../action/article.action';
 
 export default function CatalogueArticles() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  // Permission check - use 'fournisseurs' permission for full manage access
+  const user = useAuthStore((state) => state.user);
+  const canManageFournisseurs = user && canEdit(user.role.name, 'fournisseurs');
+
   const [newArticle, setNewArticle] = useState({
     code: '',
     designation: '',
@@ -83,7 +90,10 @@ export default function CatalogueArticles() {
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700">
+            <Button 
+              className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
+              disabled={!canManageFournisseurs}
+            >
               + Ajouter un Article
             </Button>
           </DialogTrigger>
@@ -221,6 +231,7 @@ export default function CatalogueArticles() {
                         <Button 
                           variant="destructive" 
                           size="sm"
+                          disabled={!canManageFournisseurs}
                           onClick={() => article._id && handleDeleteArticle(article._id)}
                         >
                           Supprimer

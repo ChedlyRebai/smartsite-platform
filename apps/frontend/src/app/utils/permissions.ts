@@ -8,6 +8,7 @@ export type Permission =
   | "manage_clients"
   | "manage_suppliers"
   | "manage_fournisseurs"
+  | "view_fournisseurs"
   | "manage_materials"
   | "manage_finance"
   | "manage_qhse"
@@ -50,6 +51,7 @@ const rolePermissions: Record<RoleType, Permission[]> = {
     "manage_projects",
     "manage_team",
     "manage_incidents",
+    "view_fournisseurs",
     "manage_fournisseurs",
     "view_analytics",
     "view_reports",
@@ -82,6 +84,7 @@ const rolePermissions: Record<RoleType, Permission[]> = {
   procurement_manager: [
     "view_dashboard",
     "manage_suppliers",
+    "manage_fournisseurs",
     "manage_materials",
   ],
   qhse_manager: [
@@ -132,6 +135,39 @@ export const canEdit = (
   };
 
   return hasPermission(role, permissionMap[resource]);
+};
+
+// New function for viewing Fournisseurs (project_manager can view but not manage)
+export const canView = (
+  role: RoleType,
+  resource:
+    | "sites"
+    | "projects"
+    | "team"
+    | "clients"
+    | "suppliers"
+    | "fournisseurs"
+    | "materials"
+    | "finance"
+    | "qhse"
+    | "incidents"
+    | "users",
+): boolean => {
+  const viewPermissionMap: Record<string, Permission> = {
+    sites: "manage_sites",
+    projects: "manage_projects",
+    team: "manage_team",
+    clients: "manage_clients",
+    suppliers: "manage_suppliers",
+    fournisseurs: "view_fournisseurs",
+    materials: "manage_materials",
+    finance: "manage_finance",
+    qhse: "manage_qhse",
+    incidents: "manage_incidents",
+    users: "manage_users",
+  };
+
+  return hasPermission(role, viewPermissionMap[resource]);
 };
 
 export const canCreate = canEdit;

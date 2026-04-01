@@ -125,16 +125,21 @@ export const navigationItems: NavItem[] = [
     roles: ["super_admin", "procurement_manager", "accountant"],
   },
   {
-    label: "Suppliers",
+    label: "Fournisseurs",
     href: "/gestion-fournisseurs",
     icon: Truck,
-    roles: ["super_admin", "project_manager"],
+    roles: [
+      "super_admin",
+      "procurement_manager",
+      "project_manager",
+      "accountant",
+    ],
   },
   {
     label: "Articles Catalog",
     href: "/catalogue-articles",
     icon: Package,
-    roles: ["super_admin", "project_manager"],
+    roles: ["super_admin", "procurement_manager", "project_manager"],
   },
   {
     label: "Materials",
