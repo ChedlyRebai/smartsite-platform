@@ -75,59 +75,59 @@ export default function GestionFournisseurs() {
 
     // Required fields
     if (!formData.nom?.trim()) {
-      newErrors.nom = 'Le nom du fournisseur est obligatoire';
+      newErrors.nom = 'Supplier name is required';
     }
 
     // Email validation
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Adresse email invalide';
+      newErrors.email = 'Invalid email address';
     }
 
     // Phone validation (international format)
     if (formData.telephone && !/^[+]?[\d\s]{8,}$/.test(formData.telephone.replace(/\s/g, ''))) {
-      newErrors.telephone = 'Numéro de téléphone invalide';
+      newErrors.telephone = 'Invalid phone number';
     }
 
     // IBAN validation (basic check - starts with country code)
     if (formData.iban && !/^[A-Z]{2}\d{2}[A-Z0-9]+$/.test(formData.iban.replace(/\s/g, ''))) {
-      newErrors.iban = 'IBAN invalide (ex: TN59 1234...)';
+      newErrors.iban = 'Invalid IBAN (ex: TN59 1234...)';
     }
 
     // Number ranges
     if (formData.noteFiabilite !== undefined && (formData.noteFiabilite < 0 || formData.noteFiabilite > 5)) {
-      newErrors.noteFiabilite = 'La note doit être entre 0 et 5';
+      newErrors.noteFiabilite = 'Rating must be between 0 and 5';
     }
     if (formData.noteQualite !== undefined && (formData.noteQualite < 0 || formData.noteQualite > 5)) {
-      newErrors.noteQualite = 'La note doit être entre 0 et 5';
+      newErrors.noteQualite = 'Rating must be between 0 and 5';
     }
     if (formData.noteRespectDelais !== undefined && (formData.noteRespectDelais < 0 || formData.noteRespectDelais > 5)) {
-      newErrors.noteRespectDelais = 'La note doit être entre 0 et 5';
+      newErrors.noteRespectDelais = 'Rating must be between 0 and 5';
     }
 
     if (formData.remise !== undefined && (formData.remise < 0 || formData.remise > 100)) {
-      newErrors.remise = 'La remise doit être entre 0 et 100%';
+      newErrors.remise = 'Discount must be between 0 and 100%';
     }
 
     if (formData.delaiLivraison !== undefined && formData.delaiLivraison < 0) {
-      newErrors.delaiLivraison = 'Le délai ne peut pas être négatif';
+      newErrors.delaiLivraison = 'Delivery time cannot be negative';
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Categories disponibles
+  // Available categories
   const categoriesOptions = [
     'béton', 'fer', 'acier', 'électricité', 'plomberie', 
     'bois', 'sable', 'gravier', 'ciment', 'brique', 
     'carrelage', 'peinture', 'isolation', 'toiture'
   ];
 
-  // Statuts
+  // Statuses
   const statuts = [
-    { value: 'preferentiel', label: 'Préférentiel', color: 'bg-green-100 text-green-800' },
-    { value: 'occasionnel', label: 'Occasionnel', color: 'bg-blue-100 text-blue-800' },
-    { value: 'a_risque', label: 'À risque', color: 'bg-red-100 text-red-800' },
+    { value: 'preferentiel', label: 'Preferred', color: 'bg-green-100 text-green-800' },
+    { value: 'occasionnel', label: 'Occasional', color: 'bg-blue-100 text-blue-800' },
+    { value: 'a_risque', label: 'At Risk', color: 'bg-red-100 text-red-800' },
   ];
 
   const loadFournisseurs = async () => {
@@ -147,7 +147,7 @@ export default function GestionFournisseurs() {
       adresse: '',
       ville: '',
       codePostal: '',
-      pays: 'Tunisie',
+      pays: 'Tunisia',
       zoneGeographique: '',
       telephone: '',
       email: '',
@@ -159,7 +159,7 @@ export default function GestionFournisseurs() {
       siret: '',
       iban: '',
       banque: '',
-      conditionsPaiement: '30 jours',
+      conditionsPaiement: '30 days',
       delaiLivraison: 7,
       remise: 0,
       noteFiabilite: 0,
@@ -190,7 +190,7 @@ export default function GestionFournisseurs() {
   const handleSave = async () => {
     // Validate form before saving
     if (!validateForm()) {
-      toast.error('Veuillez corriger les erreurs avant de sauvegarder');
+      toast.error('Please fix errors before saving');
       return;
     }
 
@@ -203,24 +203,24 @@ export default function GestionFournisseurs() {
 
     // Handle the new return type { status, data?, message? }
     if (result && (result.status === 200 || result.status === 201)) {
-      toast.success(selectedFournisseur ? 'Fournisseur mis à jour' : 'Fournisseur créé');
+      toast.success(selectedFournisseur ? 'Supplier updated' : 'Supplier created');
       setDialogOpen(false);
       resetForm();
       setErrors({});
       loadFournisseurs();
     } else {
-      toast.error(result?.message || 'Erreur lors de la sauvegarde');
+      toast.error(result?.message || 'Error saving supplier');
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('Voulez-vous vraiment supprimer ce fournisseur ?')) {
+    if (confirm('Are you sure you want to delete this supplier?')) {
       const success = await deleteFournisseur(id);
       if (success) {
-        toast.success('Fournisseur supprimé');
+        toast.success('Supplier deleted');
         loadFournisseurs();
       } else {
-        toast.error('Erreur lors de la suppression');
+        toast.error('Error deleting supplier');
       }
     }
   };
@@ -228,7 +228,7 @@ export default function GestionFournisseurs() {
   const handleArchive = async (id: string) => {
     const success = await archiveFournisseur(id);
     if (success) {
-      toast.success('Fournisseur archivé');
+      toast.success('Supplier archived');
       loadFournisseurs();
     }
   };
@@ -236,7 +236,7 @@ export default function GestionFournisseurs() {
   const handleUnarchive = async (id: string) => {
     const success = await unarchiveFournisseur(id);
     if (success) {
-      toast.success('Fournisseur désarchivé');
+      toast.success('Supplier restored');
       loadFournisseurs();
     }
   };
@@ -268,7 +268,7 @@ export default function GestionFournisseurs() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestion des Fournisseurs</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Supplier Management</h1>
           <p className="text-gray-500 mt-1">Gérer les fiches fournisseurs et leurs interactions</p>
         </div>
         <div className="flex gap-2">
@@ -277,7 +277,7 @@ export default function GestionFournisseurs() {
             onClick={() => setShowArchived(!showArchived)}
           >
             <Archive className="w-4 h-4 mr-2" />
-            {showArchived ? 'Actifs' : 'Archivés'}
+            {showArchived ? 'Active' : 'Archived'}
           </Button>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
@@ -286,45 +286,45 @@ export default function GestionFournisseurs() {
                 onClick={() => handleOpenDialog()}
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Nouveau Fournisseur
+                New Supplier
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
-                  {selectedFournisseur ? 'Modifier le Fournisseur' : 'Nouveau Fournisseur'}
+                  {selectedFournisseur ? 'Edit Supplier' : 'New Supplier'}
                 </DialogTitle>
               </DialogHeader>
               <div className="space-y-6">
                 <Tabs defaultValue="general" className="w-full">
                   <TabsList className="grid w-full grid-cols-4">
-                    <TabsTrigger value="general">Général</TabsTrigger>
+                    <TabsTrigger value="general">General</TabsTrigger>
                     <TabsTrigger value="contacts">Contacts</TabsTrigger>
                     <TabsTrigger value="finance">Finance</TabsTrigger>
-                    <TabsTrigger value="categories">Catégories</TabsTrigger>
+                    <TabsTrigger value="categories">Categories</TabsTrigger>
                   </TabsList>
 
                   {/* Show Evaluation tab only when editing an existing supplier */}
                   {selectedFournisseur && (
                     <TabsList className="grid w-full grid-cols-5 mt-2">
-                      <TabsTrigger value="evaluation">Évaluation</TabsTrigger>
+                      <TabsTrigger value="evaluation">Evaluation</TabsTrigger>
                     </TabsList>
                   )}
 
                   <TabsContent value="general" className="space-y-4 mt-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>Nom du fournisseur *</Label>
+                        <Label>Supplier Name *</Label>
                         <Input 
                           value={formData.nom || ''}
                           onChange={(e) => setFormData({...formData, nom: e.target.value})}
-                          placeholder="Société des Ciments"
+                          placeholder="Cement Company"
                           className={errors.nom ? 'border-red-500' : ''}
                         />
                         {errors.nom && <p className="text-red-500 text-xs">{errors.nom}</p>}
                       </div>
                       <div className="space-y-2">
-                        <Label>Statut</Label>
+                        <Label>Status</Label>
                         <select 
                           className="w-full px-3 py-2 border rounded-md"
                           value={formData.statut || 'occasionnel'}
@@ -339,15 +339,15 @@ export default function GestionFournisseurs() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>Adresse</Label>
+                        <Label>Address</Label>
                         <Input 
                           value={formData.adresse || ''}
                           onChange={(e) => setFormData({...formData, adresse: e.target.value})}
-                          placeholder="Rue de l'Industrie"
+                          placeholder="Industry Street"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Ville</Label>
+                        <Label>City</Label>
                         <Input 
                           value={formData.ville || ''}
                           onChange={(e) => setFormData({...formData, ville: e.target.value})}
@@ -358,14 +358,14 @@ export default function GestionFournisseurs() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>Code Postal</Label>
+                        <Label>Postal Code</Label>
                         <Input 
                           value={formData.codePostal || ''}
                           onChange={(e) => setFormData({...formData, codePostal: e.target.value})}
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Pays</Label>
+                        <Label>Country</Label>
                         <Input 
                           value={formData.pays || ''}
                           onChange={(e) => setFormData({...formData, pays: e.target.value})}
@@ -375,7 +375,7 @@ export default function GestionFournisseurs() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>Téléphone</Label>
+                        <Label>Phone</Label>
                         <Input 
                           value={formData.telephone || ''}
                           onChange={(e) => setFormData({...formData, telephone: e.target.value})}
@@ -420,14 +420,14 @@ export default function GestionFournisseurs() {
                     {/* Simple contact fields */}
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>Personne à contacter</Label>
+                        <Label>Contact Person</Label>
                         <Input 
                           value={formData.personneContact || ''}
                           onChange={(e) => setFormData({...formData, personneContact: e.target.value})}
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Téléphone Contact</Label>
+                        <Label>Contact Phone</Label>
                         <Input 
                           value={formData.telephoneContact || ''}
                           onChange={(e) => setFormData({...formData, telephoneContact: e.target.value})}
@@ -448,7 +448,7 @@ export default function GestionFournisseurs() {
                             setFormData({...formData, contacts: [...(formData.contacts || []), newContact]});
                           }}
                         >
-                          <Plus className="h-4 w-4 mr-1" /> Ajouter
+                          <Plus className="h-4 w-4 mr-1" /> Add
                         </Button>
                       </div>
                       
@@ -471,7 +471,7 @@ export default function GestionFournisseurs() {
                           </div>
                           <div className="grid grid-cols-2 gap-2">
                             <div className="space-y-1">
-                              <Label className="text-xs">Nom</Label>
+                              <Label className="text-xs">Name</Label>
                               <Input 
                                 value={contact.nom || ''}
                                 onChange={(e) => {
@@ -479,11 +479,11 @@ export default function GestionFournisseurs() {
                                   newContacts[index] = {...newContacts[index], nom: e.target.value};
                                   setFormData({...formData, contacts: newContacts});
                                 }}
-                                placeholder="Nom complet"
+                                placeholder="Full name"
                               />
                             </div>
                             <div className="space-y-1">
-                              <Label className="text-xs">Fonction</Label>
+                              <Label className="text-xs">Function</Label>
                               <Input 
                                 value={contact.fonction || ''}
                                 onChange={(e) => {
@@ -491,11 +491,11 @@ export default function GestionFournisseurs() {
                                   newContacts[index] = {...newContacts[index], fonction: e.target.value};
                                   setFormData({...formData, contacts: newContacts});
                                 }}
-                                placeholder="Fonction"
+                                placeholder="Function"
                               />
                             </div>
                             <div className="space-y-1">
-                              <Label className="text-xs">Téléphone</Label>
+                              <Label className="text-xs">Phone</Label>
                               <Input 
                                 value={contact.telephone || ''}
                                 onChange={(e) => {
@@ -516,7 +516,7 @@ export default function GestionFournisseurs() {
                                   newContacts[index] = {...newContacts[index], email: e.target.value};
                                   setFormData({...formData, contacts: newContacts});
                                 }}
-                                placeholder="email@fournisseur.tn"
+                                placeholder="email@supplier.tn"
                               />
                             </div>
                           </div>
@@ -531,7 +531,7 @@ export default function GestionFournisseurs() {
                                   setFormData({...formData, contacts: newContacts});
                                 }}
                               />
-                              Contact principal
+                              Main contact
                             </label>
                           </div>
                         </div>
@@ -542,14 +542,14 @@ export default function GestionFournisseurs() {
                   <TabsContent value="finance" className="space-y-4 mt-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>Registre de Commerce</Label>
+                        <Label>Business Register</Label>
                         <Input 
                           value={formData.registreCommerce || ''}
                           onChange={(e) => setFormData({...formData, registreCommerce: e.target.value})}
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Matricule Fiscale</Label>
+                        <Label>Tax ID</Label>
                         <Input 
                           value={formData.matriculeFiscale || ''}
                           onChange={(e) => setFormData({...formData, matriculeFiscale: e.target.value})}
@@ -594,7 +594,7 @@ export default function GestionFournisseurs() {
                         {errors.iban && <p className="text-red-500 text-xs">{errors.iban}</p>}
                       </div>
                       <div className="space-y-2">
-                        <Label>Banque</Label>
+                        <Label>Bank</Label>
                         <Input 
                           value={formData.banque || ''}
                           onChange={(e) => setFormData({...formData, banque: e.target.value})}
@@ -604,7 +604,7 @@ export default function GestionFournisseurs() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>Conditions de Paiement</Label>
+                        <Label>Payment Terms</Label>
                         <select 
                           className="w-full px-3 py-2 border rounded-md"
                           value={formData.conditionsPaiement || '30 jours'}
@@ -618,7 +618,7 @@ export default function GestionFournisseurs() {
                         </select>
                       </div>
                       <div className="space-y-2">
-                        <Label>Délai de livraison (jours)</Label>
+                        <Label>Delivery Time (days)</Label>
                         <Input 
                           type="number"
                           value={formData.delaiLivraison || 0}
@@ -631,7 +631,7 @@ export default function GestionFournisseurs() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>Remise (%)</Label>
+                        <Label>Discount (%)</Label>
                         <Input 
                           type="number"
                           min="0"
@@ -675,7 +675,7 @@ export default function GestionFournisseurs() {
                     <TabsContent value="evaluation" className="space-y-4 mt-4">
                       <div className="grid grid-cols-3 gap-4">
                         <div className="space-y-2">
-                          <Label>Note de fiabilité (0-5)</Label>
+                          <Label>Reliability Rating (0-5)</Label>
                           <Input 
                             type="number"
                             min="0"
@@ -696,7 +696,7 @@ export default function GestionFournisseurs() {
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <Label>Note de qualité (0-5)</Label>
+                          <Label>Quality Rating (0-5)</Label>
                           <Input 
                             type="number"
                             min="0"
@@ -717,7 +717,7 @@ export default function GestionFournisseurs() {
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <Label>Respect des délais (0-5)</Label>
+                          <Label>Delivery Compliance (0-5)</Label>
                           <Input 
                             type="number"
                             min="0"
@@ -745,7 +745,7 @@ export default function GestionFournisseurs() {
                           className="w-full px-3 py-2 border rounded-md min-h-[100px]"
                           value={formData.notes || ''}
                           onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                          placeholder="Notes sur le fournisseur..."
+                          placeholder="Notes about the supplier..."
                         />
                       </div>
                     </TabsContent>
@@ -753,12 +753,12 @@ export default function GestionFournisseurs() {
                 </Tabs>
 
                 <div className="flex justify-end gap-2 pt-4">
-                  <Button variant="outline" onClick={() => setDialogOpen(false)}>Annuler</Button>
+                  <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
                   <Button 
                     className="bg-gradient-to-r from-blue-600 to-green-600"
                     onClick={handleSave}
                   >
-                    Enregistrer
+                    Save
                   </Button>
                 </div>
               </div>
@@ -789,7 +789,7 @@ export default function GestionFournisseurs() {
                 <Star className="w-6 h-6 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Préférentiels</p>
+                <p className="text-sm text-gray-500">Preferred</p>
                 <p className="text-2xl font-bold">
                   {fournisseurs.filter(f => f.statut === 'preferentiel').length}
                 </p>
@@ -804,7 +804,7 @@ export default function GestionFournisseurs() {
                 <AlertTriangle className="w-6 h-6 text-red-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">À risque</p>
+                <p className="text-sm text-gray-500">At Risk</p>
                 <p className="text-2xl font-bold">
                   {fournisseurs.filter(f => f.statut === 'a_risque').length}
                 </p>
@@ -819,7 +819,7 @@ export default function GestionFournisseurs() {
                 <Archive className="w-6 h-6 text-gray-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Archivés</p>
+                <p className="text-sm text-gray-500">Archived</p>
                 <p className="text-2xl font-bold">
                   {fournisseurs.filter(f => f.estArchive).length}
                 </p>
@@ -833,14 +833,14 @@ export default function GestionFournisseurs() {
       <Card>
         <CardHeader>
           <CardTitle>
-            {showArchived ? 'Fournisseurs Archivés' : 'Fournisseurs Actifs'}
+            {showArchived ? 'Archived Suppliers' : 'Active Suppliers'}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <p>Chargement...</p>
+            <p>Loading...</p>
           ) : filteredFournisseurs.length === 0 ? (
-            <p className="text-gray-500">Aucun fournisseur trouvé</p>
+            <p className="text-gray-500">No suppliers found</p>
           ) : (
             <div className="space-y-4">
               {filteredFournisseurs.map((fournisseur) => (
@@ -851,7 +851,7 @@ export default function GestionFournisseurs() {
                         <h3 className="font-semibold text-lg">{fournisseur.nom}</h3>
                         {getStatutBadge(fournisseur.statut)}
                         {!fournisseur.estActif && (
-                          <Badge variant="destructive">Inactif</Badge>
+                          <Badge variant="destructive">Inactive</Badge>
                         )}
                       </div>
                       
@@ -870,22 +870,22 @@ export default function GestionFournisseurs() {
                         </div>
                         <div className="flex items-center gap-2">
                           <Clock className="w-4 h-4" />
-                          {fournisseur.delaiLivraison} jours
+                          {fournisseur.delaiLivraison} days
                         </div>
                       </div>
 
                       {/* Notes */}
                       <div className="flex gap-6 mt-3 text-sm">
                         <div className="flex items-center gap-2">
-                          <span className="text-gray-500">Fiabilité:</span>
+                          <span className="text-gray-500">Reliability:</span>
                           {renderStars(fournisseur.noteFiabilite || 0)}
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-gray-500">Qualité:</span>
+                          <span className="text-gray-500">Quality:</span>
                           {renderStars(fournisseur.noteQualite || 0)}
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-gray-500">Délais:</span>
+                          <span className="text-gray-500">Delivery:</span>
                           {renderStars(fournisseur.noteRespectDelais || 0)}
                         </div>
                       </div>
