@@ -3,17 +3,25 @@ import { NotificationApi } from "@/lib/api-client";
 import axios from "axios";
 import { useAuthStore } from "../store/authStore";
 
-export const getMyNotifications = async () => {
-  const { data } = await NotificationApi.get("/mynotifications");
+export const getMyNotifications = async (page = 1, limit = 10) => {
+  const { data } = await NotificationApi.get("/mynotifications", {
+    params: { page, limit },
+  });
   return data;
 };
 
-export const getTeamNotifications = async (teamId: string) => {
-  const { data } = await NotificationApi.get(`/team/${teamId}`);
+export const getTeamNotifications = async (
+  teamId: string,
+  page = 1,
+  limit = 10,
+) => {
+  const { data } = await NotificationApi.get(`/team/${teamId}`, {
+    params: { page, limit },
+  });
   return data || ([] as Notification[]);
 };
 
-export const getUnreadNotifications = async () => {
+export const getUnreadNotifications = async (page = 1, limit = 10) => {
   const token = useAuthStore.getState().user.access_token;
   const { data } = await axios.get(
     "http://localhost:3004/notification/unread",
@@ -21,19 +29,28 @@ export const getUnreadNotifications = async () => {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      params: { page, limit },
     },
   );
   console.log("data unread================================", data);
   return data || ([] as Notification[]);
 };
 
-export const getReadNotifications = async () => {
-  const { data } = await NotificationApi.get("/read");
+export const getReadNotifications = async (page = 1, limit = 10) => {
+  const { data } = await NotificationApi.get("/read", {
+    params: { page, limit },
+  });
   return data || ([] as Notification[]);
 };
 
-export const getTeamUnreadNotifications = async (teamId: string) => {
-  const { data } = await NotificationApi.get(`/team/${teamId}/unread`);
+export const getTeamUnreadNotifications = async (
+  teamId: string,
+  page = 1,
+  limit = 10,
+) => {
+  const { data } = await NotificationApi.get(`/team/${teamId}/unread`, {
+    params: { page, limit },
+  });
   return data || ([] as Notification[]);
 };
 

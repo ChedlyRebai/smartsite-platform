@@ -23,14 +23,13 @@ import {
 } from "../../components/ui/tabs";
 
 import { toast } from "sonner";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { getCurrentUser } from "@/app/action/auth.action";
 import {
   deleteNotificationById,
   getMyNotifications,
   getTeamNotifications,
   getUnreadNotifications,
-  getTeamUnreadNotifications,
   getTeamUnreadNotificationCount,
   getUnreadNotificationCount,
   markTeamNotificationsAsRead,
@@ -39,6 +38,7 @@ import { useAuthStore } from "@/app/store/authStore";
 
 export default function Notifications() {
   const authUser = useAuthStore((state) => state.user);
+  const PAGE_SIZE = 5;
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -103,10 +103,10 @@ export default function Notifications() {
     try {
       await markTeamNotificationsAsRead(normalizedTeamId);
       await Promise.all([
-        refetch(),
-        refetchTeamNotifications(),
-        refetchTeamUnreadNotifications(),
-        refetchTeamUnreadCount(),
+        myNotificationsQuery.refetch(),
+        unreadNotificationsQuery.refetch(),
+        teamNotificationsQuery.refetch(),
+        teamUnreadCountQuery.refetch(),
       ]);
       toast.success("All team notifications marked as read");
     } catch {
@@ -114,11 +114,30 @@ export default function Notifications() {
     }
   };
 
- 
+  const myNotificationsQuery = useInfiniteQuery({
+    queryKey: ["myNotifications", PAGE_SIZE],
+    queryFn: ({ pageParam = 1 }) => getMyNotifications(pageParam, PAGE_SIZE),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.length === PAGE_SIZE ? allPages.length + 1 : undefined,
+  });
 
-  const { data: myNotifcations,refetch } = useQuery({
-    queryKey: ["myNotifications"],
-    queryFn: () => getMyNotifications(),
+  const unreadNotificationsQuery = useInfiniteQuery({
+    queryKey: ["unreadNotifications", PAGE_SIZE],
+    queryFn: ({ pageParam = 1 }) => getUnreadNotifications(pageParam, PAGE_SIZE),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.length === PAGE_SIZE ? allPages.length + 1 : undefined,
+  });
+
+  const teamNotificationsQuery = useInfiniteQuery({
+    queryKey: ["teamNotifications", normalizedTeamId, PAGE_SIZE],
+    queryFn: ({ pageParam = 1 }) =>
+      getTeamNotifications(normalizedTeamId, pageParam, PAGE_SIZE),
+    initialPageParam: 1,
+    enabled: hasTeamFilter,
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.length === PAGE_SIZE ? allPages.length + 1 : undefined,
   });
 
   const { data: UnreadNotifCount } = useQuery({
@@ -126,54 +145,46 @@ export default function Notifications() {
     queryFn: () => getUnreadNotificationCount(),
   });
 
-  const { data: unreadNotifs } = useQuery({
-    queryKey: ["unreadNotifications"],
-    queryFn: () => getUnreadNotifications(),
-  });
+  const myNotifcations = useMemo(
+    () => myNotificationsQuery.data?.pages.flat() ?? [],
+    [myNotificationsQuery.data],
+  );
 
-  const { data: teamNotifications } = useQuery({
-    queryKey: ["teamNotifications", normalizedTeamId],
-    queryFn: () => getTeamNotifications(normalizedTeamId),
-    enabled: hasTeamFilter,
-  });
+  const unreadNotifs = useMemo(
+    () => unreadNotificationsQuery.data?.pages.flat() ?? [],
+    [unreadNotificationsQuery.data],
+  );
 
-  const { refetch: refetchTeamNotifications } = useQuery({
-    queryKey: ["teamNotifications", normalizedTeamId],
-    queryFn: () => getTeamNotifications(normalizedTeamId),
-    enabled: false,
-  });
+  const teamNotifications = useMemo(
+    () => teamNotificationsQuery.data?.pages.flat() ?? [],
+    [teamNotificationsQuery.data],
+  );
 
-  const { refetch: refetchTeamUnreadNotifications } = useQuery({
-    queryKey: ["teamUnreadNotifications", normalizedTeamId],
-    queryFn: () => getTeamUnreadNotifications(normalizedTeamId),
-    enabled: false,
-  });
-
-  const { data: teamUnreadCount } = useQuery({
+  const teamUnreadCountQuery = useQuery({
     queryKey: ["teamUnreadNotificationCount", normalizedTeamId],
     queryFn: () => getTeamUnreadNotificationCount(normalizedTeamId),
     enabled: hasTeamFilter,
   });
 
-  const { refetch: refetchTeamUnreadCount } = useQuery({
-    queryKey: ["teamUnreadNotificationCount", normalizedTeamId],
-    queryFn: () => getTeamUnreadNotificationCount(normalizedTeamId),
-    enabled: false,
-  });
+  const teamUnreadCount = teamUnreadCountQuery.data;
+
+  const loadMoreMyNotifications = () => myNotificationsQuery.fetchNextPage();
+  const loadMoreUnreadNotifications = () =>
+    unreadNotificationsQuery.fetchNextPage();
+  const loadMoreTeamNotifications = () => teamNotificationsQuery.fetchNextPage();
 
   console.log("unread notif", unreadNotifs);
   const handleDeleteNotification = async (id: string) => {
     const res = await deleteNotificationById(id);
     if (res.status === 200) {
-      refetch();
+      myNotificationsQuery.refetch();
+      unreadNotificationsQuery.refetch();
+      teamNotificationsQuery.refetch();
       toast.success("Notification removed");
     }
   };
 
-  const teamAllNotifications = useMemo(
-    () => teamNotifications ?? [],
-    [teamNotifications],
-  );
+  const teamAllNotifications = teamNotifications;
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -209,9 +220,7 @@ export default function Notifications() {
         <CardContent>
           <Tabs defaultValue="unread" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="unread">
-                Unread ({UnreadNotifCount})
-              </TabsTrigger>
+              <TabsTrigger value="unread">Unread ({UnreadNotifCount})</TabsTrigger>
               <TabsTrigger value="all">All Notifications</TabsTrigger>
               <TabsTrigger value="team" disabled={!hasTeamFilter}>
                 Team {hasTeamFilter ? `(${teamAllNotifications.length})` : ""}
@@ -219,54 +228,28 @@ export default function Notifications() {
             </TabsList>
 
             <TabsContent value="unread" className="space-y-3 mt-4">
-              {unreadNotifs && unreadNotifs.length === 0 ? (
+              {unreadNotifs.length === 0 ? (
                 <div className="text-center py-12 text-gray-500">
                   <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300" />
                   <p>No unread notifications</p>
                 </div>
               ) : (
-                unreadNotifs &&
                 unreadNotifs.map((notification) => (
                   <div
                     key={notification.id}
                     className={`flex items-start gap-4 p-4 border rounded-lg ${getBackgroundColor(notification.type)}`}
                   >
-                    <div className="flex-shrink-0 mt-1">
-                      {getIcon(notification.type)}
-                    </div>
+                    <div className="flex-shrink-0 mt-1">{getIcon(notification.type)}</div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
-                        {notification.read ? (
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-gray-900">
-                              {notification.title}
-                            </h3>
-                            <p className="text-sm text-gray-600 mt-1">
-                              {notification.message}
-                            </p>
-                            <p className="text-xs text-gray-400 mt-2">
-                              {new Date(
-                                notification.createdAt,
-                              ).toLocaleString()}
-                            </p>
-                          </div>
-                        ) : (
-                          <div className="flex-1">
-                            <h3 className="font-extrabold text-gray-900">
-                              {notification.title}
-                            </h3>
-                            <p className="text-sm text-gray-600 mt-1">
-                              {notification.message}
-                            </p>
-                            <p className="text-xs text-gray-400 mt-2">
-                              {new Date(
-                                notification.createdAt,
-                              ).toLocaleString()}
-                            </p>
-                          </div>
-                        )}
-
-                        {/* <Badge
+                        <div className="flex-1">
+                          <h3 className={notification.read ? "font-semibold text-gray-900" : "font-extrabold text-gray-900"}>
+                            {notification.title}
+                          </h3>
+                          <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
+                          <p className="text-xs text-gray-400 mt-2">{new Date(notification.createdAt).toLocaleString()}</p>
+                        </div>
+                        <Badge
                           variant={
                             notification.type === "critical"
                               ? "destructive"
@@ -278,73 +261,50 @@ export default function Notifications() {
                           }
                         >
                           {notification.type}
-
-                          
-                        </Badge> */}
+                        </Badge>
                       </div>
                     </div>
-
                     {!notification.read && (
                       <CircleIcon className="size-4 rounded-full text-gray-200 bg-gray-200 self-start my-auto" />
                     )}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="flex-shrink-0 my-auto"
-                      //onClick={() => handleDeleteNotification(notification.id)}
-                    >
+                    <Button variant="ghost" size="icon" className="flex-shrink-0 my-auto">
                       <X className="h-4 w-4" />
                     </Button>
                   </div>
                 ))
               )}
+
+              {unreadNotifs.length > 0 && unreadNotificationsQuery.hasNextPage && (
+                <div className="pt-2 flex justify-center">
+                  <Button variant="outline" onClick={loadMoreUnreadNotifications} disabled={unreadNotificationsQuery.isFetchingNextPage}>
+                    {unreadNotificationsQuery.isFetchingNextPage ? "Loading..." : "Load more"}
+                  </Button>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="all" className="space-y-3 mt-4">
-              {myNotifcations &&
-                [...myNotifcations].map((notification) => (
+              {myNotifcations.length === 0 ? (
+                <div className="text-center py-12 text-gray-500">
+                  <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                  <p>No notifications found</p>
+                </div>
+              ) : (
+                myNotifcations.map((notification) => (
                   <div
                     key={notification.id}
-                    className={`flex items-start gap-4 p-4 border rounded-lg ${
-                      notification.read
-                        ? "bg-gray-50 opacity-75"
-                        : getBackgroundColor(notification.type)
-                    }`}
+                    className={`flex items-start gap-4 p-4 border rounded-lg ${notification.read ? "bg-gray-50 opacity-75" : getBackgroundColor(notification.type)}`}
                   >
-                    <div className="flex-shrink-0 mt-1">
-                      {getIcon(notification.type)}
-                    </div>
+                    <div className="flex-shrink-0 mt-1">{getIcon(notification.type)}</div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
-                        {notification.read ? (
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-gray-900">
-                              {notification.title}
-                            </h3>
-                            <p className="text-sm text-gray-600 mt-1">
-                              {notification.message}
-                            </p>
-                            <p className="text-xs text-gray-400 mt-2">
-                              {new Date(
-                                notification.createdAt,
-                              ).toLocaleString()}
-                            </p>
-                          </div>
-                        ) : (
-                          <div className="flex-1">
-                            <h3 className="font-extrabold text-gray-900">
-                              {notification.title}
-                            </h3>
-                            <p className="text-sm text-gray-600 mt-1">
-                              {notification.message}
-                            </p>
-                            <p className="text-xs text-gray-400 mt-2">
-                              {new Date(
-                                notification.createdAt,
-                              ).toLocaleString()}
-                            </p>
-                          </div>
-                        )}
+                        <div className="flex-1">
+                          <h3 className={notification.read ? "font-semibold text-gray-900" : "font-extrabold text-gray-900"}>
+                            {notification.title}
+                          </h3>
+                          <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
+                          <p className="text-xs text-gray-400 mt-2">{new Date(notification.createdAt).toLocaleString()}</p>
+                        </div>
                         <Badge
                           variant={
                             notification.type === "critical"
@@ -369,7 +329,16 @@ export default function Notifications() {
                       <X className="h-4 w-4" />
                     </Button>
                   </div>
-                ))}
+                ))
+              )}
+
+              {myNotifcations.length > 0 && myNotificationsQuery.hasNextPage && (
+                <div className="pt-2 flex justify-center">
+                  <Button variant="outline" onClick={loadMoreMyNotifications} disabled={myNotificationsQuery.isFetchingNextPage}>
+                    {myNotificationsQuery.isFetchingNextPage ? "Loading..." : "Load more"}
+                  </Button>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="team" className="space-y-3 mt-4">
@@ -389,21 +358,13 @@ export default function Notifications() {
                     key={notification._id ?? notification.id}
                     className={`flex items-start gap-4 p-4 border rounded-lg ${getBackgroundColor(notification.type)}`}
                   >
-                    <div className="flex-shrink-0 mt-1">
-                      {getIcon(notification.type)}
-                    </div>
+                    <div className="flex-shrink-0 mt-1">{getIcon(notification.type)}</div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900">
-                            {notification.title}
-                          </h3>
-                          <p className="text-sm text-gray-600 mt-1">
-                            {notification.message}
-                          </p>
-                          <p className="text-xs text-gray-400 mt-2">
-                            {new Date(notification.createdAt).toLocaleString()}
-                          </p>
+                          <h3 className="font-semibold text-gray-900">{notification.title}</h3>
+                          <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
+                          <p className="text-xs text-gray-400 mt-2">{new Date(notification.createdAt).toLocaleString()}</p>
                         </div>
                         <Badge
                           variant={
@@ -422,6 +383,14 @@ export default function Notifications() {
                     </div>
                   </div>
                 ))
+              )}
+
+              {teamAllNotifications.length > 0 && teamNotificationsQuery.hasNextPage && (
+                <div className="pt-2 flex justify-center">
+                  <Button variant="outline" onClick={loadMoreTeamNotifications} disabled={teamNotificationsQuery.isFetchingNextPage}>
+                    {teamNotificationsQuery.isFetchingNextPage ? "Loading..." : "Load more"}
+                  </Button>
+                </div>
               )}
             </TabsContent>
           </Tabs>

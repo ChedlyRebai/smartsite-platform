@@ -13,8 +13,38 @@ export class NotificationService {
     return await this.notifModel.find().exec();
   }
 
+  async getAllNotificationsPaginated(page = 1, limit = 10) {
+    const safePage = Math.max(1, page);
+    const safeLimit = Math.max(1, limit);
+    const skip = (safePage - 1) * safeLimit;
+
+    return await this.notifModel
+      .find()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(safeLimit)
+      .exec();
+  }
+
   async getNotificationsByRecipientId(recipientId: string) {
     return await this.notifModel.find({ recipentId: recipientId }).exec();
+  }
+
+  async getNotificationsByRecipientIdPaginated(
+    recipientId: string,
+    page = 1,
+    limit = 10,
+  ) {
+    const safePage = Math.max(1, page);
+    const safeLimit = Math.max(1, limit);
+    const skip = (safePage - 1) * safeLimit;
+
+    return await this.notifModel
+      .find({ recipentId: recipientId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(safeLimit)
+      .exec();
   }
 
   async getNotiFicationByUserId(userId: string) {
@@ -53,9 +83,43 @@ export class NotificationService {
       .exec();
   }
 
+  async getUnreadNotificationsByUserIdPaginated(
+    userId: string,
+    page = 1,
+    limit = 10,
+  ) {
+    const safePage = Math.max(1, page);
+    const safeLimit = Math.max(1, limit);
+    const skip = (safePage - 1) * safeLimit;
+
+    return await this.notifModel
+      .find({ recipentId: userId, isRead: false })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(safeLimit)
+      .exec();
+  }
+
   async getUnreadNotificationsByTeamId(teamId: string) {
     return await this.notifModel
       .find({ recipentId: teamId, isRead: false })
+      .exec();
+  }
+
+  async getUnreadNotificationsByTeamIdPaginated(
+    teamId: string,
+    page = 1,
+    limit = 10,
+  ) {
+    const safePage = Math.max(1, page);
+    const safeLimit = Math.max(1, limit);
+    const skip = (safePage - 1) * safeLimit;
+
+    return await this.notifModel
+      .find({ recipentId: teamId, isRead: false })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(safeLimit)
       .exec();
   }
 
@@ -65,9 +129,43 @@ export class NotificationService {
       .exec();
   }
 
+  async getReadNotificationsByUserIdPaginated(
+    userId: string,
+    page = 1,
+    limit = 10,
+  ) {
+    const safePage = Math.max(1, page);
+    const safeLimit = Math.max(1, limit);
+    const skip = (safePage - 1) * safeLimit;
+
+    return await this.notifModel
+      .find({ recipentId: userId, isRead: true })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(safeLimit)
+      .exec();
+  }
+
   async getReadNotificationsByTeamId(teamId: string) {
     return await this.notifModel
       .find({ recipentId: teamId, isRead: true })
+      .exec();
+  }
+
+  async getReadNotificationsByTeamIdPaginated(
+    teamId: string,
+    page = 1,
+    limit = 10,
+  ) {
+    const safePage = Math.max(1, page);
+    const safeLimit = Math.max(1, limit);
+    const skip = (safePage - 1) * safeLimit;
+
+    return await this.notifModel
+      .find({ recipentId: teamId, isRead: true })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(safeLimit)
       .exec();
   }
 
