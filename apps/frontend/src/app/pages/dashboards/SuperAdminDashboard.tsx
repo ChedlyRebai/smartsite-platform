@@ -1,7 +1,8 @@
-import { Building2, Users, Briefcase, DollarSign, AlertTriangle, TrendingUp, Shield, Clock, MapPin, Calendar, Target } from 'lucide-react';
+import { Building2, Users, Briefcase, DollarSign, AlertTriangle, TrendingUp, Shield, Clock, MapPin, Calendar, Target, Search } from 'lucide-react';
 import { StatCard } from '../../components/DashboardStats';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
+import { Input } from '../../components/ui/input';
 import { Progress } from '../../components/ui/progress';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { useAuthStore } from '../../store/authStore';
@@ -13,12 +14,14 @@ import {
   type TeamMember,
   type Incident
 } from '../../action/dashboard.action';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { incidentMatchesSearch, taskMatchesSearch } from '../../utils/incidentSearchFilter';
 
 export default function SuperAdminDashboard() {
   const user = useAuthStore((state) => state.user);
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [urgentSectionSearch, setUrgentSectionSearch] = useState('');
 
   useEffect(() => {
     const loadData = async () => {
@@ -43,6 +46,18 @@ export default function SuperAdminDashboard() {
   const urgentTasks = dashboardData?.urgentTasks || [];
   const incidents = dashboardData?.incidents || [];
   const teamMembers = dashboardData?.teamMembers || [];
+
+  const filteredUrgentTasks = useMemo(
+    () => urgentTasks.filter((task: Task) => taskMatchesSearch(task, urgentSectionSearch)).slice(0, 5),
+    [urgentTasks, urgentSectionSearch],
+  );
+  const filteredIncidentsForCard = useMemo(
+    () =>
+      incidents
+        .filter((inc: Incident) => incidentMatchesSearch(inc, urgentSectionSearch))
+        .slice(0, 5),
+    [incidents, urgentSectionSearch],
+  );
 
   if (loading) {
     return (
@@ -215,37 +230,53 @@ export default function SuperAdminDashboard() {
         {/* Urgent Tasks & Incidents */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5" />
-              Urgent Tasks & Incidents
+            <CardTitle className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 shrink-0" />
+                <span>Urgent Tasks & Incidents</span>
+              </div>
+              <div className="relative w-full sm:max-w-xs">
+                <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                <Input
+                  placeholder="Rechercher par nom d'incident, type..."
+                  value={urgentSectionSearch}
+                  onChange={(e) => setUrgentSectionSearch(e.target.value)}
+                  className="pl-10"
+                  aria-label="Filtrer tâches et incidents"
+                />
+              </div>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {urgentTasks.slice(0, 3).map((task: Task) => (
-                <div key={task._id} className="flex items-center gap-3 p-3 border rounded-lg bg-red-50">
-                  <Target className="h-4 w-4 text-red-600" />
-                  <div className="flex-1">
+              {filteredUrgentTasks.map((task: Task) => (
+                <div key={task._id} className="flex items-center gap-3 p-3 border rounded-lg bg-red-50 dark:bg-red-950/30">
+                  <Target className="h-4 w-4 text-red-600 shrink-0" />
+                  <div className="flex-1 min-w-0">
                     <h4 className="font-semibold text-sm">{task.title}</h4>
-                    <p className="text-xs text-gray-600">Due: {new Date(task.deadline).toLocaleDateString()}</p>
+                    <p className="text-xs text-muted-foreground">Due: {new Date(task.deadline).toLocaleDateString()}</p>
                   </div>
                   <Badge variant="destructive">{task.priority}</Badge>
                 </div>
               ))}
-              {incidents.slice(0, 2).map((incident: Incident) => (
-                <div key={incident._id} className="flex items-center gap-3 p-3 border rounded-lg bg-orange-50">
-                  <AlertTriangle className="h-4 w-4 text-orange-600" />
-                  <div className="flex-1">
+              {filteredIncidentsForCard.map((incident: Incident) => (
+                <div key={incident._id} className="flex items-center gap-3 p-3 border rounded-lg bg-orange-50 dark:bg-orange-950/30">
+                  <AlertTriangle className="h-4 w-4 text-orange-600 shrink-0" />
+                  <div className="flex-1 min-w-0">
                     <h4 className="font-semibold text-sm">{incident.type}</h4>
-                    <p className="text-xs text-gray-600">{incident.description}</p>
+                    <p className="text-xs text-muted-foreground line-clamp-2">{incident.description}</p>
                   </div>
                   <Badge variant={incident.severity === 'critical' ? 'destructive' : 'secondary'}>
                     {incident.severity}
                   </Badge>
                 </div>
               ))}
-              {urgentTasks.length === 0 && incidents.length === 0 && (
-                <div className="text-center py-4 text-gray-500">No urgent items</div>
+              {filteredUrgentTasks.length === 0 && filteredIncidentsForCard.length === 0 && (
+                <div className="text-center py-4 text-muted-foreground text-sm">
+                  {urgentSectionSearch.trim()
+                    ? 'Aucun incident trouvé pour cette recherche'
+                    : 'No urgent items'}
+                </div>
               )}
             </div>
           </CardContent>

@@ -5,6 +5,17 @@
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <title>SmartSite Platform Development</title>
+      <script>
+        (function () {
+          try {
+            var raw = localStorage.getItem("smartsite-theme");
+            if (!raw) return;
+            var p = JSON.parse(raw);
+            var t = p.state && p.state.theme;
+            if (t === "dark") document.documentElement.classList.add("dark");
+          } catch (e) {}
+        })();
+      </script>
     </head>
 
     <body>

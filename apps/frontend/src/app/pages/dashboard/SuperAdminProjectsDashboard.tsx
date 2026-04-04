@@ -20,6 +20,11 @@ import {
   type TeamMember
 } from "../../action/synced-project.action";
 import {
+  getDashboardStats,
+  type Site as DashboardSite,
+  type Incident
+} from "../../action/dashboard.action";
+import {
   AlertTriangle,
   CheckCircle,
   Clock,
@@ -55,6 +60,12 @@ export default function SuperAdminProjectsDashboard() {
   const [statsTitle, setStatsTitle] = useState("");
   const [statsItems, setStatsItems] = useState<string[]>([]);
 
+  // Dashboard data for real stats
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [sites, setSites] = useState<DashboardSite[]>([]);
+  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+
   // Vérifier si l'utilisateur est bien un Super Admin
   useEffect(() => {
     const userRole = user?.role?.name || user?.role;
@@ -66,7 +77,7 @@ export default function SuperAdminProjectsDashboard() {
     }
   }, [user, navigate]);
 
-  // Charger tous les projets des Project Managers
+  // Charger tous les projets et données du dashboard
   const loadProjects = async () => {
     setLoading(true);
     try {
@@ -74,6 +85,13 @@ export default function SuperAdminProjectsDashboard() {
       const projectsData = await getSyncedProjectsWithDetails();
       setProjects(projectsData);
       setFilteredProjects(projectsData);
+
+      // Récupérer les données du dashboard pour les stats réelles
+      const dashboardStats = await getDashboardStats();
+      setDashboardData(dashboardStats);
+      setSites(dashboardStats.sites || []);
+      setIncidents(dashboardStats.incidents || []);
+      setTeamMembers(dashboardStats.teamMembers || []);
 
       // Récupérer les tâches urgentes
       try {
@@ -105,6 +123,10 @@ export default function SuperAdminProjectsDashboard() {
       setFilteredProjects([]);
       setUrgentTasks([]);
       setNotifications([]);
+      setDashboardData(null);
+      setSites([]);
+      setIncidents([]);
+      setTeamMembers([]);
     } finally {
       setLoading(false);
     }
@@ -179,7 +201,8 @@ export default function SuperAdminProjectsDashboard() {
     }
   };
 
-  // Calculer les statistiques
+  // Calculer les statistiques avec données réelles
+  const dashboardStats = dashboardData?.stats || {};
   const stats = {
     totalProjects: projects.length,
     projectsEnCours: projects.filter(p => p.status === 'en_cours').length,
@@ -187,7 +210,13 @@ export default function SuperAdminProjectsDashboard() {
     projectsEnRetard: projects.filter(p => p.status === 'en_retard').length,
     urgentTasks: urgentTasks.length,
     totalProjectManagers: uniqueProjectManagers.length,
-    avgProgress: projects.length > 0 ? Math.round(projects.reduce((sum, p) => sum + p.progress, 0) / projects.length) : 0
+    avgProgress: projects.length > 0 ? Math.round(projects.reduce((sum, p) => sum + p.progress, 0) / projects.length) : 0,
+    // Real dashboard stats
+    criticalIncidents: dashboardStats.criticalIncidents || 0,
+    activeSites: dashboardStats.activeSites || 0,
+    totalTeamMembers: dashboardStats.totalTeamMembers || 0,
+    activeTeamMembers: dashboardStats.activeTeamMembers || 0,
+    totalSites: dashboardStats.totalSites || 0
   };
 
   const openProjectDetails = (project: SyncedProject) => {
@@ -348,6 +377,57 @@ export default function SuperAdminProjectsDashboard() {
               <div>
                 <p className="text-2xl font-bold">{stats.totalProjectManagers}</p>
                 <p className="text-sm text-gray-600">Project Managers</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Nouvelles statistiques avec données réelles */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+        <Card className="cursor-pointer hover:shadow-md transition-shadow">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-8 w-8 text-red-500" />
+              <div>
+                <p className="text-2xl font-bold">{stats.criticalIncidents}</p>
+                <p className="text-sm text-gray-600">Incidents Critiques</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="cursor-pointer hover:shadow-md transition-shadow">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <Building2 className="h-8 w-8 text-blue-500" />
+              <div>
+                <p className="text-2xl font-bold">{stats.activeSites}</p>
+                <p className="text-sm text-gray-600">Sites Actifs</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="cursor-pointer hover:shadow-md transition-shadow">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <Users className="h-8 w-8 text-green-500" />
+              <div>
+                <p className="text-2xl font-bold">{stats.activeTeamMembers}</p>
+                <p className="text-sm text-gray-600">Membres Actifs</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="cursor-pointer hover:shadow-md transition-shadow">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-8 w-8 text-purple-500" />
+              <div>
+                <p className="text-2xl font-bold">{stats.avgProgress}%</p>
+                <p className="text-sm text-gray-600">Progression Moyenne</p>
               </div>
             </div>
           </CardContent>
@@ -604,10 +684,10 @@ export default function SuperAdminProjectsDashboard() {
                   <p className="text-gray-500">Aucune tâche pour ce projet.</p>
                 ) : (
                   <div className="space-y-2">
-                    {selectedProject.tasks.map((task) => (
-                      <div key={task._id} className="p-2 border rounded-md">
+                    {selectedProject.tasks.map((task: any) => (
+                      <div key={task._id || task.id} className="p-2 border rounded-md">
                         <div className="flex items-center justify-between">
-                          <p className="font-medium">{task.title}</p>
+                          <p className="font-medium">{task.title || task.name}</p>
                           <div className="flex items-center gap-2">
                             <Badge variant={getPriorityColor(task.priority)}>{task.priority}</Badge>
                             <Badge variant={getStatusColor(task.status)}>{task.status}</Badge>
