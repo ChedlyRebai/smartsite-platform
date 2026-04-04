@@ -32,6 +32,7 @@ import {
 import { useAuthStore } from "@/app/store/authStore";
 import { useNavigate } from "react-router";
 import toast from "react-hot-toast";
+import { SmartSiteLogo } from "@/app/components/branding/SmartSiteLogo";
 import { roleLabels } from "@/app/utils/roleConfig";
 import type { RoleType } from "@/app/types";
 
@@ -127,10 +128,25 @@ const formSchema = z.object({
 
 type RegisterFormData = z.infer<typeof formSchema>;
 
+const STEP_1_FIELDS: (keyof RegisterFormData)[] = [
+  "cin",
+  "email",
+  "firstName",
+  "lastName",
+  "phoneCountryCode",
+  "telephone",
+  "country",
+  "city",
+  "postalCode",
+  "addressLine",
+  "role",
+];
+
 export default function Register() {
   const navigate = useNavigate();
   const register = useAuthStore((state) => state.register);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [step, setStep] = React.useState<1 | 2 | 3>(1);
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(formSchema),
@@ -195,17 +211,48 @@ export default function Register() {
     );
   };
 
+  const goToStep2 = async () => {
+    const ok = await form.trigger(STEP_1_FIELDS);
+    if (!ok) {
+      toast.error("Veuillez corriger les champs du formulaire.");
+      return;
+    }
+    setStep(2);
+  };
+
+  const goToStep3 = () => {
+    form.setValue("acceptTerms", true, { shouldValidate: false });
+    setStep(3);
+  };
+
+  const goBackToStep1 = () => {
+    form.setValue("acceptTerms", false);
+    form.setValue("acceptReglement", false);
+    setStep(1);
+  };
+
+  const goBackToStep2From3 = () => {
+    form.setValue("acceptReglement", false);
+    setStep(2);
+  };
+
+  const submitFinal = () => {
+    form.setValue("acceptReglement", true, { shouldValidate: false });
+    void form.handleSubmit(onSubmit, onInvalid)();
+  };
+
   return (
-    <div className="h-screen flex min-h-full flex-1">
+    <div className="min-h-screen flex min-h-full flex-1">
       <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
         <div className="mx-auto w-full max-w-lg lg:w-2xl">
           <div>
-            <img
-              src="/logo.png"
-              alt="SmartSite"
-              className="h-16 w-16 object-contain"
-            />
-            <h2 className="mt-8 text-2xl font-bold leading-9 tracking-tight text-gray-900">
+            <a href="/" className="inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-md">
+              <SmartSiteLogo size="sm" />
+            </a>
+            <p className="mt-2 text-xs font-semibold tracking-[0.2em] text-slate-600 uppercase">
+              Intelligent construction platform
+            </p>
+            <h2 className="mt-6 text-2xl font-bold leading-9 tracking-tight text-gray-900">
               Créer votre compte
             </h2>
             <p className="mt-2 text-sm leading-6 text-gray-500">
@@ -222,17 +269,52 @@ export default function Register() {
           <div className="mt-10">
             <Card>
               <CardHeader>
-                <CardTitle>Formulaire d'inscription</CardTitle>
+                <div className="flex flex-wrap items-center gap-2 mb-4">
+                  {([1, 2, 3] as const).map((s) => (
+                    <React.Fragment key={s}>
+                      {s > 1 && (
+                        <span className="text-slate-300 hidden sm:inline">—</span>
+                      )}
+                      <span
+                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
+                          step === s
+                            ? "bg-indigo-600 text-white"
+                            : step > s
+                              ? "bg-indigo-100 text-indigo-800"
+                              : "bg-slate-100 text-slate-500"
+                        }`}
+                      >
+                        {s === 1
+                          ? "1. Informations"
+                          : s === 2
+                            ? "2. Critères"
+                            : "3. Règlement"}
+                      </span>
+                    </React.Fragment>
+                  ))}
+                </div>
+                <CardTitle>
+                  {step === 1 && "Formulaire d'inscription"}
+                  {step === 2 && "Critères d'acceptation"}
+                  {step === 3 && "Règlement de la plateforme"}
+                </CardTitle>
                 <CardDescription>
-                  Remplissez ce formulaire pour créer votre compte SmartSite
+                  {step === 1 &&
+                    "Renseignez vos informations, puis validez pour lire les conditions une par une."}
+                  {step === 2 &&
+                    "Lisez attentivement les critères. Cliquez sur le bouton lorsque vous les acceptez."}
+                  {step === 3 &&
+                    "Dernière étape : lisez le règlement puis envoyez votre demande d'inscription."}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <form
-                  onSubmit={form.handleSubmit(onSubmit, onInvalid)}
+                  onSubmit={(e) => e.preventDefault()}
                   className="space-y-6"
                   noValidate
                 >
+                  {step === 1 && (
+                    <>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FieldGroup>
                       <Controller
@@ -510,18 +592,29 @@ export default function Register() {
                     />
                   </FieldGroup>
 
-                  {/* Critères d'acceptation */}
-                  <FieldGroup>
-                    <div className="space-y-3 p-4 bg-gray-50 rounded-lg border">
-                      <h4 className="font-semibold text-sm text-gray-900">
-                        📋 Critères d'acceptation
-                      </h4>
-                      <div className="text-xs text-gray-600 space-y-2">
-                        <p>
-                          Avant de soumettre votre demande d'inscription,
+                  <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                    <Button
+                      type="button"
+                      onClick={goToStep2}
+                      className="flex-1 rounded-md bg-indigo-600 px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+                    >
+                      Continuer vers les critères d'acceptation
+                    </Button>
+                  </div>
+                    </>
+                  )}
+
+                  {step === 2 && (
+                    <div className="space-y-5">
+                      <div className="max-h-[min(420px,55vh)] overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-700 shadow-inner">
+                        <h4 className="font-semibold text-base text-slate-900 mb-3 flex items-center gap-2">
+                          <span aria-hidden>📋</span> Critères d&apos;acceptation
+                        </h4>
+                        <p className="mb-3 text-slate-600">
+                          Avant de soumettre votre demande d&apos;inscription,
                           veuillez noter que :
                         </p>
-                        <ul className="list-disc list-inside space-y-1 ml-2">
+                        <ul className="list-disc pl-5 space-y-2 leading-relaxed">
                           <li>
                             Les informations fournies doivent être exactes et
                             vérifiables
@@ -535,7 +628,8 @@ export default function Register() {
                             administrative
                           </li>
                           <li>
-                            Le processus d'approbation peut prendre 24-48 heures
+                            Le processus d&apos;approbation peut prendre 24-48
+                            heures
                           </li>
                           <li>
                             Un email de confirmation sera envoyé après
@@ -543,56 +637,43 @@ export default function Register() {
                           </li>
                         </ul>
                       </div>
-
-                      <Controller
-                        name="acceptTerms"
-                        control={form.control}
-                        render={({ field, fieldState }) => (
-                          <Field data-invalid={fieldState.invalid}>
-                            <div className="flex items-start space-x-2">
-                              <input
-                                type="checkbox"
-                                id="acceptTerms"
-                                checked={field.value}
-                                onChange={(e) =>
-                                  field.onChange(e.target.checked)
-                                }
-                                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                              />
-                              <div className="space-y-1">
-                                <FieldLabel
-                                  htmlFor="acceptTerms"
-                                  className="text-sm font-normal"
-                                >
-                                  J'ai lu et j'accepte les critères
-                                  d'acceptation ci-dessus
-                                </FieldLabel>
-                                {fieldState.invalid && (
-                                  <FieldError errors={[fieldState.error]} />
-                                )}
-                              </div>
-                            </div>
-                          </Field>
-                        )}
-                      />
+                      <p className="text-xs text-slate-500">
+                        Faites défiler le texte ci-dessus si besoin, puis
+                        confirmez votre accord.
+                      </p>
+                      <div className="flex flex-col-reverse sm:flex-row gap-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={goBackToStep1}
+                          className="flex-1"
+                        >
+                          Retour au formulaire
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={goToStep3}
+                          className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white"
+                        >
+                          J&apos;ai lu et j&apos;accepte ces critères
+                        </Button>
+                      </div>
                     </div>
-                  </FieldGroup>
+                  )}
 
-                  {/* Règlement */}
-                  <FieldGroup>
-                    <div className="space-y-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                      <h4 className="font-semibold text-sm text-blue-900">
-                        📜 Règlement de la plateforme
-                      </h4>
-                      <div className="text-xs text-blue-800 space-y-2">
-                        <p>
+                  {step === 3 && (
+                    <div className="space-y-5">
+                      <div className="max-h-[min(420px,55vh)] overflow-y-auto rounded-xl border border-blue-200 bg-blue-50/80 p-5 text-sm text-slate-800 shadow-inner">
+                        <h4 className="font-semibold text-base text-blue-950 mb-3 flex items-center gap-2">
+                          <span aria-hidden>📜</span> Règlement de la plateforme
+                        </h4>
+                        <p className="mb-3 text-blue-950/90">
                           En utilisant la plateforme SmartSite, vous vous
                           engagez à respecter :
                         </p>
-                        <ul className="list-disc list-inside space-y-1 ml-2">
+                        <ul className="list-disc pl-5 space-y-2 leading-relaxed text-blue-950/90">
                           <li>
-                            Respecter les politiques de confidentialité et de
-                            sécurité
+                            Les politiques de confidentialité et de sécurité
                           </li>
                           <li>Fournir des informations exactes et à jour</li>
                           <li>
@@ -606,66 +687,45 @@ export default function Register() {
                             Respecter les autres utilisateurs et collaborateurs
                           </li>
                           <li>
-                            Signalier tout problème ou anomalie rapidement
+                            Signaler tout problème ou anomalie rapidement
                           </li>
                           <li>
                             Accepter les décisions administratives finales
                           </li>
                         </ul>
-                        <p className="font-medium text-blue-900">
+                        <p className="mt-4 font-semibold text-blue-950 border-t border-blue-200 pt-4">
                           Toute violation du règlement peut entraîner la
                           suspension ou la suppression de votre compte.
                         </p>
                       </div>
-
-                      <Controller
-                        name="acceptReglement"
-                        control={form.control}
-                        render={({ field, fieldState }) => (
-                          <Field data-invalid={fieldState.invalid}>
-                            <div className="flex items-start space-x-2">
-                              <input
-                                type="checkbox"
-                                id="acceptReglement"
-                                checked={field.value}
-                                onChange={(e) =>
-                                  field.onChange(e.target.checked)
-                                }
-                                className="mt-0.5 h-4 w-4 rounded border-blue-300 text-blue-600 focus:ring-blue-500"
-                              />
-                              <div className="space-y-1">
-                                <FieldLabel
-                                  htmlFor="acceptReglement"
-                                  className="text-sm font-normal text-blue-900"
-                                >
-                                  J'ai lu et j'accepte le règlement de la
-                                  plateforme
-                                </FieldLabel>
-                                {fieldState.invalid && (
-                                  <FieldError errors={[fieldState.error]} />
-                                )}
-                              </div>
-                            </div>
-                          </Field>
-                        )}
-                      />
+                      <div className="flex flex-col-reverse sm:flex-row gap-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={goBackToStep2From3}
+                          disabled={isLoading}
+                          className="flex-1"
+                        >
+                          Retour aux critères
+                        </Button>
+                        <Button
+                          type="button"
+                          disabled={isLoading}
+                          onClick={submitFinal}
+                          className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white"
+                        >
+                          {isLoading ? (
+                            <>
+                              <span className="inline-block animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2 align-middle" />
+                              Envoi en cours...
+                            </>
+                          ) : (
+                            "J'accepte le règlement et j'envoie ma demande"
+                          )}
+                        </Button>
+                      </div>
                     </div>
-                  </FieldGroup>
-
-                  <Button
-                    type="submit"
-                    disabled={isLoading}
-                    className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                  >
-                    {isLoading ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Inscription en cours...
-                      </>
-                    ) : (
-                      "S'inscrire"
-                    )}
-                  </Button>
+                  )}
                 </form>
               </CardContent>
             </Card>

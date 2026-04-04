@@ -21,6 +21,7 @@ import { useAuthStore } from "@/app/store/authStore";
 import { useNavigate } from "react-router";
 import toast from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
+import { SmartSiteLogo } from "@/app/components/branding/SmartSiteLogo";
 
 const formSchema = z.object({
   cin: z
@@ -36,7 +37,6 @@ export default function Login() {
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
   const [isLoading, setIsLoading] = React.useState(false);
-  const [logoAvailable, setLogoAvailable] = React.useState(true);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -98,12 +98,13 @@ export default function Login() {
         <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
           <div className="mx-auto w-full  lg:w-96">
             <div>
-              <img
-                src="/logo.png"
-                alt="SmartSite"
-                className="h-16 w-16 object-contain"
-              />
-              <h2 className="mt-8 text-2xl font-bold leading-9 tracking-tight text-gray-900">
+              <a href="/" className="inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-md">
+                <SmartSiteLogo size="sm" />
+              </a>
+              <p className="mt-2 text-xs font-semibold tracking-[0.2em] text-slate-600 uppercase">
+                Intelligent construction platform
+              </p>
+              <h2 className="mt-6 text-2xl font-bold leading-9 tracking-tight text-gray-900">
                 Connectez-vous à votre compte
               </h2>
               <p className="mt-2 text-sm leading-6 text-gray-500">

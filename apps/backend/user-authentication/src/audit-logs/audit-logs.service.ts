@@ -9,7 +9,7 @@ export class AuditLogsService {
   constructor(
     @InjectModel(AuditLog.name)
     private readonly auditLogModel: Model<AuditLogDocument>,
-  ) {}
+  ) { }
 
   async createLog(payload: Partial<AuditLog>) {
     // Rétention automatique: purge des logs plus anciens que N jours
@@ -29,6 +29,7 @@ export class AuditLogsService {
     const mongoQuery: any = {};
 
     if (query.userId) mongoQuery.userId = query.userId;
+    if (query.userCin) mongoQuery.userCin = { $regex: query.userCin, $options: 'i' };
     if (query.actionType) mongoQuery.actionType = query.actionType;
     if (query.severity) mongoQuery.severity = query.severity;
     if (query.status) mongoQuery.status = query.status;

@@ -66,9 +66,11 @@ export default function SystemLogs() {
   const [loading, setLoading] = useState(false);
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
   const [retentionDays, setRetentionDays] = useState<number>(365);
+  const [archivedLogs, setArchivedLogs] = useState<Set<string>>(new Set());
 
   const [filters, setFilters] = useState({
     userId: "all",
+    userCin: "",
     actionType: "all",
     severity: "all",
     keyword: "",
@@ -83,16 +85,7 @@ export default function SystemLogs() {
   );
   const actionTypes = useMemo(() => Array.from(new Set(logs.map((l) => l.actionType))), [logs]);
 
-  const loadLogs = async (
-    filtersOverride?: {
-      userId: string;
-      actionType: string;
-      severity: string;
-      keyword: string;
-      startDate: string;
-      endDate: string;
-    },
-  ) => {
+  const loadLogs = async () => {
     setLoading(true);
     try {
       const token = getAuthToken();
@@ -100,14 +93,14 @@ export default function SystemLogs() {
         toast.error("Token manquant, veuillez vous reconnecter.");
         return;
       }
-      const effectiveFilters = filtersOverride ?? filters;
       const params: Record<string, string> = {};
-      if (effectiveFilters.userId !== "all") params.userId = effectiveFilters.userId;
-      if (effectiveFilters.actionType !== "all") params.actionType = effectiveFilters.actionType;
-      if (effectiveFilters.severity !== "all") params.severity = effectiveFilters.severity;
-      if (effectiveFilters.keyword.trim()) params.keyword = effectiveFilters.keyword.trim();
-      if (effectiveFilters.startDate) params.startDate = effectiveFilters.startDate;
-      if (effectiveFilters.endDate) params.endDate = effectiveFilters.endDate;
+      if (filters.userId !== "all") params.userId = filters.userId;
+      if (filters.userCin.trim()) params.userCin = filters.userCin.trim();
+      if (filters.actionType !== "all") params.actionType = filters.actionType;
+      if (filters.severity !== "all") params.severity = filters.severity;
+      if (filters.keyword.trim()) params.keyword = filters.keyword.trim();
+      if (filters.startDate) params.startDate = filters.startDate;
+      if (filters.endDate) params.endDate = filters.endDate;
 
       const res = await api.get("/audit-logs", {
         params,
@@ -151,7 +144,7 @@ export default function SystemLogs() {
           <CardTitle>Filtres</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-3">
             <div>
               <Label>Utilisateur</Label>
               <Select value={filters.userId} onValueChange={(v) => setFilters((f) => ({ ...f, userId: v }))}>
@@ -165,6 +158,14 @@ export default function SystemLogs() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div>
+              <Label>CIN</Label>
+              <Input
+                placeholder="Rechercher par CIN..."
+                value={filters.userCin}
+                onChange={(e) => setFilters((f) => ({ ...f, userCin: e.target.value }))}
+              />
             </div>
             <div>
               <Label>Action</Label>
@@ -206,7 +207,13 @@ export default function SystemLogs() {
             <Button
               variant="outline"
               onClick={() => {
-                const blob = new Blob([JSON.stringify(logs, null, 2)], { type: "application/json;charset=utf-8" });
+                const logsToArchive = logs.filter(log => !archivedLogs.has(log._id));
+                if (logsToArchive.length === 0) {
+                  toast.error("Aucun nouveau log à archiver");
+                  return;
+                }
+
+                const blob = new Blob([JSON.stringify(logsToArchive, null, 2)], { type: "application/json;charset=utf-8" });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a");
                 a.href = url;
@@ -215,6 +222,13 @@ export default function SystemLogs() {
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
+
+                // Marquer les logs comme archivés
+                const newArchivedLogs = new Set(archivedLogs);
+                logsToArchive.forEach(log => newArchivedLogs.add(log._id));
+                setArchivedLogs(newArchivedLogs);
+
+                toast.success(`${logsToArchive.length} logs archivés avec succès`);
               }}
             >
               Archiver JSON
@@ -222,8 +236,14 @@ export default function SystemLogs() {
             <Button
               variant="outline"
               onClick={() => {
+                const logsToArchive = logs.filter(log => !archivedLogs.has(log._id));
+                if (logsToArchive.length === 0) {
+                  toast.error("Aucun nouveau log à archiver");
+                  return;
+                }
+
                 const header = "date,user,actionType,actionLabel,severity,status,resourceType,resourceId,ip,details,sessionDurationSec";
-                const rows = logs.map((l) =>
+                const rows = logsToArchive.map((l) =>
                   [
                     new Date(l.createdAt).toISOString(),
                     `"${(l.userName || l.userCin || "").replace(/"/g, '""')}"`,
@@ -248,6 +268,13 @@ export default function SystemLogs() {
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
+
+                // Marquer les logs comme archivés
+                const newArchivedLogs = new Set(archivedLogs);
+                logsToArchive.forEach(log => newArchivedLogs.add(log._id));
+                setArchivedLogs(newArchivedLogs);
+
+                toast.success(`${logsToArchive.length} logs archivés avec succès`);
               }}
             >
               Archiver CSV
@@ -255,9 +282,9 @@ export default function SystemLogs() {
             <Button
               variant="outline"
               onClick={() => {
-                const resetFilters = { userId: "all", actionType: "all", severity: "all", keyword: "", startDate: "", endDate: "" };
+                const resetFilters = { userId: "all", userCin: "", actionType: "all", severity: "all", keyword: "", startDate: "", endDate: "" };
                 setFilters(resetFilters);
-                loadLogs(resetFilters);
+                loadLogs();
               }}
             >
               Réinitialiser
@@ -278,10 +305,11 @@ export default function SystemLogs() {
           ) : (
             <div className="space-y-2">
               {logs.map((log) => (
-                <div key={log._id} className="p-3 border rounded-md flex items-center justify-between">
+                <div key={log._id} className={`p-3 border rounded-md flex items-center justify-between ${archivedLogs.has(log._id) ? 'bg-gray-50 opacity-75' : ''}`}>
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{log.actionLabel}</span>
+                      {archivedLogs.has(log._id) && <Badge variant="secondary">Archivé</Badge>}
                       <Badge variant={severityVariant(log.severity)}>{log.severity || "normal"}</Badge>
                       <Badge variant={log.status === "failed" ? "destructive" : "secondary"}>{log.status || "success"}</Badge>
                     </div>

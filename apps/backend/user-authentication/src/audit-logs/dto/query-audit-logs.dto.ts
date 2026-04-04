@@ -7,6 +7,10 @@ export class QueryAuditLogsDto {
 
   @IsOptional()
   @IsString()
+  userCin?: string;
+
+  @IsOptional()
+  @IsString()
   actionType?: string;
 
   @IsOptional()

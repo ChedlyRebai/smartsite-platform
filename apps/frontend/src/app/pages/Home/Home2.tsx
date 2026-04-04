@@ -6,6 +6,7 @@ import {
   Menu,
   Twitter,
 } from "lucide-react";
+import { SmartSiteLogo } from "@/app/components/branding/SmartSiteLogo";
 
 const navigation = [
   { name: "Product", href: "#" },
@@ -176,13 +177,9 @@ export default function Home2() {
           aria-label="Global"
         >
           <div className="flex lg:flex-1">
-            <a href="#" className="-m-1.5 p-1.5">
+            <a href="/" className="-m-1.5 p-1.5 flex items-center gap-2 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600">
               <span className="sr-only">SmartSite</span>
-              <img
-                className="h-8 w-auto"
-                src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
-                alt=""
-              />
+              <SmartSiteLogo size="md" className="drop-shadow-sm" />
             </a>
           </div>
           <div className="flex lg:hidden">
@@ -265,6 +262,12 @@ export default function Home2() {
             <div className="mx-auto max-w-7xl px-6 pb-32 pt-36 sm:pt-60 lg:px-8 lg:pt-32">
               <div className="mx-auto max-w-2xl gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
                 <div className="w-full max-w-xl lg:shrink-0 xl:max-w-2xl">
+                  <div className="mb-8">
+                    <SmartSiteLogo size="lg" className="mx-auto lg:mx-0" />
+                    <p className="mt-3 text-center text-xs font-semibold tracking-[0.2em] text-slate-600 uppercase lg:text-left">
+                      Intelligent construction platform
+                    </p>
+                  </div>
                   <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
                     SmartSite: Manage your construction sites with artificial
                     intelligence

@@ -226,17 +226,41 @@ export class AuthService {
       throw new NotFoundException('User not found');
     }
 
-    let hashedPassword = user.password;
-    if (password) {
-      hashedPassword = await bcrypt.hash(password, 10);
+    if ((user as any).status && (user as any).status !== 'pending') {
+      throw new BadRequestException(
+        "L'utilisateur n'est pas en attente d'approbation",
+      );
     }
 
-    const updatedUser = await this.usersService.update(userId, {
-      password: hashedPassword,
+    const plainPassword = password?.trim() || '';
+    const updatePayload: Record<string, unknown> = {
       status: 'approved',
       approvedBy: adminId,
       approvedAt: new Date(),
-    });
+    };
+    // usersService.update() hash le mot de passe une seule fois — ne pas pré-hasher ici
+    if (plainPassword) {
+      updatePayload.password = plainPassword;
+    }
+
+    const updatedUser = await this.usersService.update(userId, updatePayload);
+    if (!updatedUser) {
+      throw new BadRequestException("Échec de l'approbation");
+    }
+
+    if (updatedUser.email && plainPassword) {
+      try {
+        await this.emailService.sendApprovalEmail(
+          updatedUser.email,
+          updatedUser.firstName,
+          updatedUser.lastName,
+          updatedUser.cin,
+          plainPassword,
+        );
+      } catch (error) {
+        console.error("Échec envoi email d'approbation (compte déjà approuvé):", error);
+      }
+    }
 
     return updatedUser;
   }
