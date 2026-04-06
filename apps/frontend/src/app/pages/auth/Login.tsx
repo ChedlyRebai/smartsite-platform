@@ -98,7 +98,10 @@ export default function Login() {
         <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
           <div className="mx-auto w-full  lg:w-96">
             <div>
-              <a href="/" className="inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-md">
+              <a
+                href="/"
+                className="inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-md"
+              >
                 <SmartSiteLogo size="sm" />
               </a>
               <p className="mt-2 text-xs font-semibold tracking-[0.2em] text-slate-600 uppercase">
