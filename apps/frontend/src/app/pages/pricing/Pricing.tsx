@@ -44,7 +44,12 @@ const Pricing = () => {
     },
   ];
   return (
-    <>
+    <main
+      id="main-content"
+      data-app-content
+      tabIndex={-1}
+      className="min-h-screen bg-white outline-none"
+    >
       <Navbar />
       <section className="bg-white py-20">
         <div className="max-w-7xl mx-auto mt-20 px-6 lg:px-8">
@@ -107,7 +112,7 @@ const Pricing = () => {
           </div>
         </div>
       </section>
-    </>
+    </main>
   );
 };
 

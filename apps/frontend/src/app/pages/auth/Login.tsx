@@ -94,7 +94,12 @@ export default function Login() {
         <body class="h-full">
         ```
       */}
-      <div className="h-screen flex min-h-full flex-1">
+      <div
+        id="main-content"
+        data-app-content
+        tabIndex={-1}
+        className="h-screen flex min-h-full flex-1 outline-none"
+      >
         <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
           <div className="mx-auto w-full  lg:w-96">
             <div>

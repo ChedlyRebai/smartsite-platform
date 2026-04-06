@@ -63,8 +63,13 @@ export const BudgetInfluenceApprovalChart: React.FC<Props> = ({ data }) => {
         </CardDescription>
       </CardHeader>
       <CardContent className="h-[320px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={chartData} margin={{ top: 8, right: 16, left: 8, bottom: 8 }}>
+        <div
+          role="img"
+          aria-label="Line chart showing cumulative estimated savings and budget spent at each recommendation approval"
+          className="h-full"
+        >
+          <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart data={chartData} margin={{ top: 8, right: 16, left: 8, bottom: 8 }}>
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
             <XAxis dataKey="label" tick={{ fontSize: 11 }} />
             <YAxis
@@ -128,8 +133,22 @@ export const BudgetInfluenceApprovalChart: React.FC<Props> = ({ data }) => {
               connectNulls
               activeDot={{ r: 6 }}
             />
-          </ComposedChart>
-        </ResponsiveContainer>
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="sr-only" aria-live="polite">
+          <p>Budget impact summary by approval step:</p>
+          <ul>
+            {chartData.map((p) => (
+              <li key={`${p.label}-${p.step}`}>
+                {p.label}: cumulative estimated savings {fmt(p.cumulativePotentialReliefTnd)} TND
+                {p.budgetSpentSnapshotTnd != null
+                  ? `, budget spent snapshot ${fmt(p.budgetSpentSnapshotTnd)} TND.`
+                  : "."}
+              </li>
+            ))}
+          </ul>
+        </div>
       </CardContent>
     </Card>
   );

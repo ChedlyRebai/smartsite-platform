@@ -88,12 +88,15 @@ export default function DashboardLayout() {
               variant="ghost"
               size="icon"
               className="lg:hidden"
+              aria-label={sidebarOpen ? "Close sidebar menu" : "Open sidebar menu"}
+              aria-controls="primary-sidebar"
+              aria-expanded={sidebarOpen}
               onClick={() => setSidebarOpen(!sidebarOpen)}
             >
               {sidebarOpen ? (
-                <X className="h-5 w-5" />
+                <X aria-hidden="true" className="h-5 w-5" />
               ) : (
-                <Menu className="h-5 w-5" />
+                <Menu aria-hidden="true" className="h-5 w-5" />
               )}
             </Button>
             <Link to="/" className="flex items-center gap-2">
@@ -121,9 +124,10 @@ export default function DashboardLayout() {
               variant="ghost"
               size="icon"
               className="relative"
+              aria-label="Open notifications"
               onClick={() => navigate("/notifications")}
             >
-              <Bell className="h-5 w-5" />
+              <Bell aria-hidden="true" className="h-5 w-5" />
               {unreadNotifications > 0 && (
                 <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center bg-red-500 text-white text-xs">
                   {unreadNotifications}
@@ -148,7 +152,7 @@ export default function DashboardLayout() {
                       {/* {roleLabels[user.role]} */}
                     </span>
                   </div>
-                  <ChevronDown className="h-4 w-4 hidden md:block" />
+                  <ChevronDown aria-hidden="true" className="h-4 w-4 hidden md:block" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
@@ -184,6 +188,8 @@ export default function DashboardLayout() {
       <div className="flex">
         {/* Sidebar */}
         <aside
+          id="primary-sidebar"
+          aria-label="Sidebar navigation"
           className={cn(
             "fixed lg:sticky top-0 left-0 z-30 h-screen w-[17rem] flex flex-col",
             "bg-sidebar text-sidebar-foreground border-r border-sidebar-border",
@@ -215,14 +221,21 @@ export default function DashboardLayout() {
 
         {/* Overlay for mobile */}
         {sidebarOpen && (
-          <div
+          <button
+            type="button"
+            aria-label="Close sidebar overlay"
             className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
 
         {/* Main Content */}
-        <main className="flex-1 p-6 lg:p-8">
+        <main
+          id="main-content"
+          data-app-content
+          tabIndex={-1}
+          className="flex-1 p-6 lg:p-8 outline-none"
+        >
           <Outlet />
         </main>
       </div>

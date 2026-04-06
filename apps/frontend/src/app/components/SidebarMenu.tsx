@@ -51,6 +51,8 @@ export function SidebarMenuItem({
   }, [hasActiveChild]);
 
   const isItemExpanded = isExpanded || hasActiveChild;
+  const itemId = `sidebar-group-${item.label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+  const submenuId = `${itemId}-submenu`;
 
   const toggleExpanded = () => {
     if (hasChildren) setIsExpanded(!isExpanded);
@@ -61,9 +63,11 @@ export function SidebarMenuItem({
     return (
       <Link
         to={item.href}
+        aria-current={active ? "page" : undefined}
         className={cn(
           "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
           "text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar",
           active &&
             "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm border border-sidebar-border/60",
         )}
@@ -89,10 +93,14 @@ export function SidebarMenuItem({
       <div className="space-y-1">
         <button
           type="button"
+          id={itemId}
+          aria-expanded={isItemExpanded}
+          aria-controls={submenuId}
           onClick={toggleExpanded}
           className={cn(
             "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors",
             "text-sidebar-foreground/90 hover:bg-sidebar-accent/80 hover:text-sidebar-accent-foreground",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar",
             (hasActiveChild || isParentActive) && "text-sidebar-foreground",
           )}
         >
@@ -113,16 +121,23 @@ export function SidebarMenuItem({
         </button>
 
         {!isCollapsed && isItemExpanded && (
-          <div className="ml-2 space-y-0.5 border-l border-sidebar-border/80 pl-3 py-1">
+          <div
+            id={submenuId}
+            role="group"
+            aria-labelledby={itemId}
+            className="ml-2 space-y-0.5 border-l border-sidebar-border/80 pl-3 py-1"
+          >
             {visibleChildren.map((child, index) => {
               const childActive = isRouteActive(pathname, child.href);
               return (
                 <Link
                   key={`${child.href}-${index}`}
                   to={child.href}
+                  aria-current={childActive ? "page" : undefined}
                   className={cn(
                     "flex items-center gap-2 rounded-md py-2 pr-2 pl-1 text-sm transition-colors",
                     "text-sidebar-foreground/75 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar",
                     childActive &&
                       "bg-sidebar-accent text-sidebar-accent-foreground font-medium text-sidebar-foreground",
                   )}
@@ -173,7 +188,7 @@ export function SidebarMenu({
             Menu
           </p>
         )}
-        <nav className="space-y-1">
+        <nav aria-label="Primary navigation" className="space-y-1">
           {items.map((item, index) => (
             <SidebarMenuItem
               key={`${item.label}-${index}`}

@@ -213,7 +213,12 @@ export default function Home2() {
         </nav>
       </header>
 
-      <main className="isolate">
+      <main
+        id="main-content"
+        data-app-content
+        tabIndex={-1}
+        className="isolate outline-none"
+      >
         {/* Hero section */}
         <div className="relative isolate -z-10">
           <svg

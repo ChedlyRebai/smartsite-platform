@@ -6,12 +6,14 @@ import ThemeSync from "./components/ThemeSync";
 import { ThemeToggle } from "./components/ThemeToggle";
 import "@svar-ui/react-gantt/all.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { GlobalAccessibilityBar } from "./components/accessibility/GlobalAccessibilityBar";
 
 const queryClient = new QueryClient();
 
 export default function App() {
   return (
     <>
+      <GlobalAccessibilityBar />
       <QueryClientProvider client={queryClient}>
         <ThemeSync />
         <RouterProvider router={router} />
