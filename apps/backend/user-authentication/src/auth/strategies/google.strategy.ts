@@ -12,12 +12,20 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     private usersService: UsersService,
     private jwtService: JwtService,
   ) {
-    super({
-      clientID: configService.get('GOOGLE_CLIENT_ID') || '',
-      clientSecret: configService.get('GOOGLE_CLIENT_SECRET') || '',
-      callbackURL: 'http://localhost:3000/auth/google/callback',
-      scope: ['email', 'profile'],
-    } as any); // ← Ajouter 'as any' pour éviter l'erreur de type
+    const clientID = configService.get('GOOGLE_CLIENT_ID');
+    const clientSecret = configService.get('GOOGLE_CLIENT_SECRET');
+    
+    if (!clientID || !clientSecret) {
+      console.warn('⚠️ Google OAuth not configured - GOOGLE_CLIENT_ID and/or GOOGLE_CLIENT_SECRET missing');
+      super({ clientID: 'dummy', clientSecret: 'dummy', callbackURL: 'http://localhost:3000/auth/google/callback', scope: ['email', 'profile'] });
+    } else {
+      super({
+        clientID,
+        clientSecret,
+        callbackURL: 'http://localhost:3000/auth/google/callback',
+        scope: ['email', 'profile'],
+      });
+    }
   }
 
   async validate(
