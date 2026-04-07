@@ -23,9 +23,7 @@ export class PaiementService {
 
     const reference = createPaymentDto.reference || this.generateReference();
 
-    const paymentDate = createPaymentDto.paymentDate
-      ? new Date(createPaymentDto.paymentDate)
-      : new Date();
+    const paymentDate = new Date();
 
     let status = createPaymentDto.status || 'pending';
     if (status === 'paid') {
@@ -87,10 +85,6 @@ export class PaiementService {
       ...updatePaymentDto,
       updatedBy: userId && Types.ObjectId.isValid(userId) ? new Types.ObjectId(userId) : null,
     };
-
-    if (updatePaymentDto.paymentDate) {
-      updateData.paymentDate = new Date(updatePaymentDto.paymentDate);
-    }
 
     if (updatePaymentDto.siteId && !Types.ObjectId.isValid(updatePaymentDto.siteId)) {
       throw new BadRequestException('Invalid siteId format. Must be a valid MongoDB ObjectId');

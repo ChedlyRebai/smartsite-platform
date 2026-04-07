@@ -99,7 +99,6 @@ const emptyForm = {
   amount: "" as number | string,
   description: "",
   paymentMethod: "cash" as PaymentMethod,
-  paymentDate: "",
 };
 
 const Payments = () => {
@@ -240,7 +239,7 @@ const Payments = () => {
         amount: Number(form.amount),
         description: form.description || undefined,
         paymentMethod: form.paymentMethod,
-        paymentDate: form.paymentDate ? new Date(form.paymentDate).toISOString() : new Date().toISOString(),
+        paymentDate: new Date().toISOString(),
         status: "completed",
       };
       createMutation.mutate(payload);
@@ -254,6 +253,7 @@ const Payments = () => {
       amount: Number(form.amount),
       description: form.description || undefined,
       paymentMethod: "card",
+      paymentDate: new Date().toISOString(),
       status: "completed",
     };
     console.log("Saving payment:", payload);
@@ -366,11 +366,7 @@ const Payments = () => {
                   {formErrors.description && <p className="text-xs text-red-500 flex items-center gap-1"><AlertCircle className="h-3 w-3" />{formErrors.description}</p>}
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-sm font-medium">Payment Date</label>
-                  <Input type="date" value={form.paymentDate} max={new Date().toISOString().split("T")[0]} onChange={(e) => setForm({ ...form, paymentDate: e.target.value })} />
-                  <p className="text-xs text-muted-foreground">Leave blank to use today's date.</p>
-                </div>
+
 
                 <Button className="w-full" onClick={handleCreatePayment} disabled={createMutation.isPending}>
                   {form.paymentMethod === "card" ? (<><CreditCard className="h-4 w-4 mr-2" />Pay by Card</>) : createMutation.isPending ? "Saving…" : "Create Payment"}
