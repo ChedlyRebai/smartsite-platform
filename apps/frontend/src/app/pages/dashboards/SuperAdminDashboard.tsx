@@ -97,7 +97,7 @@ export default function SuperAdminDashboard() {
         />
         <StatCard
           title="Total Budget"
-          value={`$${(stats.totalBudget / 1000000).toFixed(1)}M`}
+          value={`TND ${(stats.totalBudget / 1000000).toFixed(1)}M`}
           icon={DollarSign}
           trend={{ value: 15.3, isPositive: true }}
         />

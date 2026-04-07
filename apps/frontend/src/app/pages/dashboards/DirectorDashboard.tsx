@@ -32,7 +32,7 @@ export default function DirectorDashboard() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total Revenue"
-          value={`$${(totalRevenue / 1000000).toFixed(1)}M`}
+          value={`TND${(totalRevenue / 1000000).toFixed(1)}M`}
           icon={DollarSign}
           trend={{ value: 18.5, isPositive: true }}
         />
@@ -50,9 +50,9 @@ export default function DirectorDashboard() {
         />
         <StatCard
           title="On-Track Projects"
-          value={`${onTrackProjects}/${totalProjects}`}
+          value={`TND{onTrackProjects}/${totalProjects}`}
           icon={Target}
-          subtitle={`${Math.round((onTrackProjects/totalProjects)*100)}% success rate`}
+          subtitle={`TND{Math.round((onTrackProjects/totalProjects)*100)}% success rate`}
         />
       </div>
 
@@ -85,7 +85,7 @@ export default function DirectorDashboard() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />
-                <Tooltip formatter={(value) => `$${Number(value).toLocaleString()}`} />
+                <Tooltip formatter={(value) => `TND${Number(value).toLocaleString()}`} />
                 <Bar dataKey="profit" fill="#10b981" name="Profit" />
               </BarChart>
             </ResponsiveContainer>

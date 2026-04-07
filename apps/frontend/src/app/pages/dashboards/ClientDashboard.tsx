@@ -19,7 +19,7 @@ export default function ClientDashboard() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <StatCard title="My Projects" value={mockProjects.length} icon={Eye} subtitle="In your portfolio" />
         <StatCard title="Average Progress" value="40%" icon={Calendar} subtitle="Across all projects" />
-        <StatCard title="Total Investment" value="$16M" icon={DollarSign} subtitle="Total project value" />
+        <StatCard title="Total Investment" value="TND16M" icon={DollarSign} subtitle="Total project value" />
         <StatCard title="Reports Available" value={8} icon={FileText} subtitle="Ready to view" />
       </div>
 

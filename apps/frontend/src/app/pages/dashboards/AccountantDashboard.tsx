@@ -26,8 +26,8 @@ export default function AccountantDashboard() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Total Budget" value={`$${(totalBudget / 1000000).toFixed(1)}M`} icon={DollarSign} trend={{ value: 15, isPositive: true }} />
-        <StatCard title="Revenue (MTD)" value="$2.2M" icon={TrendingUp} subtitle="Month to date" />
+        <StatCard title="Total Budget" value={`TND${(totalBudget / 1000000).toFixed(1)}M`} icon={DollarSign} trend={{ value: 15, isPositive: true }} />
+        <StatCard title="Revenue (MTD)" value="TND2.2M" icon={TrendingUp} subtitle="Month to date" />
         <StatCard title="Expenses (MTD)" value="$1.75M" icon={TrendingDown} subtitle="Month to date" />
         <StatCard title="Profit Margin" value="20.5%" icon={PieChart} trend={{ value: 3.2, isPositive: true }} />
       </div>
