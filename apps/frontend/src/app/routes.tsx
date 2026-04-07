@@ -41,6 +41,10 @@ import AddCatalogItem from "./pages/catalog/AddCatalogItem";
 import EditCatalogItem from "./pages/catalog/EditCatalogItem";
 import CatalogDetails from "./pages/catalog/CatalogDetails";
 import CheckoutSimulator from "./pages/CheckoutSimulator";
+
+import SupplierMaterials from "./pages/supplier-materials/SupplierMaterials";
+import AddSupplierMaterialMapping from "./pages/supplier-materials/AddSupplierMaterialMapping";
+import SupplierMaterialDetails from "./pages/supplier-materials/SupplierMaterialDetails";
 import PLaningProjects from "./pages/planning/PLaningProjects";
 import ProjectMilestone from "./pages/planning/ProjectMilestone";
 import MilestoneTasks from "./pages/planning/MilestoneTasks";
@@ -50,7 +54,6 @@ import MilestoneTaskss from "./pages/planning/MilestoneTaskss";
 import NotFound from "./pages/Error/NotFound";
 import { PermissionLoader } from "./components/shared/PermissionLoader";
 import ResourceOptimizationDashboard from "@/features/resource-optimization/pages/ResourceOptimizationDashboard";
-import CheckoutSimulator from "./pages/CheckoutSimulator";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = true;
@@ -169,6 +172,22 @@ export const router = createBrowserRouter([
       {
         path: "catalog/:id",
         element: <CatalogDetails />,
+      },
+      {
+        path: "supplier-materials",
+        element: <SupplierMaterials />,
+      },
+      {
+        path: "supplier-materials/add",
+        element: <AddSupplierMaterialMapping />,
+      },
+      {
+        path: "supplier-materials/edit/:id",
+        element: <AddSupplierMaterialMapping />,
+      },
+      {
+        path: "supplier-materials/:id",
+        element: <SupplierMaterialDetails />,
       },
       {
         path: "clients",
