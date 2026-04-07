@@ -132,6 +132,18 @@ export const  navigationItems: NavItem[] = [
     ],
   },
   {
+    label: "My Team Members",
+    href: "/my-team-members",
+    icon: Users,
+    roles: [
+      "super_admin",
+      "director",
+      "project_manager",
+      "site_manager",
+      "works_manager",
+    ],
+  },
+  {
     label: "Clients",
     href: "/clients",
     icon: UserCog,

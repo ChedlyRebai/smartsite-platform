@@ -12,6 +12,7 @@ import Sites from "./pages/sites/Sites";
 import Projects from "./pages/projects/Projects";
 import Planning from "./pages/planning/MyTask";
 import Team from "./pages/team/Team";
+import MyTeamMembers from "./pages/team/MyTeamMembers";
 import Clients from "./pages/clients/Clients";
 import Suppliers from "./pages/suppliers/Suppliers";
 import Materials from "./pages/materials/Materials";
@@ -42,6 +43,11 @@ import { PermissionLoader } from "./components/shared/PermissionLoader";
 import MyAffectedSite from "./pages/planning/MyAffectedSite";
 import MySItes from "./pages/planning/Mysites";
 import MyMilestones from "./pages/planning/MyMilstone";
+import NotificationsPage from "./pages/videoCall/NotificationsPage";
+import HomePage from "./pages/videoCall/HomePage";
+import CallPage from "./pages/videoCall/CallPage";
+import ChatPage from "./pages/videoCall/ChatPage";
+import GroupChatPage from "./pages/videoCall/GroupChatPage";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = true;
@@ -77,6 +83,7 @@ export const router = createBrowserRouter([
     path: "/change-password-first-login",
     element: <ChangePasswordFirstLogin />,
   },
+
   {
     path: "/",
     element: <DashboardLayout />,
@@ -84,6 +91,30 @@ export const router = createBrowserRouter([
       {
         path: "dashboard",
         element: <Dashboard />,
+      },
+      {
+        path: "/home",
+        element: <HomePage />,
+      },
+      {
+        path: "/notifcall",
+        element: <NotificationsPage />,
+      },
+      {
+        path: "/call/:id",
+        element: <CallPage />,
+      },
+      {
+        path: "/chat/:id",
+        element: <ChatPage />,
+      },
+      {
+        path: "/group-chat",
+        element: <GroupChatPage />,
+      },
+      {
+        path: "/group-chat/:groupId",
+        element: <GroupChatPage />,
       },
       {
         path: "project-manager-dashboard",
@@ -149,6 +180,10 @@ export const router = createBrowserRouter([
       {
         path: "team",
         element: <Team />,
+      },
+      {
+        path: "my-team-members",
+        element: <MyTeamMembers />,
       },
       {
         path: "clients",
