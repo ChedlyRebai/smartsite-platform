@@ -50,7 +50,6 @@ import MilestoneTaskss from "./pages/planning/MilestoneTaskss";
 import NotFound from "./pages/Error/NotFound";
 import { PermissionLoader } from "./components/shared/PermissionLoader";
 import ResourceOptimizationDashboard from "@/features/resource-optimization/pages/ResourceOptimizationDashboard";
-import CheckoutSimulator from "./pages/CheckoutSimulator";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = true;
