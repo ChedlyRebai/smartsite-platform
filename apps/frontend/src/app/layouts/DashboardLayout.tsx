@@ -35,13 +35,13 @@ export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [logoAvailable, setLogoAvailable] = useState(true);
 
-  console.log(user, "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu");
+  // console.log(user, "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu");
 
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
-  console.log(user, "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu");
+  // console.log(user, "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu");
 
   const {
     data: navigationItems,

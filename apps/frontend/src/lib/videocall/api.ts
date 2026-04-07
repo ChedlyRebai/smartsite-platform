@@ -65,7 +65,7 @@ export async function getStreamToken() {
 
   // Normalize possible backend response shapes and fail fast if token is missing.
   const token = payload?.token ?? payload?.data?.token;
-
+  
   if (!token) {
     throw new Error("Stream token is missing from API response");
   }

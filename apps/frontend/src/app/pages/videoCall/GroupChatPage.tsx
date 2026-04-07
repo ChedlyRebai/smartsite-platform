@@ -13,9 +13,10 @@ import {
 import { StreamChat } from "stream-chat";
 import { VideoIcon, UsersIcon } from "lucide-react";
 import toast from "react-hot-toast";
-import useAuthUser from "@/app/hooks/videoCAllHooks/useAuthUser";
 import { getStreamToken } from "@/lib/videocall/api";
+import { extractStreamUserIdFromToken } from "@/lib/videocall/stream";
 import ChatLoader from "@/app/components/videoCall/ChatLoader";
+import { useAuthStore } from "@/app/store/authStore";
 
 const STREAM_API_KEY = "gcatxrhb47wf";
 // VITE_STREAM_API_KEY=gcatxrhb47wf
@@ -31,17 +32,18 @@ const GroupChatPage = () => {
   const [channel, setChannel] = useState<any>(null);
   const [isConnecting, setIsConnecting] = useState(false);
 
-  const { authUser } = useAuthUser();
+  const { user:authUser } = useAuthStore();
 
   const {
     data: tokenData,
     isLoading: tokenLoading,
     isError: tokenError,
   } = useQuery({
-    queryKey: ["streamToken", authUser?._id],
+    queryKey: ["streamToken", authUser?.id],
     queryFn: getStreamToken,
-    enabled: !!authUser?._id,
+    enabled: !!authUser?.id,
   });
+  const streamUserId = tokenData?.token ? extractStreamUserIdFromToken(tokenData.token) : null;
 
   const groupName = searchParams.get("name") || "Project Group";
   const membersFromQuery = searchParams.get("members") || "";
@@ -52,12 +54,12 @@ const GroupChatPage = () => {
       .map((id) => id.trim())
       .filter(Boolean);
 
-    if (authUser?._id) {
-      parsed.push(authUser._id);
+    if (authUser?.id) {
+      parsed.push(authUser.id);
     }
 
     return Array.from(new Set(parsed));
-  }, [membersFromQuery, authUser?._id]);
+  }, [membersFromQuery, authUser?.id]);
 
   useEffect(() => {
     let isMounted = true;
@@ -66,7 +68,7 @@ const GroupChatPage = () => {
     const initGroupChannel = async () => {
       if (!groupId || !authUser || tokenLoading) return;
 
-      if (!tokenData?.token) {
+      if (!tokenData?.token || !streamUserId) {
         setIsConnecting(false);
         return;
       }
@@ -86,9 +88,9 @@ const GroupChatPage = () => {
         if (!client.userID) {
           await client.connectUser(
             {
-              id: authUser._id,
-              name: authUser.fullName,
-              image: authUser.profilePic || "",
+              id: streamUserId,
+              name: `${authUser.firstName || ""} ${authUser.lastName || ""}`.trim() || "User",
+              image: "",
             },
             tokenData.token
           );
@@ -124,7 +126,7 @@ const GroupChatPage = () => {
         });
       }
     };
-  }, [groupId, groupName, memberIds, authUser, tokenData, tokenLoading]);
+  }, [groupId, groupName, memberIds, authUser, tokenData, tokenLoading, streamUserId]);
 
   const handleStartVideoCall = async () => {
     if (!channel || !authUser) return;
@@ -134,7 +136,7 @@ const GroupChatPage = () => {
       const callUrl = `${window.location.origin}/call/${callId}`;
 
       await channel.sendMessage({
-        text: `${authUser.fullName} started a group video call. Join here: ${callUrl}`,
+        text: `${authUser.firstName} started a group video call. Join here: ${callUrl}`,
       });
 
       toast.success("Video call link sent to group chat");

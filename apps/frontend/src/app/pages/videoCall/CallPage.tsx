@@ -17,8 +17,9 @@ import {
 import "@stream-io/video-react-sdk/dist/css/styles.css";
 import toast from "react-hot-toast";
 import { getStreamToken } from "@/lib/videocall/api";
-import useAuthUser from "@/app/hooks/videoCAllHooks/useAuthUser";
+import { extractStreamUserIdFromToken } from "@/lib/videocall/stream";
 import PageLoader from "@/app/components/videoCall/PageLoader";
+import { useAuthStore } from "@/app/store/authStore";
 
 const STREAM_API_KEY = "gcatxrhb47wf";
 
@@ -28,26 +29,30 @@ const CallPage = () => {
   const [call, setCall] = useState(null);
   const [isConnecting, setIsConnecting] = useState(true);
 
-  const { authUser, isLoading } = useAuthUser();
+  const { user:athuser } = useAuthStore();
 
   const {
     data: tokenData,
     isLoading: tokenLoading,
     isError: tokenError,
   } = useQuery({
-    queryKey: ["streamToken", authUser?._id],
+    queryKey: ["streamToken", athuser?.id],
     queryFn: getStreamToken,
-    enabled: !!authUser?._id,
+    enabled: !!athuser?.id,
   });
+  
+  const streamUserId = tokenData?.token
+    ? extractStreamUserIdFromToken(tokenData.token)
+    : null;
 
   useEffect(() => {
     let isMounted = true;
     let activeClient = null;
 
     const initCall = async () => {
-      if (!authUser || !callId || tokenLoading) return;
+      if (!callId || tokenLoading) return;
 
-      if (!tokenData?.token) {
+      if (!tokenData?.token || !streamUserId) {
         setIsConnecting(false);
         return;
       }
@@ -56,9 +61,12 @@ const CallPage = () => {
         console.log("Initializing Stream video client...");
 
         const user = {
-          id: authUser._id,
-          name: authUser.fullName,
-          image: authUser.profilePic || "",
+          id: streamUserId,
+          name:
+            [athuser?.firstName, athuser?.lastName].filter(Boolean).join(" ") ||
+            athuser?.cin ||
+            "User",
+          image: "",
         };
 
         const videoClient = new StreamVideoClient({
@@ -97,9 +105,9 @@ const CallPage = () => {
         });
       }
     };
-  }, [tokenData, authUser, callId, tokenLoading]);
+  }, [tokenData, athuser, callId, tokenLoading, streamUserId]);
 
-  if (isLoading || tokenLoading || isConnecting) return <PageLoader />;
+  if (  tokenLoading || isConnecting) return <PageLoader />;
 
   return (
     <div className="h-screen flex flex-col items-center justify-center">
