@@ -144,6 +144,11 @@ export const navigationItems: NavItem[] = [
         roles: ["super_admin", "director", "accountant"],
       },
       {
+        label: "Paiements",
+        href: "/payments",
+        roles: ["super_admin", "director", "accountant", "project_manager"],
+      },
+      {
         label: "Clients",
         href: "/clients",
         roles: ["super_admin", "director", "accountant"],
