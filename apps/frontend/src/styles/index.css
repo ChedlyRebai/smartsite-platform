@@ -12,6 +12,9 @@
   background: linear-gradient(to bottom, #c9e8c9, #b7e7bb);
   height: 100%;
 }
+/* .wx-rHj6070p, .wx-text-center ,.wx-action {
+  display: none;
+} */
 
 .str-chat__container {
   max-width: 1200px;

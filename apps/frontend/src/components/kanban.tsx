@@ -460,7 +460,7 @@ export type KanbanBoardColumnProps = {
 };
 
 export const kanbanBoardColumnClassNames =
-  'w-64 flex-shrink-0 rounded-lg border flex flex-col border-border bg-sidebar py-2  h-2/3 max-h-full';
+  'w-64 flex-shrink-0 rounded-lg border flex flex-col border-border bg-sidebar py-2  min-h-2/3 max-h-full';
 
 export function KanbanBoardColumn({
   className,

@@ -71,8 +71,8 @@ const GanttChart = () => {
           </Button>
         </div> */}
         
-        <Gantt tasks={tasks} links={links} scales={scales} init={setApi} />
-        {api && <Editor api={api} />}
+        <Gantt tasks={tasks}  links={links} scales={scales} init={setApi} />
+        {/* {api && <Editor api={api} />} */}
       </Willow>
     </div>
   );

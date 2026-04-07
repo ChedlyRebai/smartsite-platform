@@ -34,7 +34,6 @@ import UserGuide from "./pages/guide/UserGuide";
 
 import PLaningProjects from "./pages/planning/PLaningProjects";
 import ProjectMilestone from "./pages/planning/ProjectMilestone";
-import MilestoneTasks from "./pages/planning/MilestoneTasks";
 import MyTask from "./pages/planning/MyTask";
 import GanttChart from "./pages/planning/GanttManage";
 import MilestoneTaskss from "./pages/planning/MilestoneTaskss";
@@ -165,10 +164,10 @@ export const router = createBrowserRouter([
         path: "planning",
         element: <PLaningProjects />,
       },
-      {
-        path: "milestone-tasksprev/:milestoneId",
-        element: <MilestoneTasks />,
-      },
+      // {
+      //   path: "milestone-tasksprev/:milestoneId",
+      //   element: <MilestoneTasks />,
+      // },
       {
         path: "milestone-tasks/:milestoneId",
         element: <MilestoneTaskss />,
