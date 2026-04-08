@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 
 const RO_RAW = (import.meta as any).env?.VITE_RESOURCE_OPTIMIZATION_URL;
+
 const API_BASE_URL =
   (RO_RAW && String(RO_RAW).replace(/\/$/, '')) || '/api';
 
