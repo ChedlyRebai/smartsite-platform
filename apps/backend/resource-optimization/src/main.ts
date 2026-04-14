@@ -7,7 +7,7 @@ async function bootstrap() {
   app.enableCors();
   app.setGlobalPrefix('api');
 
-  const port = process.env.PORT || 3007;
+  const port = process.env.PORT || 3008;
   await app.listen(port);
   console.log(`🚀 Resource Optimization Service listening on port ${port}`);
 }
