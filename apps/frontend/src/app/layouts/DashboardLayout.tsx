@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, Navigate, Outlet, useNavigate, useLocation } from "react-router";
+import { Link, Navigate, Outlet, useNavigate, useLocation, redirect } from "react-router";
 import {
   Building2,
   LogOut,
@@ -94,7 +94,7 @@ export default function DashboardLayout() {
   const isInactiveAccount = currentUser?.status === 200 && currentUser?.data?.isActif === false;
 
   if (isInactiveAccount) {
-    return <AccountBanned />;
+    return redirect("/banned");
   }
 
   // if(currentUser?.data.firstLogin == true){
@@ -219,12 +219,12 @@ export default function DashboardLayout() {
                 <Button variant="ghost" className="gap-2">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="bg-gradient-to-br from-blue-600 to-green-600 text-white">
-                      {getInitials(user.firstName || "", user.lastName || "")}
+                      {getInitials(user?.firstName || "", user?.lastName || "")}
                     </AvatarFallback>
                   </Avatar>
                   <div className="hidden md:flex flex-col items-start">
                     <span className="text-sm font-semibold">
-                      {user.firstName} {user.lastName}
+                      {user?.firstName} {user?.lastName}
                     </span>
                     <span className="text-xs text-muted-foreground">
                       {/* {roleLabels[user.role]} */}

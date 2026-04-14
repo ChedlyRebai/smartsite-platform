@@ -100,6 +100,10 @@ export const router = createBrowserRouter([
     element: <ResetPassword />,
   },
   {
+    path: "/banned",
+    element: <AccountBanned />,
+  },
+  {
     path: "/change-password-first-login",
     element: <ChangePasswordFirstLogin />,
   },
