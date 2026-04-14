@@ -56,6 +56,8 @@ export const getTeamById = async (id: string): Promise<{ status: number; data: T
 export const createTeam = async (team: Partial<Team>): Promise<{ status: number; data: Team }> => {
   try {
     const response = await api.post('/', team);
+    console.log(team)
+    console.log(response)
     return { status: response.status, data: response.data };
   } catch (error: any) {
     console.error('Error creating team:', error);

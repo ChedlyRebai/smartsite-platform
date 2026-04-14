@@ -13,7 +13,7 @@ import { PrixArticlesModule } from "./prix-articles/prix-articles.module";
     }),
     MongooseModule.forRoot(
       process.env.MONGODB_URI ||
-        "mongodb://localhost:27017/smartsite-fournisseurs",
+        "mongodb+srv://admin:admin@cluster0.6zcerbm.mongodb.net/smartsite",
     ),
     FournisseursModule,
     ArticlesModule,

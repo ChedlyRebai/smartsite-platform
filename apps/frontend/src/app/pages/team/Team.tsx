@@ -188,26 +188,12 @@ export default function Team() {
         return;
       }
       // API response not valid, use mock data
-      setAvailableUsers(
-        mockTeamMembers.map((u) => ({
-          _id: u._id,
-          firstName: u.firstName,
-          lastName: u.lastName,
-          email: u.email,
-        })),
-      );
+      
       setUserLoadingError(true);
     } catch (err) {
       console.error("Error loading users:", err);
       // Use mock data when API fails
-      setAvailableUsers(
-        mockTeamMembers.map((u) => ({
-          _id: u._id,
-          firstName: u.firstName,
-          lastName: u.lastName,
-          email: u.email,
-        })),
-      );
+     
       setUserLoadingError(true);
     }
   };

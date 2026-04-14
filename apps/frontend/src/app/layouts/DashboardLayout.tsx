@@ -82,13 +82,13 @@ export default function DashboardLayout() {
     queryFn: () => getCurrentUser(user), // Simuler une requête pour obtenir les données de l'utilisateur
   });
 
-  if(currentUser?.data.firstLogin == true){
-    redirect("/reset-password-first-login");
-  }
+  // if(currentUser?.data.firstLogin == true){
+  //   redirect("/reset-password-first-login");
+  // }
 
-  if(currentUser?.data.isActif == false){
-    redirect("/account-banned");
-  }
+  // if(currentUser?.data.isActif == false){
+  //   redirect("/account-banned");
+  // }
 
 
   console.log(currentUser, "currentUser in DashboardLayout");
@@ -295,7 +295,7 @@ export default function DashboardLayout() {
           <button
             type="button"
             aria-label="Close sidebar overlay"
-            className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
+            className="fixed inset-0  bg-opacity-10 z-20 lg:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
