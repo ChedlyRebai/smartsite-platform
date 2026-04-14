@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, Outlet, useNavigate, useLocation, redirect } from "react-router";
+import { Link, Navigate, Outlet, useNavigate, useLocation } from "react-router";
 import {
   Building2,
   LogOut,
@@ -30,6 +30,7 @@ import { SidebarMenu } from "../components/SidebarMenu";
 import type { RoleType } from "../types";
 import { cn } from "@/lib/utils";
 import { getCurrentUser } from "../action/auth.action";
+import AccountBanned from "../pages/AccountBanned";
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
@@ -89,6 +90,12 @@ export default function DashboardLayout() {
     queryKey: ["currentUser"],
     queryFn: () => getCurrentUser(user), // Simuler une requête pour obtenir les données de l'utilisateur
   });
+
+  const isInactiveAccount = currentUser?.status === 200 && currentUser?.data?.isActif === false;
+
+  if (isInactiveAccount) {
+    return <AccountBanned />;
+  }
 
   // if(currentUser?.data.firstLogin == true){
   //   redirect("/reset-password-first-login");
