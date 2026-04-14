@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { User } from '../users/entities/user.entity';
 import { RolesService } from '../roles/roles.service';
+import { upsertStreamUser } from '../lib/stream';
 
 /**
  * À chaque démarrage : assure qu’un rôle super_admin existe et qu’un compte super-admin
@@ -73,7 +74,7 @@ export class SuperAdminSeedService implements OnModuleInit {
       }
 
       const hashed = await bcrypt.hash(plainPassword, 10);
-      await this.userModel.create({
+      const newUser: any = await this.userModel.create({
         cin,
         firstName: 'Super',
         lastName: 'Admin',
@@ -85,6 +86,15 @@ export class SuperAdminSeedService implements OnModuleInit {
         emailVerified: true,
         address: '—',
         firstLogin: false,
+      });
+
+      newUser.fullName =
+        newUser.fullName || `${newUser.firstName || ''} ${newUser.lastName || ''}`.trim();
+      newUser.profilePic = newUser.profilePic || newUser.profilePicture || '';
+      await upsertStreamUser({
+        id: newUser._id.toString(),
+        name: newUser.fullName,
+        image: newUser.profilePic || "",
       });
 
       this.logger.log(

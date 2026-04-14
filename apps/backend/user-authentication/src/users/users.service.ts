@@ -11,6 +11,7 @@ import * as bcrypt from 'bcrypt';
 import { EmailService } from '../email/email.service';
 import { RolesService } from '../roles/roles.service';
 import path from 'path';
+import { upsertStreamUser } from '../lib/stream';
 
 @Injectable()
 export class UsersService {
@@ -65,6 +66,15 @@ export class UsersService {
       console.log(' DEBUG: createdUser avant save:', createdUser);
 
       const result = await createdUser.save();
+      const newUser: any = result;
+      newUser.fullName =
+        newUser.fullName || `${newUser.firstName || ''} ${newUser.lastName || ''}`.trim();
+      newUser.profilePic = newUser.profilePic || newUser.profilePicture || '';
+      await upsertStreamUser({
+        id: newUser._id.toString(),
+        name: newUser.fullName,
+        image: newUser.profilePic || "",
+      });
       console.log(' DEBUG: Utilisateur créé:', result);
       return result;
     } catch (error: any) {
@@ -113,6 +123,15 @@ export class UsersService {
       console.log(' DEBUG: createdUser avant save:', createdUser);
 
       const result = await createdUser.save();
+      const newUser: any = result;
+      newUser.fullName =
+        newUser.fullName || `${newUser.firstName || ''} ${newUser.lastName || ''}`.trim();
+      newUser.profilePic = newUser.profilePic || newUser.profilePicture || '';
+      await upsertStreamUser({
+        id: newUser._id.toString(),
+        name: newUser.fullName,
+        image: newUser.profilePic || "",
+      });
       console.log(' DEBUG: Utilisateur créé:', result);
       return result;
     } catch (error: any) {
@@ -353,6 +372,15 @@ export class UsersService {
       // Create the user
       const createdUser = new this.userModel(userData);
       const result = await createdUser.save();
+      const newUser: any = result;
+      newUser.fullName =
+        newUser.fullName || `${newUser.firstName || ''} ${newUser.lastName || ''}`.trim();
+      newUser.profilePic = newUser.profilePic || newUser.profilePicture || '';
+      await upsertStreamUser({
+        id: newUser._id.toString(),
+        name: newUser.fullName,
+        image: newUser.profilePic || "",
+      });
       console.log('✅ User created successfully:', result._id);
 
       // Send email with temporary password
