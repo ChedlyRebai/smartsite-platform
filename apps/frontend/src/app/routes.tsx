@@ -43,6 +43,7 @@ import NotFound from "./pages/Error/NotFound";
 import { PermissionLoader } from "./components/shared/PermissionLoader";
 import ResourceOptimizationDashboard from "@/features/resource-optimization/pages/ResourceOptimizationDashboard";
 import Suppliers from "./pages/suppliers/Suppliers";
+import Materials from "./pages/materials/Materials";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = true;
@@ -199,6 +200,10 @@ export const router = createBrowserRouter([
       {
         path: "suppliers",
         element: <Suppliers />,
+      },
+      {
+        path: "materials",
+        element: <Materials />,
       },
      ],
   },

@@ -121,12 +121,15 @@ export const navigationItems: NavItem[] = [
          href: "/team",
          roles: ["super_admin", "director", "project_manager", "site_manager", "works_manager"],
        },
-      
-       
        {
          label: "Suppliers",
          href: "/suppliers",
          roles: ["super_admin", "procurement_manager", "site_manager", "works_manager", "accountant"],
+       },
+       {
+         label: "Materials",
+         href: "/materials",
+         roles: ["super_admin", "procurement_manager", "site_manager", "works_manager"],
        },
      ],
    },
