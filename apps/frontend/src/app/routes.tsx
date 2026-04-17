@@ -13,7 +13,7 @@ import Projects from "./pages/projects/Projects";
 import Planning from "./pages/planning/MyTask";
 import Team from "./pages/team/Team";
 import Clients from "./pages/clients/Clients";
-import Materials from "./pages/materials/Materials";
+
 import Finance from "./pages/finance/Finance";
 import Payments from "./pages/payments/Payments";
 import QHSE from "./pages/qhse/QHSE";
@@ -30,27 +30,9 @@ import Home2 from "./pages/Home/Home2";
 import Pricing from "./pages/pricing/Pricing";
 import ClientsNew from "./pages/clients/ClientsNew";
 import UserGuide from "./pages/guide/UserGuide";
-import SupplierList from "./pages/suppliers/SupplierList";
-import AddSupplier from "./pages/suppliers/AddSupplier";
-import EditSupplier from "./pages/suppliers/EditSupplier";
-import SupplierDetails from "./pages/suppliers/SupplierDetails";
-import SupplierEvaluation from "./pages/suppliers/SupplierEvaluation";
-import SupplierComparison from "./pages/suppliers/SupplierComparison";
 
-import Catalog from "./pages/catalog/Catalog";
-import CatalogList from "./pages/catalog/CatalogList";
-import AddCatalogItem from "./pages/catalog/AddCatalogItem";
-import EditCatalogItem from "./pages/catalog/EditCatalogItem";
-import CatalogDetails from "./pages/catalog/CatalogDetails";
 import CheckoutSimulator from "./pages/CheckoutSimulator";
 
-import SupplierMaterials from "./pages/supplier-materials/SupplierMaterials";
-import AddSupplierMaterialMapping from "./pages/supplier-materials/AddSupplierMaterialMapping";
-import SupplierMaterialDetails from "./pages/supplier-materials/SupplierMaterialDetails";
-import MaterialSupplierList from "./pages/supplier-materials/MaterialSupplierList";
-import SupplierMaterialList from "./pages/supplier-materials/SupplierMaterialList";
-import MaterialSupplierListPage from "./pages/supplier-materials/MaterialSupplierListPage";
-import SupplierMaterialListPage from "./pages/supplier-materials/SupplierMaterialListPage";
 import PLaningProjects from "./pages/planning/PLaningProjects";
 import ProjectMilestone from "./pages/planning/ProjectMilestone";
 import MilestoneTasks from "./pages/planning/MilestoneTasks";
@@ -147,86 +129,12 @@ export const router = createBrowserRouter([
         path: "clients",
         element: <ClientsNew />,
       },
-      {
-        path: "suppliers",
-        element: <SupplierList />,
-      },
-      {
-        path: "suppliers/add",
-        element: <AddSupplier />,
-      },
-      {
-        path: "suppliers/edit/:id",
-        element: <EditSupplier />,
-      },
-      {
-        path: "suppliers/:id",
-        element: <SupplierDetails />,
-      },
-      {
-        path: "suppliers-evaluation",
-        element: <SupplierEvaluation />,
-      },
-      {
-        path: "suppliers-comparison",
-        element: <SupplierComparison />,
-      },
-      {
-        path: "catalog",
-        element: <Catalog />,
-      },
-      {
-        path: "catalog/add",
-        element: <AddCatalogItem />,
-      },
-      {
-        path: "catalog/edit/:id",
-        element: <EditCatalogItem />,
-      },
-      {
-        path: "catalog/:id",
-        element: <CatalogDetails />,
-      },
-      {
-        path: "supplier-materials",
-        element: <SupplierMaterials />,
-      },
-      {
-        path: "supplier-materials/add",
-        element: <AddSupplierMaterialMapping />,
-      },
-      {
-        path: "supplier-materials/edit/:id",
-        element: <AddSupplierMaterialMapping />,
-      },
-      {
-        path: "supplier-materials/:id",
-        element: <SupplierMaterialDetails />,
-      },
-      {
-        path: "catalog/:id/suppliers",
-        element: <MaterialSupplierList />,
-      },
-      {
-        path: "suppliers/:id/materials",
-        element: <SupplierMaterialList />,
-      },
-      {
-        path: "material-suppliers",
-        element: <MaterialSupplierListPage />,
-      },
-      {
-        path: "supplier-materials-list",
-        element: <SupplierMaterialListPage />,
-      },
+     
       {
         path: "clients",
         element: <Clients />,
       },
-      {
-        path: "materials",
-        element: <Materials />,
-      },
+   
       {
         path: "finance",
         element: <Finance />,

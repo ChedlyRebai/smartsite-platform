@@ -38,7 +38,6 @@ const PERMISSION_CATEGORIES = [
   { name: "Planning", href: "/planning" },
   { name: "Team", href: "/team" },
   { name: "Clients", href: "/clients" },
-  { name: "Suppliers", href: "/suppliers" },
   { name: "Materials", href: "/materials" },
   { name: "Finance", href: "/finance" },
   { name: "QHSE & Safety", href: "/qhse" },

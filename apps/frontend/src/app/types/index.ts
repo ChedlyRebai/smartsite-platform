@@ -271,25 +271,6 @@ export interface Client {
   createdAt: string;
 }
 
-export interface Supplier {
-  _id?: string;
-  name: string;
-  supplierCode: string;
-  category: string;
-  specialty?: string;
-  contactName?: string;
-  phone?: string;
-  email?: string;
-  address?: string;
-  city?: string;
-  country?: string;
-  paymentTerms?: string;
-  averageDeliveryDays?: number;
-  notes?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
 export interface Notification {
   id: string;
   type: "info" | "warning" | "critical" | "success";

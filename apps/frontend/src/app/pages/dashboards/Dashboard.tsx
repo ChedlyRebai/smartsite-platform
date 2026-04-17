@@ -5,7 +5,6 @@ import ProjectManagerDashboard from './ProjectManagerDashboard';
 import SiteManagerDashboard from './SiteManagerDashboard';
 import WorksManagerDashboard from './WorksManagerDashboard';
 import AccountantDashboard from './AccountantDashboard';
-import ProcurementDashboard from './ProcurementDashboard';
 import QHSEDashboard from './QHSEDashboard';
 import ClientDashboard from './ClientDashboard';
 import SubcontractorDashboard from './SubcontractorDashboard';
@@ -34,7 +33,7 @@ export default function Dashboard() {
     case 'accountant':
       return <AccountantDashboard />;
     case 'procurement_manager':
-      return <ProcurementDashboard />;
+      return <UserDashboard />;
     case 'qhse_manager':
       return <QHSEDashboard />;
     case 'client':

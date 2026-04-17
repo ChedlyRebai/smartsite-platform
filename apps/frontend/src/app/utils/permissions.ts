@@ -6,7 +6,6 @@ export type Permission =
   | 'manage_projects'
   | 'manage_team'
   | 'manage_clients'
-  | 'manage_suppliers'
   | 'manage_materials'
   | 'manage_finance'
   | 'manage_qhse'
@@ -22,7 +21,6 @@ const rolePermissions: Record<RoleType, Permission[]> = {
     'manage_projects',
     'manage_team',
     'manage_clients',
-    'manage_suppliers',
     'manage_materials',
     'manage_finance',
     'manage_qhse',
@@ -72,13 +70,11 @@ const rolePermissions: Record<RoleType, Permission[]> = {
   accountant: [
     'view_dashboard',
     'manage_clients',
-    'manage_suppliers',
     'manage_finance',
     'view_analytics',
   ],
   procurement_manager: [
     'view_dashboard',
-    'manage_suppliers',
     'manage_materials',
   ],
   qhse_manager: [
@@ -103,13 +99,12 @@ export const hasPermission = (role: RoleType, permission: Permission): boolean =
   return rolePermissions[role]?.includes(permission) ?? false;
 };
 
-export const canEdit = (role: RoleType, resource: 'sites' | 'projects' | 'team' | 'clients' | 'suppliers' | 'materials' | 'finance' | 'qhse' | 'incidents' | 'users'): boolean => {
+export const canEdit = (role: RoleType, resource: 'sites' | 'projects' | 'team' | 'clients' | 'materials' | 'finance' | 'qhse' | 'incidents' | 'users'): boolean => {
   const permissionMap: Record<string, Permission> = {
     sites: 'manage_sites',
     projects: 'manage_projects',
     team: 'manage_team',
     clients: 'manage_clients',
-    suppliers: 'manage_suppliers',
     materials: 'manage_materials',
     finance: 'manage_finance',
     qhse: 'manage_qhse',

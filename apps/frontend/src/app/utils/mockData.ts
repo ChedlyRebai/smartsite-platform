@@ -1,4 +1,4 @@
-import type { Project, Site, Client, Supplier, Notification, Incident, Task, User } from '../types';
+import type { Project, Site, Client, Notification, Incident, Task, User } from '../types';
 
 export const mockProjects: Project[] = [
   {
@@ -94,54 +94,6 @@ export const mockSites: Site[] = [
 ];
 
 export const mockTasks:Task[] = []
-
-export const mockSuppliers: Supplier[] = [
-  {
-    id: '1',
-    name: 'BuildMat Solutions',
-    address: '1000 Industrial Zone',
-    contact: 'Ahmed Ben Ali',
-    email: 'ahmed@buildmat.com',
-    phone: '+216 71 456 789',
-    category: 'Construction Materials',
-    rating: 4.5,
-    contractDate: '2025-01-01',
-    stockType: 'Cement, Steel, Concrete',
-    stockQuantity: 10000,
-    receivedQuantity: 8500,
-    usedQuantity: 6200,
-  },
-  {
-    id: '2',
-    name: 'ElectroTech Supplies',
-    address: '2000 Tech Park',
-    contact: 'Fatma Khalil',
-    email: 'fatma@electrotech.com',
-    phone: '+216 71 567 890',
-    category: 'Electrical Equipment',
-    rating: 4.8,
-    contractDate: '2025-02-01',
-    stockType: 'Cables, Switches, Lighting',
-    stockQuantity: 5000,
-    receivedQuantity: 4800,
-    usedQuantity: 3200,
-  },
-  {
-    id: '3',
-    name: 'Heavy Machinery Rental',
-    address: '3000 Equipment Avenue',
-    contact: 'Mohamed Trabelsi',
-    email: 'mohamed@heavymachinery.com',
-    phone: '+216 71 678 901',
-    category: 'Equipment Rental',
-    rating: 4.3,
-    contractDate: '2025-03-01',
-    stockType: 'Cranes, Excavators, Loaders',
-    stockQuantity: 50,
-    receivedQuantity: 50,
-    usedQuantity: 35,
-  },
-];
 
 
 
