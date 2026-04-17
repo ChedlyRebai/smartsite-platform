@@ -109,7 +109,7 @@ export const navigationItems: NavItem[] = [
    {
      label: "Resources & operations",
      icon: Package,
-     roles: ["super_admin", "director", "site_manager", "works_manager", "procurement_manager"],
+     roles: ["super_admin", "director", "project_manager", "site_manager", "works_manager", "procurement_manager"],
      children: [
        {
          label: "Sites",
@@ -131,10 +131,10 @@ export const navigationItems: NavItem[] = [
          href: "/materials",
          roles: ["super_admin", "procurement_manager", "site_manager", "works_manager"],
        },
-     ],
-   },
+      ],
+    },
 
-  {
+   {
     label: "Finance & clients",
     icon: DollarSign,
     roles: ["super_admin", "director", "accountant"],
