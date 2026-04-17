@@ -277,7 +277,11 @@ Le motif doit être:
               {currentUsers.map((u) => (
                 <div
                   key={u._id}
-                  className="flex items-center justify-between p-3 border rounded-md"
+                  onClick={() => {
+                    setSelectedUser(u);
+                    setDetailsOpen(true);
+                  }}
+                  className="flex items-center justify-between p-3 border rounded-md cursor-pointer hover:bg-gray-50 transition-colors"
                 >
                   <div>
                     <div className="font-semibold">
@@ -352,51 +356,151 @@ Le motif doit être:
           if (!open) setSelectedUser(null);
         }}
       >
-        <DialogContent>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Pending User Details</DialogTitle>
+            <DialogTitle>Détails complets de l'utilisateur</DialogTitle>
           </DialogHeader>
           {selectedUser && (
-            <div className="space-y-2 text-sm">
-              <p>
-                <span className="font-semibold">Full Name:</span>{" "}
-                {(selectedUser as any).firstname ||
-                  (selectedUser as any).firstName}{" "}
-                {(selectedUser as any).lastname ||
-                  (selectedUser as any).lastName}
-              </p>
-              <p>
-                <span className="font-semibold">CIN:</span>{" "}
-                {(selectedUser as any).cin || "N/A"}
-              </p>
-              <p>
-                <span className="font-semibold">Email:</span>{" "}
-                {selectedUser.email || "N/A"}
-              </p>
-              <p>
-                <span className="font-semibold">Phone:</span>{" "}
-                {(selectedUser as any).telephone ||
-                  (selectedUser as any).phone ||
-                  "N/A"}
-              </p>
-              <p>
-                <span className="font-semibold">Address:</span>{" "}
-                {(selectedUser as any).address ||
-                  (selectedUser as any).adresse ||
-                  "N/A"}
-              </p>
-              <p>
-                <span className="font-semibold">Role:</span>{" "}
-                {getRoleLabel(selectedUser.role) || "Role not defined"}
-              </p>
-              <p>
-                <span className="font-semibold">Status:</span>{" "}
-                {(selectedUser as any).status || "pending"}
-              </p>
-              <p>
-                <span className="font-semibold">Created:</span>{" "}
-                {getUserCreatedAtLabel(selectedUser)}
-              </p>
+            <div className="space-y-4 text-sm">
+              {/* Informations personnelles */}
+              <div className="border-b pb-4">
+                <h3 className="font-semibold text-base mb-3">Informations personnelles</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <p>
+                    <span className="font-medium">Prénom:</span>{" "}
+                    {(selectedUser as any).firstName || (selectedUser as any).firstname || "N/A"}
+                  </p>
+                  <p>
+                    <span className="font-medium">Nom:</span>{" "}
+                    {(selectedUser as any).lastName || (selectedUser as any).lastname || "N/A"}
+                  </p>
+                  <p>
+                    <span className="font-medium">CIN:</span>{" "}
+                    {(selectedUser as any).cin || "N/A"}
+                  </p>
+                  <p>
+                    <span className="font-medium">Email:</span>{" "}
+                    {selectedUser.email || "N/A"}
+                  </p>
+                  <p>
+                    <span className="font-medium">Téléphone:</span>{" "}
+                    {(selectedUser as any).telephone || (selectedUser as any).phone || (selectedUser as any).phoneNumber || "N/A"}
+                  </p>
+                  <p>
+                    <span className="font-medium">Rôle demandé:</span>{" "}
+                    {getRoleLabel(selectedUser.role) || "Non défini"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Adresse et localisation */}
+              <div className="border-b pb-4">
+                <h3 className="font-semibold text-base mb-3">Adresse et localisation</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <p className="col-span-2">
+                    <span className="font-medium">Adresse:</span>{" "}
+                    {(selectedUser as any).address || (selectedUser as any).adresse || (selectedUser as any).addressLine || "N/A"}
+                  </p>
+                  <p>
+                    <span className="font-medium">Ville:</span>{" "}
+                    {(selectedUser as any).city || (selectedUser as any).ville || "N/A"}
+                  </p>
+                  <p>
+                    <span className="font-medium">Code postal:</span>{" "}
+                    {(selectedUser as any).postalCode || (selectedUser as any).codePostal || "N/A"}
+                  </p>
+                  <p>
+                    <span className="font-medium">Pays:</span>{" "}
+                    {(selectedUser as any).country || (selectedUser as any).pays || "N/A"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Informations du compte */}
+              <div className="border-b pb-4">
+                <h3 className="font-semibold text-base mb-3">Informations du compte</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <p>
+                    <span className="font-medium">Statut:</span>{" "}
+                    <span className="inline-block px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                      {(selectedUser as any).status || "pending"}
+                    </span>
+                  </p>
+                  <p>
+                    <span className="font-medium">Actif:</span>{" "}
+                    {(selectedUser as any).isActive ? "✓ Oui" : "✗ Non"}
+                  </p>
+                  <p>
+                    <span className="font-medium">Date d'inscription:</span>{" "}
+                    {getUserCreatedAtLabel(selectedUser)}
+                  </p>
+                  <p>
+                    <span className="font-medium">Dernière connexion:</span>{" "}
+                    {(selectedUser as any).lastLoginDate ? new Date((selectedUser as any).lastLoginDate).toLocaleString("fr-FR") : "Jamais"}
+                  </p>
+                  <p>
+                    <span className="font-medium">ID utilisateur:</span>{" "}
+                    <code className="bg-gray-100 px-2 py-1 rounded text-xs">{selectedUser._id}</code>
+                  </p>
+                </div>
+              </div>
+
+              {/* Informations supplémentaires */}
+              <div className="pb-4">
+                <h3 className="font-semibold text-base mb-3">Informations supplémentaires</h3>
+                <div className="space-y-2">
+                  {(selectedUser as any).department && (
+                    <p>
+                      <span className="font-medium">Département:</span> {(selectedUser as any).department}
+                    </p>
+                  )}
+                  {(selectedUser as any).position && (
+                    <p>
+                      <span className="font-medium">Position:</span> {(selectedUser as any).position}
+                    </p>
+                  )}
+                  {(selectedUser as any).companyName && (
+                    <p>
+                      <span className="font-medium">Entreprise:</span> {(selectedUser as any).companyName}
+                    </p>
+                  )}
+                  {(selectedUser as any).description && (
+                    <p>
+                      <span className="font-medium">Description:</span>
+                      <div className="bg-gray-50 p-2 rounded mt-1 text-xs">{(selectedUser as any).description}</div>
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-end gap-2 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => setDetailsOpen(false)}
+                >
+                  Fermer
+                </Button>
+                <Button
+                  onClick={() => {
+                    setDetailsOpen(false);
+                    handleApprove(selectedUser._id);
+                  }}
+                  disabled={actionLoading !== null}
+                >
+                  {actionLoading === selectedUser._id ? "..." : "Approuver"}
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    setDetailsOpen(false);
+                    openRejectDialog(selectedUser);
+                  }}
+                  disabled={actionLoading !== null}
+                >
+                  Rejeter
+                </Button>
+              </div>
             </div>
           )}
         </DialogContent>

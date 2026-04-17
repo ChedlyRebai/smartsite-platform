@@ -14,11 +14,9 @@ import {
   X,
   Bell,
   User,
-  ChevronDown,
 } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
 import { Button } from "../components/ui/button";
-import { Avatar, AvatarFallback } from "../components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,6 +39,7 @@ import { ThemeButton } from "../components/ThemeButton";
 import { LanguageSelector } from "../components/LanguageSelector";
 import { NavbarAccessibilityButton } from "../components/NavbarAccessibilityButton";
 import { useTranslation } from "../hooks/useTranslation";
+import SiteInfoPanel from "../components/SiteInfoPanel";
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
@@ -163,10 +162,6 @@ export default function DashboardLayout() {
   // const navigationItems = getNavigationForRole(roleName);
   const unreadNotifications = 0; // Placeholder - will be implemented with real notifications
 
-  const getInitials = (nom: string, lastName: string) => {
-    return `${nom.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
-  };
-
   // if(navigItemsError || UnreadError){
   //   return (
   //     <div className="min-h-screen flex items-center justify-center">
@@ -230,7 +225,12 @@ export default function DashboardLayout() {
             </Link>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
+            {/* Site Info Panel */}
+            <div className="hidden lg:block">
+              <SiteInfoPanel />
+            </div>
+
             {/* Date & Time */}
             <div className="hidden md:flex flex-col items-end text-sm mr-2">
               <span className="font-medium text-foreground">
@@ -272,56 +272,6 @@ export default function DashboardLayout() {
                 </Badge>
               )}
             </Button>
-
-            {/* User Menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="gap-2">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-gradient-to-br from-blue-600 to-green-600 text-white">
-                      {getInitials(user?.firstName || "", user?.lastName || "")}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="hidden md:flex flex-col items-start">
-                    <span className="text-sm font-semibold">
-                      {user?.firstName} {user?.lastName}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {/* {roleLabels[user.role]} */}
-                    </span>
-                  </div>
-                  <ChevronDown
-                    aria-hidden="true"
-                    className="h-4 w-4 hidden md:block"
-                  />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>
-                  <div className="flex flex-col">
-                    <span>
-                      {user.firstName} {user.lastName}
-                    </span>
-                    <span className="text-xs font-normal text-muted-foreground">
-                      {user.cin}
-                    </span>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate("/profile")}>
-                  <User className="mr-2 h-4 w-4" />
-                  {t("userMenu.profile", "Profile")}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={handleLogout}
-                  className="text-red-600"
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  {t("userMenu.logout", "Logout")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
       </header>

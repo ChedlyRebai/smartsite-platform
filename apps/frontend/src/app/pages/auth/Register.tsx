@@ -36,6 +36,14 @@ import { SmartSiteLogo } from "@/app/components/branding/SmartSiteLogo";
 import { roleLabels } from "@/app/utils/roleConfig";
 import { useTranslation } from "@/app/hooks/useTranslation";
 import type { RoleType } from "@/app/types";
+import { countries, getCountryByValue } from "@/app/utils/countriesData";
+
+// Fonction helper pour obtenir le texte display du pays avec drapeau et code
+const getCountryDisplay = (country: any) => {
+  if (country.display) return country.display;
+  // Génère le display dynamiquement si pas présent
+  return `${country.label} (${country.code})`;
+};
 
 // Liste des roles disponibles (sauf super_admin)
 const availableRoles: RoleType[] = [
@@ -244,71 +252,125 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex min-h-full flex-1">
-      <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
-        <div className="mx-auto w-full max-w-lg lg:w-2xl">
-          <div>
-            <a href="/" className="inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-md">
-              <SmartSiteLogo size="sm" />
-            </a>
-            <p className="mt-2 text-xs font-semibold tracking-[0.2em] text-slate-600 uppercase">
-              {t("nav.login")}
-            </p>
-            <h2 className="mt-6 text-2xl font-bold leading-9 tracking-tight text-gray-900">
-              {t("auth.register.title")}
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-gray-500">
-              {t("auth.register.haveAccount")}{" "}
-              <a
-                href="/login"
-                className="font-semibold text-indigo-600 hover:text-indigo-500"
-              >
-                {t("auth.register.signIn")}
-              </a>
-            </p>
+    <>
+      <div
+        id="main-content"
+        data-app-content
+        tabIndex={-1}
+        className="h-screen flex min-h-full outline-none overflow-hidden"
+      >
+        {/* Background avec image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: 'url(/architect-using-digital-tablet-analyzing-building-construction-project-free-photo.jpg)',
+          }}
+        >
+          {/* Overlay pour meilleure lisibilité du texte */}
+          <div className="absolute inset-0 bg-black/40" />
+        </div>
+
+        {/* Contenu */}
+        <div className="relative w-full flex">
+          {/* Panneau gauche - Infos (hidden on mobile) */}
+          <div className="hidden lg:flex lg:w-3/5 flex-col justify-center items-start px-12 xl:px-20">
+            <div className="max-w-lg">
+              <div className="inline-block">
+                <div className="flex items-center gap-4 mb-10">
+                  <div className="h-16 w-16 rounded-xl bg-white/30 backdrop-blur-lg flex items-center justify-center border-2 border-white/50 shadow-lg">
+                    <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10.5 1.5H3.75A2.25 2.25 0 001.5 3.75v12.5A2.25 2.25 0 003.75 18.5h12.5a2.25 2.25 0 002.25-2.25V9.5m-15-6h12m-12 4h8m-8 3h10m-10 3h8M15 1.5v4m0 0h4m-4 0l4-4" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <h1 className="text-5xl font-bold text-white drop-shadow-lg">SmartSite</h1>
+                </div>
+              </div>
+
+              <h2 className="text-6xl font-bold text-white mb-6 leading-tight drop-shadow-lg">
+                Join Our Team
+              </h2>
+              <p className="text-xl text-white/90 mb-10 leading-relaxed drop-shadow-md font-medium">
+                Create your account to access SmartSite's powerful construction management tools and join thousands of successful project teams.
+              </p>
+
+              <div className="space-y-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-green-400/30 border-2 border-green-300 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-6 h-6 text-green-200" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <span className="text-white font-semibold text-lg drop-shadow-md">Instant Account Activation</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-green-400/30 border-2 border-green-300 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-6 h-6 text-green-200" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <span className="text-white font-semibold text-lg drop-shadow-md">24/7 Support Access</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-green-400/30 border-2 border-green-300 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-6 h-6 text-green-200" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <span className="text-white font-semibold text-lg drop-shadow-md">Full Feature Access</span>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="mt-10">
-            <Card>
-              <CardHeader>
-                <div className="flex flex-wrap items-center gap-2 mb-4">
+          {/* Panneau droite - Formulaire */}
+          <div className="w-full lg:w-2/5 flex flex-col justify-start items-center px-4 sm:px-6 lg:px-8 py-12 overflow-y-auto h-screen">
+            <div className="w-full max-w-2xl">
+              {/* Carte premium avec glassmorphism */}
+              <div className="bg-white/98 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 px-10 py-12 sm:px-12">
+                {/* Logo et texte d'en-tête */}
+                <div className="text-center mb-8">
+                  <a href="/" className="inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-lg mb-6 transform hover:scale-105 transition-transform">
+                    <SmartSiteLogo size="lg" />
+                  </a>
+                  <p className="text-sm font-bold tracking-widest text-blue-600 uppercase mb-3">
+                    {t("nav.register")}
+                  </p>
+                  <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-3 leading-tight">
+                    {t("auth.register.title")}
+                  </h2>
+                  <p className="text-sm lg:text-base text-gray-600 font-medium">
+                    {t("auth.register.haveAccount")}{" "}
+                    <a
+                      href="/login"
+                      className="font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+                    >
+                      {t("auth.register.signIn")}
+                    </a>
+                  </p>
+                </div>
+
+                {/* Step indicator */}
+                <div className="flex flex-wrap justify-center items-center gap-2 mb-8">
                   {([1, 2, 3] as const).map((s) => (
                     <React.Fragment key={s}>
                       {s > 1 && (
-                        <span className="text-slate-300 hidden sm:inline">—</span>
+                        <span className="text-gray-300 hidden sm:inline">—</span>
                       )}
                       <span
-                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${step === s
-                          ? "bg-indigo-600 text-white"
+                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold transition-all ${step === s
+                          ? "bg-blue-600 text-white"
                           : step > s
-                            ? "bg-indigo-100 text-indigo-800"
-                            : "bg-slate-100 text-slate-500"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-gray-100 text-gray-500"
                           }`}
                       >
-                        {s === 1
-                          ? t("auth.register.step1")
-                          : s === 2
-                            ? t("auth.register.step2")
-                            : t("auth.register.step3")}
+                        Step {s}
                       </span>
                     </React.Fragment>
                   ))}
                 </div>
-                <CardTitle>
-                  {step === 1 && t("auth.register.step1")}
-                  {step === 2 && t("auth.register.step2")}
-                  {step === 3 && t("auth.register.step3")}
-                </CardTitle>
-                <CardDescription>
-                  {step === 1 &&
-                    t("auth.register.step1Description")}
-                  {step === 2 &&
-                    t("auth.register.step2Description")}
-                  {step === 3 &&
-                    t("auth.register.step3Description")}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+
+                {/* Formulaire */}
                 <form
                   onSubmit={(e) => e.preventDefault()}
                   className="space-y-6"
@@ -477,20 +539,39 @@ export default function Register() {
                           <Controller
                             name="country"
                             control={form.control}
-                            render={({ field, fieldState }) => (
-                              <Field data-invalid={fieldState.invalid}>
-                                <FieldLabel htmlFor="country">{t("auth.register.country")}</FieldLabel>
-                                <Input
-                                  {...field}
-                                  id="country"
-                                  placeholder={t("auth.register.countryPlaceholder")}
-                                  aria-invalid={fieldState.invalid}
-                                />
-                                {fieldState.invalid && (
-                                  <FieldError errors={[fieldState.error]} />
-                                )}
-                              </Field>
-                            )}
+                            render={({ field, fieldState }) => {
+                              const selectedCountry = getCountryByValue(field.value);
+                              return (
+                                <Field data-invalid={fieldState.invalid}>
+                                  <FieldLabel htmlFor="country">{t("auth.register.country")}</FieldLabel>
+                                  <Select
+                                    onValueChange={field.onChange}
+                                    value={field.value}
+                                  >
+                                    <SelectTrigger id="country">
+                                      <SelectValue 
+                                        placeholder={t("auth.register.countryPlaceholder")}
+                                      >
+                                        {selectedCountry && getCountryDisplay(selectedCountry)}
+                                      </SelectValue>
+                                    </SelectTrigger>
+                                    <SelectContent className="max-h-[300px]">
+                                      {countries.map((country) => (
+                                        <SelectItem
+                                          key={`${country.code}-${country.value}`}
+                                          value={country.value}
+                                        >
+                                          {getCountryDisplay(country)}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  {fieldState.invalid && (
+                                    <FieldError errors={[fieldState.error]} />
+                                  )}
+                                </Field>
+                              );
+                            }}
                           />
                         </FieldGroup>
 
@@ -596,7 +677,7 @@ export default function Register() {
                         <Button
                           type="button"
                           onClick={goToStep2}
-                          className="flex-1 rounded-md bg-indigo-600 px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+                          className="w-full py-3 px-4 text-base bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:scale-105"
                         >
                           {t("auth.register.continueButton")}
                         </Button>
@@ -646,7 +727,7 @@ export default function Register() {
                         <Button
                           type="button"
                           onClick={goToStep3}
-                          className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white"
+                          className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white"
                         >
                           {t("auth.register.acceptButton")}
                         </Button>
@@ -704,13 +785,13 @@ export default function Register() {
                           type="button"
                           disabled={isLoading}
                           onClick={submitFinal}
-                          className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white"
+                          className="flex-1 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
                         >
                           {isLoading ? (
-                            <>
-                              <span className="inline-block animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2 align-middle" />
+                            <span className="flex items-center justify-center gap-2">
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                               {t("auth.register.sending")}
-                            </>
+                            </span>
                           ) : (
                             t("auth.register.acceptRegulationButton")
                           )}
@@ -719,18 +800,16 @@ export default function Register() {
                     </div>
                   )}
                 </form>
-              </CardContent>
-            </Card>
+
+                {/* Pieds de page */}
+                <p className="mt-8 text-center text-sm font-semibold text-white/90 drop-shadow-lg">
+                  © 2026 SmartSite. All rights reserved.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div className="relative hidden w-0 flex-1 lg:block">
-        <img
-          className="absolute inset-0 h-full w-full object-cover"
-          src="https://images.unsplash.com/photo-1496917756835-20cb06e75b4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1908&q=80"
-          alt=""
-        />
-      </div>
-    </div>
+    </>
   );
 }

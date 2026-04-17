@@ -138,12 +138,12 @@ export const ResourceOptimizationDashboard: React.FC = () => {
   }, [dashboard]);
 
   const navItems = [
-    { id: 'overview', label: 'Vue Globale', icon: BarChart3 },
-    { id: 'resource-analysis', label: 'Analyse', icon: TrendingUp },
-    { id: 'recommendations', label: 'Recommandations', icon: Lightbulb },
+    { id: 'overview', label: 'Overview', icon: BarChart3 },
+    { id: 'resource-analysis', label: 'Analysis', icon: TrendingUp },
+    { id: 'recommendations', label: 'Recommendations', icon: Lightbulb },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-    { id: 'alerts', label: 'Alertes', icon: AlertTriangle },
-    { id: 'reporting', label: 'Rapports', icon: DollarSign },
+    { id: 'alerts', label: 'Alerts', icon: AlertTriangle },
+    { id: 'reporting', label: 'Reports', icon: DollarSign },
   ] as const;
 
   // No site selected - Show global view of all sites
@@ -152,10 +152,10 @@ export const ResourceOptimizationDashboard: React.FC = () => {
       <div className="relative p-6">
         <div className={`space-y-6 transition-all duration-300 ${previewSite ? 'blur-[4px] scale-[0.995]' : ''}`}>
           <div className="rounded-2xl border border-border/80 bg-gradient-to-r from-card to-muted/30 px-6 py-5 shadow-sm">
-            <h1 className="text-3xl font-bold tracking-tight">Pilotage des ressources — tous les chantiers</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Resource Management — All Sites</h1>
             <p className="text-muted-foreground mt-1 max-w-4xl">
-            Vue transversale : budgets sites, recommandations IA liées au planning et aux équipes. Sélectionnez un site
-            pour le détail et les courbes avant / après mise en œuvre.
+            Cross-site view: site budgets, AI recommendations linked to planning and teams. Select a site
+            for details and before/after implementation charts.
             </p>
           </div>
 
@@ -164,7 +164,7 @@ export const ResourceOptimizationDashboard: React.FC = () => {
             <Card className="border-blue-200/60 bg-gradient-to-br from-blue-50 to-blue-100/30 shadow-sm">
               <CardContent className="pt-4">
                 <div className="text-2xl font-bold text-blue-700">{activeSites.length}</div>
-                <div className="text-sm text-blue-900/80">Sites actifs</div>
+                <div className="text-sm text-blue-900/80">Active Sites</div>
               </CardContent>
             </Card>
             <Card className="border-emerald-200/60 bg-gradient-to-br from-emerald-50 to-emerald-100/30 shadow-sm">
@@ -172,7 +172,7 @@ export const ResourceOptimizationDashboard: React.FC = () => {
                 <div className="text-2xl font-bold text-emerald-700">
                   {activeSites.reduce((sum, site) => sum + (site.budget || 0), 0).toLocaleString()} TND
                 </div>
-                <div className="text-sm text-emerald-900/80">Budget total</div>
+                <div className="text-sm text-emerald-900/80">Total Budget</div>
               </CardContent>
             </Card>
             <Card className="border-violet-200/60 bg-gradient-to-br from-violet-50 to-violet-100/30 shadow-sm">
@@ -180,7 +180,7 @@ export const ResourceOptimizationDashboard: React.FC = () => {
                 <div className="text-2xl font-bold text-violet-700">
                   {activeSites.reduce((sum, site) => sum + (siteTeams?.length || 0), 0)}
                 </div>
-                <div className="text-sm text-violet-900/80">Équipes totales</div>
+                <div className="text-sm text-violet-900/80">Total Teams</div>
               </CardContent>
             </Card>
             <Card className="border-amber-200/60 bg-gradient-to-br from-amber-50 to-amber-100/30 shadow-sm">
@@ -188,7 +188,7 @@ export const ResourceOptimizationDashboard: React.FC = () => {
                 <div className="text-2xl font-bold text-amber-700">
                   {activeSites.reduce((sum, site) => sum + (tasks?.length || 0), 0)}
                 </div>
-                <div className="text-sm text-amber-900/80">Tâches totales</div>
+                <div className="text-sm text-amber-900/80">Total Tasks</div>
               </CardContent>
             </Card>
           </div>
@@ -196,10 +196,10 @@ export const ResourceOptimizationDashboard: React.FC = () => {
           {/* Sites with Recommendations */}
           <Card className="shadow-sm border-border/70">
             <CardHeader>
-              <CardTitle>Sites actifs et recommandations</CardTitle>
+              <CardTitle>Active Sites and Recommendations</CardTitle>
               <CardDescription>
-                Chaque carte résume le site (gestion des sites). Ouvrez un chantier pour approuver les reco. et suivre
-                l’impact dans l’onglet Analytique.
+                Each card summarizes the site (site management). Open a site to approve recommendations and track
+                impact in the Analytics tab.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -208,7 +208,7 @@ export const ResourceOptimizationDashboard: React.FC = () => {
                   <Loader2 className="h-8 w-8 animate-spin" />
                 </div>
               ) : activeSites.length === 0 ? (
-                <p className="text-gray-500 text-center p-8">Aucun site disponible</p>
+                <p className="text-gray-500 text-center p-8">No available sites</p>
               ) : (
                 <div className="space-y-6">
                   {activeSites.map((site, index) => {
@@ -235,17 +235,17 @@ export const ResourceOptimizationDashboard: React.FC = () => {
               <div className="flex items-center justify-between border-b border-border px-6 py-4">
                 <div>
                   <p className="text-xs uppercase tracking-widest text-muted-foreground">
-                    Site sélectionné
+                    Selected Site
                   </p>
                   <h3 className="text-xl font-bold mt-1">{previewSite.nom}</h3>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => setPreviewSite(null)} aria-label="Fermer l'aperçu du site">
+                <Button variant="ghost" size="icon" onClick={() => setPreviewSite(null)} aria-label="Close site preview">
                   <X className="h-5 w-5" />
                 </Button>
               </div>
               <div className="p-6 space-y-5">
                 <div className="rounded-xl border border-blue-200/60 bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
-                  <p className="text-sm text-muted-foreground">Localisation</p>
+                  <p className="text-sm text-muted-foreground">Location</p>
                   <p className="font-semibold mt-1">{previewSite.localisation || '—'}</p>
                 </div>
                 <div className="grid gap-3 md:grid-cols-3">
@@ -254,11 +254,11 @@ export const ResourceOptimizationDashboard: React.FC = () => {
                     <p className="text-lg font-bold">{(previewSite.budget || 0).toLocaleString()} TND</p>
                   </div>
                   <div className="rounded-lg border border-border bg-muted/30 p-3">
-                    <p className="text-xs text-muted-foreground">Statut</p>
+                    <p className="text-xs text-muted-foreground">Status</p>
                     <p className="text-lg font-bold capitalize">{previewSite.status || '—'}</p>
                   </div>
                   <div className="rounded-lg border border-border bg-muted/30 p-3">
-                    <p className="text-xs text-muted-foreground">Surface</p>
+                    <p className="text-xs text-muted-foreground">Area</p>
                     <p className="text-lg font-bold">{previewSite.surface ? `${previewSite.surface} m²` : 'N/A'}</p>
                   </div>
                 </div>
@@ -266,13 +266,13 @@ export const ResourceOptimizationDashboard: React.FC = () => {
                   <div className="flex items-start gap-2">
                     <Sparkles className="h-4 w-4 text-amber-600 mt-0.5" />
                     <p className="text-sm text-amber-900">
-                      Ouvrez ce chantier pour afficher les recommandations IA, alertes temps réel, et analytics avant/après implémentation.
+                      Open this site to view AI recommendations, real-time alerts, and before/after implementation analytics.
                     </p>
                   </div>
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button variant="outline" onClick={() => setPreviewSite(null)}>
-                    Annuler
+                    Cancel
                   </Button>
                   <Button
                     className="gap-2"
@@ -282,7 +282,7 @@ export const ResourceOptimizationDashboard: React.FC = () => {
                       handleSiteChange(id);
                     }}
                   >
-                    Ouvrir le détail du site
+                    Open Site Details
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
@@ -308,7 +308,7 @@ export const ResourceOptimizationDashboard: React.FC = () => {
         <div className="flex items-center gap-2 p-4 rounded-xl border border-border bg-muted/30">
           <Button variant="ghost" size="sm" onClick={() => setCurrentPage('overview')} className="gap-1">
             <ArrowLeft className="h-4 w-4" />
-            Retour
+            Back
           </Button>
           <span className="text-gray-400">/</span>
           <span className="font-medium capitalize">{currentPage.replace('-', ' ')}</span>
@@ -317,10 +317,9 @@ export const ResourceOptimizationDashboard: React.FC = () => {
         {currentPage === 'resource-analysis' && (
           <Card className="shadow-sm">
             <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold">Analyse des ressources chantier</h3>
+              <h3 className="text-lg font-semibold">Site Resource Analysis</h3>
               <p className="text-gray-600">
-                Connexion aux indicateurs d’utilisation des équipements, de la charge et des coûts par site — module en
-                extension.
+                Connection to equipment usage, workload and cost indicators per site — module in development.
               </p>
             </CardContent>
           </Card>
@@ -348,8 +347,8 @@ export const ResourceOptimizationDashboard: React.FC = () => {
         {currentPage === 'reporting' && (
           <Card className="shadow-sm">
             <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold">Rapports</h3>
-              <p className="text-gray-600">Fonctionnalité en développement</p>
+              <h3 className="text-lg font-semibold">Reports</h3>
+              <p className="text-gray-600">Feature in development</p>
             </CardContent>
           </Card>
         )}
@@ -361,18 +360,18 @@ export const ResourceOptimizationDashboard: React.FC = () => {
     <div className="space-y-6 p-6">
       <div className="rounded-2xl border border-border/80 bg-gradient-to-r from-card to-muted/30 px-6 py-5 shadow-sm flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Ressources du chantier</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Site Resources</h1>
           <p className="text-muted-foreground mt-1 max-w-4xl">
             {site
-              ? `${site.nom} — budget, tâches (planning) et équipes ; recommandations IA et suivi avant / après validation.`
-              : 'Sélectionnez un site pour analyser budget, planning et recommandations.'}
+              ? `${site.nom} — budget, tasks (planning) and teams; AI recommendations and tracking before/after approval.`
+              : 'Select a site to analyze budget, planning and recommendations.'}
           </p>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
           {/* Site Selector */}
           <Select value={effectiveSiteId} onValueChange={handleSiteChange}>
             <SelectTrigger className="w-72 bg-background">
-              <SelectValue placeholder="Sélectionner un site" />
+              <SelectValue placeholder="Select a site" />
             </SelectTrigger>
             <SelectContent>
               {activeSites.map((s) => (
@@ -384,7 +383,7 @@ export const ResourceOptimizationDashboard: React.FC = () => {
           </Select>
           <Button size="lg" className="gap-2 shadow-sm" onClick={handleGenerateRecommendations} disabled={isGenerating}>
             <Zap className={`h-4 w-4 ${isGenerating ? 'animate-spin' : ''}`} />
-            {isGenerating ? 'Génération...' : 'Générer Tout'}
+            {isGenerating ? 'Generating...' : 'Generate All'}
           </Button>
         </div>
       </div>
@@ -399,12 +398,12 @@ export const ResourceOptimizationDashboard: React.FC = () => {
                 <p className="font-semibold">{site.budget} TND</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Équipe</p>
-                <p className="font-semibold">{siteTeams?.length || 0} membres</p>
+                <p className="text-sm text-gray-600">Team</p>
+                <p className="font-semibold">{siteTeams?.length || 0} members</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Tâches</p>
-                <p className="font-semibold">{tasks?.length || 0} tâches</p>
+                <p className="text-sm text-gray-600">Tasks</p>
+                <p className="font-semibold">{tasks?.length || 0} tasks</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -428,8 +427,8 @@ export const ResourceOptimizationDashboard: React.FC = () => {
                 <TrendingUp className="h-5 w-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Analyse</p>
-                <p className="font-medium">Voir insights</p>
+                <p className="text-sm text-gray-600">Analysis</p>
+                <p className="font-medium">View Insights</p>
               </div>
               <ChevronRight className="h-4 w-4 ml-auto text-gray-400" />
             </div>
@@ -443,7 +442,7 @@ export const ResourceOptimizationDashboard: React.FC = () => {
                 <Lightbulb className="h-5 w-5 text-yellow-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Recommandations</p>
+                <p className="text-sm text-gray-600">Recommendations</p>
                 <p className="font-medium">{recommendations.length} suggestions</p>
               </div>
               <ChevronRight className="h-4 w-4 ml-auto text-gray-400" />
@@ -458,8 +457,8 @@ export const ResourceOptimizationDashboard: React.FC = () => {
                 <AlertTriangle className="h-5 w-5 text-red-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Alertes</p>
-                <p className="font-medium">{unreadAlertsCount} non lues</p>
+                <p className="text-sm text-gray-600">Alerts</p>
+                <p className="font-medium">{unreadAlertsCount} unread</p>
               </div>
               <ChevronRight className="h-4 w-4 ml-auto text-gray-400" />
             </div>
@@ -473,8 +472,8 @@ export const ResourceOptimizationDashboard: React.FC = () => {
                 <DollarSign className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Rapports</p>
-                <p className="font-medium">Tableaux de bord</p>
+                <p className="text-sm text-gray-600">Reports</p>
+                <p className="font-medium">Dashboards</p>
               </div>
               <ChevronRight className="h-4 w-4 ml-auto text-gray-400" />
             </div>
@@ -488,15 +487,15 @@ export const ResourceOptimizationDashboard: React.FC = () => {
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="recommendations" className="gap-2">
             <Lightbulb className="h-4 w-4" />
-            Recommandations ({recommendations.length})
+            Recommendations ({recommendations.length})
           </TabsTrigger>
           <TabsTrigger value="alerts" className="gap-2">
             <AlertTriangle className="h-4 w-4" />
-            Alertes ({unreadAlertsCount})
+            Alerts ({unreadAlertsCount})
           </TabsTrigger>
           <TabsTrigger value="analytics" className="gap-2">
             <BarChart3 className="h-4 w-4" />
-            Analytique & courbes
+            Analytics & Charts
           </TabsTrigger>
         </TabsList>
 

@@ -32,14 +32,14 @@ export const RecommendationsPage: React.FC<RecommendationsPageProps> = ({ siteId
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">💡 Recommandations</h1>
+          <h1 className="text-3xl font-bold">💡 Recommendations</h1>
           <p className="text-gray-600 mt-1">
-            Suggestions intelligentes pour optimiser les ressources
+            Smart suggestions to optimize resources
           </p>
         </div>
         <Button onClick={handleGenerate} disabled={isGenerating} className="gap-2">
           <RefreshCw className={`h-4 w-4 ${isGenerating ? 'animate-spin' : ''}`} />
-          {isGenerating ? 'Génération...' : 'Générer'}
+          {isGenerating ? 'Generating...' : 'Generate'}
         </Button>
       </div>
 

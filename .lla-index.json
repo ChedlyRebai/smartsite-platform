@@ -4011,7 +4011,8 @@
       "react",
       "axios",
       "react-hot-toast",
-      "@/lib/auth-api-url"
+      "@/lib/auth-api-url",
+      "@/app/hooks/useTranslation"
     ]
   },
   "apps\\frontend\\src\\app\\pages\\analytics\\Analytics.tsx": {
@@ -4077,7 +4078,8 @@
       "react-router",
       "react-hot-toast",
       "lucide-react",
-      "@/app/components/branding/SmartSiteLogo"
+      "@/app/components/branding/SmartSiteLogo",
+      "@/app/hooks/useTranslation"
     ]
   },
   "apps\\frontend\\src\\app\\pages\\auth\\Register.tsx": {
@@ -4097,6 +4099,7 @@
       "react-hot-toast",
       "@/app/components/branding/SmartSiteLogo",
       "@/app/utils/roleConfig",
+      "@/app/hooks/useTranslation",
       "@/app/types"
     ]
   },
@@ -4465,7 +4468,14 @@
       "default"
     ],
     "imports": [
-      "@/app/components/branding/SmartSiteLogo"
+      "react",
+      "@/app/components/branding/SmartSiteLogo",
+      "lucide-react",
+      "@/app/components/LanguageSelector",
+      "@/app/components/ThemeButton",
+      "@/app/components/NavbarAccessibilityButton",
+      "@/app/components/DemoModal",
+      "@/app/hooks/useTranslation"
     ]
   },
   "apps\\frontend\\src\\app\\pages\\incidents\\Incidents.tsx": {
@@ -4599,7 +4609,8 @@
     "imports": [
       "lucide-react",
       "sonner",
-      "@tanstack/react-query"
+      "@tanstack/react-query",
+      "@/app/hooks/useTranslation"
     ]
   },
   "apps\\frontend\\src\\app\\pages\\payments\\Payments.tsx": {
@@ -4767,7 +4778,8 @@
       "zod",
       "react-hot-toast",
       "axios",
-      "@/app/action/auth.action"
+      "@/app/action/auth.action",
+      "@/app/hooks/useTranslation"
     ]
   },
   "apps\\frontend\\src\\app\\pages\\projects\\Projects.tsx": {
@@ -4787,7 +4799,8 @@
       "default"
     ],
     "imports": [
-      "lucide-react"
+      "lucide-react",
+      "@/app/hooks/useTranslation"
     ]
   },
   "apps\\frontend\\src\\app\\pages\\reports\\Reports.tsx": {
@@ -4851,7 +4864,8 @@
       "react",
       "react-router",
       "@/app/action/catalog.action",
-      "@/app/action/supplier-material.action"
+      "@/app/action/supplier-material.action",
+      "@/app/hooks/useTranslation"
     ]
   },
   "apps\\frontend\\src\\app\\pages\\supplier-materials\\SupplierMaterialDetails.tsx": {
@@ -4889,7 +4903,8 @@
       "react",
       "react-router",
       "@/app/action/supplier.action",
-      "@/app/action/supplier-material.action"
+      "@/app/action/supplier-material.action",
+      "@/app/hooks/useTranslation"
     ]
   },
   "apps\\frontend\\src\\app\\pages\\supplier-materials\\SupplierMaterialMapping.tsx": {
@@ -5026,7 +5041,8 @@
       "@tanstack/react-query",
       "@/app/hooks/permission.store",
       "@/app/hooks/use-user-Modal",
-      "@/app/hooks/use-role-permissions-modal"
+      "@/app/hooks/use-role-permissions-modal",
+      "@/app/hooks/useTranslation"
     ]
   },
   "apps\\frontend\\src\\app\\pages\\users\\_components\\permissions-data-table.tsx": {
@@ -5601,6 +5617,7 @@
     "purpose": "component",
     "exports": [
       "RECOMMENDATION_TYPE_LABELS",
+      "METRIC_DESCRIPTIONS",
       "buildComparisonBarRows",
       "buildPercentEvolutionLineData",
       "buildAggregateBarRows",
@@ -5610,7 +5627,8 @@
     ],
     "imports": [
       "react",
-      "@/components/ui/card"
+      "@/components/ui/card",
+      "lucide-react"
     ]
   },
   "apps\\frontend\\src\\features\\resource-optimization\\components\\BudgetInfluenceApprovalChart.tsx": {
@@ -5620,7 +5638,8 @@
     ],
     "imports": [
       "react",
-      "@/components/ui/card"
+      "@/components/ui/card",
+      "lucide-react"
     ]
   },
   "apps\\frontend\\src\\features\\resource-optimization\\components\\DashboardCharts.tsx": {
@@ -5973,6 +5992,159 @@
   },
   "scripts\\seed-db.ts": {
     "purpose": "unknown",
+    "exports": [],
+    "imports": []
+  },
+  "apps\\frontend\\src\\app\\components\\DemoModal.tsx": {
+    "purpose": "component",
+    "exports": [
+      "DemoModal"
+    ],
+    "imports": [
+      "react",
+      "lucide-react"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\LanguageSelector.tsx": {
+    "purpose": "component",
+    "exports": [
+      "LanguageSelector"
+    ],
+    "imports": [
+      "react",
+      "@/app/context/LanguageContext",
+      "lucide-react",
+      "@/app/hooks/useTranslation"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\NavbarAccessibilityButton.tsx": {
+    "purpose": "component",
+    "exports": [
+      "NavbarAccessibilityButton"
+    ],
+    "imports": [
+      "react",
+      "lucide-react",
+      "@/components/ui/button"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\ThemeButton.tsx": {
+    "purpose": "component",
+    "exports": [
+      "ThemeButton"
+    ],
+    "imports": [
+      "react",
+      "@/app/context/ThemeContext",
+      "@/app/context/themes",
+      "lucide-react"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\ThemeSelector.tsx": {
+    "purpose": "component",
+    "exports": [
+      "ThemeSelector"
+    ],
+    "imports": [
+      "react",
+      "@/app/context/ThemeContext",
+      "@/app/context/themes",
+      "lucide-react"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\ThemeSelectorBar.tsx": {
+    "purpose": "component",
+    "exports": [
+      "ThemeSelectorBar"
+    ],
+    "imports": [
+      "react",
+      "@/app/context/ThemeContext",
+      "@/app/context/themes",
+      "lucide-react"
+    ]
+  },
+  "apps\\frontend\\src\\app\\context\\LanguageContext.tsx": {
+    "purpose": "component",
+    "exports": [
+      "LanguageProvider",
+      "useLanguage"
+    ],
+    "imports": [
+      "react"
+    ]
+  },
+  "apps\\frontend\\src\\app\\context\\ThemeContext.tsx": {
+    "purpose": "component",
+    "exports": [
+      "ThemeProvider",
+      "useTheme"
+    ],
+    "imports": [
+      "react"
+    ]
+  },
+  "apps\\frontend\\src\\app\\context\\themes.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "themes",
+      "applyTheme"
+    ],
+    "imports": []
+  },
+  "apps\\frontend\\src\\app\\context\\translations.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "translations",
+      "t"
+    ],
+    "imports": []
+  },
+  "apps\\frontend\\src\\app\\hooks\\useTranslation.ts": {
+    "purpose": "hook",
+    "exports": [
+      "useTranslation"
+    ],
+    "imports": [
+      "@/app/context/LanguageContext",
+      "@/app/context/translations"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\Home\\Home2-new.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "@/app/components/branding/SmartSiteLogo",
+      "lucide-react",
+      "@/app/components/LanguageSelector",
+      "@/app/hooks/useTranslation"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\TranslationTest.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "@/app/hooks/useTranslation",
+      "@/components/ui/card"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\SiteInfoPanel.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "lucide-react",
+      "react-router"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\auth\\Register_backup.tsx": {
+    "purpose": "component",
     "exports": [],
     "imports": []
   }

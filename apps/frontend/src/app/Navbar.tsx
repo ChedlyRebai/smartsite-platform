@@ -1,6 +1,8 @@
 import { Menu } from "lucide-react";
 import React, { useState } from "react";
 import { useAuthStore } from "./store/authStore";
+import SiteInfoPanel from "./components/SiteInfoPanel";
+
 const navigation = [
   { name: "Product", href: "#" },
   { name: "Features", href: "#" },
@@ -36,6 +38,9 @@ const Navbar = () => {
             <span className="sr-only">Ouvrir le menu principal</span>
             <Menu className="h-6 w-6" aria-hidden="true" />
           </button>
+        </div>
+        <div className="hidden lg:flex lg:flex-1 lg:justify-center">
+          <SiteInfoPanel />
         </div>
         <div className="hidden lg:flex lg:gap-x-12">
           {navigation.map((item) => (
