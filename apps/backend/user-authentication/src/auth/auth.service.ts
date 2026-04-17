@@ -55,17 +55,16 @@ export class AuthService {
 
     // Récupérer l'utilisateur avec rôle peuplé (le user passé peut ne pas avoir le rôle peuplé selon le contexte)
     const userFromDb = await this.usersService.findById(user._id);
-    
+
     const userData = userFromDb ? userFromDb.toObject() : user.toObject();
     const sessionId = randomUUID();
-    
+
     // Récupérer le nom du rôle (récupéré depuis le document peuplé)
-    const roleDoc = userData.role && typeof userData.role === 'object' 
-      ? userData.role 
-      : null;
-    const roleName = roleDoc ? (roleDoc.name || 'user') : 'user';
+    const roleDoc =
+      userData.role && typeof userData.role === 'object' ? userData.role : null;
+    const roleName = roleDoc ? roleDoc.name || 'user' : 'user';
     const roleId = roleDoc ? roleDoc._id : userData.role;
-    
+
     return {
       access_token: this.jwtService.sign(payload),
       id: userData._id,
@@ -273,7 +272,10 @@ export class AuthService {
           plainPassword,
         );
       } catch (error) {
-        console.error("Échec envoi email d'approbation (compte déjà approuvé):", error);
+        console.error(
+          "Échec envoi email d'approbation (compte déjà approuvé):",
+          error,
+        );
       }
     }
 

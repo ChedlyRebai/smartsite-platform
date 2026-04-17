@@ -62,7 +62,7 @@ describe('AuthController', () => {
 
       const result = await controller.register(registerDto);
       expect(result.message).toBe('User registered successfully');
-  //    expect(result.user.cin).toBe(registerDto.cin);
+      //    expect(result.user.cin).toBe(registerDto.cin);
     });
 
     it('should handle registration error', async () => {
@@ -72,7 +72,9 @@ describe('AuthController', () => {
         nom: 'Existing',
         prenom: 'User',
       };
-      mockAuthService.register.mockRejectedValue(new Error('User already exists'));
+      mockAuthService.register.mockRejectedValue(
+        new Error('User already exists'),
+      );
 
       const result = await controller.register(registerDto);
       //expect(result.error).toBe('User already exists');

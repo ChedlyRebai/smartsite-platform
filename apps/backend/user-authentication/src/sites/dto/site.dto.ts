@@ -9,8 +9,12 @@ export const CreateSiteDto = z.object({
     lng: z.number(),
   }),
   area: z.number().min(0, 'Area must be positive'),
-  status: z.enum(['planning', 'in_progress', 'on_hold', 'completed']).default('planning'),
-  workStartDate: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'Invalid date' }),
+  status: z
+    .enum(['planning', 'in_progress', 'on_hold', 'completed'])
+    .default('planning'),
+  workStartDate: z
+    .string()
+    .refine((val) => !isNaN(Date.parse(val)), { message: 'Invalid date' }),
   workEndDate: z.string().optional(),
   projectId: z.string().min(1, 'Project is required'),
   budget: z.number().min(0, 'Budget must be positive'),
@@ -21,12 +25,16 @@ export const CreateSiteDto = z.object({
 export const UpdateSiteDto = z.object({
   name: z.string().min(1, 'Name is required').max(100).optional(),
   address: z.string().min(1, 'Address is required').max(200).optional(),
-  coordinates: z.object({
-    lat: z.number(),
-    lng: z.number(),
-  }).optional(),
+  coordinates: z
+    .object({
+      lat: z.number(),
+      lng: z.number(),
+    })
+    .optional(),
   area: z.number().min(0, 'Area must be positive').optional(),
-  status: z.enum(['planning', 'in_progress', 'on_hold', 'completed']).optional(),
+  status: z
+    .enum(['planning', 'in_progress', 'on_hold', 'completed'])
+    .optional(),
   workStartDate: z.string().optional(),
   workEndDate: z.string().optional(),
   projectId: z.string().min(1, 'Project is required').optional(),

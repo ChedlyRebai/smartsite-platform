@@ -23,9 +23,9 @@ import { useAuthStore } from '../../store/authStore';
 import { mockSites, mockTeamMembers } from '../../utils/mockData';
 import { toast } from 'sonner';
 import type { Site } from '../../types';
-import { fetchSites, createSite, updateSite, deleteSite, assignTeamToSite, removeTeamFromSite, getTeamsAssignedToSite, getAllSitesWithTeams } from '../../action/site.action';
-import { getAllUsers, assignUserToSite } from '../../action/user.action';
-import { getAllTeams, getTeamById, assignSiteToTeam } from '../../action/team.action';
+import { fetchSites, createSite, updateSite, deleteSite } from '../../action/site.action';
+import { getAllUsers } from '../../action/user.action';
+import { getAllTeams } from '../../action/team.action';
 import { exportSitesToPDF, exportSingleSiteToPDF } from '../../utils/pdfExport';
 import { exportSitesToCSV, exportSitesToExcel, exportSitesToJSON } from '../../utils/exportUtils';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
@@ -120,32 +120,27 @@ export default function Sites() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [showProblemsOnly, setShowProblemsOnly] = useState(false);
   
-  // Sites data
-  const [sites, setSites] = useState<Site[]>([]);
-  const [sitesWithTeams, setSitesWithTeams] = useState<Site[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [useMockData, setUseMockData] = useState(false);
-  
-  // Real-time refresh
-  const [autoRefresh, setAutoRefresh] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  
-  // Form state
-  const [newSite, setNewSite] = useState({ name: '', address: '', area: '', budget: '' });
-  const [selectedStatusEdit, setSelectedStatusEdit] = useState('all');
-  const [addressSearchLoading, setAddressSearchLoading] = useState(false);
-  const [nearbyFournisseurs, setNearbyFournisseurs] = useState<Array<{_id: string; nom: string; adresse: string; telephone: string; categories: string[]}>>([]);
-  
-  // Dialog state
-  const [viewDetailsOpen, setViewDetailsOpen] = useState(false);
-  const [manageDialogOpen, setManageDialogOpen] = useState(false);
-  const [teamDialogOpen, setTeamDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [commentsDialogOpen, setCommentsDialogOpen] = useState(false);
-  const [issuesDialogOpen, setIssuesDialogOpen] = useState(false);
-  const [selectedSite, setSelectedSite] = useState<Site | null>(null);
+   // Sites data
+   const [sites, setSites] = useState<Site[]>([]);
+   const [loading, setLoading] = useState(true);
+   const [error, setError] = useState<string | null>(null);
+   const [useMockData, setUseMockData] = useState(false);
+   
+   // Real-time refresh
+   const [autoRefresh, setAutoRefresh] = useState(false);
+   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+   
+   // Form state
+   const [newSite, setNewSite] = useState({ name: '', address: '', area: '', budget: '' });
+   const [addressSearchLoading, setAddressSearchLoading] = useState(false);
+   const [nearbyFournisseurs, setNearbyFournisseurs] = useState<Array<{_id: string; nom: string; adresse: string; telephone: string; categories: string[]}>>([]);
+   
+   // Dialog state
+   const [viewDetailsOpen, setViewDetailsOpen] = useState(false);
+   const [manageDialogOpen, setManageDialogOpen] = useState(false);
+   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+   const [addDialogOpen, setAddDialogOpen] = useState(false);
+   const [selectedSite, setSelectedSite] = useState<Site | null>(null);
   
   // Manage data
   const [manageData, setManageData] = useState({ 
@@ -160,28 +155,32 @@ export default function Sites() {
   const [mapPosition, setMapPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [editMapPosition, setEditMapPosition] = useState<{ lat: number; lng: number } | null>(null);
 
-  // Validation errors
-  const [errors, setErrors] = useState<{ name?: string; address?: string; area?: string; budget?: string }>({});
-  const [selectedTeam, setSelectedTeam] = useState<string>('');
-  const [availableTeams, setAvailableTeams] = useState<Array<{_id: string; name: string}>>([]);
-  
-  // Comments state
+   // Validation errors
+   const [errors, setErrors] = useState<{ name?: string; address?: string; area?: string; budget?: string }>({});
+   
+   // Comments state
   const [newComment, setNewComment] = useState('');
-  const [siteComments, setSiteComments] = useState<Record<string, Array<{id: string; text: string; author: string; createdAt: string}>>>(() => {
-    // Load comments from localStorage on initial render
-    const saved = localStorage.getItem('siteComments');
-    return saved ? JSON.parse(saved) : {};
-  });
-  
-  // Issues state
+   const [siteComments, setSiteComments] = useState<Record<string, Array<{id: string; text: string; author: string; createdAt: string}>>>(() => {
+     // Load comments from localStorage on initial render
+     const saved = localStorage.getItem('siteComments');
+     return saved ? JSON.parse(saved) : {};
+   });
+
+   // Comments dialog state
+   const [commentsDialogOpen, setCommentsDialogOpen] = useState(false);
+
+   // Issues state
   const [newIssue, setNewIssue] = useState({ type: 'other', severity: 'medium', description: '' });
-  const [siteIssues, setSiteIssues] = useState<Record<string, Array<{id: string; type: string; severity: string; description: string; createdAt: string; resolved: boolean}>>>(() => {
-    // Load issues from localStorage on initial render
-    const saved = localStorage.getItem('siteIssues');
-    return saved ? JSON.parse(saved) : {};
-  });
-  
-  // Export history state
+   const [siteIssues, setSiteIssues] = useState<Record<string, Array<{id: string; type: string; severity: string; description: string; createdAt: string; resolved: boolean}>>>(() => {
+     // Load issues from localStorage on initial render
+     const saved = localStorage.getItem('siteIssues');
+     return saved ? JSON.parse(saved) : {};
+   });
+
+   // Issues dialog state
+   const [issuesDialogOpen, setIssuesDialogOpen] = useState(false);
+
+   // Export history state
   const [exportHistoryOpen, setExportHistoryOpen] = useState(false);
   const [exportHistory, setExportHistory] = useState<Array<{id: string; format: string; filename: string; siteCount: number; downloadedAt: string; downloadedBy: string}>>(() => {
     // Load export history from localStorage on initial render
@@ -189,12 +188,7 @@ export default function Sites() {
     return saved ? JSON.parse(saved) : [];
   });
   
-  // Team management state
-  const [siteTeams, setSiteTeams] = useState<any[]>([]);
-  const [selectedUserId, setSelectedUserId] = useState('');
-  const [loadingTeams, setLoadingTeams] = useState(false);
-
-  // Auto-refresh for real-time updates
+   // Auto-refresh for real-time updates
   useEffect(() => {
     if (autoRefresh) {
       const interval = setInterval(() => {
@@ -204,75 +198,32 @@ export default function Sites() {
     }
   }, [autoRefresh]);
 
-  // Load sites from API
-  useEffect(() => {
-    loadSites();
-  }, [selectedStatus, selectedPriority]);
+   // Load sites from API
+   useEffect(() => {
+     loadSites();
+   }, [selectedStatus, selectedPriority]);
 
-  // Load available teams when add dialog opens
-  useEffect(() => {
-    if (addDialogOpen) {
-      loadAvailableTeams();
-    }
-  }, [addDialogOpen]);
+const loadSites = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-  const loadAvailableTeams = async () => {
-    try {
-      const response = await getAllTeams();
-      // Check if response is successful and data is an array
-      if (!response || response.status !== 200 || !Array.isArray(response.data)) {
-        console.error('Invalid response:', response);
-        // Fallback to mock data
-        setAvailableTeams(mockTeamMembers.map(user => ({
-          _id: user._id,
-          name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email
-        })));
-        return;
+        const sitesData = await fetchSites();
+
+        console.log('Sites loaded from API:', sitesData);
+        console.log('Sites data length:', sitesData?.length);
+        setSites(Array.isArray(sitesData) ? sitesData : []);
+        setUseMockData(false);
+      } catch (err) {
+        console.error('Error loading sites, using mock data:', err);
+        setError('Backend not available, using mock data');
+        setSites(Array.isArray(mockSites) ? mockSites : []);
+        setUseMockData(true);
+        toast.warning('Offline mode - demo data');
+      } finally {
+        setLoading(false);
       }
-      // Load all teams from the database
-      const teams = response.data
-        .map((team: any) => ({ 
-          _id: team._id, 
-          name: team.name
-        }));
-      setAvailableTeams(teams);
-    } catch (err) {
-      console.error('Error loading teams, using mock data:', err);
-      // Fallback to mock data
-      setAvailableTeams(mockTeamMembers.map(user => ({
-        _id: user._id,
-        name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email
-      })));
-    }
-  };
-
-   const loadSites = async () => {
-     try {
-       setLoading(true);
-       setError(null);
-
-       // Load both sites and sites with teams in parallel
-       const [sitesData, sitesWithTeamsData] = await Promise.all([
-         fetchSites(),
-         getAllSitesWithTeams()
-       ]);
-
-       console.log('Sites loaded from API:', sitesData);
-       console.log('Sites data length:', sitesData?.length);
-       console.log('Sites with teams:', sitesWithTeamsData);
-       setSites(Array.isArray(sitesData) ? sitesData : []);
-       setSitesWithTeams(sitesWithTeamsData as Site[]);
-       setUseMockData(false);
-     } catch (err) {
-       console.error('Error loading sites, using mock data:', err);
-       setError('Backend not available, using mock data');
-       setSites(Array.isArray(mockSites) ? mockSites : []);
-       setUseMockData(true);
-       toast.warning('Offline mode - demo data');
-     } finally {
-       setLoading(false);
-     }
-   };
+    };
 
   const searchAddressOnMap = async (address: string) => {
     if (!address.trim() || address.length < 5) {
@@ -544,76 +495,7 @@ export default function Sites() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle open team dialog
-  const handleOpenTeamDialog = async (site: Site) => {
-    setSelectedSite(site);
-    setLoadingTeams(true);
-    try {
-      const teams = await getTeamsAssignedToSite(site.id);
-      setSiteTeams(teams || []);
-    } catch (error) {
-      console.error('Error fetching teams:', error);
-      setSiteTeams([]);
-    }
-    setLoadingTeams(false);
-    setTeamDialogOpen(true);
-  };
-
-  // Handle assign team to site
-  const handleAssignTeam = async () => {
-    if (!selectedSite || !selectedUserId) {
-      toast.error('Please select a team to assign');
-      return;
-    }
-    
-    // Get the team details to check if it has members
-    const team = availableTeams.find((t: any) => t._id === selectedUserId);
-    if (!team) {
-      toast.error('Team not found');
-      return;
-    }
-    
-    // Check if team has members - this is a requirement
-    // We need to fetch the team details to check members count
-    try {
-      const teamDetails = await getTeamById(selectedUserId);
-      if (teamDetails && teamDetails.data && teamDetails.data.members) {
-        const memberCount = teamDetails.data.members.length;
-        if (memberCount === 0) {
-          toast.error('This team has no members. Please add members to the team before assigning it to a site.');
-          return;
-        }
-      }
-      
-      // First, assign team to site in gestion-sites (site knows about the team)
-      await assignTeamToSite(selectedSite.id, selectedUserId);
-      
-      // Also update the team to record which site it's assigned to (team knows about the site)
-      await assignSiteToTeam(selectedUserId, selectedSite.id);
-      
-      toast.success('Team assigned successfully');
-      const teams = await getTeamsAssignedToSite(selectedSite.id);
-      setSiteTeams(teams || []);
-      setSelectedUserId('');
-    } catch (error: any) {
-      toast.error(error?.message || 'Error assigning team');
-    }
-  };
-
-  // Handle remove team from site
-  const handleRemoveTeam = async (userId: string) => {
-    if (!selectedSite) return;
-    try {
-      await removeTeamFromSite(selectedSite.id, userId);
-      toast.success('Team removed successfully');
-      const teams = await getTeamsAssignedToSite(selectedSite.id);
-      setSiteTeams(teams || []);
-    } catch (error: any) {
-      toast.error(error?.message || 'Error removing team');
-    }
-  };
-
-  const handleAddSite = async () => {
+   const handleAddSite = async () => {
     if (!validateForm()) {
       toast.error('Please correct the form errors');
       return;
@@ -651,22 +533,10 @@ export default function Sites() {
            coordinates: mapPosition || { lat: 0, lng: 0 },
          };
          
-         const createdSite = await createSite(site);
-         setSites([...(sites || []), createdSite]);
-        
-        // Assign team to site if selected
-        if (selectedTeam && createdSite.id) {
-          try {
-            await assignTeamToSite(createdSite.id, selectedTeam);
-            toast.success('Site created and team assigned successfully!');
-          } catch (teamError) {
-            console.error('Error assigning team to site:', teamError);
-            toast.warning('Site created but team assignment failed');
-          }
-        } else {
+          const createdSite = await createSite(site);
+          setSites([...(sites || []), createdSite]);
           toast.success('Site added successfully!');
-        }
-        resetAddForm();
+          resetAddForm();
       }
     } catch (error) {
       console.error('Error creating site:', error);
@@ -674,14 +544,13 @@ export default function Sites() {
     }
   };
 
-  const resetAddForm = () => {
-    setNewSite({ name: '', address: '', area: '', budget: '' });
-    setMapPosition(null);
-    setErrors({});
-    setSelectedTeam('');
-    setNearbyFournisseurs([]);
-    setAddDialogOpen(false);
-  };
+   const resetAddForm = () => {
+     setNewSite({ name: '', address: '', area: '', budget: '' });
+     setMapPosition(null);
+     setErrors({});
+     setNearbyFournisseurs([]);
+     setAddDialogOpen(false);
+   };
 
   const handleViewDetails = (site: Site) => {
     setSelectedSite(site);
@@ -786,31 +655,31 @@ export default function Sites() {
     return <Icon className={`h-4 w-4 ${config.color.split(' ')[0]}`} />;
   };
 
-  // Handle PDF export - always fetch fresh data from MongoDB
-  const handleExportPDF = async () => {
-    try {
-      // Fetch fresh data directly from the API
-      const sitesData = await getAllSitesWithTeams();
-      
-      if (sitesData && sitesData.length > 0) {
-        exportSitesToPDF(sitesData as Site[], `smartsite-sites-${new Date().toISOString().split('T')[0]}.pdf`);
-        toast.success('PDF exported successfully with ' + sitesData.length + ' sites!');
-      } else {
-        toast.error('No sites found in database');
-      }
-    } catch (error) {
-      console.error('Error exporting PDF:', error);
-      toast.error('Failed to export PDF - please ensure backend is running');
-    }
-  };
+   // Handle PDF export - always fetch fresh data from MongoDB
+   const handleExportPDF = async () => {
+     try {
+       // Fetch fresh data directly from the API
+       const sitesData = await fetchSites();
+       
+       if (sitesData && sitesData.length > 0) {
+         exportSitesToPDF(sitesData as Site[], `smartsite-sites-${new Date().toISOString().split('T')[0]}.pdf`);
+         toast.success('PDF exported successfully with ' + sitesData.length + ' sites!');
+       } else {
+         toast.error('No sites found in database');
+       }
+     } catch (error) {
+       console.error('Error exporting PDF:', error);
+       toast.error('Failed to export PDF - please ensure backend is running');
+     }
+   };
 
-  // Handle export in different formats
-  const handleExport = async (format: 'pdf' | 'csv' | 'excel' | 'json') => {
-    try {
-      const sitesData = await getAllSitesWithTeams();
-      
-      console.log('Sites data for export:', sitesData);
-      console.log('First site teams:', sitesData[0]?.teams);
+   // Handle export in different formats
+   const handleExport = async (format: 'pdf' | 'csv' | 'excel' | 'json') => {
+     try {
+       const sitesData = await fetchSites();
+       
+       console.log('Sites data for export:', sitesData);
+       console.log('First site teams:', sitesData[0]?.teams);
       
       if (!sitesData || sitesData.length === 0) {
         toast.error('No sites found in database');
@@ -1057,37 +926,10 @@ export default function Sites() {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="team" className="text-sm font-medium">
-                      Team <span className="text-gray-500">(Optional)</span>
-                    </Label>
-                    <Select value={selectedTeam} onValueChange={setSelectedTeam}>
-                      <SelectTrigger id="team" className="w-full">
-                        <SelectValue placeholder="Select a team" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableTeams.length > 0 ? (
-                          availableTeams.map((team) => (
-                            <SelectItem key={team._id} value={team._id}>
-                              {team.name}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <SelectItem value="no-teams" disabled>
-                            No teams available
-                          </SelectItem>
-                        )}
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-gray-500">
-                      Assign a team to this site (Workers / Team Leader)
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">
-                      Location on Map <span className="text-red-500">*</span>
-                    </Label>
+                   <div className="space-y-2">
+                     <Label className="text-sm font-medium">
+                       Location on Map <span className="text-red-500">*</span>
+                     </Label>
                     <div className="h-64 rounded-lg overflow-hidden border-2 border-gray-200 hover:border-blue-400 transition-colors">
                       <MapContainer
                         center={mapPosition ? [mapPosition.lat, mapPosition.lng] : TUNISIA_CENTER}
@@ -1602,19 +1444,10 @@ export default function Sites() {
                       )}
                     </Button>
 
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-blue-200 hover:border-blue-400 hover:bg-blue-50 transition-colors"
-                      onClick={() => handleOpenTeamDialog(site)}
-                    >
-                      <Users className="h-4 w-4 mr-1" />
-                    </Button>
-                    
-                    <Button 
-                      size="sm" 
-                      variant="destructive"
-                      className="hover:bg-red-600 transition-colors"
+                     <Button 
+                       size="sm" 
+                       variant="destructive"
+                       className="hover:bg-red-600 transition-colors"
                       onClick={() => handleDeleteSite(site)}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -1952,54 +1785,6 @@ export default function Sites() {
       </Dialog>
 
       {/* Team Dialog */}
-      <Dialog open={teamDialogOpen} onOpenChange={setTeamDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-2xl">Team Management</DialogTitle>
-            <DialogDescription>
-              Site: {selectedSite?.name}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <h3 className="font-semibold text-lg">Assigned Teams</h3>
-              {loadingTeams ? (
-                <p className="text-gray-500">Chargement...</p>
-              ) : siteTeams.length === 0 ? (
-                <p className="text-gray-500">No team assigned</p>
-              ) : (
-                <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {siteTeams.map((team: any) => (
-                    <div key={team._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div>
-                        {/* Handle both old format (UserSimple) and new format (Team) */}
-                        {team.name ? (
-                          <>
-                            <p className="font-medium">{team.name}</p>
-                            <p className="text-sm text-gray-500">{team.description || 'Équipe'}</p>
-                            {team.members && team.members.length > 0 && (
-                              <p className="text-xs text-gray-400">{team.members.length} membre(s)</p>
-                            )}
-                          </>
-                        ) : (
-                          <>
-                            <p className="font-medium">{team.firstName} {team.lastName}</p>
-                            <p className="text-sm text-gray-500">{team.email}</p>
-                          </>
-                        )}
-                      </div>
-                      <Button size="sm" variant="destructive" onClick={() => handleRemoveTeam(team._id)}>
-                        Retirer
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
       {/* Comments Dialog */}
       <Dialog open={commentsDialogOpen} onOpenChange={setCommentsDialogOpen}>
         <DialogContent className="max-w-2xl">

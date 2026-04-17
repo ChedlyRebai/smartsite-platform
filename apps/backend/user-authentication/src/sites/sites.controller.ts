@@ -38,14 +38,6 @@ export class SitesController {
     return this.sitesService.findAll(userId, userRole);
   }
 
-  @Get('with-teams')
-  @ApiOperation({ summary: 'Get all sites with teams populated' })
-  async findAllWithTeams(@Req() req: any) {
-    const userId = req.user.userId;
-    const userRole = req.user.roles?.[0]?.name || req.user.role;
-    return this.sitesService.findAllWithTeams(userId, userRole);
-  }
-
   @Get(':id')
   @ApiOperation({ summary: 'Get site by ID' })
   async findOne(@Param('id') id: string, @Req() req: any) {
@@ -75,57 +67,12 @@ export class SitesController {
     return this.sitesService.softDelete(id, userId, userRole);
   }
 
-   @Post(':id/reactivate')
-   @HttpCode(HttpStatus.OK)
-   @ApiOperation({ summary: 'Reactivate a deactivated site' })
-   async reactivate(@Param('id') id: string, @Req() req: any) {
-     const userId = req.user.userId;
-     const userRole = req.user.roles?.[0]?.name || req.user.role;
-     return this.sitesService.reactivate(id, userId, userRole);
-   }
-
-   @Post(':id/assign-team/:teamId')
-   @ApiOperation({ summary: 'Assign a team to a site' })
-   async assignTeam(
-     @Param('id') id: string,
-     @Param('teamId') teamId: string,
-     @Req() req: any,
-   ) {
-     const userId = req.user.userId;
-     const userRole = req.user.roles?.[0]?.name || req.user.role;
-     // Vérifier l'accès au site
-     await this.sitesService.findOne(id, userId, userRole);
-     // Ajouter l'équipe au site
-     const site = await this.sitesService.addTeamToSite(id, teamId);
-     return site;
-   }
-
-   @Delete(':id/remove-team/:teamId')
-   @HttpCode(HttpStatus.OK)
-   @ApiOperation({ summary: 'Remove a team from a site' })
-   async removeTeam(
-     @Param('id') id: string,
-     @Param('teamId') teamId: string,
-     @Req() req: any,
-   ) {
-     const userId = req.user.userId;
-     const userRole = req.user.roles?.[0]?.name || req.user.role;
-     // Vérifier l'accès au site
-     await this.sitesService.findOne(id, userId, userRole);
-     // Retirer l'équipe du site
-     const site = await this.sitesService.removeTeamFromSite(id, teamId);
-     return site;
-   }
-
-   @Get(':id/teams')
-   @ApiOperation({ summary: 'Get teams assigned to a site' })
-   async getTeams(@Param('id') id: string, @Req() req: any) {
-     const userId = req.user.userId;
-     const userRole = req.user.roles?.[0]?.name || req.user.role;
-     // Vérifier l'accès au site
-     await this.sitesService.findOne(id, userId, userRole);
-     // Retourner les équipes du site
-     const site = await this.sitesService.findOne(id, userId, userRole);
-     return site.teams || [];
-   }
+  @Post(':id/reactivate')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Reactivate a deactivated site' })
+  async reactivate(@Param('id') id: string, @Req() req: any) {
+    const userId = req.user.userId;
+    const userRole = req.user.roles?.[0]?.name || req.user.role;
+    return this.sitesService.reactivate(id, userId, userRole);
+  }
 }

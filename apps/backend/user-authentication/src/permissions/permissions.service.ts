@@ -5,7 +5,9 @@ import { Permission } from './entities/permission.entity';
 
 @Injectable()
 export class PermissionsService {
-  constructor(@InjectModel(Permission.name) private permissionModel: Model<Permission>) {}
+  constructor(
+    @InjectModel(Permission.name) private permissionModel: Model<Permission>,
+  ) {}
 
   async create(createPermissionDto: any) {
     const createdPermission = new this.permissionModel(createPermissionDto);
@@ -30,7 +32,9 @@ export class PermissionsService {
   }
 
   async update(id: string, updatePermissionDto: any) {
-    return this.permissionModel.findByIdAndUpdate(id, updatePermissionDto, { new: true }).exec();
+    return this.permissionModel
+      .findByIdAndUpdate(id, updatePermissionDto, { new: true })
+      .exec();
   }
 
   async remove(id: string) {

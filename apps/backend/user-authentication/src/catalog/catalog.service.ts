@@ -2,7 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CatalogItem } from './entities/catalog-item.entity';
-import { CreateCatalogItemDto, UpdateCatalogItemDto, CatalogItemQueryDto } from './dto/catalog-item.dto';
+import {
+  CreateCatalogItemDto,
+  UpdateCatalogItemDto,
+  CatalogItemQueryDto,
+} from './dto/catalog-item.dto';
 
 @Injectable()
 export class CatalogService {
@@ -15,11 +19,16 @@ export class CatalogService {
     return created.save();
   }
 
-  async findAll(query: CatalogItemQueryDto): Promise<{ data: CatalogItem[]; total: number; page: number; limit: number }> {
+  async findAll(query: CatalogItemQueryDto): Promise<{
+    data: CatalogItem[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
     const { search, category, status, page = '1', limit = '10' } = query;
-    
+
     const filter: any = {};
-    
+
     if (search) {
       filter.$or = [
         { code: { $regex: search, $options: 'i' } },
@@ -27,16 +36,21 @@ export class CatalogService {
         { description: { $regex: search, $options: 'i' } },
       ];
     }
-    
+
     if (category) filter.category = category;
     if (status) filter.status = status;
 
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
     const skip = (pageNum - 1) * limitNum;
-    
+
     const [data, total] = await Promise.all([
-      this.catalogModel.find(filter).skip(skip).limit(limitNum).sort({ name: 1 }).exec(),
+      this.catalogModel
+        .find(filter)
+        .skip(skip)
+        .limit(limitNum)
+        .sort({ name: 1 })
+        .exec(),
       this.catalogModel.countDocuments(filter).exec(),
     ]);
 
@@ -51,7 +65,10 @@ export class CatalogService {
     return item;
   }
 
-  async update(id: string, updateDto: UpdateCatalogItemDto): Promise<CatalogItem> {
+  async update(
+    id: string,
+    updateDto: UpdateCatalogItemDto,
+  ): Promise<CatalogItem> {
     const item = await this.catalogModel
       .findByIdAndUpdate(id, updateDto, { new: true })
       .exec();
@@ -70,6 +87,6 @@ export class CatalogService {
 
   async getCategories(): Promise<string[]> {
     const categories = await this.catalogModel.distinct('category').exec();
-    return categories.filter(c => c);
+    return categories.filter((c) => c);
   }
 }

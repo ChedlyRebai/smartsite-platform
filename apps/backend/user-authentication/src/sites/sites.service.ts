@@ -40,78 +40,26 @@ export class SitesService {
       query.createdBy = new Types.ObjectId(userId);
     }
 
-    return this.siteModel
-      .find(query)
-      .sort({ createdAt: -1 })
-      .exec();
+    return this.siteModel.find(query).sort({ createdAt: -1 }).exec();
   }
 
-   /**
-    * Lister les sites avec équipes peuplées (pour Team page)
-    */
-   async findAllWithTeams(userId: string, userRole: string): Promise<Site[]> {
-     const query: any = {};
+  /**
+   * Récupérer un site par ID (avec vérification d'accès pour site_manager)
+   */
+  async findOne(id: string, userId?: string, userRole?: string): Promise<Site> {
+    const site = await this.siteModel.findById(id).exec();
 
-     if (userRole === 'site_manager') {
-       query.createdBy = new Types.ObjectId(userId);
-     }
+    if (!site) {
+      throw new NotFoundException(`Site with ID ${id} not found`);
+    }
 
-     return this.siteModel
-       .find(query)
-       .populate('teams')
-       .sort({ createdAt: -1 })
-       .exec();
-   }
+    // Vérification d'accès pour site_manager
+    if (userRole === 'site_manager' && site.createdBy.toString() !== userId) {
+      throw new ForbiddenException('You do not have access to this site');
+    }
 
-   /**
-    * Ajouter une équipe à un site (synchro bidirectionnelle)
-    */
-   async addTeamToSite(siteId: string, teamId: string): Promise<Site> {
-     const site = await this.siteModel.findById(siteId);
-     if (!site) {
-       throw new NotFoundException(`Site with ID ${siteId} not found`);
-     }
-
-     if (!site.teams.includes(teamId as any)) {
-       site.teams.push(teamId as any);
-       await site.save();
-     }
-
-     return site;
-   }
-
-   /**
-    * Retirer une équipe d'un site (synchro bidirectionnelle)
-    */
-   async removeTeamFromSite(siteId: string, teamId: string): Promise<Site> {
-     const site = await this.siteModel.findById(siteId);
-     if (!site) {
-       throw new NotFoundException(`Site with ID ${siteId} not found`);
-     }
-
-     site.teams = site.teams.filter((t: any) => t.toString() !== teamId);
-     await site.save();
-
-     return site;
-   }
-
-   /**
-    * Récupérer un site par ID (avec vérification d'accès pour site_manager)
-    */
-   async findOne(id: string, userId?: string, userRole?: string): Promise<Site> {
-     const site = await this.siteModel.findById(id).exec();
-
-     if (!site) {
-       throw new NotFoundException(`Site with ID ${id} not found`);
-     }
-
-     // Vérification d'accès pour site_manager
-     if (userRole === 'site_manager' && site.createdBy.toString() !== userId) {
-       throw new ForbiddenException('You do not have access to this site');
-     }
-
-     return site;
-   }
+    return site;
+  }
 
   /**
    * Mettre à jour un site
@@ -142,7 +90,11 @@ export class SitesService {
   /**
    * Soft delete (désactiver) un site
    */
-  async softDelete(id: string, userId: string, userRole: string): Promise<Site> {
+  async softDelete(
+    id: string,
+    userId: string,
+    userRole: string,
+  ): Promise<Site> {
     const site = await this.findOne(id, userId, userRole);
 
     if (!site.is_active) {
@@ -158,7 +110,11 @@ export class SitesService {
   /**
    * Réactiver un site
    */
-  async reactivate(id: string, userId: string, userRole: string): Promise<Site> {
+  async reactivate(
+    id: string,
+    userId: string,
+    userRole: string,
+  ): Promise<Site> {
     const site = await this.findOne(id, userId, userRole);
 
     if (site.is_active) {

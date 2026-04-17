@@ -25,4 +25,5 @@ export class ChatbotConversation extends Document {
   currentSiteId?: Types.ObjectId;
 }
 
-export const ChatbotConversationSchema = SchemaFactory.createForClass(ChatbotConversation);
+export const ChatbotConversationSchema =
+  SchemaFactory.createForClass(ChatbotConversation);

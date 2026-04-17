@@ -6,7 +6,9 @@ import { CatalogItem, CatalogItemSchema } from './entities/catalog-item.entity';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: CatalogItem.name, schema: CatalogItemSchema }]),
+    MongooseModule.forFeature([
+      { name: CatalogItem.name, schema: CatalogItemSchema },
+    ]),
   ],
   controllers: [CatalogController],
   providers: [CatalogService],

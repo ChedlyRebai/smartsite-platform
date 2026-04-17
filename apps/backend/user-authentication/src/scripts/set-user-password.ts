@@ -14,8 +14,12 @@ async function setUserPassword() {
   const newPassword = process.argv[3];
 
   if (!cin || !newPassword) {
-    console.error('❌ Usage: npx ts-node src/scripts/set-user-password.ts <CIN> <PASSWORD>');
-    console.error('   Example: npx ts-node src/scripts/set-user-password.ts 14655641 MyPassword123!');
+    console.error(
+      '❌ Usage: npx ts-node src/scripts/set-user-password.ts <CIN> <PASSWORD>',
+    );
+    console.error(
+      '   Example: npx ts-node src/scripts/set-user-password.ts 14655641 MyPassword123!',
+    );
     process.exit(1);
   }
 
@@ -29,7 +33,9 @@ async function setUserPassword() {
     process.exit(1);
   }
 
-  console.log(`✅ Found user: ${user.firstName} ${user.lastName} (${user.email})`);
+  console.log(
+    `✅ Found user: ${user.firstName} ${user.lastName} (${user.email})`,
+  );
   console.log(`🔐 Setting new password...`);
 
   // Hash the new password
@@ -38,13 +44,13 @@ async function setUserPassword() {
   // Update the user's password
   await userModel.updateOne(
     { _id: user._id },
-    { 
-      $set: { 
+    {
+      $set: {
         password: hashedPassword,
-        firstLogin: true,  // Keep firstLogin true so they'll be prompted to change it
-        passwordChnage: false
-      } 
-    }
+        firstLogin: true, // Keep firstLogin true so they'll be prompted to change it
+        passwordChnage: false,
+      },
+    },
   );
 
   console.log(`✅ Password updated successfully for user ${cin}`);

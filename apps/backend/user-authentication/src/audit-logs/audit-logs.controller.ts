@@ -27,7 +27,10 @@ export class AuditLogsController {
   @Get()
   async findAll(@Query() query: QueryAuditLogsDto, @Req() req: any) {
     const currentUserId = req?.user?.sub || req?.user?.userId;
-    const currentUser = await this.userModel.findById(currentUserId).populate('role').exec();
+    const currentUser = await this.userModel
+      .findById(currentUserId)
+      .populate('role')
+      .exec();
     const currentUserRole = (currentUser as any)?.role?.name;
 
     if (currentUserRole !== 'super_admin') {
@@ -40,7 +43,10 @@ export class AuditLogsController {
   @Get('retention')
   async getRetention(@Req() req: any) {
     const currentUserId = req?.user?.sub || req?.user?.userId;
-    const currentUser = await this.userModel.findById(currentUserId).populate('role').exec();
+    const currentUser = await this.userModel
+      .findById(currentUserId)
+      .populate('role')
+      .exec();
     const currentUserRole = (currentUser as any)?.role?.name;
     if (currentUserRole !== 'super_admin') {
       throw new ForbiddenException('Access denied: super_admin only');
@@ -54,11 +60,15 @@ export class AuditLogsController {
   @Post('track')
   async trackEvent(@Body() dto: CreateAuditLogDto, @Req() req: any) {
     const currentUserId = req?.user?.sub || req?.user?.userId;
-    const currentUser = await this.userModel.findById(currentUserId).populate('role').exec();
+    const currentUser = await this.userModel
+      .findById(currentUserId)
+      .populate('role')
+      .exec();
     return this.auditLogsService.createLog({
       userId: String((currentUser as any)?._id || ''),
       userCin: (currentUser as any)?.cin,
-      userName: `${(currentUser as any)?.firstname || ''} ${(currentUser as any)?.lastname || ''}`.trim(),
+      userName:
+        `${(currentUser as any)?.firstname || ''} ${(currentUser as any)?.lastname || ''}`.trim(),
       userRole: (currentUser as any)?.role?.name,
       actionType: dto.actionType || 'view',
       actionLabel: dto.actionLabel || 'Tracked event',

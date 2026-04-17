@@ -16,7 +16,6 @@ export class RolesService {
     return this.roleModel.find().populate('permissions').exec();
   }
 
-  
   async findById(id: string) {
     return this.roleModel.findById(id).populate('permissions').exec();
   }
@@ -26,7 +25,10 @@ export class RolesService {
   }
 
   async update(id: string, updateRoleDto: any) {
-    return this.roleModel.findByIdAndUpdate(id, updateRoleDto, { new: true }).populate('permissions').exec();
+    return this.roleModel
+      .findByIdAndUpdate(id, updateRoleDto, { new: true })
+      .populate('permissions')
+      .exec();
   }
 
   async remove(id: string) {
@@ -34,18 +36,24 @@ export class RolesService {
   }
 
   async addPermissionToRole(roleId: string, permissionId: string) {
-    return this.roleModel.findByIdAndUpdate(
-      roleId,
-      { $addToSet: { permissions: permissionId } },
-      { new: true },
-    ).populate('permissions').exec();
+    return this.roleModel
+      .findByIdAndUpdate(
+        roleId,
+        { $addToSet: { permissions: permissionId } },
+        { new: true },
+      )
+      .populate('permissions')
+      .exec();
   }
 
   async removePermissionFromRole(roleId: string, permissionId: string) {
-    return this.roleModel.findByIdAndUpdate(
-      roleId,
-      { $pull: { permissions: permissionId } },
-      { new: true },
-    ).populate('permissions').exec();
+    return this.roleModel
+      .findByIdAndUpdate(
+        roleId,
+        { $pull: { permissions: permissionId } },
+        { new: true },
+      )
+      .populate('permissions')
+      .exec();
   }
 }

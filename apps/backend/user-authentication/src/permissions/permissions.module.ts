@@ -5,7 +5,11 @@ import { PermissionsController } from './permissions.controller';
 import { Permission, PermissionSchema } from './entities/permission.entity';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: Permission.name, schema: PermissionSchema }])],
+  imports: [
+    MongooseModule.forFeature([
+      { name: Permission.name, schema: PermissionSchema },
+    ]),
+  ],
   providers: [PermissionsService],
   controllers: [PermissionsController],
   exports: [PermissionsService],

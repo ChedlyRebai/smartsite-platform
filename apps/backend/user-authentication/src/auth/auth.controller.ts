@@ -41,10 +41,10 @@ export class AuthController {
 
     const result = await this.authService.login(user);
     await this.auditLogsService.createLog({
-      userId: String((user as any)?._id || ''),
+      userId: String(user?._id || ''),
       userCin: user?.cin,
       userName: `${user?.firstName || ''} ${user?.lastName || ''}`.trim(),
-      userRole: (user as any)?.role?.name,
+      userRole: user?.role?.name,
       actionType: 'login',
       actionLabel: 'User logged in',
       resourceType: 'auth',
@@ -148,35 +148,35 @@ export class AuthController {
     return response;
   }
 
-   @Post('approve-user/:userId')
-   @UseGuards(JwtAuthGuard)
-   async approveUser(
-     @Param('userId') userId: string,
-     @Body() body: { password: string },
-     @Request() req: any,
-   ) {
-     const adminId = req.user.userId;
-     const updatedUser = await this.authService.approveUser(
-       userId,
-       body.password,
-       adminId,
-     );
-     await this.auditLogsService.createLog({
-       userId: String(adminId),
-       userName: 'Super Admin',
-       actionType: 'update',
-       actionLabel: 'Approved user account',
-       resourceType: 'user',
-       resourceId: userId,
-       status: 'success',
-       severity: 'important',
-       ipAddress: req?.ip,
-     });
-     return {
-       message: 'User approved successfully',
-       user: updatedUser,
-     };
-   }
+  @Post('approve-user/:userId')
+  @UseGuards(JwtAuthGuard)
+  async approveUser(
+    @Param('userId') userId: string,
+    @Body() body: { password: string },
+    @Request() req: any,
+  ) {
+    const adminId = req.user.userId;
+    const updatedUser = await this.authService.approveUser(
+      userId,
+      body.password,
+      adminId,
+    );
+    await this.auditLogsService.createLog({
+      userId: String(adminId),
+      userName: 'Super Admin',
+      actionType: 'update',
+      actionLabel: 'Approved user account',
+      resourceType: 'user',
+      resourceId: userId,
+      status: 'success',
+      severity: 'important',
+      ipAddress: req?.ip,
+    });
+    return {
+      message: 'User approved successfully',
+      user: updatedUser,
+    };
+  }
 
   @Post('reject-user/:userId')
   @UseGuards(JwtAuthGuard)

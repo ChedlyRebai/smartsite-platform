@@ -144,7 +144,11 @@ export class UsersService {
       console.error('❌ Erreur dans findAll:', error);
       // Fallback: find without populate if populate causes error
       const fallbackResult = await this.userModel.find().exec();
-      console.log('🔍 DEBUG: findAll fallback:', fallbackResult.length, 'utilisateurs');
+      console.log(
+        '🔍 DEBUG: findAll fallback:',
+        fallbackResult.length,
+        'utilisateurs',
+      );
       return fallbackResult;
     }
   }
@@ -169,7 +173,7 @@ export class UsersService {
         cin: result[0].cin,
         role: result[0].role,
         roleType: typeof result[0].role,
-       // roleName: (result[0].role as any)?.name,
+        // roleName: (result[0].role as any)?.name,
       });
     }
     return result;

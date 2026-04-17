@@ -46,14 +46,11 @@ export class Site extends Document {
   @Prop({ required: true, min: 0, max: 100 })
   progress: number;
 
-   @Prop({ required: true, type: Types.ObjectId, ref: 'User' })
-   createdBy: Types.ObjectId; // L'utilisateur qui a créé le site
+  @Prop({ required: true, type: Types.ObjectId, ref: 'User' })
+  createdBy: Types.ObjectId; // L'utilisateur qui a créé le site
 
-   @Prop({ type: [{ type: Types.ObjectId, ref: 'Team' }], default: [] })
-   teams: Types.ObjectId[]; // Équipes assignées à ce site
-
-   @Prop({ default: true })
-   is_active: boolean;
+  @Prop({ default: true })
+  is_active: boolean;
 
   @Prop({ default: Date.now })
   createdAt: Date;

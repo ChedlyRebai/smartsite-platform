@@ -1,10 +1,10 @@
 import axios from 'axios';
 import type { Site } from '../types';
 import { authApi } from '../store/authStore';
+import { getAllTeams } from './team.action';
 
 // Ensure token is attached to every request (fallback if authApi defaults not set)
 authApi.interceptors.request.use((config) => {
-  // Try getting token from localStorage (persisted store)
   try {
     const persisted = localStorage.getItem('smartsite-auth');
     if (persisted) {
@@ -45,7 +45,6 @@ export const fetchSites = async (): Promise<Site[]> => {
   try {
     const response = await authApi.get('/sites');
     const data = response.data;
-    // Le backend peut retourner { data: Site[] } ou directement Site[]
     const sitesArray = Array.isArray(data) ? data : data.data || [];
     return sitesArray.map(mapBackendSiteToFrontend);
   } catch (error) {
@@ -105,61 +104,24 @@ export const deleteSite = async (id: string): Promise<void> => {
   }
 };
 
-export const assignTeamToSite = async (siteId: string, teamId: string): Promise<void> => {
-  try {
-    await authApi.post(`/sites/${siteId}/assign-team/${teamId}`);
-  } catch (error) {
-    console.error('Error assigning team to site:', error);
-    throw error;
-  }
-};
-
-export const removeTeamFromSite = async (siteId: string, teamId: string): Promise<void> => {
-  try {
-    await authApi.delete(`/sites/${siteId}/remove-team/${teamId}`);
-  } catch (error) {
-    console.error('Error removing team from site:', error);
-    throw error;
-  }
-};
-
-export const getTeamsAssignedToSite = async (siteId: string): Promise<Array<{_id: string; name: string}>> => {
-  try {
-    const response = await authApi.get(`/sites/${siteId}/teams`);
-    return response.data || [];
-  } catch (error) {
-    console.error('Error fetching site teams:', error);
-    throw error;
-  }
-};
-
-export const getAllSitesWithTeams = async (): Promise<Site[]> => {
-  try {
-    const response = await authApi.get('/sites/with-teams');
-    const data = response.data;
-    const sitesArray = Array.isArray(data) ? data : data.data || [];
-    return sitesArray.map(mapBackendSiteToFrontend);
-  } catch (error) {
-    console.error('Error fetching sites with teams:', error);
-    throw error;
-  }
-};
-
 // Get mapping of teamId -> site assignment (for Teams page compatibility)
-// In the new architecture, teams are assigned to sites (many-to-many via site.teams array)
-// Returns first site found for each team
+// In current architecture, each team has a `site` field (ObjectId reference to Site)
+// Returns mapping: teamId -> { siteId, siteName }
 export const getAssignedTeamIds = async (): Promise<Record<string, { siteId: string; siteName: string }>> => {
   try {
-    const sites = await getAllSitesWithTeams();
+    const teams = await getAllTeams();
     const result: Record<string, { siteId: string; siteName: string }> = {};
-    for (const site of sites) {
-      if (site.teams && Array.isArray(site.teams)) {
-        for (const team of site.teams) {
-          const teamId = typeof team === 'object' ? team._id : team;
-          if (teamId && !result[teamId]) {
-            result[teamId] = { siteId: site.id, siteName: site.name };
-          }
-        }
+
+    // Handle both array and { data: [] } responses
+    const teamsArray = Array.isArray(teams) ? teams : (teams as any)?.data || [];
+
+    for (const team of teamsArray) {
+      if (team.site) {
+        const siteId = typeof team.site === 'object' ? (team.site._id || team.site.id) : team.site;
+        result[team._id] = {
+          siteId: siteId?.toString() || '',
+          siteName: team.name || '',
+        };
       }
     }
     return result;

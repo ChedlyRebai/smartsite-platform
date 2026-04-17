@@ -36,19 +36,21 @@ async function fixUserRoles() {
 
   for (const user of users) {
     const roleValue = user.role;
-    
+
     // Check if role is a string
     if (typeof roleValue === 'string') {
       console.log(`\n⚠️  User ${user.cin} has string role: "${roleValue}"`);
-      
+
       // Try to map the string to an ObjectId
       if (roleMap[roleValue]) {
         try {
           await userModel.updateOne(
             { _id: user._id },
-            { $set: { role: roleMap[roleValue] } }
+            { $set: { role: roleMap[roleValue] } },
           );
-          console.log(`✅ Fixed user ${user.cin}: "${roleValue}" -> ${roleMap[roleValue]}`);
+          console.log(
+            `✅ Fixed user ${user.cin}: "${roleValue}" -> ${roleMap[roleValue]}`,
+          );
           fixedCount++;
         } catch (error) {
           console.error(`❌ Error fixing user ${user.cin}:`, error);
@@ -61,21 +63,29 @@ async function fixUserRoles() {
           try {
             await userModel.updateOne(
               { _id: user._id },
-              { $set: { role: roleDoc._id } }
+              { $set: { role: roleDoc._id } },
             );
-            console.log(`✅ Fixed user ${user.cin}: "${roleValue}" -> ${roleDoc._id}`);
+            console.log(
+              `✅ Fixed user ${user.cin}: "${roleValue}" -> ${roleDoc._id}`,
+            );
             fixedCount++;
           } catch (error) {
             console.error(`❌ Error fixing user ${user.cin}:`, error);
             errorCount++;
           }
         } else {
-          console.error(`❌ No role found for "${roleValue}" for user ${user.cin}`);
+          console.error(
+            `❌ No role found for "${roleValue}" for user ${user.cin}`,
+          );
           errorCount++;
         }
       }
     } else if (!(roleValue instanceof Types.ObjectId)) {
-      console.log(`⚠️  User ${user.cin} has non-ObjectId role:`, typeof roleValue, roleValue);
+      console.log(
+        `⚠️  User ${user.cin} has non-ObjectId role:`,
+        typeof roleValue,
+        roleValue,
+      );
     }
   }
 

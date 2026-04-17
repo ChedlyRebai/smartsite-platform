@@ -3,12 +3,10 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { TeamsService } from './teams.service';
 import { TeamsController } from './teams.controller';
 import { Team, TeamSchema } from './entities/team.entity';
-import { SitesModule } from '../sites/sites.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Team.name, schema: TeamSchema }]),
-    SitesModule, // Pour injecter SitesService
   ],
   providers: [TeamsService],
   controllers: [TeamsController],

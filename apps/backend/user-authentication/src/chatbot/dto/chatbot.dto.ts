@@ -1,4 +1,10 @@
-import { IsString, IsOptional, IsEnum, IsObject, IsArray } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsEnum,
+  IsObject,
+  IsArray,
+} from 'class-validator';
 
 export class SendMessageDto {
   @IsString()

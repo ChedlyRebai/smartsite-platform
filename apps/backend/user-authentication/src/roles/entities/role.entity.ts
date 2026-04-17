@@ -6,9 +6,9 @@ import { Permission } from '../../permissions/entities/permission.entity';
 @Schema({ timestamps: true })
 export class Role extends Document {
   @Prop({ required: true, unique: true, trim: true })
-  name: string; 
+  name: string;
   @Prop()
-  description: string; 
+  description: string;
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Permission' }], default: [] })
   permissions: Types.ObjectId[] | Permission[];

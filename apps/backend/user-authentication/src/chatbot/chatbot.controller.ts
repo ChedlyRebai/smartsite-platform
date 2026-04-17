@@ -1,4 +1,18 @@
-import { Controller, Post, Get, Delete, Body, Query, UseGuards, Req, HttpCode, HttpStatus, UseInterceptors, UploadedFile, Put } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Delete,
+  Body,
+  Query,
+  UseGuards,
+  Req,
+  HttpCode,
+  HttpStatus,
+  UseInterceptors,
+  UploadedFile,
+  Put,
+} from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ChatbotService } from './chatbot.service';
 import { SendMessageDto, GetConversationDto, FeedbackDto } from './dto';
@@ -16,44 +30,56 @@ export class ChatbotController {
 
   @Get('api-status')
   async getApiStatus() {
-    const googleKey = this.configService.get<string>('GOOGLE_CLOUD_VISION_API_KEY') || '';
+    const googleKey =
+      this.configService.get<string>('GOOGLE_CLOUD_VISION_API_KEY') || '';
     const imaggaKey = this.configService.get<string>('IMAGGA_API_KEY') || '';
-    const imaggaSecret = this.configService.get<string>('IMAGGA_API_SECRET') || '';
-    
+    const imaggaSecret =
+      this.configService.get<string>('IMAGGA_API_SECRET') || '';
+
     return {
       success: true,
       data: {
         googleCloudConfigured: !!(googleKey && googleKey.length > 0),
-        imaggaConfigured: !!(imaggaKey && imaggaSecret && imaggaKey.length > 0 && imaggaSecret.length > 0),
-      }
+        imaggaConfigured: !!(
+          imaggaKey &&
+          imaggaSecret &&
+          imaggaKey.length > 0 &&
+          imaggaSecret.length > 0
+        ),
+      },
     };
   }
 
   @Put('api-keys')
   @UseGuards(JwtAuthGuard)
-  async updateApiKeys(@Body() body: { googleKey?: string; imaggaKey?: string; imaggaSecret?: string }) {
+  async updateApiKeys(
+    @Body()
+    body: {
+      googleKey?: string;
+      imaggaKey?: string;
+      imaggaSecret?: string;
+    },
+  ) {
     // Note: This would require persisting to a database in production
     // For now, return instructions
     return {
       success: false,
-      message: 'API keys must be configured in the .env file. Please update the following variables:\n\n- GOOGLE_CLOUD_VISION_API_KEY\n- IMAGGA_API_KEY\n- IMAGGA_API_SECRET\n\nThen restart the backend.',
+      message:
+        'API keys must be configured in the .env file. Please update the following variables:\n\n- GOOGLE_CLOUD_VISION_API_KEY\n- IMAGGA_API_KEY\n- IMAGGA_API_SECRET\n\nThen restart the backend.',
       data: {
         instructions: [
           '1. Edit .env file in apps/backend/user-authentication/',
           '2. Add your API keys',
           '3. Restart the backend server',
-        ]
-      }
+        ],
+      },
     };
   }
 
   @Post('message')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  async sendMessage(
-    @Req() req: any,
-    @Body() dto: SendMessageDto,
-  ) {
+  async sendMessage(@Req() req: any, @Body() dto: SendMessageDto) {
     const userId = req.user?.userId || req.user?.id || req.user?._id;
     const userRole = req.user?.role?.name || 'user';
     return this.chatbotService.sendMessage(userId, userRole, dto);
@@ -62,15 +88,20 @@ export class ChatbotController {
   @Post('voice')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('audio', {
-    storage: diskStorage({
-      destination: './uploads',
-      filename: (req, file, cb) => {
-        const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
-        cb(null, `${randomName}${extname(file.originalname)}`);
-      }
-    })
-  }))
+  @UseInterceptors(
+    FileInterceptor('audio', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          const randomName = Array(32)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join('');
+          cb(null, `${randomName}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
   async processVoice(
     @Req() req: any,
     @UploadedFile() audio: any,
@@ -78,28 +109,38 @@ export class ChatbotController {
   ) {
     const userId = req.user?.userId || req.user?.id || req.user?._id;
     const userRole = req.user?.role?.name || 'user';
-    return this.chatbotService.processVoiceMessage(userId, userRole, audio, language);
+    return this.chatbotService.processVoiceMessage(
+      userId,
+      userRole,
+      audio,
+      language,
+    );
   }
 
   @Post('analyze-image')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('image', {
-    storage: diskStorage({
-      destination: './uploads',
-      filename: (req, file, cb) => {
-        const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
-        cb(null, `${randomName}${extname(file.originalname)}`);
-      }
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          const randomName = Array(32)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join('');
+          cb(null, `${randomName}${extname(file.originalname)}`);
+        },
+      }),
+      fileFilter: (req: any, file: any, cb: any) => {
+        if (file.mimetype.startsWith('image/')) {
+          cb(null, true);
+        } else {
+          cb(new Error('Only image files are allowed'), false);
+        }
+      },
     }),
-    fileFilter: (req: any, file: any, cb: any) => {
-      if (file.mimetype.startsWith('image/')) {
-        cb(null, true);
-      } else {
-        cb(new Error('Only image files are allowed'), false);
-      }
-    }
-  }))
+  )
   async analyzeImage(
     @Req() req: any,
     @UploadedFile() image: any,
@@ -120,27 +161,33 @@ export class ChatbotController {
     const userId = req.user?.userId || req.user?.id || req.user?._id;
     const userRole = req.user?.role?.name || 'user';
     const { command, language = 'en' } = body;
-    return this.chatbotService.processQuickCommand(userId, userRole, command, language);
+    return this.chatbotService.processQuickCommand(
+      userId,
+      userRole,
+      command,
+      language,
+    );
   }
 
   @Get('conversation')
   @UseGuards(JwtAuthGuard)
-  async getConversation(
-    @Req() req: any,
-    @Query() query: GetConversationDto,
-  ) {
+  async getConversation(@Req() req: any, @Query() query: GetConversationDto) {
     const userId = req.user?.userId || req.user?.id || req.user?._id;
-    return this.chatbotService.getConversation(userId, query.conversationId, query.limit ? parseInt(query.limit) : undefined);
+    return this.chatbotService.getConversation(
+      userId,
+      query.conversationId,
+      query.limit ? parseInt(query.limit) : undefined,
+    );
   }
 
   @Get('conversations')
   @UseGuards(JwtAuthGuard)
-  async getConversations(
-    @Req() req: any,
-    @Query('limit') limit?: string,
-  ) {
+  async getConversations(@Req() req: any, @Query('limit') limit?: string) {
     const userId = req.user?.userId || req.user?.id || req.user?._id;
-    return this.chatbotService.getConversations(userId, limit ? parseInt(limit) : 10);
+    return this.chatbotService.getConversations(
+      userId,
+      limit ? parseInt(limit) : 10,
+    );
   }
 
   @Delete('conversation')
@@ -157,19 +204,14 @@ export class ChatbotController {
   @Post('feedback')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  async submitFeedback(
-    @Req() req: any,
-    @Body() dto: FeedbackDto,
-  ) {
+  async submitFeedback(@Req() req: any, @Body() dto: FeedbackDto) {
     const userId = req.user?.userId || req.user?.id || req.user?._id;
     return this.chatbotService.submitFeedback(userId, dto);
   }
 
   @Get('suggestions')
   @UseGuards(JwtAuthGuard)
-  async getSuggestedQuestions(
-    @Query('language') language?: string,
-  ) {
+  async getSuggestedQuestions(@Query('language') language?: string) {
     return this.chatbotService.getSuggestedQuestions(language || 'en');
   }
 }

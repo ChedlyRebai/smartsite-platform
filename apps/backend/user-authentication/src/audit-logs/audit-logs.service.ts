@@ -9,7 +9,7 @@ export class AuditLogsService {
   constructor(
     @InjectModel(AuditLog.name)
     private readonly auditLogModel: Model<AuditLogDocument>,
-  ) { }
+  ) {}
 
   async createLog(payload: Partial<AuditLog>) {
     // Rétention automatique: purge des logs plus anciens que N jours
@@ -29,14 +29,16 @@ export class AuditLogsService {
     const mongoQuery: any = {};
 
     if (query.userId) mongoQuery.userId = query.userId;
-    if (query.userCin) mongoQuery.userCin = { $regex: query.userCin, $options: 'i' };
+    if (query.userCin)
+      mongoQuery.userCin = { $regex: query.userCin, $options: 'i' };
     if (query.actionType) mongoQuery.actionType = query.actionType;
     if (query.severity) mongoQuery.severity = query.severity;
     if (query.status) mongoQuery.status = query.status;
 
     if (query.startDate || query.endDate) {
       mongoQuery.createdAt = {};
-      if (query.startDate) mongoQuery.createdAt.$gte = new Date(query.startDate);
+      if (query.startDate)
+        mongoQuery.createdAt.$gte = new Date(query.startDate);
       if (query.endDate) mongoQuery.createdAt.$lte = new Date(query.endDate);
     }
 
@@ -50,7 +52,11 @@ export class AuditLogsService {
       ];
     }
 
-    return this.auditLogModel.find(mongoQuery).sort({ createdAt: -1 }).limit(1000).exec();
+    return this.auditLogModel
+      .find(mongoQuery)
+      .sort({ createdAt: -1 })
+      .limit(1000)
+      .exec();
   }
 
   async findLatestLogin(userId: string, sessionId?: string) {

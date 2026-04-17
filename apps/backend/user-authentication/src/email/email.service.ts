@@ -126,9 +126,16 @@ export class EmailService {
     };
   }
 
-  private wrapLayout(innerHtml: string, accent: 'lime' | 'cyan' | 'danger'): string {
+  private wrapLayout(
+    innerHtml: string,
+    accent: 'lime' | 'cyan' | 'danger',
+  ): string {
     const accentColor =
-      accent === 'danger' ? BRAND.danger : accent === 'cyan' ? BRAND.cyan : BRAND.lime;
+      accent === 'danger'
+        ? BRAND.danger
+        : accent === 'cyan'
+          ? BRAND.cyan
+          : BRAND.lime;
     const { html: logoHtml } = this.getLogoImgTag();
 
     return `<!DOCTYPE html>

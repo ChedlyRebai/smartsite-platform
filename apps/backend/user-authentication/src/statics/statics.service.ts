@@ -7,8 +7,7 @@ import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class StaticsService {
-
-    constructor(
+  constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Role.name) private roleModel: Model<Role>,
     @InjectModel(Permission.name) private permissionModel: Model<Permission>,

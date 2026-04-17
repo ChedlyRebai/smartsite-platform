@@ -6,9 +6,7 @@ import { Site, SiteSchema } from './entities/site.entity';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: Site.name, schema: SiteSchema },
-    ]),
+    MongooseModule.forFeature([{ name: Site.name, schema: SiteSchema }]),
   ],
   controllers: [SitesController],
   providers: [SitesService],
