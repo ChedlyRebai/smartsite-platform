@@ -1,8 +1,0 @@
-{
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "outDir": "./dist"
-  },
-  "include": ["src/**/*", "gestion-site.module.ts", "gestion-site.controller.ts", "gestion-site.service.ts", "dto/**/*", "entities/**/*"],
-  "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]
-}
