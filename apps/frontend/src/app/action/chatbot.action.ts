@@ -11,15 +11,19 @@ const api = axios.create({
 // Add auth token to requests
 api.interceptors.request.use((config) => {
   const authData = localStorage.getItem('smartsite-auth');
-  if (authData) {
-    try {
-      const parsed = JSON.parse(authData);
-      if (parsed.state?.user?.access_token) {
-        config.headers.Authorization = `Bearer ${parsed.state.user.access_token}`;
-      }
-    } catch (e) {
-      // Ignore parse errors
-    }
+  const token =
+    localStorage.getItem('access_token') ||
+    (authData
+      ? (() => {
+          try {
+            return JSON.parse(authData)?.state?.user?.access_token;
+          } catch {
+            return null;
+          }
+        })()
+      : null);
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
@@ -66,7 +70,7 @@ export const sendChatbotMessage = async (
       language,
       conversationId,
     });
-    if (res.status === 200) {
+    if (res.status === 200 || res.status === 201) {
       return res.data;
     }
     return { success: false, message: 'Failed to send message', timestamp: new Date().toISOString() };

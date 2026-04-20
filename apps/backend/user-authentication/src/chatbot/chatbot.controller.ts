@@ -154,6 +154,38 @@ export class ChatbotController {
     return this.chatbotService.deleteConversation(userId, conversationId);
   }
 
+  @Put('conversation/restore')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  async restoreConversation(
+    @Req() req: any,
+    @Query('conversationId') conversationId: string,
+  ) {
+    const userId = req.user?.userId || req.user?.id || req.user?._id;
+    return this.chatbotService.restoreConversation(userId, conversationId);
+  }
+
+  @Delete('conversation/permanent')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  async permanentlyDeleteConversation(
+    @Req() req: any,
+    @Query('conversationId') conversationId: string,
+  ) {
+    const userId = req.user?.userId || req.user?.id || req.user?._id;
+    return this.chatbotService.permanentlyDeleteConversation(userId, conversationId);
+  }
+
+  @Get('conversations/archived')
+  @UseGuards(JwtAuthGuard)
+  async getArchivedConversations(
+    @Req() req: any,
+    @Query('limit') limit?: string,
+  ) {
+    const userId = req.user?.userId || req.user?.id || req.user?._id;
+    return this.chatbotService.getArchivedConversations(userId, limit ? parseInt(limit) : 20);
+  }
+
   @Post('feedback')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)

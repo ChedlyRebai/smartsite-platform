@@ -293,70 +293,92 @@ export class ChatbotService implements OnModuleInit {
   async sendMessage(userId: string, userRole: string, dto: SendMessageDto) {
     const { message, language = this.defaultLanguage, conversationId, intent, context } = dto;
 
-    // Find or create conversation
-    let conversation: ChatbotConversation | null;
-    if (conversationId) {
-      conversation = await this.conversationModel.findById(conversationId);
-    } else {
-      conversation = await this.conversationModel.findOne({ userId: new Types.ObjectId(userId), status: 'active' });
-    }
+    try {
+      // Validate userId is a valid ObjectId
+      if (!userId || !Types.ObjectId.isValid(userId)) {
+        return {
+          success: false,
+          message: 'Invalid user session. Please log in again.',
+          timestamp: new Date().toISOString(),
+        };
+      }
 
-    if (!conversation) {
-      conversation = new this.conversationModel({
-        userId: new Types.ObjectId(userId),
-        userRole,
-        language,
-        messages: [],
-        status: 'active',
+      // Find or create conversation
+      let conversation: ChatbotConversation | null;
+      if (conversationId) {
+        conversation = await this.conversationModel.findById(conversationId);
+      } else {
+        conversation = await this.conversationModel.findOne({ userId: new Types.ObjectId(userId), status: 'active' });
+      }
+
+      if (!conversation) {
+        conversation = new this.conversationModel({
+          userId: new Types.ObjectId(userId),
+          userRole,
+          language,
+          messages: [],
+          status: 'active',
+        });
+      }
+
+      // FIRST: Check for FAQ match - this has absolute priority
+      const faqResponse = this.searchFAQ(message, language);
+      const lang = conversation.language || language;
+
+      // Only detect intent if no FAQ match
+      const detectedIntent = !faqResponse ? (intent ? this.intents.find(i => i.name === intent) || this.detectIntent(message) : this.detectIntent(message)) : null;
+
+      let responseText: string;
+      if (faqResponse) {
+        responseText = faqResponse;
+      } else if (detectedIntent?.action) {
+        responseText = await this.processAction(detectedIntent.action, lang);
+      } else {
+        responseText = this.generateResponse(detectedIntent, lang);
+      }
+
+      // Add messages to conversation
+      conversation.messages.push({
+        role: 'user',
+        content: message,
+        timestamp: new Date(),
       });
-    }
+      conversation.messages.push({
+        role: 'assistant',
+        content: responseText,
+        timestamp: new Date(),
+      });
 
-    // FIRST: Check for FAQ match - this has absolute priority
-    const faqResponse = this.searchFAQ(message, language);
-    const lang = conversation.language || language;
+      await conversation.save();
 
-    // Only detect intent if no FAQ match
-    const detectedIntent = !faqResponse ? (intent ? this.intents.find(i => i.name === intent) || this.detectIntent(message) : this.detectIntent(message)) : null;
-
-    let responseText: string;
-    if (faqResponse) {
-      responseText = faqResponse;
-    } else if (detectedIntent?.action) {
-      responseText = await this.processAction(detectedIntent.action, lang);
-    } else {
-      responseText = this.generateResponse(detectedIntent, lang);
-    }
-
-    // Add messages to conversation
-    conversation.messages.push({
-      role: 'user',
-      content: message,
-      timestamp: new Date(),
-    });
-    conversation.messages.push({
-      role: 'assistant',
-      content: responseText,
-      timestamp: new Date(),
-    });
-
-    await conversation.save();
-
-    return {
-      success: true,
-      message: 'Message processed successfully',
-      data: {
-        conversationId: conversation._id.toString(),
-        responses: [responseText],
-        suggestions: this.getContextualSuggestions(detectedIntent, lang),
-        quickReplies: detectedIntent?.quickReplies[lang as keyof typeof detectedIntent.quickReplies] || [],
-        metadata: {
-          detectedIntent: detectedIntent?.name,
-          action: detectedIntent?.action,
-          fromFAQ: !!faqResponse,
+      return {
+        success: true,
+        message: 'Message processed successfully',
+        data: {
+          conversationId: conversation._id.toString(),
+          responses: [responseText],
+          suggestions: this.getContextualSuggestions(detectedIntent, lang),
+          quickReplies: detectedIntent?.quickReplies[lang as keyof typeof detectedIntent.quickReplies] || [],
+          metadata: {
+            detectedIntent: detectedIntent?.name,
+            action: detectedIntent?.action,
+            fromFAQ: !!faqResponse,
+          },
         },
-      },
-      timestamp: new Date().toISOString(),
-    };
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      console.error('sendMessage error:', error);
+      return {
+        success: false,
+        message: language === 'fr'
+          ? 'Une erreur est survenue. Veuillez réessayer.'
+          : language === 'ar'
+          ? 'حدث خطأ. يرجى المحاولة مرة أخرى.'
+          : 'An error occurred. Please try again.',
+        timestamp: new Date().toISOString(),
+      };
+    }
   }
 
   private async processAction(action: string, language: string): Promise<string> {
@@ -646,14 +668,107 @@ export class ChatbotService implements OnModuleInit {
 
       return {
         success: true,
-        message: 'Conversation deleted successfully',
+        message: 'Conversation archived successfully',
         timestamp: new Date().toISOString(),
       };
     } catch (error) {
-      console.error('Error deleting conversation:', error);
+      console.error('Error archiving conversation:', error);
+      return {
+        success: false,
+        message: 'Error archiving conversation',
+        timestamp: new Date().toISOString(),
+      };
+    }
+  }
+
+  async restoreConversation(userId: string, conversationId: string) {
+    try {
+      const conversation = await this.conversationModel.findOne({
+        _id: new Types.ObjectId(conversationId),
+        userId: new Types.ObjectId(userId),
+      });
+
+      if (!conversation) {
+        return {
+          success: false,
+          message: 'Conversation not found',
+          timestamp: new Date().toISOString(),
+        };
+      }
+
+      conversation.status = 'active';
+      await conversation.save();
+
+      return {
+        success: true,
+        message: 'Conversation restored successfully',
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      console.error('Error restoring conversation:', error);
+      return {
+        success: false,
+        message: 'Error restoring conversation',
+        timestamp: new Date().toISOString(),
+      };
+    }
+  }
+
+  async permanentlyDeleteConversation(userId: string, conversationId: string) {
+    try {
+      const result = await this.conversationModel.deleteOne({
+        _id: new Types.ObjectId(conversationId),
+        userId: new Types.ObjectId(userId),
+      });
+
+      if (result.deletedCount === 0) {
+        return {
+          success: false,
+          message: 'Conversation not found',
+          timestamp: new Date().toISOString(),
+        };
+      }
+
+      return {
+        success: true,
+        message: 'Conversation permanently deleted',
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      console.error('Error permanently deleting conversation:', error);
       return {
         success: false,
         message: 'Error deleting conversation',
+        timestamp: new Date().toISOString(),
+      };
+    }
+  }
+
+  async getArchivedConversations(userId: string, limit = 20) {
+    try {
+      const conversations = await this.conversationModel
+        .find({ userId: new Types.ObjectId(userId), status: 'archived' })
+        .sort({ updatedAt: -1 })
+        .limit(limit);
+
+      return {
+        success: true,
+        data: conversations.map(c => ({
+          conversationId: c._id.toString(),
+          lastMessage: c.messages[c.messages.length - 1]?.content || '',
+          language: c.language,
+          status: c.status,
+          messageCount: c.messages.length,
+          createdAt: (c as any).createdAt || new Date(),
+          updatedAt: (c as any).updatedAt || new Date(),
+        })),
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      console.error('Error getting archived conversations:', error);
+      return {
+        success: false,
+        data: [],
         timestamp: new Date().toISOString(),
       };
     }
