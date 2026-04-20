@@ -19,6 +19,7 @@ import { useAuthStore } from "../../store/authStore";
 import WelcomeModal from "./WelcomeModalSimple";
 import toast from "react-hot-toast";
 import axios from "axios";
+import { AUTH_API_URL } from "@/lib/auth-api-url";
 
 const formSchema = z
   .object({
@@ -68,7 +69,7 @@ export default function ChangePasswordFirstLogin() {
     setIsLoading(true);
     try {
       const res = await axios.put(
-        "http://localhost:3000/users/me/password",
+        `${AUTH_API_URL}/users/me/password`,
         {
           currentPassword: data.currentPassword,
           newPassword: data.newPassword,

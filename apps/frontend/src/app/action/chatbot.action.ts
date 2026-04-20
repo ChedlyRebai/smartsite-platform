@@ -11,18 +11,6 @@ const api = axios.create({
 // Add auth token to requests
 api.interceptors.request.use((config) => {
   const authData = localStorage.getItem('smartsite-auth');
-<<<<<<< HEAD
-  if (authData) {
-    try {
-      const parsed = JSON.parse(authData);
-      console.log('Parsed auth data:', parsed);
-      if (parsed.state?.user?.access_token) {
-        config.headers.Authorization = `Bearer ${parsed.state.user.access_token}`;
-      }
-    } catch (e) {
-      // Ignore parse errors
-    }
-=======
   const token =
     localStorage.getItem('access_token') ||
     (authData
@@ -36,7 +24,6 @@ api.interceptors.request.use((config) => {
       : null);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
->>>>>>> d9b7ccb4a8beb8b281d5e1c2022e91962b8afa71
   }
   return config;
 });

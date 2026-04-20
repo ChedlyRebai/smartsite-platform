@@ -3,8 +3,9 @@ import { useAuthStore } from "../store/authStore";
 
 
 import { Permission } from "../types";
+import { AUTH_API_URL } from "@/lib/auth-api-url";
 
-const API_URL = "http://localhost:3000/permissions";
+const API_URL = `${AUTH_API_URL}/permissions`;
 
 export const getAllPermissions = async () => {
   const { data } = await axios.get(`${API_URL}`);
@@ -96,7 +97,7 @@ export const accessPermissionByurl = async (url: string) => {
   const token = useAuthStore.getState().user.access_token;
 
   const { data } = await axios.get(
-    `http://localhost:3000/users/acessurl/${url}`,
+    `${AUTH_API_URL}/users/acessurl/${url}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -109,7 +110,7 @@ export const accessPermissionByurl = async (url: string) => {
 export const getMynavigationAccess = async () => {
   const token = useAuthStore.getState().user.access_token;
   const { data } = await axios.get(
-    `http://localhost:3000/users/mypermissions`,
+    `${AUTH_API_URL}/users/mypermissions`,
     {
       headers: {
         Authorization: `Bearer ${token}`,

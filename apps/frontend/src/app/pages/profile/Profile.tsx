@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/field";
 import { getCurrentUser } from "@/app/action/auth.action";
 import { useTranslation } from "@/app/hooks/useTranslation";
+import { AUTH_API_URL } from "@/lib/auth-api-url";
 
 const profileSchema = z.object({
   firstName: z
@@ -70,7 +71,7 @@ const passwordSchema = z
 type ProfileFormData = z.infer<typeof profileSchema>;
 type PasswordFormData = z.infer<typeof passwordSchema>;
 
-const API_ME = "http://localhost:3000/users/me";
+const API_ME = `${AUTH_API_URL}/users/me`;
 
 export default function Profile() {
   const authUser = useAuthStore((state) => state.user);

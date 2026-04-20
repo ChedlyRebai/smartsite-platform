@@ -1,7 +1,8 @@
+import { AUTH_API_URL } from '@/lib/auth-api-url';
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:3000/teams',
+  baseURL: `${AUTH_API_URL}/teams`,
 });
 
 // Add auth token to requests

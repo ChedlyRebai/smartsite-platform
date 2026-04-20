@@ -1,6 +1,7 @@
+import { AUTH_API_URL } from "@/lib/auth-api-url";
 import axios from "axios";
 
-const API_URL = "http://localhost:3000/roles";
+const API_URL = `${AUTH_API_URL}/roles`;
 
 export const getAllRoles = async () => {
   const { data } = await axios.get(`${API_URL}`);

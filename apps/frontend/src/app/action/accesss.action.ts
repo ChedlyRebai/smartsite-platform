@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useAuthStore } from "../store/authStore";
+import { AUTH_API_URL } from "@/lib/auth-api-url";
 
 export const getPermissions = async () => {
   try {
@@ -14,7 +15,7 @@ export const getPermissions = async () => {
       });
     }
 
-    const res = await axios.get(`http://localhost:3000/users/mypermissions`, {
+    const res = await axios.get(`${AUTH_API_URL}/users/mypermissions`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
