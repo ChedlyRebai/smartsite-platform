@@ -27,6 +27,7 @@ interface SiteData {
   teams: any[];
   teamIds: any[];
   projectId?: string;
+  clientName?: string;
 }
 
 interface ExpandedProject {
@@ -298,7 +299,11 @@ const loadData = async () => {
                       <TableCell className="text-blue-600 font-medium">
                         {formatBudget(project.totalSitesBudget || 0)}
                       </TableCell>
-                      <TableCell>{project.clientName || '-'}</TableCell>
+                      <TableCell>
+                        {project.clientName ||
+                          (project.sites as SiteData[]).find(s => s.clientName)?.clientName ||
+                          '-'}
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Button

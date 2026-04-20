@@ -104,6 +104,7 @@ export default function Team() {
   const [availableUsers, setAvailableUsers] = useState<UserData[]>([]);
   const [memberDialogOpen, setMemberDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
+  const [editMemberUserId, setEditMemberUserId] = useState("");
   const [userLoadingError, setUserLoadingError] = useState(false);
 
   // Statistics
@@ -309,7 +310,9 @@ export default function Team() {
 
   const handleEditTeam = (team: TeamData) => {
     setEditTeam(team);
+    setEditMemberUserId("");
     setEditDialogOpen(true);
+    loadAvailableUsers();
   };
 
   const handleSaveEdit = async () => {
@@ -658,6 +661,12 @@ export default function Team() {
                 >
                   Create Team
                 </Button>
+                <div className="flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-3">
+                  <Building className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
+                  <p className="text-sm text-blue-700">
+                    After creating your team, go to <span className="font-semibold">Sites</span> and assign this team to a site.
+                  </p>
+                </div>
               </div>
             </DialogContent>
           </Dialog>
@@ -670,52 +679,180 @@ export default function Team() {
       </div>
 
       {/* Edit Team Dialog */}
-      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent>
+      <Dialog open={editDialogOpen} onOpenChange={(open) => { setEditDialogOpen(open); if (!open) { setEditMemberUserId(""); } }}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Team</DialogTitle>
-            <DialogDescription>Update team information</DialogDescription>
+            <DialogDescription>Update team information and members</DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-team-name">Team Name *</Label>
-              <Input
-                id="edit-team-name"
-                value={editTeam?.name || ""}
-                onChange={(e) =>
-                  setEditTeam(
-                    editTeam ? { ...editTeam, name: e.target.value } : null,
-                  )
-                }
-              />
+          <div className="space-y-5">
+            {/* Team Info */}
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label htmlFor="edit-team-name">Team Name *</Label>
+                <Input
+                  id="edit-team-name"
+                  value={editTeam?.name || ""}
+                  onChange={(e) =>
+                    setEditTeam(
+                      editTeam ? { ...editTeam, name: e.target.value } : null,
+                    )
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-team-code">Team Code</Label>
+                <Input
+                  id="edit-team-code"
+                  value={editTeam?.teamCode || ""}
+                  onChange={(e) =>
+                    setEditTeam(
+                      editTeam ? { ...editTeam, teamCode: e.target.value } : null,
+                    )
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-team-description">Description</Label>
+                <Input
+                  id="edit-team-description"
+                  value={editTeam?.description || ""}
+                  onChange={(e) =>
+                    setEditTeam(
+                      editTeam
+                        ? { ...editTeam, description: e.target.value }
+                        : null,
+                    )
+                  }
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-team-code">Team Code</Label>
-              <Input
-                id="edit-team-code"
-                value={editTeam?.teamCode || ""}
-                onChange={(e) =>
-                  setEditTeam(
-                    editTeam ? { ...editTeam, teamCode: e.target.value } : null,
-                  )
-                }
-              />
+
+            {/* Members Section */}
+            <div className="border-t pt-4 space-y-3">
+              <Label className="flex items-center gap-2 text-sm font-semibold">
+                <Users className="h-4 w-4" />
+                Members ({editTeam?.members?.length || 0})
+              </Label>
+
+              {/* Current members list */}
+              {editTeam?.members && editTeam.members.length > 0 ? (
+                <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                  {editTeam.members.map((member: any) => {
+                    const firstName = member.firstName || member.firstname || "";
+                    const lastName = member.lastName || member.lastname || "";
+                    const fullName = `${firstName} ${lastName}`.trim() || member.email || "Unknown";
+                    return (
+                      <div
+                        key={member._id}
+                        className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 px-3 py-2"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Avatar className="h-7 w-7">
+                            <AvatarFallback className="text-xs bg-blue-100 text-blue-700">
+                              {getInitials(fullName)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="text-sm font-medium">{fullName}</p>
+                            {member.email && (
+                              <p className="text-xs text-gray-500">{member.email}</p>
+                            )}
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                          onClick={async () => {
+                            if (!editTeam) return;
+                            try {
+                              const response = await removeMemberFromTeam(editTeam._id, member._id);
+                              const updated = { ...editTeam, members: response.data.members ?? editTeam.members.filter((m: any) => m._id !== member._id) };
+                              setEditTeam(updated);
+                              setTeams(teams.map((t) => t._id === editTeam._id ? updated : t));
+                              toast.success("Member removed");
+                            } catch {
+                              toast.error("Error removing member");
+                            }
+                          }}
+                          title="Remove member"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-400 italic">No members yet</p>
+              )}
+
+              {/* Add member */}
+              <div className="flex gap-2 pt-1">
+                <Select value={editMemberUserId} onValueChange={setEditMemberUserId}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Select a member to add" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(() => {
+                      const filtered = availableUsers.filter((u) => {
+                        // Exclude already in this team
+                        if (editTeam?.members?.some((m: any) => m._id === u._id)) return false;
+                        // Exclude if member belongs to a team assigned to an active (non-completed) site
+                        const busyInActiveTeam = Object.entries(teamSiteAssignments).find(
+                          ([teamId, assignment]) => {
+                            const team = teams.find((t) => t._id === teamId);
+                            const isMember = team?.members?.some((m: any) => m._id === u._id);
+                            return isMember && assignment.status !== "completed";
+                          }
+                        );
+                        return !busyInActiveTeam;
+                      });
+
+                      if (filtered.length === 0) {
+                        return (
+                          <div className="py-4 px-2 text-sm text-gray-500 text-center">
+                            No available members
+                          </div>
+                        );
+                      }
+                      return filtered.map((user) => (
+                        <SelectItem key={user._id} value={user._id}>
+                          {user.firstName} {user.lastName}
+                          {user.email ? ` (${user.email})` : ""}
+                        </SelectItem>
+                      ));
+                    })()}
+                  </SelectContent>
+                </Select>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0"
+                  disabled={!editMemberUserId}
+                  onClick={async () => {
+                    if (!editTeam || !editMemberUserId) return;
+                    try {
+                      const response = await addMemberToTeam(editTeam._id, editMemberUserId);
+                      const updated = response.data;
+                      setEditTeam(updated);
+                      setTeams(teams.map((t) => t._id === editTeam._id ? updated : t));
+                      setEditMemberUserId("");
+                      toast.success("Member added");
+                    } catch {
+                      toast.error("Error adding member");
+                    }
+                  }}
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add
+                </Button>
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-team-description">Description</Label>
-              <Input
-                id="edit-team-description"
-                value={editTeam?.description || ""}
-                onChange={(e) =>
-                  setEditTeam(
-                    editTeam
-                      ? { ...editTeam, description: e.target.value }
-                      : null,
-                  )
-                }
-              />
-            </div>
-            <div className="flex gap-2">
+
+            {/* Actions */}
+            <div className="flex gap-2 border-t pt-4">
               <Button
                 className="flex-1 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
                 onClick={handleSaveEdit}

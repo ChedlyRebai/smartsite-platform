@@ -1,4 +1,4 @@
-import { Briefcase } from "lucide-react";
+import { Briefcase, AlertCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import axios from "axios";
@@ -42,6 +42,7 @@ export default function Projects() {
     budget: "",
     siteCount: 0,
   });
+  const [createError, setCreateError] = useState<string | null>(null);
   const [sites, setSites] = useState<{_id: string; name: string}[]>([]);
   const [selectedSites, setSelectedSites] = useState<string[]>([]);
   const [viewDetailsOpen, setViewDetailsOpen] = useState(false);
@@ -85,12 +86,13 @@ export default function Projects() {
   }, []);
 
   const handleAddProject = async () => {
+    setCreateError(null);
     if (!newProject.name || !newProject.budget) {
-      toast.error("Name and budget are required");
+      setCreateError("Project name and budget are required.");
       return;
     }
     if (newProject.siteCount < 1) {
-      toast.error("Number of sites must be at least 1");
+      setCreateError("You must specify at least 1 site to create a project.");
       return;
     }
     try {
@@ -104,6 +106,7 @@ export default function Projects() {
       });
       setProjects([...projects, response.data]);
       setNewProject({ name: "", budget: "", siteCount: 0 });
+      setCreateError(null);
       setSelectedSites([]);
       toast.success("Project created successfully!");
     } catch (error) {
@@ -243,9 +246,10 @@ export default function Projects() {
                     id="project-name"
                     placeholder="e.g., Downtown Office Tower"
                     value={newProject.name}
-                    onChange={(e) =>
-                      setNewProject({ ...newProject, name: e.target.value })
-                    }
+                    onChange={(e) => {
+                      setNewProject({ ...newProject, name: e.target.value });
+                      setCreateError(null);
+                    }}
                   />
                 </div>
                 <div className="space-y-2">
@@ -268,11 +272,21 @@ export default function Projects() {
                     min="1"
                     placeholder="e.g., 5"
                     value={newProject.siteCount}
-                    onChange={(e) =>
-                      setNewProject({ ...newProject, siteCount: parseInt(e.target.value) || 0 })
-                    }
+                    onChange={(e) => {
+                      setNewProject({ ...newProject, siteCount: parseInt(e.target.value) || 0 });
+                      setCreateError(null);
+                    }}
                   />
                 </div>
+                {createError && (
+                  <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+                    <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="font-semibold text-red-700 text-sm">Cannot create project</p>
+                      <p className="text-sm text-red-600 mt-0.5">{createError}</p>
+                    </div>
+                  </div>
+                )}
                 <Button
                   className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
                   onClick={handleAddProject}

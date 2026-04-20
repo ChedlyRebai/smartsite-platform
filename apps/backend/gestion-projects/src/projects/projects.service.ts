@@ -132,6 +132,7 @@ export class ProjectsService {
             progress: site.progress || 0,
             teams: site.teams || [],
             teamIds: site.teamIds || [],
+            clientName: site.clientName || null,
           });
         });
       } catch (e) {

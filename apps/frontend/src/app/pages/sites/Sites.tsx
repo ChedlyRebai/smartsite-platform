@@ -116,24 +116,21 @@ export default function Sites() {
   const navigate = useNavigate();
   const isProjectContext = !!projectIdFromUrl;
   const currentProjectId = isProjectContext ? projectIdFromUrl : null;
-  
+
   const [projectSiteLimit, setProjectSiteLimit] = useState<number | null>(null);
-  const [projectLoading, setProjectLoading] = useState(false);
-  
+
   useEffect(() => {
     if (isProjectContext && currentProjectId) {
-      setProjectLoading(true);
       axios.get(`http://localhost:3007/projects/${currentProjectId}`)
         .then(res => {
           if (res.data?.siteCount !== undefined) {
             setProjectSiteLimit(res.data.siteCount);
           }
         })
-        .catch(err => console.error('Error fetching project:', err))
-        .finally(() => setProjectLoading(false));
+        .catch(err => console.error('Error fetching project:', err));
     }
   }, [isProjectContext, currentProjectId]);
-  
+
   // Search and filter state
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
@@ -150,7 +147,8 @@ export default function Sites() {
   const [useMockData, setUseMockData] = useState(false);
   
   const canManageSites = true;
-  const isLimitReached = projectSiteLimit !== null && sites.filter(s => s.projectId === currentProjectId).length >= projectSiteLimit;
+  const currentSiteCount = sites.filter(s => s.projectId === currentProjectId).length;
+  const isLimitReached = projectSiteLimit !== null && currentSiteCount >= projectSiteLimit;
   
   // Real-time refresh
   const [autoRefresh, setAutoRefresh] = useState(false);
@@ -187,6 +185,7 @@ export default function Sites() {
 
   // Validation errors
   const [errors, setErrors] = useState<{ name?: string; address?: string; area?: string; budget?: string }>({});
+  const [budgetError, setBudgetError] = useState<string | null>(null);
   const [selectedTeam, setSelectedTeam] = useState<string>('');
   const [availableTeams, setAvailableTeams] = useState<Array<{_id: string; name: string}>>([]);
   
@@ -654,12 +653,11 @@ export default function Sites() {
       toast.error('Please correct the form errors');
       return;
     }
-    
+
     if (isLimitReached) {
-      toast.error(`Site limit (${projectSiteLimit}) reached for this project`);
       return;
     }
-    
+
     try {
       if (useMockData) {
         const site: Site = {
@@ -715,9 +713,9 @@ export default function Sites() {
       const errorData = error?.response?.data;
       const backendMessage = errorData?.message || error?.message || '';
       console.log('Backend error:', backendMessage);
-      
-      if (backendMessage.includes('exceeds')) {
-        toast.error(backendMessage);
+
+      if (backendMessage.toLowerCase().includes('budget') || backendMessage.toLowerCase().includes('exceeds')) {
+        setBudgetError(backendMessage);
       } else {
         toast.error(backendMessage || 'Error creating site');
       }
@@ -728,6 +726,7 @@ export default function Sites() {
     setNewSite({ name: '', address: '', area: '', budget: '', clientName: '' });
     setMapPosition(null);
     setErrors({});
+    setBudgetError(null);
     setSelectedTeam('');
     setNearbyFournisseurs([]);
     setAddDialogOpen(false);
@@ -940,7 +939,7 @@ export default function Sites() {
             </span>
             {projectSiteLimit !== null && (
               <span className="ml-1 text-blue-600">
-                {' • '}{sites.filter(s => s.projectId === currentProjectId).length} / {projectSiteLimit} limit
+                {' • '}{currentSiteCount} / {projectSiteLimit} sites
               </span>
             )}
             {siteIssues && Object.keys(siteIssues).length > 0 && (
@@ -1000,7 +999,11 @@ export default function Sites() {
             
             <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 shadow-lg hover:shadow-xl transition-all">
+              <Button
+                className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isLimitReached}
+                title={isLimitReached ? `Limite de ${projectSiteLimit} site(s) atteinte` : undefined}
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 New Site
               </Button>
@@ -1112,7 +1115,7 @@ export default function Sites() {
                         min="1"
                         placeholder="e.g., 2500000"
                         value={newSite.budget}
-                        onChange={(e) => setNewSite({ ...newSite, budget: e.target.value })}
+                        onChange={(e) => { setNewSite({ ...newSite, budget: e.target.value }); setBudgetError(null); }}
                         className={errors.budget ? 'border-red-500 focus:ring-red-500' : ''}
                       />
                       {errors.budget && (
@@ -1234,6 +1237,17 @@ export default function Sites() {
                 </div>
                 
                 <div className="flex gap-3 pt-4">
+                  {budgetError && (
+                    <div className="w-full flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 mb-1">
+                      <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 shrink-0" />
+                      <div>
+                        <p className="font-semibold text-red-700 text-sm">Budget exceeded</p>
+                        <p className="text-sm text-red-600 mt-0.5">{budgetError}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="flex gap-3 pt-2">
                   <Button
                     variant="outline"
                     className="flex-1"
@@ -1254,6 +1268,21 @@ export default function Sites() {
           </div>
         ) : null}
       </div>
+
+      {/* Search and Filter Card */}
+      {isLimitReached && isProjectContext && (
+        <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-4">
+          <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 shrink-0" />
+          <div>
+            <p className="font-semibold text-red-700">Site limit reached</p>
+            <p className="text-sm text-red-600 mt-0.5">
+              This project is limited to <span className="font-bold">{projectSiteLimit} site{projectSiteLimit !== 1 ? 's' : ''}</span>.
+              You already have {currentSiteCount} site{currentSiteCount !== 1 ? 's' : ''} created.
+              To add a new site, update the limit in the project settings.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Search and Filter Card */}
       <Card className="border-none shadow-md">
