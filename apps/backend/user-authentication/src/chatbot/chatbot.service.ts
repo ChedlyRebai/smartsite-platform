@@ -9,9 +9,9 @@ import sharp from 'sharp';
 import { basename, extname } from 'path';
 import { ChatbotConversation } from './entities';
 import { SendMessageDto, FeedbackDto } from './dto';
-import { UsersService } from 'src/users/users.service';
-import { TeamsService } from 'src/teams/teams.service';
-import { RolesService } from 'src/roles/roles.service';
+import { UsersService } from '../users/users.service';
+import { TeamsService } from '../teams/teams.service';
+import { RolesService } from '../roles/roles.service';
 
 // Google Cloud Vision - optional dependency
 let ImageAnnotatorClient: any = null;

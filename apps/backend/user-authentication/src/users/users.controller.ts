@@ -14,8 +14,8 @@ import {
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { JwtService } from '@nestjs/jwt';
-import { GetUser } from 'src/auth/strategies/get-user.decorator';
-import { AuditLogsService } from 'src/audit-logs/audit-logs.service';
+import { GetUser } from '../auth/strategies/get-user.decorator';
+import { AuditLogsService } from '../audit-logs/audit-logs.service';
 
 interface JwtPayload {
   sub: string;

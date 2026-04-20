@@ -4,9 +4,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ChatbotController } from './chatbot.controller';
 import { ChatbotService } from './chatbot.service';
 import { ChatbotConversation, ChatbotConversationSchema } from './entities';
-import { UsersModule } from 'src/users/users.module';
-import { TeamsModule } from 'src/teams/teams.module';
-import { RolesModule } from 'src/roles/roles.module';
+import { UsersModule } from '../users/users.module';
+import { TeamsModule } from '../teams/teams.module';
+import { RolesModule } from '../roles/roles.module';
 
 @Module({
   imports: [

@@ -14,6 +14,7 @@ api.interceptors.request.use((config) => {
   if (authData) {
     try {
       const parsed = JSON.parse(authData);
+      console.log('Parsed auth data:', parsed);
       if (parsed.state?.user?.access_token) {
         config.headers.Authorization = `Bearer ${parsed.state.user.access_token}`;
       }

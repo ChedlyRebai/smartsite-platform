@@ -1,5 +1,5 @@
 import { Controller, Post, Get, Delete, Body, Query, UseGuards, Req, HttpCode, HttpStatus, UseInterceptors, UploadedFile, Put } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ChatbotService } from './chatbot.service';
 import { SendMessageDto, GetConversationDto, FeedbackDto } from './dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -56,6 +56,8 @@ export class ChatbotController {
   ) {
     const userId = req.user?.userId || req.user?.id || req.user?._id;
     const userRole = req.user?.role?.name || 'user';
+      console.log(`**********************************************************************Processing quick command: ${userId} with role: ${userRole}`);
+  
     return this.chatbotService.sendMessage(userId, userRole, dto);
   }
 
@@ -120,6 +122,7 @@ export class ChatbotController {
     const userId = req.user?.userId || req.user?.id || req.user?._id;
     const userRole = req.user?.role?.name || 'user';
     const { command, language = 'en' } = body;
+    console.log(`Processing quick command: ${command} with language: ${language} for user: ${userId} with role: ${userRole}`);
     return this.chatbotService.processQuickCommand(userId, userRole, command, language);
   }
 

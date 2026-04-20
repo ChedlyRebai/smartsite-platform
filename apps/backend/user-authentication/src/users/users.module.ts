@@ -5,7 +5,7 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { User, UserSchema } from './entities/user.entity';
 
-import { Role, RoleSchema } from 'src/roles/entities/role.entity';
+import { Role, RoleSchema } from '../roles/entities/role.entity';
 import { AuditLogsModule } from '../audit-logs/audit-logs.module';
 import { EmailModule } from '../email/email.module';
 import { RolesModule } from '../roles/roles.module';

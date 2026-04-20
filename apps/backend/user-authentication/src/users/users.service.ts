@@ -158,10 +158,10 @@ export class UsersService {
     if (!user.role) return { error: 'Role not found' };
 
     const role = user.role as any;
-    console.log(
-      '************************************************',
-      role.permissions,
-    );
+    // console.log(
+    //   '************************************************',
+    //   role.permissions,
+    // );
     return role.permissions || [];
   }
 
@@ -202,7 +202,9 @@ export class UsersService {
   async findAll() {
     console.log('🔍 DEBUG: findAll appelé');
     try {
-      const result = await this.userModel.find().populate('role').exec();
+      const result = await this.userModel.find()
+      .select('')
+      .populate('role').exec();
       console.log('🔍 DEBUG: findAll résultat:', result.length, 'utilisateurs');
       if (result.length > 0) {
         console.log('🔍 DEBUG: Premier utilisateur:', {
