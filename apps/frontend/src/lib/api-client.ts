@@ -32,7 +32,6 @@ export const NotificationApi = axios.create({
 
 userApi.interceptors.request.use((config) => {
   const token = useAuthStore.getState().user.access_token;
-  console.log(token);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -43,7 +42,6 @@ userApi.interceptors.request.use((config) => {
 
 NotificationApi.interceptors.request.use((config) => {
   const token = useAuthStore.getState().user.access_token;
-  console.log(token);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -52,7 +50,6 @@ NotificationApi.interceptors.request.use((config) => {
 });
 planingApi.interceptors.request.use((config) => {
   const token = useAuthStore.getState().user.access_token;
-  console.log("interceptor token", token);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

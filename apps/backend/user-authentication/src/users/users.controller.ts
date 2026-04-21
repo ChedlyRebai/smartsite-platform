@@ -91,18 +91,7 @@ export class UsersController {
     }
   }
 
-  // @UseGuards(JwtGuard)
-  // @Get('/my-tasks')
-  // getMytasks(@GetUser() user: any) {
-  //   const userId = user?.sub || user?.userId || user?.id || user?._id;
-  //   console.log('Extracted user ID from token payload:', user);
-  //   if (!userId) {
-  //     throw new UnauthorizedException('User ID missing in token payload');
-  //   }
 
-  //   return this.taskService.getMyTask("69bb3f601fa09b37911c44b2");
-  // }
-  // @UseGuards(JwtAuthGuard)
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getCurrentUser(@GetUser() user: any) {

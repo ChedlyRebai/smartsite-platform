@@ -180,7 +180,8 @@ export const banUser = async (userId: string, data: boolean) => {
 
 
 export const getCuureentUser = async () => {
-  const {data} = await userApi.get(`${API_URL}/me`);
+  const {data} = await userApi.get(`/me`);
+  console.log("Fetched current user in getCurrentUser function:==================================================================================================", data);
   return data;
 }
 

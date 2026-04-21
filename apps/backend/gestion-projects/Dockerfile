@@ -25,7 +25,7 @@ RUN npm ci --only=production
 # Copier les artefacts compilés depuis le stage builder
 COPY --from=builder /app/dist ./dist
 
-EXPOSE 3007
+EXPOSE 3007 
 
 ENV NODE_ENV=production
 ENV PORT=3007
