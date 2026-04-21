@@ -4,6 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
 import { PaiementModule } from './paiement.module';
 import { StripeModule } from './stripe/stripe.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { StripeModule } from './stripe/stripe.module';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     PaiementModule,
     StripeModule,
+    ChatModule,
   ],
 })
 export class AppModule {}

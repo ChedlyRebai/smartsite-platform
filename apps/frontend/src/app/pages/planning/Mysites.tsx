@@ -16,7 +16,7 @@ import {
 import { Button } from "../../components/ui/button";
 import type { Site } from "../../types";
 
-import "leaflet/dist/leaflet.css";
+
 import { useState } from "react";
 import { Link } from "react-router";
 import { getCuureentUser } from "@/app/action/user.action";
@@ -43,7 +43,7 @@ const MySItes = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Planing</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Planning</h1>
           <p className="text-gray-500 mt-1">
             Manage site relationships and order
           </p>
@@ -59,7 +59,7 @@ const MySItes = () => {
         <CardContent>
           <div className="space-y-4">
             {sites &&
-              sites.map((site) => (
+              sites.map((site:any) => (
                 <div key={site.id} className="p-4 border rounded-lg">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">

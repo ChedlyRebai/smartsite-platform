@@ -1,0 +1,44 @@
+name: CI gestion-site
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'apps/backend/gestion-site/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'apps/backend/gestion-site/**'
+
+jobs:
+  ci:
+    name: Build & Test gestion-site
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: apps/backend/gestion-site
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Configuration de Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/backend/gestion-site/package-lock.json
+
+      - name: Installation des dépendances
+        run: npm ci
+
+      - name: Exécution des tests unitaires
+        run: npm test
+
+      - name: Build NestJS
+        run: npm run build

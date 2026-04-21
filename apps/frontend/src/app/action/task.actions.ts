@@ -1,3 +1,4 @@
+import { getTaskStageById } from './taskStage.action';
 // services/task.service.ts
 
 import { planingApi } from "@/lib/api-client";
@@ -34,6 +35,11 @@ export const getTaskByTeamid = async (teamId : string)=>{
 
 export const getAllTaskStagesByMilestoneId= async (milestoneId:string) =>{
   const {data} = await planingApi.get(`task-stage/milestone/${milestoneId}`);
+  return data
+}
+
+export const getTaskStageByteamIdandMilestoneId = async (milestoneId:string,teamId:string) =>{
+  const {data} = await planingApi.get(`task-stage/milestone/${milestoneId}/team/${teamId}`);
   return data
 }
 

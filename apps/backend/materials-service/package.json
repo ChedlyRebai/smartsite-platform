@@ -20,6 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@nestjs/axios": "^4.0.1",
     "@nestjs/cache-manager": "^3.1.0",
     "@nestjs/common": "^11.0.1",
@@ -30,6 +31,7 @@
     "@nestjs/platform-socket.io": "^11.1.14",
     "@nestjs/schedule": "^6.1.1",
     "@nestjs/websockets": "^11.1.14",
+    "@tensorflow/tfjs": "^4.22.0",
     "@types/multer": "^2.0.0",
     "@types/node-fetch": "^2.6.13",
     "@types/pdfkit": "^0.17.5",
@@ -42,13 +44,13 @@
     "jsqr": "^1.4.0",
     "mongoose": "^9.2.3",
     "multer": "^2.1.0",
+    "openai": "^4.100.0",
     "pdfkit": "^0.18.0",
     "qrcode": "^1.5.4",
     "qrcode-reader": "^1.0.4",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "xlsx": "^0.18.5",
-    "@tensorflow/tfjs": "^4.22.0"
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

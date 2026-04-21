@@ -34,12 +34,12 @@ import Home2 from "./pages/Home/Home2";
 import Pricing from "./pages/pricing/Pricing";
 import ClientsNew from "./pages/clients/ClientsNew";
 import UserGuide from "./pages/guide/UserGuide";
-import SupplierList from "./pages/suppliers/SupplierList";
-import AddSupplier from "./pages/suppliers/AddSupplier";
-import EditSupplier from "./pages/suppliers/EditSupplier";
-import SupplierDetails from "./pages/suppliers/SupplierDetails";
-import SupplierEvaluation from "./pages/suppliers/SupplierEvaluation";
-import SupplierComparison from "./pages/suppliers/SupplierComparison";
+
+import AddSupplierNew from "./pages/suppliers-new/AddSupplier";
+import SuppliersListNew from "./pages/suppliers-new/SuppliersList";
+import QhseSupplierValidation from "./pages/suppliers-new/QhseSupplierValidation";
+import SupplierDetail from "./pages/suppliers-new/SupplierDetail";
+import EditSupplier from "./pages/suppliers-new/EditSupplier";
 
 import Catalog from "./pages/catalog/Catalog";
 import CatalogList from "./pages/catalog/CatalogList";
@@ -48,13 +48,6 @@ import EditCatalogItem from "./pages/catalog/EditCatalogItem";
 import CatalogDetails from "./pages/catalog/CatalogDetails";
 import CheckoutSimulator from "./pages/CheckoutSimulator";
 
-import SupplierMaterials from "./pages/supplier-materials/SupplierMaterials";
-import AddSupplierMaterialMapping from "./pages/supplier-materials/AddSupplierMaterialMapping";
-import SupplierMaterialDetails from "./pages/supplier-materials/SupplierMaterialDetails";
-import MaterialSupplierList from "./pages/supplier-materials/MaterialSupplierList";
-import SupplierMaterialList from "./pages/supplier-materials/SupplierMaterialList";
-import MaterialSupplierListPage from "./pages/supplier-materials/MaterialSupplierListPage";
-import SupplierMaterialListPage from "./pages/supplier-materials/SupplierMaterialListPage";
 import PLaningProjects from "./pages/planning/PLaningProjects";
 import ProjectMilestone from "./pages/planning/ProjectMilestone";
 import MyTask from "./pages/planning/MyTask";
@@ -238,27 +231,19 @@ export const router = createBrowserRouter([
       },
       {
         path: "suppliers",
-        element: <SupplierList />,
+        element: <SuppliersListNew />,
       },
       {
         path: "suppliers/add",
-        element: <AddSupplier />,
-      },
-      {
-        path: "suppliers/edit/:id",
-        element: <EditSupplier />,
+        element: <AddSupplierNew />,
       },
       {
         path: "suppliers/:id",
-        element: <SupplierDetails />,
+        element: <SupplierDetail />,
       },
       {
-        path: "suppliers-evaluation",
-        element: <SupplierEvaluation />,
-      },
-      {
-        path: "suppliers-comparison",
-        element: <SupplierComparison />,
+        path: "suppliers/:id/edit",
+        element: <EditSupplier />,
       },
       {
         path: "catalog",
@@ -275,38 +260,6 @@ export const router = createBrowserRouter([
       {
         path: "catalog/:id",
         element: <CatalogDetails />,
-      },
-      {
-        path: "supplier-materials",
-        element: <SupplierMaterials />,
-      },
-      {
-        path: "supplier-materials/add",
-        element: <AddSupplierMaterialMapping />,
-      },
-      {
-        path: "supplier-materials/edit/:id",
-        element: <AddSupplierMaterialMapping />,
-      },
-      {
-        path: "supplier-materials/:id",
-        element: <SupplierMaterialDetails />,
-      },
-      {
-        path: "catalog/:id/suppliers",
-        element: <MaterialSupplierList />,
-      },
-      {
-        path: "suppliers/:id/materials",
-        element: <SupplierMaterialList />,
-      },
-      {
-        path: "material-suppliers",
-        element: <MaterialSupplierListPage />,
-      },
-      {
-        path: "supplier-materials-list",
-        element: <SupplierMaterialListPage />,
       },
       {
         path: "clients",
