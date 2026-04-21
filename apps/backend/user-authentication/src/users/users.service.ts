@@ -624,4 +624,12 @@ export class UsersService {
       role: user.role,
     };
   }
+
+  async getUsersByRoleName(roleName: string) {
+    const role = await this.rolesService.findByName(roleName);
+    if (!role) {
+      return [];
+    }
+    return this.userModel.find({ role: role._id, status: 'approved' }).exec();
+  }
 }

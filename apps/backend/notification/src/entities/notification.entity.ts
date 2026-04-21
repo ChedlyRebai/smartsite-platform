@@ -39,6 +39,9 @@ export class Notification extends Document {
 
   @Prop({ default: false })
   trash: boolean;
+
+  @Prop()
+  qhseNotes?: string;
 }
 
 export const NotificationSchema = SchemaFactory.createForClass(Notification);

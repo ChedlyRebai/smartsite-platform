@@ -14,10 +14,12 @@ import { StaticsModule } from './statics/statics.module';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { TeamsModule } from './teams/teams.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
+<<<<<<< HEAD
+=======
 import { AiChatModule } from './ai-chat/ai-chat.module';
 import { SuppliersModule } from './suppliers/suppliers.module';
+>>>>>>> main
 import { CatalogModule } from './catalog/catalog.module';
-import { SuppliersMaterialsModule } from './suppliers-materials/suppliers-materials.module';
 
 @Module({
   imports: [
@@ -36,11 +38,15 @@ import { SuppliersMaterialsModule } from './suppliers-materials/suppliers-materi
     ChatbotModule,
     AiChatModule,
     AuditLogsModule,
+<<<<<<< HEAD
+    CatalogModule,
+=======
 
     SuppliersModule,
     CatalogModule,
     SuppliersMaterialsModule,
 
+>>>>>>> main
     MongooseModule.forRoot(
       process.env.MONGODB_URI || 'mongodb://localhost:27017/smartsite',
     ),

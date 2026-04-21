@@ -347,7 +347,7 @@ export default function Sites() {
   const searchNearbyFournisseurs = async (position: { lat: number; lng: number }) => {
     try {
       // Get all active fournisseurs from API
-      const response = await fetch('/gestion-fournisseurs/fournisseurs?actif=true');
+      const response = await fetch('/api/fournisseurs?actif=true');
       let fournisseurs = [];
       
       if (response.ok) {

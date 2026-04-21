@@ -197,6 +197,11 @@ export class UsersController {
     return this.usersService.getAllclients();
   }
 
+  @Get('role/:roleName')
+  async getUsersByRole(@Param('roleName') roleName: string) {
+    return this.usersService.getUsersByRoleName(roleName);
+  }
+
   @Get(':id')
   async findById(@Param('id') id: string) {
     return this.usersService.findById(id);

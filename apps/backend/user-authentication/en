@@ -35,3 +35,4 @@ GOOGLE_CLOUD_VISION_API_KEY=your_google_vision_api_key_here
 # Obtenez vos clés gratuites depuis https://imagga.com/
 IMAGGA_API_KEY=acc_89651fa8f8d5da8
 IMAGGA_API_SECRET=96109d49e4896b5278ca8372809b1a6b
+MONGODB_URI=mongodb+srv://admin:admin@cluster0.6zcerbm.mongodb.net/smartsite
