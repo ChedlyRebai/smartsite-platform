@@ -5810,6 +5810,7 @@
     ],
     "imports": [
       "react",
+      "react-router-dom",
       "@/components/ui/card",
       "@/components/ui/button",
       "lucide-react"
@@ -5834,6 +5835,7 @@
     ],
     "imports": [
       "react",
+      "react-router-dom",
       "@/components/ui/card",
       "@/components/ui/button",
       "@/components/ui/tabs",
@@ -5848,7 +5850,9 @@
     ],
     "imports": [
       "react",
+      "react-router-dom",
       "@/components/ui/card",
+      "@/components/ui/button",
       "@/components/ui/tabs",
       "lucide-react"
     ]
@@ -5861,7 +5865,9 @@
     ],
     "imports": [
       "react",
+      "react-router-dom",
       "@/components/ui/card",
+      "@/components/ui/button",
       "@/components/ui/tabs",
       "lucide-react"
     ]
@@ -5885,7 +5891,9 @@
   },
   "apps\\frontend\\src\\features\\resource-optimization\\types\\index.ts": {
     "purpose": "types",
-    "exports": [],
+    "exports": [
+      "getSiteId"
+    ],
     "imports": []
   },
   "apps\\frontend\\src\\hooks\\use-js-loaded.ts": {

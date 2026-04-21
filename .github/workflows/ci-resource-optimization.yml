@@ -1,0 +1,60 @@
+name: CI resource-optimization
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'apps/backend/resource-optimization/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'apps/backend/resource-optimization/**'
+
+jobs:
+  ci:
+    name: Build & Test resource-optimization
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: apps/backend/resource-optimization
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Configuration de Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/backend/resource-optimization/package-lock.json
+
+      - name: Installation des dépendances
+        run: npm ci
+
+      - name: Exécution des tests unitaires avec couverture
+        run: npm test -- --coverage
+
+      - name: Publication du rapport de couverture
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-resource-optimization
+          path: apps/backend/resource-optimization/coverage/lcov.info
+          retention-days: 7
+
+      - name: Analyse SonarQube
+        uses: sonarsource/sonarqube-scan-action@v5
+        with:
+          projectBaseDir: apps/backend/resource-optimization
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      - name: Build NestJS
+        run: npm run build

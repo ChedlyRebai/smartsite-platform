@@ -5,13 +5,12 @@ export default {
   transform: {
     '^.+\\.(t|j)s$': 'ts-jest',
   },
-  collectCoverageFrom: [
-    '**/*.(t|j)s',
-  ],
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/$1',
+  },
+  collectCoverageFrom: ['**/*.(t|j)s'],
   coverageDirectory: '../coverage',
+  coverageReporters: ['lcov', 'text'],
   testEnvironment: 'node',
-  roots: [
-    '<rootDir>',
-    '<rootDir>/../test',
-  ],
+  roots: ['<rootDir>'],
 };
