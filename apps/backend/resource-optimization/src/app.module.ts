@@ -10,6 +10,7 @@ import { ReportingModule } from './modules/reporting/reporting.module';
 import { ExternalDataModule } from './modules/external-data/external-data.module';
 import { ExternalDataController } from './modules/external-data/external-data.controller';
 import { ExternalDataService } from './modules/external-data/external-data.service';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ExternalDataService } from './modules/external-data/external-data.servi
     AlertModule,
     ReportingModule,
     ExternalDataModule,
+    ChatModule,
   ],
   controllers: [ExternalDataController],
   providers: [ExternalDataService],

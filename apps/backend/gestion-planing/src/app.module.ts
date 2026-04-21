@@ -6,8 +6,8 @@ import { TaskModule } from './task/task.module';
 import { MilestoneModule } from './milestone/milestone.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
-
 import { TaskStageModule } from './task-stage/task-stage.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -15,15 +15,15 @@ import { TaskStageModule } from './task-stage/task-stage.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
-   MongooseModule.forRoot(
+    MongooseModule.forRoot(
       process.env.MONGODB_URI || 'mongodb://localhost:27017/smartsite',
     ),
     TaskModule,
     MilestoneModule,
     AuthModule,
     TaskStageModule,
+    ChatModule,
   ],
-
   controllers: [AppController],
   providers: [AppService],
 })

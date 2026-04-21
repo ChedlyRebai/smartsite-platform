@@ -14,6 +14,7 @@ import { StaticsModule } from './statics/statics.module';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { TeamsModule } from './teams/teams.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
+import { AiChatModule } from './ai-chat/ai-chat.module';
 import { SuppliersModule } from './suppliers/suppliers.module';
 import { CatalogModule } from './catalog/catalog.module';
 import { SuppliersMaterialsModule } from './suppliers-materials/suppliers-materials.module';
@@ -33,6 +34,7 @@ import { SuppliersMaterialsModule } from './suppliers-materials/suppliers-materi
     TeamsModule,
 
     ChatbotModule,
+    AiChatModule,
     AuditLogsModule,
 
     SuppliersModule,
