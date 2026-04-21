@@ -1,0 +1,155 @@
+pipeline {
+    agent any
+
+    environment {
+        SERVICE_NAME    = 'gestion-site'
+        SERVICE_DIR     = 'apps/backend/gestion-site'
+        DOCKER_IMAGE    = "asmaamh/smartsite-gestion-site"
+        SONAR_PROJECT   = 'smartsite-gestion-site'
+        PORT            = '3001'
+    }
+
+    tools {
+        nodejs 'NodeJS-20'
+    }
+
+    stages {
+
+        // ── 1. Checkout ──────────────────────────────────────────────────────
+        stage('Checkout') {
+            steps {
+                checkout scm
+                echo "✅ Code récupéré depuis GitHub"
+            }
+        }
+
+        // ── 2. Installation des dépendances ──────────────────────────────────
+        stage('Install Dependencies') {
+            steps {
+                dir("${SERVICE_DIR}") {
+                    sh 'npm ci'
+                    echo "✅ Dépendances installées"
+                }
+            }
+        }
+
+        // ── 3. Tests unitaires ───────────────────────────────────────────────
+        stage('Unit Tests') {
+            steps {
+                dir("${SERVICE_DIR}") {
+                    sh 'npm test -- --coverage --coverageReporters=lcov --forceExit'
+                    echo "✅ Tests unitaires passés"
+                }
+            }
+            post {
+                always {
+                    junit(
+                        testResults: "${SERVICE_DIR}/coverage/junit.xml",
+                        allowEmptyResults: true
+                    )
+                }
+            }
+        }
+
+        // ── 4. Build NestJS ──────────────────────────────────────────────────
+        stage('Build') {
+            steps {
+                dir("${SERVICE_DIR}") {
+                    sh 'npm run build'
+                    echo "✅ Build NestJS réussi"
+                }
+            }
+        }
+
+        // ── 5. Analyse SonarQube ─────────────────────────────────────────────
+        stage('SonarQube Analysis') {
+            steps {
+                dir("${SERVICE_DIR}") {
+                    withSonarQubeEnv('SonarQube') {
+                        sh """
+                            sonar-scanner \
+                                -Dsonar.projectKey=${SONAR_PROJECT} \
+                                -Dsonar.projectName='SmartSite - Gestion Site' \
+                                -Dsonar.sources=src \
+                                -Dsonar.exclusions=**/*.spec.ts,**/node_modules/**,**/dist/** \
+                                -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+                        """
+                    }
+                }
+            }
+        }
+
+        // ── 6. Quality Gate ──────────────────────────────────────────────────
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: false
+                }
+            }
+        }
+
+        // ── 7. Build Docker Image ────────────────────────────────────────────
+        stage('Docker Build') {
+            steps {
+                dir("${SERVICE_DIR}") {
+                    sh "docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} -t ${DOCKER_IMAGE}:latest ."
+                    echo "✅ Image Docker construite : ${DOCKER_IMAGE}:${BUILD_NUMBER}"
+                }
+            }
+        }
+
+        // ── 8. Push Docker Image ─────────────────────────────────────────────
+        stage('Docker Push') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'docker-hub-credentials',
+                    usernameVariable: 'DOCKER_USERNAME',
+                    passwordVariable: 'DOCKER_PASSWORD'
+                )]) {
+                    sh """
+                        echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
+                        docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}
+                        docker push ${DOCKER_IMAGE}:latest
+                    """
+                    echo "✅ Image Docker poussée sur Docker Hub"
+                }
+            }
+        }
+
+        // ── 9. Deploy ────────────────────────────────────────────────────────
+        stage('Deploy') {
+            steps {
+                withCredentials([string(
+                    credentialsId: 'mongodb-uri',
+                    variable: 'MONGODB_URI'
+                )]) {
+                    sh """
+                        docker stop ${SERVICE_NAME} || true
+                        docker rm ${SERVICE_NAME} || true
+                        docker run -d \
+                            --name ${SERVICE_NAME} \
+                            --restart unless-stopped \
+                            -p ${PORT}:${PORT} \
+                            -e PORT=${PORT} \
+                            -e NODE_ENV=production \
+                            -e MONGODB_URI=${MONGODB_URI} \
+                            ${DOCKER_IMAGE}:latest
+                    """
+                    echo "✅ ${SERVICE_NAME} déployé sur le port ${PORT}"
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "🎉 Pipeline ${SERVICE_NAME} terminé avec succès !"
+        }
+        failure {
+            echo "❌ Pipeline ${SERVICE_NAME} a échoué."
+        }
+        always {
+            cleanWs()
+        }
+    }
+}
