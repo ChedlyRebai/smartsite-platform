@@ -1,14 +1,17 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useDashboard, usePerformanceReport, useEnvironmentalReport, useFinancialReport } from '../../hooks/useResourceApi';
-import { BarChart3, TrendingUp, Leaf, DollarSign } from 'lucide-react';
+import { BarChart3, TrendingUp, Leaf, DollarSign, ArrowLeft } from 'lucide-react';
 
 interface ReportingPageProps {
   siteId: string;
 }
 
 export const ReportingPage: React.FC<ReportingPageProps> = ({ siteId }) => {
+  const navigate = useNavigate();
   const { data: dashboard, isLoading: dashboardLoading } = useDashboard(siteId);
   const { data: performance, isLoading: perfLoading } = usePerformanceReport(siteId);
   const { data: environmental, isLoading: envLoading } = useEnvironmentalReport(siteId);
@@ -16,6 +19,15 @@ export const ReportingPage: React.FC<ReportingPageProps> = ({ siteId }) => {
 
   return (
     <div className="space-y-6 p-6">
+      <Button 
+        variant="ghost" 
+        onClick={() => navigate(`/resource-optimization/${siteId}`)} 
+        className="mb-4 gap-2"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to Dashboard
+      </Button>
+      
       <div>
         <h1 className="text-3xl font-bold">📈 Reports</h1>
         <p className="text-gray-600 mt-1">

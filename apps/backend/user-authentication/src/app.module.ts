@@ -10,7 +10,6 @@ import { RolesModule } from './roles/roles.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { StaticsModule } from './statics/statics.module';
 
-
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { TeamsModule } from './teams/teams.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
@@ -24,7 +23,7 @@ import { CatalogModule } from './catalog/catalog.module';
       envFilePath: '.env',
     }),
     AuthModule,
-    
+
     UsersModule,
     RolesModule,
     PermissionsModule,
@@ -35,7 +34,6 @@ import { CatalogModule } from './catalog/catalog.module';
     AiChatModule,
     AuditLogsModule,
 
-   // SuppliersModule,
     CatalogModule,
 
     MongooseModule.forRoot(

@@ -1,15 +1,17 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAlerts, useUnreadAlerts, useCriticalAlerts, useAlertsSummary, useGenerateAlerts, useMarkAlertAsRead, useMarkAlertAsResolved } from '../../hooks/useResourceApi';
 import { AlertsList } from '../../components/AlertsList';
-import { RefreshCw, AlertTriangle, Bell, CheckCircle } from 'lucide-react';
+import { RefreshCw, AlertTriangle, Bell, CheckCircle, ArrowLeft } from 'lucide-react';
 
 interface AlertsPageProps {
   siteId: string;
 }
 
 export const AlertsPage: React.FC<AlertsPageProps> = ({ siteId }) => {
+  const navigate = useNavigate();
   const { data: allAlerts, isLoading, refetch } = useAlerts(siteId);
   const { data: unreadAlerts } = useUnreadAlerts(siteId);
   const { data: criticalAlerts } = useCriticalAlerts(siteId);
@@ -25,6 +27,15 @@ export const AlertsPage: React.FC<AlertsPageProps> = ({ siteId }) => {
 
   return (
     <div className="space-y-6 p-6">
+      <Button 
+        variant="ghost" 
+        onClick={() => navigate(`/resource-optimization/${siteId}`)} 
+        className="mb-4 gap-2"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to Dashboard
+      </Button>
+      
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">🚨 Alerts</h1>

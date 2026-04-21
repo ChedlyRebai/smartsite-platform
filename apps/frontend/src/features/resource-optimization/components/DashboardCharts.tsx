@@ -41,80 +41,128 @@ interface DashboardStatsProps {
 export const SummaryStats: React.FC<DashboardStatsProps> = ({ dashboard }) => {
   if (!dashboard) {
     return (
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Realized Savings</CardTitle>
-            <DollarSign className="h-5 w-5 text-emerald-600" />
+      <div className="grid gap-6 md:grid-cols-3">
+        <Card className="border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-emerald-50/30 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden relative group">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-200 rounded-full -mr-20 -mt-20 opacity-20 group-hover:scale-110 transition-transform duration-500" />
+          <CardHeader className="flex flex-row items-center justify-between pb-3 relative z-10">
+            <CardTitle className="text-sm font-semibold text-gray-700">Realized Savings</CardTitle>
+            <div className="p-2.5 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-md">
+              <DollarSign className="h-5 w-5 text-white" />
+            </div>
           </CardHeader>
-          <CardContent className="bg-emerald-50 p-4 rounded-lg -m-4 mt-2">
-            <div className="text-2xl font-bold text-emerald-600">0 TND</div>
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold text-emerald-700 mb-1">0 TND</div>
+            <p className="text-xs text-emerald-600 font-medium">No savings yet</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Recommendations Implemented</CardTitle>
-            <Leaf className="h-5 w-5 text-green-600" />
+
+        <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 via-white to-green-50/30 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden relative group">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-green-200 rounded-full -mr-20 -mt-20 opacity-20 group-hover:scale-110 transition-transform duration-500" />
+          <CardHeader className="flex flex-row items-center justify-between pb-3 relative z-10">
+            <CardTitle className="text-sm font-semibold text-gray-700">Recommendations Implemented</CardTitle>
+            <div className="p-2.5 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-md">
+              <Target className="h-5 w-5 text-white" />
+            </div>
           </CardHeader>
-          <CardContent className="bg-green-50 p-4 rounded-lg -m-4 mt-2">
-            <div className="text-2xl font-bold text-green-600">0</div>
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold text-green-700 mb-1">0</div>
+            <p className="text-xs text-green-600 font-medium">Start implementing</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Overall Effectiveness</CardTitle>
-            <TrendingDown className="h-5 w-5 text-blue-600" />
+
+        <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 via-white to-blue-50/30 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden relative group">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-blue-200 rounded-full -mr-20 -mt-20 opacity-20 group-hover:scale-110 transition-transform duration-500" />
+          <CardHeader className="flex flex-row items-center justify-between pb-3 relative z-10">
+            <CardTitle className="text-sm font-semibold text-gray-700">Overall Effectiveness</CardTitle>
+            <div className="p-2.5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-md">
+              <Zap className="h-5 w-5 text-white" />
+            </div>
           </CardHeader>
-          <CardContent className="bg-blue-50 p-4 rounded-lg -m-4 mt-2">
-            <div className="text-2xl font-bold text-blue-600">0%</div>
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold text-blue-700 mb-1">0%</div>
+            <p className="text-xs text-blue-600 font-medium">Track your progress</p>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  const stats = [
-    {
-      icon: DollarSign,
-      label: 'Realized Savings',
-      value: `${(dashboard.financial?.realizedSavings && isFinite(Number(dashboard.financial.realizedSavings)) ? Number(dashboard.financial.realizedSavings) : 0).toLocaleString()} TND`,
-      color: 'text-emerald-600',
-      bg: 'bg-emerald-50',
-    },
-    {
-      icon: Leaf,
-      label: 'Recommendations Implemented',
-      value: `${dashboard.recommendations?.implemented || 0}`,
-      color: 'text-green-600',
-      bg: 'bg-green-50',
-    },
-    {
-      icon: TrendingDown,
-      label: 'Overall Effectiveness',
-      value: `${(dashboard.financial?.roi && isFinite(Number(dashboard.financial.roi)) ? Math.round(Number(dashboard.financial.roi) * 100) : 0)}%`,
-      color: 'text-blue-600',
-      bg: 'bg-blue-50',
-    },
-  ];
+  const realizedSavings = dashboard.financial?.realizedSavings && isFinite(Number(dashboard.financial.realizedSavings)) 
+    ? Number(dashboard.financial.realizedSavings) 
+    : 0;
+  
+  const implementedCount = dashboard.recommendations?.implemented || 0;
+  
+  const effectiveness = dashboard.financial?.roi && isFinite(Number(dashboard.financial.roi)) 
+    ? Math.round(Number(dashboard.financial.roi) * 100) 
+    : 0;
+
+  const co2Reduction = dashboard.environmental?.actualCO2Reduction && isFinite(Number(dashboard.environmental.actualCO2Reduction))
+    ? Number(dashboard.environmental.actualCO2Reduction)
+    : 0;
 
   return (
-    <div className="grid gap-4 md:grid-cols-3">
-      {stats.map((stat) => {
-        const Icon = stat.icon;
-        return (
-          <Card key={stat.label}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">{stat.label}</CardTitle>
-              <Icon className={`h-5 w-5 ${stat.color}`} />
-            </CardHeader>
-            <CardContent className={`${stat.bg} p-4 rounded-lg -m-4 mt-2`}>
-              <div className={`text-2xl font-bold ${stat.color}`}>
-                {stat.value}
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })}
+    <div className="grid gap-6 md:grid-cols-4">
+      <Card className="border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-emerald-50/30 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden relative group">
+        <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-200 rounded-full -mr-20 -mt-20 opacity-20 group-hover:scale-110 transition-transform duration-500" />
+        <CardHeader className="flex flex-row items-center justify-between pb-3 relative z-10">
+          <CardTitle className="text-sm font-semibold text-gray-700">Realized Savings</CardTitle>
+          <div className="p-2.5 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-md group-hover:scale-110 transition-transform duration-300">
+            <DollarSign className="h-5 w-5 text-white" />
+          </div>
+        </CardHeader>
+        <CardContent className="relative z-10">
+          <div className="text-3xl font-bold text-emerald-700 mb-1">
+            {realizedSavings.toLocaleString()} TND
+          </div>
+          <p className="text-xs text-emerald-600 font-medium flex items-center gap-1">
+            <TrendingDown className="h-3 w-3" />
+            Cost reduction achieved
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 via-white to-green-50/30 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden relative group">
+        <div className="absolute top-0 right-0 w-40 h-40 bg-green-200 rounded-full -mr-20 -mt-20 opacity-20 group-hover:scale-110 transition-transform duration-500" />
+        <CardHeader className="flex flex-row items-center justify-between pb-3 relative z-10">
+          <CardTitle className="text-sm font-semibold text-gray-700">Implemented</CardTitle>
+          <div className="p-2.5 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-md group-hover:scale-110 transition-transform duration-300">
+            <Target className="h-5 w-5 text-white" />
+          </div>
+        </CardHeader>
+        <CardContent className="relative z-10">
+          <div className="text-3xl font-bold text-green-700 mb-1">{implementedCount}</div>
+          <p className="text-xs text-green-600 font-medium">Recommendations applied</p>
+        </CardContent>
+      </Card>
+
+      <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 via-white to-blue-50/30 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden relative group">
+        <div className="absolute top-0 right-0 w-40 h-40 bg-blue-200 rounded-full -mr-20 -mt-20 opacity-20 group-hover:scale-110 transition-transform duration-500" />
+        <CardHeader className="flex flex-row items-center justify-between pb-3 relative z-10">
+          <CardTitle className="text-sm font-semibold text-gray-700">Effectiveness</CardTitle>
+          <div className="p-2.5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-md group-hover:scale-110 transition-transform duration-300">
+            <Zap className="h-5 w-5 text-white" />
+          </div>
+        </CardHeader>
+        <CardContent className="relative z-10">
+          <div className="text-3xl font-bold text-blue-700 mb-1">{effectiveness}%</div>
+          <p className="text-xs text-blue-600 font-medium">Overall ROI</p>
+        </CardContent>
+      </Card>
+
+      <Card className="border-2 border-teal-200 bg-gradient-to-br from-teal-50 via-white to-teal-50/30 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden relative group">
+        <div className="absolute top-0 right-0 w-40 h-40 bg-teal-200 rounded-full -mr-20 -mt-20 opacity-20 group-hover:scale-110 transition-transform duration-500" />
+        <CardHeader className="flex flex-row items-center justify-between pb-3 relative z-10">
+          <CardTitle className="text-sm font-semibold text-gray-700">CO2 Reduction</CardTitle>
+          <div className="p-2.5 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl shadow-md group-hover:scale-110 transition-transform duration-300">
+            <Leaf className="h-5 w-5 text-white" />
+          </div>
+        </CardHeader>
+        <CardContent className="relative z-10">
+          <div className="text-3xl font-bold text-teal-700 mb-1">{co2Reduction.toFixed(0)} kg</div>
+          <p className="text-xs text-teal-600 font-medium">Environmental impact</p>
+        </CardContent>
+      </Card>
     </div>
   );
 };

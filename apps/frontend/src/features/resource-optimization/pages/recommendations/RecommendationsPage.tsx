@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useRecommendations, useGenerateRecommendations, useRecommendationsSummary } from '../../hooks/useResourceApi';
 import { RecommendationsList } from '../../components/RecommendationsList';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, ArrowLeft } from 'lucide-react';
 
 interface RecommendationsPageProps {
   siteId: string;
 }
 
 export const RecommendationsPage: React.FC<RecommendationsPageProps> = ({ siteId }) => {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState<string | undefined>(undefined);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -30,6 +32,15 @@ export const RecommendationsPage: React.FC<RecommendationsPageProps> = ({ siteId
 
   return (
     <div className="space-y-6 p-6">
+      <Button 
+        variant="ghost" 
+        onClick={() => navigate(`/resource-optimization/${siteId}`)} 
+        className="mb-4 gap-2"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to Dashboard
+      </Button>
+      
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">💡 Recommendations</h1>

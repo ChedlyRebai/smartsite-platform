@@ -226,9 +226,8 @@
     "purpose": "unknown",
     "exports": [],
     "imports": [
-      "@nestjs/core",
-      "@nestjs/platform-fastify",
-      "compression"
+      "@nestjs/swagger",
+      "@nestjs/core"
     ]
   },
   "apps\\backend\\gestion-planing\\src\\milestone\\dto\\create-milestone.dto.ts": {
@@ -256,7 +255,6 @@
       "MilestoneSchema"
     ],
     "imports": [
-      "@/task/entities/task.entity",
       "@nestjs/mongoose",
       "mongoose"
     ]
@@ -282,8 +280,7 @@
     ],
     "imports": [
       "@nestjs/common",
-      "@nestjs/mongoose",
-      "@/task/entities/task.entity"
+      "@nestjs/mongoose"
     ]
   },
   "apps\\backend\\gestion-planing\\src\\milestone\\milestone.service.spec.ts": {
@@ -301,8 +298,7 @@
     "imports": [
       "@nestjs/common",
       "@nestjs/mongoose",
-      "mongoose",
-      "@/task/entities/task.entity"
+      "mongoose"
     ]
   },
   "apps\\backend\\gestion-planing\\src\\StatusEnum.ts": {
@@ -316,7 +312,6 @@
       "CreateTaskDto"
     ],
     "imports": [
-      "@/StatusEnum",
       "class-validator"
     ]
   },
@@ -336,7 +331,6 @@
       "TaskSchema"
     ],
     "imports": [
-      "@/StatusEnum",
       "@nestjs/mongoose",
       "mongoose"
     ]
@@ -358,10 +352,7 @@
     "exports": [
       "TaskController"
     ],
-    "imports": [
-      "@/auth/jwt.guard/jwt.guard",
-      "@/auth/get-user.decorator"
-    ]
+    "imports": []
   },
   "apps\\backend\\gestion-planing\\src\\task\\task.module.ts": {
     "purpose": "unknown",
@@ -371,15 +362,18 @@
     "imports": [
       "@nestjs/common",
       "@nestjs/mongoose",
-      "@/milestone/entities/milestone.entity",
-      "@/task-stage/entities/TaskStage.entities"
+      "@nestjs/microservices"
     ]
   },
   "apps\\backend\\gestion-planing\\src\\task\\task.service.spec.ts": {
     "purpose": "unknown",
     "exports": [],
     "imports": [
-      "@nestjs/testing"
+      "@nestjs/testing",
+      "@nestjs/mongoose",
+      "@nestjs/microservices",
+      "rxjs",
+      "mongoose"
     ]
   },
   "apps\\backend\\gestion-planing\\src\\task\\task.service.ts": {
@@ -391,10 +385,8 @@
       "@nestjs/common",
       "@nestjs/mongoose",
       "mongoose",
-      "@/task/entities/task.entity",
-      "@/milestone/entities/milestone.entity",
-      "@/task-stage/entities/TaskStage.entities",
-      "console"
+      "@nestjs/microservices",
+      "rxjs"
     ]
   },
   "apps\\backend\\gestion-planing\\src\\task-stage\\entities\\TaskStage.entities.ts": {
@@ -404,7 +396,6 @@
       "TaskStageSchema"
     ],
     "imports": [
-      "@/StatusEnum",
       "@nestjs/mongoose",
       "mongoose"
     ]
@@ -430,10 +421,7 @@
     ],
     "imports": [
       "@nestjs/common",
-      "@/task/task.module",
-      "@/milestone/milestone.module",
-      "@nestjs/mongoose",
-      "@/task/entities/task.entity"
+      "@nestjs/mongoose"
     ]
   },
   "apps\\backend\\gestion-planing\\src\\task-stage\\task-stage.service.spec.ts": {
@@ -449,8 +437,6 @@
       "TaskStageService"
     ],
     "imports": [
-      "@/milestone/entities/milestone.entity",
-      "@/task/entities/task.entity",
       "@nestjs/common",
       "@nestjs/mongoose",
       "mongoose"
@@ -554,7 +540,8 @@
     "imports": [
       "@nestjs/mongoose",
       "mongoose",
-      "@nestjs/common"
+      "@nestjs/common",
+      "axios"
     ]
   },
   "apps\\backend\\gestion-site\\src\\app.module.ts": {
@@ -583,6 +570,7 @@
     ],
     "imports": [
       "@nestjs/common",
+      "@nestjs/config",
       "@nestjs/mongoose"
     ]
   },
@@ -672,7 +660,8 @@
       "AppModule"
     ],
     "imports": [
-      "@nestjs/common"
+      "@nestjs/common",
+      "@nestjs/config"
     ]
   },
   "apps\\backend\\materials-service\\src\\app.service.ts": {
@@ -1069,7 +1058,9 @@
     "purpose": "unknown",
     "exports": [],
     "imports": [
-      "@nestjs/core"
+      "@nestjs/core",
+      "@nestjs/microservices",
+      "@nestjs/common"
     ]
   },
   "apps\\backend\\notification\\src\\notification\\notification.controller.spec.ts": {
@@ -1097,8 +1088,8 @@
     ],
     "imports": [
       "@nestjs/common",
-      "@nestjs/mongoose",
-      "src/entities/notification.entity"
+      "src/entities/notification.entity",
+      "@nestjs/mongoose"
     ]
   },
   "apps\\backend\\notification\\src\\notification\\notification.service.spec.ts": {
@@ -1999,7 +1990,6 @@
     ],
     "imports": [
       "@nestjs/common",
-      "src/auth/guards/jwt-auth.guard",
       "@nestjs/platform-express",
       "multer",
       "path",
@@ -2014,10 +2004,7 @@
     "imports": [
       "@nestjs/common",
       "@nestjs/config",
-      "@nestjs/mongoose",
-      "src/users/users.module",
-      "src/teams/teams.module",
-      "src/roles/roles.module"
+      "@nestjs/mongoose"
     ]
   },
   "apps\\backend\\user-authentication\\src\\chatbot\\chatbot.service.ts": {
@@ -2034,10 +2021,7 @@
       "fs",
       "form-data",
       "sharp",
-      "path",
-      "src/users/users.service",
-      "src/teams/teams.service",
-      "src/roles/roles.service"
+      "path"
     ]
   },
   "apps\\backend\\user-authentication\\src\\chatbot\\dto\\chatbot.dto.ts": {
@@ -2103,6 +2087,7 @@
     "purpose": "unknown",
     "exports": [],
     "imports": [
+      "@nestjs/swagger",
       "@nestjs/core"
     ]
   },
@@ -2469,7 +2454,9 @@
     "purpose": "hook",
     "exports": [],
     "imports": [
-      "@nestjs/testing"
+      "@nestjs/testing",
+      "@nestjs/jwt",
+      "mongoose"
     ]
   },
   "apps\\backend\\user-authentication\\src\\users\\users.controller.ts": {
@@ -2489,8 +2476,7 @@
     "imports": [
       "@nestjs/common",
       "@nestjs/mongoose",
-      "@nestjs/jwt",
-      "src/roles/entities/role.entity"
+      "@nestjs/jwt"
     ]
   },
   "apps\\backend\\user-authentication\\src\\users\\users.service.spec.ts": {
@@ -2498,7 +2484,11 @@
     "exports": [],
     "imports": [
       "@nestjs/testing",
-      "@nestjs/mongoose"
+      "@nestjs/mongoose",
+      "@nestjs/common",
+      "mongoose",
+      "bcrypt",
+      "@jest/globals"
     ]
   },
   "apps\\backend\\user-authentication\\src\\users\\users.service.ts": {
@@ -2529,7 +2519,8 @@
       "getPermissions"
     ],
     "imports": [
-      "axios"
+      "axios",
+      "@/lib/auth-api-url"
     ]
   },
   "apps\\frontend\\src\\app\\action\\audit.action.ts": {
@@ -2550,7 +2541,8 @@
       "getCurrentUser"
     ],
     "imports": [
-      "axios"
+      "axios",
+      "@/lib/api-client"
     ]
   },
   "apps\\frontend\\src\\app\\action\\catalog.action.ts": {
@@ -2578,7 +2570,10 @@
       "getChatbotConversations",
       "submitChatbotFeedback",
       "getSuggestedQuestions",
-      "deleteChatbotConversation"
+      "deleteChatbotConversation",
+      "restoreChatbotConversation",
+      "permanentlyDeleteConversation",
+      "getArchivedConversations"
     ],
     "imports": [
       "axios",
@@ -2630,6 +2625,7 @@
     "purpose": "unknown",
     "exports": [
       "getMilestonesByProjectId",
+      "getMilestoneById",
       "createMilestone",
       "updateMilestone",
       "deleteMilestone"
@@ -2642,9 +2638,14 @@
     "purpose": "unknown",
     "exports": [
       "getMyNotifications",
+      "getTeamNotifications",
       "getUnreadNotifications",
       "getReadNotifications",
-      "getUnreadNotificationCount"
+      "getTeamUnreadNotifications",
+      "getUnreadNotificationCount",
+      "getTeamUnreadNotificationCount",
+      "markTeamNotificationsAsRead",
+      "deleteNotificationById"
     ],
     "imports": [
       "@/lib/api-client",
@@ -2663,7 +2664,8 @@
       "getMynavigationAccess"
     ],
     "imports": [
-      "axios"
+      "axios",
+      "@/lib/auth-api-url"
     ]
   },
   "apps\\frontend\\src\\app\\action\\planing.action.ts": {
@@ -2716,12 +2718,15 @@
       "removePermissionFromRole"
     ],
     "imports": [
+      "@/lib/auth-api-url",
       "axios"
     ]
   },
   "apps\\frontend\\src\\app\\action\\site.action.ts": {
     "purpose": "unknown",
     "exports": [
+      "getSiteWIthTEAmId",
+      "fetchMyAffectedSites",
       "fetchSites",
       "fetchSiteById",
       "createSite",
@@ -2746,6 +2751,7 @@
       "getAllStatics"
     ],
     "imports": [
+      "@/lib/auth-api-url",
       "axios"
     ]
   },
@@ -2812,8 +2818,10 @@
   "apps\\frontend\\src\\app\\action\\synced-project.action.ts": {
     "purpose": "unknown",
     "exports": [
+      "gestionProjectsApi",
       "getAllProjectsForSuperAdmin",
       "getUrgentTasks",
+      "getProjectsWithSites",
       "getAllSites",
       "getAllTeamMembers",
       "getSyncedProjectsWithDetails",
@@ -2831,8 +2839,11 @@
       "updateTask",
       "deleteTask",
       "getCurrentUserTask",
+      "getTaskByTeamid",
       "getAllTaskStagesByMilestoneId",
-      "getTaskSTagesByMilestoneId"
+      "getTaskSTagesByMilestoneId",
+      "getGanttTasksByMilestoneId",
+      "getMyTAsks"
     ],
     "imports": [
       "@/lib/api-client"
@@ -2842,6 +2853,9 @@
     "purpose": "unknown",
     "exports": [
       "getAllTaskStages",
+      "getTaskStagesByMilestoneId",
+      "getTaskStageById",
+      "removeTaskStage",
       "createTaskStage",
       "updateTaskStage"
     ],
@@ -2863,6 +2877,7 @@
       "assignSiteToTeam"
     ],
     "imports": [
+      "@/lib/auth-api-url",
       "axios"
     ]
   },
@@ -2877,12 +2892,20 @@
       "assignRoleToUser",
       "removeRoleFromUser",
       "banUser",
+      "getCuureentUser",
       "getAllClients",
       "createClient",
+      "assignManager",
+      "modifyManager",
       "updateClient",
-      "deleteClient"
+      "getUserManager",
+      "setUserResponsibilities",
+      "getUsersBySite",
+      "assignUserToSite",
+      "removeUserFromSite"
     ],
     "imports": [
+      "@/lib/api-client",
       "axios"
     ]
   },
@@ -2931,7 +2954,7 @@
     ],
     "imports": [
       "react",
-      "lucide-react"
+      "react-router"
     ]
   },
   "apps\\frontend\\src\\app\\components\\DashboardStats.tsx": {
@@ -3009,7 +3032,8 @@
       "@/app/action/permission.action",
       "@/app/action/role.action",
       "@/app/hooks/use-role-permissions-modal",
-      "@/components/ui/field"
+      "@/components/ui/field",
+      "@tanstack/react-query"
     ]
   },
   "apps\\frontend\\src\\app\\components\\forms\\TaskForms.tsx": {
@@ -3029,9 +3053,11 @@
       "react-router",
       "@tanstack/react-query",
       "@/app/action/taskStage.action",
-      "@/app/action/task.actions",
       "lucide-react",
-      "@/app/hooks/use-task-stage-modal"
+      "@/app/hooks/use-task-stage-modal",
+      "@/app/action/milestone.action",
+      "@/app/action/team.action",
+      "axios"
     ]
   },
   "apps\\frontend\\src\\app\\components\\forms\\TaskStageForm.tsx": {
@@ -3063,7 +3089,8 @@
       "@/app/action/role.action",
       "@/app/action/user.action",
       "@/app/types",
-      "@/app/hooks/use-user-Modal"
+      "@/app/hooks/use-user-Modal",
+      "@tanstack/react-query"
     ]
   },
   "apps\\frontend\\src\\app\\components\\shared\\Modals\\AddMilestoneModal.tsx": {
@@ -3155,7 +3182,15 @@
     ],
     "imports": [
       "@/app/hooks/use-task-details-modal",
-      "react"
+      "react",
+      "@/components/ui/button",
+      "@/app/components/ui/badge",
+      "@/app/action/planing.action",
+      "@/app/hooks/use-task-modal",
+      "@tanstack/react-query",
+      "react-hot-toast",
+      "@/app/action/task.actions",
+      "@/app/action/team.action"
     ]
   },
   "apps\\frontend\\src\\app\\components\\shared\\Modals\\UserDetailsModal.tsx": {
@@ -4040,7 +4075,8 @@
       "zod",
       "lucide-react",
       "react-hot-toast",
-      "axios"
+      "axios",
+      "@/lib/auth-api-url"
     ]
   },
   "apps\\frontend\\src\\app\\pages\\auth\\ForgotPassword.tsx": {
@@ -4100,7 +4136,8 @@
       "@/app/components/branding/SmartSiteLogo",
       "@/app/utils/roleConfig",
       "@/app/hooks/useTranslation",
-      "@/app/types"
+      "@/app/types",
+      "@/app/utils/countriesData"
     ]
   },
   "apps\\frontend\\src\\app\\pages\\auth\\ResetPassword.tsx": {
@@ -4397,7 +4434,9 @@
     "exports": [
       "default"
     ],
-    "imports": []
+    "imports": [
+      "@/app/hooks/useTranslation"
+    ]
   },
   "apps\\frontend\\src\\app\\pages\\Error\\NotFound.tsx": {
     "purpose": "component",
@@ -4607,9 +4646,11 @@
       "default"
     ],
     "imports": [
-      "lucide-react",
+      "react",
       "sonner",
       "@tanstack/react-query",
+      "@/app/action/auth.action",
+      "@/app/store/authStore",
       "@/app/hooks/useTranslation"
     ]
   },
@@ -4651,9 +4692,14 @@
       "default"
     ],
     "imports": [
+      "@/app/action/task.actions",
+      "@/components/ui/button",
+      "@/app/hooks/use-task-modal",
+      "lucide-react",
       "@svar-ui/react-gantt",
+      "@tanstack/react-query",
       "react",
-      "@/lib/planning-gantt-api"
+      "react-router"
     ]
   },
   "apps\\frontend\\src\\app\\pages\\planning\\MilestoneTasks.tsx": {
@@ -4690,16 +4736,21 @@
       "react",
       "react-dom",
       "@/components/ui/button",
+      "@/app/components/ui/badge",
       "@/components/ui/input",
       "@/components/ui/skeleton",
       "@/hooks/use-js-loaded",
       "@/components/ui/card",
+      "@/components/ui/tabs",
       "@/app/types",
       "@tanstack/react-query",
       "react-router",
       "@/app/hooks/use-task-modal",
+      "@/app/hooks/use-task-details-modal",
       "@/app/action/task.actions",
-      "@/app/hooks/use-task-stage-modal"
+      "@/app/hooks/use-task-stage-modal",
+      "@/app/action/taskStage.action",
+      "react-hot-toast"
     ]
   },
   "apps\\frontend\\src\\app\\pages\\planning\\MyTask.tsx": {
@@ -4715,7 +4766,6 @@
       "@/components/ui/button",
       "@/components/ui/input",
       "@/components/ui/skeleton",
-      "zod",
       "@/hooks/use-js-loaded",
       "@/components/ui/card",
       "@/app/types",
@@ -4723,10 +4773,10 @@
       "@/app/action/planing.action",
       "react-router",
       "@/app/hooks/use-task-modal",
-      "zod/v4/locales",
-      "@/app/hooks/use-task-details-modal",
-      "@/app/store/authStore",
-      "@/app/action/task.actions"
+      "@/app/hooks/use-task-stage-modal",
+      "@/app/action/taskStage.action",
+      "react-hot-toast",
+      "@/app/action/user.action"
     ]
   },
   "apps\\frontend\\src\\app\\pages\\planning\\PLaningProjects.tsx": {
@@ -4779,7 +4829,8 @@
       "react-hot-toast",
       "axios",
       "@/app/action/auth.action",
-      "@/app/hooks/useTranslation"
+      "@/app/hooks/useTranslation",
+      "@/lib/auth-api-url"
     ]
   },
   "apps\\frontend\\src\\app\\pages\\projects\\Projects.tsx": {
@@ -4790,6 +4841,8 @@
     "imports": [
       "lucide-react",
       "react",
+      "react-router",
+      "axios",
       "sonner"
     ]
   },
@@ -4819,6 +4872,8 @@
     ],
     "imports": [
       "react",
+      "react-router",
+      "axios",
       "lucide-react",
       "sonner",
       "react-leaflet",
@@ -5033,7 +5088,6 @@
       "react-router",
       "react-hot-toast",
       "@/app/types",
-      "@/app/action/role.action",
       "@/app/action/user.action",
       "@/app/action/statiscs.action",
       "@/app/hooks/use-permission-Modal",
@@ -5132,6 +5186,9 @@
   "apps\\frontend\\src\\app\\types\\index.ts": {
     "purpose": "types",
     "exports": [
+      "THEMES",
+      "LANGUAGES",
+      "LANGUAGE_TO_FLAG",
       "KANBAN_BOARD_CIRCLE_COLORS_MAP"
     ],
     "imports": []
@@ -5200,9 +5257,7 @@
     "purpose": "utility",
     "exports": [
       "roleLabels",
-      "navigationItems",
-      "getNavigationForRole",
-      "canAccessRoute"
+      "navigationItems"
     ],
     "imports": [
       "zod"
@@ -6146,6 +6201,1033 @@
   "apps\\frontend\\src\\app\\pages\\auth\\Register_backup.tsx": {
     "purpose": "component",
     "exports": [],
+    "imports": []
+  },
+  "apps\\backend\\gestion-planing\\src\\chat\\chat.controller.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ChatController"
+    ],
+    "imports": [
+      "@nestjs/common"
+    ]
+  },
+  "apps\\backend\\gestion-planing\\src\\chat\\chat.module.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ChatModule"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/config"
+    ]
+  },
+  "apps\\backend\\gestion-planing\\src\\chat\\chat.service.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ChatService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/config",
+      "openai"
+    ]
+  },
+  "apps\\backend\\gestion-planing\\src\\task\\dto\\affected-notification-event.dto.ts": {
+    "purpose": "unknown",
+    "exports": [],
+    "imports": []
+  },
+  "apps\\backend\\gestion-planing\\src\\task\\entities\\TaskPriorityEnum.ts": {
+    "purpose": "unknown",
+    "exports": [],
+    "imports": []
+  },
+  "apps\\backend\\gestion-projects\\src\\app.module.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "AppModule"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/config",
+      "@nestjs/mongoose"
+    ]
+  },
+  "apps\\backend\\gestion-projects\\src\\chat\\chat.controller.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ChatController"
+    ],
+    "imports": [
+      "@nestjs/common"
+    ]
+  },
+  "apps\\backend\\gestion-projects\\src\\chat\\chat.module.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ChatModule"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/config"
+    ]
+  },
+  "apps\\backend\\gestion-projects\\src\\chat\\chat.service.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ChatService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/config",
+      "openai"
+    ]
+  },
+  "apps\\backend\\gestion-projects\\src\\main.ts": {
+    "purpose": "unknown",
+    "exports": [],
+    "imports": [
+      "@nestjs/core",
+      "@nestjs/common"
+    ]
+  },
+  "apps\\backend\\gestion-projects\\src\\projects\\dto\\project.dto.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "CreateProjectDto",
+      "UpdateProjectDto",
+      "ProjectFilterDto"
+    ],
+    "imports": [
+      "class-validator"
+    ]
+  },
+  "apps\\backend\\gestion-projects\\src\\projects\\entities\\project.entity.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "Project",
+      "ProjectSchema"
+    ],
+    "imports": [
+      "@nestjs/mongoose",
+      "mongoose"
+    ]
+  },
+  "apps\\backend\\gestion-projects\\src\\projects\\projects.controller.spec.ts": {
+    "purpose": "unknown",
+    "exports": [],
+    "imports": [
+      "@nestjs/testing"
+    ]
+  },
+  "apps\\backend\\gestion-projects\\src\\projects\\projects.controller.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ProjectsController"
+    ],
+    "imports": [
+      "express"
+    ]
+  },
+  "apps\\backend\\gestion-projects\\src\\projects\\projects.module.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ProjectsModule"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/mongoose"
+    ]
+  },
+  "apps\\backend\\gestion-projects\\src\\projects\\projects.service.spec.ts": {
+    "purpose": "unknown",
+    "exports": [],
+    "imports": [
+      "@nestjs/testing",
+      "@nestjs/mongoose",
+      "@nestjs/common"
+    ]
+  },
+  "apps\\backend\\gestion-projects\\src\\projects\\projects.service.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ProjectsService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/mongoose",
+      "mongoose",
+      "jspdf",
+      "jspdf-autotable",
+      "axios"
+    ]
+  },
+  "apps\\backend\\gestion-site\\src\\chat\\chat.controller.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ChatController"
+    ],
+    "imports": [
+      "@nestjs/common"
+    ]
+  },
+  "apps\\backend\\gestion-site\\src\\chat\\chat.module.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ChatModule"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/config"
+    ]
+  },
+  "apps\\backend\\gestion-site\\src\\chat\\chat.service.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ChatService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/config",
+      "openai"
+    ]
+  },
+  "apps\\backend\\gestion-site\\src\\gestion-site.controller.spec.ts": {
+    "purpose": "unknown",
+    "exports": [],
+    "imports": [
+      "@nestjs/testing"
+    ]
+  },
+  "apps\\backend\\gestion-site\\src\\gestion-site.service.spec.ts": {
+    "purpose": "unknown",
+    "exports": [],
+    "imports": [
+      "@nestjs/testing",
+      "@nestjs/mongoose",
+      "@nestjs/common"
+    ]
+  },
+  "apps\\backend\\gestion-suppliers\\src\\chat\\chat.controller.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ChatController"
+    ],
+    "imports": [
+      "@nestjs/common"
+    ]
+  },
+  "apps\\backend\\gestion-suppliers\\src\\chat\\chat.module.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ChatModule"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/config"
+    ]
+  },
+  "apps\\backend\\gestion-suppliers\\src\\chat\\chat.service.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ChatService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/config",
+      "openai"
+    ]
+  },
+  "apps\\backend\\incident-management\\src\\chat\\chat.controller.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ChatController"
+    ],
+    "imports": [
+      "@nestjs/common"
+    ]
+  },
+  "apps\\backend\\incident-management\\src\\chat\\chat.module.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ChatModule"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/config"
+    ]
+  },
+  "apps\\backend\\incident-management\\src\\chat\\chat.service.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ChatService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/config",
+      "openai"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\chat\\chat.controller.ts": {
+    "purpose": "service",
+    "exports": [
+      "ChatController"
+    ],
+    "imports": [
+      "@nestjs/common"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\chat\\chat.module.ts": {
+    "purpose": "service",
+    "exports": [
+      "ChatModule"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/config"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\chat\\chat.service.ts": {
+    "purpose": "service",
+    "exports": [
+      "ChatService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/config",
+      "openai"
+    ]
+  },
+  "apps\\backend\\notification\\src\\chat\\chat.controller.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ChatController"
+    ],
+    "imports": [
+      "@nestjs/common"
+    ]
+  },
+  "apps\\backend\\notification\\src\\chat\\chat.module.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ChatModule"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/config"
+    ]
+  },
+  "apps\\backend\\notification\\src\\chat\\chat.service.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ChatService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/config",
+      "openai"
+    ]
+  },
+  "apps\\backend\\notification\\src\\notification\\dto\\affected-event.dto.ts": {
+    "purpose": "unknown",
+    "exports": [],
+    "imports": []
+  },
+  "apps\\backend\\notification\\src\\notification\\notification-events.controller.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "NotificationEventsController"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/microservices",
+      "src/entities/notification.entity"
+    ]
+  },
+  "apps\\backend\\paiement\\src\\chat\\chat.controller.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ChatController"
+    ],
+    "imports": [
+      "@nestjs/common"
+    ]
+  },
+  "apps\\backend\\paiement\\src\\chat\\chat.module.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ChatModule"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/config"
+    ]
+  },
+  "apps\\backend\\paiement\\src\\chat\\chat.service.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ChatService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/config",
+      "openai"
+    ]
+  },
+  "apps\\backend\\resource-optimization\\src\\chat\\chat.controller.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ChatController"
+    ],
+    "imports": [
+      "@nestjs/common"
+    ]
+  },
+  "apps\\backend\\resource-optimization\\src\\chat\\chat.module.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ChatModule"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/config"
+    ]
+  },
+  "apps\\backend\\resource-optimization\\src\\chat\\chat.service.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ChatService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/config",
+      "openai"
+    ]
+  },
+  "apps\\backend\\user-authentication\\src\\ai-chat\\ai-chat.controller.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "AiChatController"
+    ],
+    "imports": [
+      "@nestjs/common"
+    ]
+  },
+  "apps\\backend\\user-authentication\\src\\ai-chat\\ai-chat.module.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "AiChatModule"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/config"
+    ]
+  },
+  "apps\\backend\\user-authentication\\src\\ai-chat\\ai-chat.service.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "AiChatService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/config",
+      "openai"
+    ]
+  },
+  "apps\\backend\\user-authentication\\src\\auth\\dto\\JwtPayload.ts": {
+    "purpose": "unknown",
+    "exports": [],
+    "imports": []
+  },
+  "apps\\backend\\user-authentication\\src\\auth\\strategies\\get-user.decorator.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "GetUser"
+    ],
+    "imports": [
+      "@nestjs/common"
+    ]
+  },
+  "apps\\backend\\user-authentication\\src\\lib\\stream.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "upsertStreamUser",
+      "generateStreamToken"
+    ],
+    "imports": [
+      "stream-chat"
+    ]
+  },
+  "apps\\backend\\user-authentication\\src\\permissions\\permissions.seed.service.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "PermissionsSeedService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/mongoose",
+      "mongoose"
+    ]
+  },
+  "apps\\backend\\videocall\\src\\controllers\\auth.controller.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "signup",
+      "login",
+      "logout",
+      "onboard"
+    ],
+    "imports": [
+      "jsonwebtoken"
+    ]
+  },
+  "apps\\backend\\videocall\\src\\controllers\\chat.controller.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "getStreamToken"
+    ],
+    "imports": []
+  },
+  "apps\\backend\\videocall\\src\\controllers\\user.controller.ts": {
+    "purpose": "hook",
+    "exports": [
+      "getRecommendedUsers",
+      "getMyFriends",
+      "sendFriendRequest",
+      "acceptFriendRequest",
+      "getFriendRequests",
+      "getOutgoingFriendReqs"
+    ],
+    "imports": []
+  },
+  "apps\\backend\\videocall\\src\\lib\\db.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "connectDB"
+    ],
+    "imports": [
+      "mongoose"
+    ]
+  },
+  "apps\\backend\\videocall\\src\\lib\\stream.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "upsertStreamUser",
+      "generateStreamToken"
+    ],
+    "imports": [
+      "stream-chat"
+    ]
+  },
+  "apps\\backend\\videocall\\src\\middleware\\auth.middleware.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "protectRoute",
+      "protectRouteForChatToken"
+    ],
+    "imports": [
+      "jsonwebtoken"
+    ]
+  },
+  "apps\\backend\\videocall\\src\\models\\FriendRequest.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "mongoose"
+    ]
+  },
+  "apps\\backend\\videocall\\src\\models\\User.ts": {
+    "purpose": "hook",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "mongoose",
+      "bcryptjs"
+    ]
+  },
+  "apps\\backend\\videocall\\src\\routes\\auth.route.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "express"
+    ]
+  },
+  "apps\\backend\\videocall\\src\\routes\\chat.route.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "express"
+    ]
+  },
+  "apps\\backend\\videocall\\src\\routes\\user.route.ts": {
+    "purpose": "hook",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "express"
+    ]
+  },
+  "apps\\backend\\videocall\\src\\server.ts": {
+    "purpose": "unknown",
+    "exports": [],
+    "imports": [
+      "express",
+      "cookie-parser",
+      "cors",
+      "path"
+    ]
+  },
+  "apps\\frontend\\src\\app\\action\\ai-chat.action.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "detectBestService",
+      "sendToDetectedService",
+      "sendToService",
+      "sendToAllServices",
+      "SERVICES"
+    ],
+    "imports": [
+      "axios"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\shared\\RoutePermissionGuard.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "@/app/action/permission.action",
+      "@/app/store/authStore",
+      "@/app/types",
+      "@tanstack/react-query",
+      "react",
+      "react-router"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\videoCall\\CallButton.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "lucide-react"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\videoCall\\ChatLoader.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "lucide-react"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\videoCall\\FriendCard.tsx": {
+    "purpose": "component",
+    "exports": [
+      "getLanguageFlag",
+      "default"
+    ],
+    "imports": [
+      "@/app/types",
+      "react-router"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\videoCall\\Layout.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": []
+  },
+  "apps\\frontend\\src\\app\\components\\videoCall\\Navbar.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react-router",
+      "lucide-react",
+      "@/app/hooks/videoCAllHooks/useAuthUser",
+      "@/app/hooks/videoCAllHooks/useLogout"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\videoCall\\NoFriendsFound.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": []
+  },
+  "apps\\frontend\\src\\app\\components\\videoCall\\NoNotificationsFound.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "lucide-react"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\videoCall\\PageLoader.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "@/app/store/themeStore",
+      "lucide-react"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\videoCall\\Sidebar.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react-router",
+      "lucide-react",
+      "@/app/hooks/videoCAllHooks/useAuthUser"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\videoCall\\ThemeSelector.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "@/app/store/themeStore",
+      "@/app/types",
+      "lucide-react"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\AccountBanned.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": []
+  },
+  "apps\\frontend\\src\\app\\pages\\planning\\MyAffectedSite.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "@/app/action/site.action",
+      "@tanstack/react-query",
+      "lucide-react",
+      "react",
+      "react-router"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\planning\\MyMilstone.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "@/app/action/site.action",
+      "@tanstack/react-query",
+      "lucide-react",
+      "react",
+      "react-router",
+      "@/app/action/milestone.action",
+      "@/app/hooks/use-milestone-modal"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\planning\\Mysites.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "@tanstack/react-query",
+      "lucide-react",
+      "react",
+      "react-router",
+      "@/app/action/user.action"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\sites\\SitesTable.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "lucide-react",
+      "sonner"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\suppliers-new\\AddSupplier.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "react-router",
+      "sonner"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\suppliers-new\\EditSupplier.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "react-router",
+      "sonner"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\suppliers-new\\QhseSupplierValidation.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "react-router",
+      "sonner"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\suppliers-new\\SupplierDetail.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "react-router",
+      "sonner"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\suppliers-new\\SuppliersList.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "react-router",
+      "sonner"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\team\\MyTeamMembers.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "@tanstack/react-query",
+      "react-router",
+      "@/app/action/dashboard.action"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\videoCall\\CallPage.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "react-router",
+      "@tanstack/react-query",
+      "react-hot-toast",
+      "@/lib/videocall/api",
+      "@/lib/videocall/stream",
+      "@/app/components/videoCall/PageLoader",
+      "@/app/store/authStore"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\videoCall\\ChatPage.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "react-router",
+      "@tanstack/react-query",
+      "stream-chat",
+      "react-hot-toast",
+      "@/app/store/authStore",
+      "@/lib/videocall/api",
+      "@/lib/videocall/stream",
+      "@/app/components/videoCall/ChatLoader",
+      "@/app/components/videoCall/CallButton"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\videoCall\\GroupChatPage.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "react-router",
+      "@tanstack/react-query",
+      "stream-chat",
+      "lucide-react",
+      "react-hot-toast",
+      "@/lib/videocall/api",
+      "@/lib/videocall/stream",
+      "@/app/components/videoCall/ChatLoader",
+      "@/app/store/authStore"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\videoCall\\HomePage.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "@tanstack/react-query",
+      "react",
+      "react-router",
+      "lucide-react",
+      "@/app/components/videoCall/FriendCard",
+      "@/app/components/videoCall/NoFriendsFound",
+      "@/lib/videocall/api",
+      "@/lib/videocall/utils"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\videoCall\\LoginPage.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "lucide-react",
+      "react-router",
+      "@/app/hooks/videoCAllHooks/useLogin"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\videoCall\\NotificationsPage.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "@/app/components/videoCall/NoNotificationsFound",
+      "@/lib/videocall/api",
+      "@tanstack/react-query",
+      "lucide-react"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\videoCall\\OnboardingPage.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "@tanstack/react-query",
+      "react-hot-toast",
+      "lucide-react",
+      "@/app/hooks/videoCAllHooks/useAuthUser",
+      "@/lib/videocall/api",
+      "@/app/types"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\videoCall\\SignUpPage.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "lucide-react",
+      "react-router",
+      "@/app/hooks/videoCAllHooks/useSignUp"
+    ]
+  },
+  "apps\\frontend\\src\\app\\store\\useThemeStore.ts": {
+    "purpose": "hook",
+    "exports": [
+      "useThemeStore"
+    ],
+    "imports": [
+      "zustand"
+    ]
+  },
+  "apps\\frontend\\src\\app\\utils\\countriesData.ts": {
+    "purpose": "utility",
+    "exports": [
+      "countries",
+      "getCountryByValue",
+      "getCountryLabel",
+      "getCountryLabelWithCode",
+      "getCountryFlag"
+    ],
+    "imports": []
+  },
+  "apps\\frontend\\src\\app\\utils\\permissionModules.ts": {
+    "purpose": "utility",
+    "exports": [
+      "groupPermissionsByModule"
+    ],
+    "imports": []
+  },
+  "apps\\frontend\\src\\lib\\gestion-projects-api-url.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "GESTION_PROJECTS_API_URL"
+    ],
+    "imports": []
+  },
+  "apps\\frontend\\src\\lib\\videocall\\api.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "signup",
+      "login",
+      "logout",
+      "getAuthUser",
+      "completeOnboarding",
+      "getUserFriends",
+      "getRecommendedUsers",
+      "getOutgoingFriendReqs",
+      "sendFriendRequest",
+      "getFriendRequests",
+      "acceptFriendRequest",
+      "getStreamToken"
+    ],
+    "imports": []
+  },
+  "apps\\frontend\\src\\lib\\videocall\\axios.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "axiosInstance"
+    ],
+    "imports": [
+      "@/app/store/authStore",
+      "axios"
+    ]
+  },
+  "apps\\frontend\\src\\lib\\videocall\\stream.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "extractStreamUserIdFromToken"
+    ],
+    "imports": []
+  },
+  "apps\\frontend\\src\\lib\\videocall\\utils.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "capitialize"
+    ],
     "imports": []
   }
 }

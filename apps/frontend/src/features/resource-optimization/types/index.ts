@@ -6,11 +6,21 @@ const GESTION_SITE_URL = (import.meta as any).env?.VITE_GESTION_SITE_URL || 'htt
 const AUTH_API_URL = (import.meta as any).env?.VITE_AUTH_API_URL || 'http://localhost:3000';
 const PLANNING_URL = (import.meta as any).env?.VITE_PLANNING_URL || 'http://localhost:3002';
 
+// ============ UTILITY FUNCTIONS ============
+
+/**
+ * Normalize site ID - handles both _id and id fields
+ */
+export const getSiteId = (site: any): string => {
+  return site?._id || site?.id || '';
+};
+
 // ============ EXTERNAL API TYPES ============
 
 // Types from gestion-site (port 3001)
 export interface Site {
-  _id: string;
+  _id?: string;
+  id?: string; // Some APIs return id instead of _id
   nom: string;
   localisation: string;
   description?: string;
