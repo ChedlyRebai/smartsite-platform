@@ -31,14 +31,14 @@ const MySItes = () => {
   console.log("***********************************************user)", user);
 
   const { data: sites } = useQuery({
-    queryKey: ["fetchSitesByUserId", user?.assignedTeam],
-    queryFn: () => getSiteWIthTEAmId(user?.assignedTeam[0]),
-    enabled: Boolean(user?.assignedTeam?.[0]),
+    queryKey: ["fetchSitesByUserId", user?.data.assignedTeam],
+    queryFn: () => getSiteWIthTEAmId(user?.data.assignedTeam[0]),
+    enabled: Boolean(user?.data.assignedTeam?.[0]),
   });
 
 
 
-  console.log(sites);
+  console.log(sites,"************************************");
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">

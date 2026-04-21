@@ -1,136 +1,214 @@
-import { useMemo } from "react";
-import { Link } from "react-router";
-import { Shield, Users, Lock } from "lucide-react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
+import { Shield, Users as UsersIcon, Lock } from "lucide-react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
-import { Badge } from "@/app/components/ui/badge";
-import { Button } from "@/app/components/ui/button";
-import { getAllRoles } from "@/app/action/role.action";
-import { deleteRole } from "@/app/action/role.action";
-import { getAllPermissions } from "@/app/action/permission.action";
-import { RolesDataTable } from "@/app/pages/users/_components/roles-data-table";
-import AddRoleModal from "@/app/components/shared/Modals/AddRoleModal";
-import RolePermissionsModal from "@/app/components/shared/Modals/RolePermissionsModal";
-import type { Permission, Role } from "@/app/types";
+import { useState, useEffect } from "react";
 
-function toArray<T>(value: unknown): T[] {
-  if (Array.isArray(value)) {
-    return value;
-  }
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { useAuthStore } from "../../store/authStore";
+import { canEdit } from "../../utils/permissions";
+import { data, useNavigate } from "react-router";
+import { toast } from "react-hot-toast";
+import { Permission, Role, User } from "@/app/types";
 
-  if (value && typeof value === "object" && Array.isArray((value as { data?: unknown }).data)) {
-    return (value as { data: T[] }).data;
-  }
+import {
+  getAllRoles,
+  deleteRole,
+} from "@/app/action/role.action";
+import { getAllStatics } from "@/app/action/statiscs.action";
+import useRoleModal from "@/app/hooks/use-role-Modal";
+import { useQuery } from "@tanstack/react-query";
+import Forbidden from "../Error/Forbidden";
+import { usePermissionStore } from "@/app/hooks/permission.store";
 
-  return [];
-}
+import { useTranslation } from "@/app/hooks/useTranslation";
+import { RolesDataTable } from "../users/_components/roles-data-table";
 
 export default function RolesPage() {
-  const queryClient = useQueryClient();
+  const user = useAuthStore((state) => state.user);
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  // Contournement : si le role est null, utiliser un role par défaut
+  const userRole = user?.role || { name: "super_admin" as const };
 
-  const { data: rolesResponse, isLoading: rolesLoading } = useQuery({
-    queryKey: ["roles"],
-    queryFn: () => getAllRoles(),
+  const [statics, setStatics] = useState({
+    totalRoles: 0,
+    totalUsers: 0,
+    totalPermissions: 0,
   });
 
-  const { data: permissionsResponse, isLoading: permissionsLoading } = useQuery({
-    queryKey: ["permissions"],
-    queryFn: () => getAllPermissions(),
+  useEffect(() => {
+    loadStatics();
+  }, []);
+
+  const { data, isError, error } = useQuery({
+    queryKey: ["statics"],
+    queryFn: () => getAllStatics(),
+    staleTime: Infinity,
   });
 
-  const roles = useMemo(() => toArray<Role>(rolesResponse), [rolesResponse]);
-  const permissions = useMemo(() => toArray<Permission>(permissionsResponse), [permissionsResponse]);
+  useEffect(() => {
+    if (data) {
+      setStatics(data.data);
+    }
+  }, [data]);
 
-  const totalPermissions = permissions.length;
-  const totalAssignedPermissions = roles.reduce((count, role) => {
-    const rolePermissions = Array.isArray(role.permissions) ? role.permissions.length : 0;
-    return count + rolePermissions;
-  }, 0);
 
-  const handleDeleteRole = async (roleId: string) => {
-    const response = await deleteRole(roleId);
-    if (response?.status === 200) {
-      toast.success("Role deleted successfully");
-      queryClient.invalidateQueries({ queryKey: ["roles"] });
-    } else {
-      toast.error(response?.data || "Failed to delete role");
+ 
+  const loadStatics = async () => {
+    try {
+      const response = await getAllStatics();
+      if (response?.status === 200) {
+        setStatics(response.data);
+      }
+    } catch (error) {
+      console.error("Failed to load statics:", error);
     }
   };
 
+  
+ 
+  const { data: roles, isLoading: isRoleLoading } = useQuery({
+    queryKey: ["roles"],
+    queryFn: () => getAllRoles(),
+  });
+  
+  const handleEditRole = (role: Role) => {
+    const { setId, setType, onOpen } = useRoleModal.getState();
+    setId(role._id);
+    setType("edit");
+    onOpen();
+  };
+
+  const handleDeleteRole = async (roleId: string) => {
+    try {
+      const response = await deleteRole(roleId);
+      if (response?.status === 200) {
+        toast.success(
+          t("userManagement.toast.roleDeleted", "Role deleted successfully"),
+        );
+        // loadRoles();
+      } else {
+        toast.error(
+          response?.data ||
+            t("userManagement.toast.failedDeleteRole", "Failed to delete role"),
+        );
+      }
+    } catch (error) {
+      console.error("Failed to delete role:", error);
+      toast.error(
+        t("userManagement.toast.failedDeleteRole", "Failed to delete role"),
+      );
+    }
+  };
+
+  const handleAddNewRole = () => {
+    toast.success("Add new role");
+    // TODO: Implement create dialog
+  };
+
+  
+
+  const access = usePermissionStore((s) => s.permissions);
+ 
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-2">
-          {/* <Badge variant="secondary" className="w-fit gap-2 rounded-full px-3 py-1">
-            <Shield className="h-4 w-4" />
-            Access Control
-          </Badge> */}
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Roles</h1>
-            <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-              Create and manage roles, then attach permissions to keep access rules consistent across the platform.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap gap-3">
-          <Button asChild variant="outline">
-            <Link to="/users/permissions">
-              <Lock className="mr-2 h-4 w-4" />
-              Open Permissions
-            </Link>
-          </Button>
-        </div>
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white dark:text-white">
+          {t("userManagement.title", "User Management")}
+        </h1>
+        <p className="text-gray-500 mt-1">
+          {t(
+            "userManagement.subtitle",
+            "Manage user roles, permissions, and access control settings to ensure secure access.",
+          )}
+        </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-3">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Roles</CardTitle>
-            <Shield className="h-4 w-4 text-muted-foreground" />
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <UsersIcon className="h-5 w-5" />
+              {t("userManagement.stats.totalUsers", "Total Users")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-semibold">{rolesLoading ? "--" : roles.length}</div>
-            <p className="mt-1 text-xs text-muted-foreground">Defined role profiles in the system</p>
+            <p className="text-4xl font-bold text-gray-900 dark:text-white dark:text-white">
+              {statics.totalUsers || 0}
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              {t("userManagement.stats.usersAssigned", "Users assigned to roles")}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              {t("userManagement.stats.totalRoles", "Total Roles")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-4xl font-bold text-gray-900 dark:text-white dark:text-white">
+              {statics.totalRoles || 0}
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              {t("userManagement.stats.activeRoles", "Active roles in the system")}
+            </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Permissions</CardTitle>
-            <Lock className="h-4 w-4 text-muted-foreground" />
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Lock className="h-5 w-5" />
+              {t("userManagement.stats.permissions", "Permissions")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-semibold">{permissionsLoading ? "--" : totalPermissions}</div>
-            <p className="mt-1 text-xs text-muted-foreground">Permissions available for assignment</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Assignments</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-semibold">{rolesLoading ? "--" : totalAssignedPermissions}</div>
-            <p className="mt-1 text-xs text-muted-foreground">Total permission links across roles</p>
+            <p className="text-4xl font-bold text-gray-900 dark:text-white dark:text-white">
+              {statics.totalPermissions || 0}
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              {t(
+                "userManagement.stats.totalPermissions",
+                "Total permissions available",
+              )}
+            </p>
           </CardContent>
         </Card>
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Role Directory</CardTitle>
-        </CardHeader>
+        <CardHeader className="flex items-center justify-between">
+            <CardTitle>{t("userManagement.rolesSectionTitle", "Roles")}</CardTitle>
+            {/* {canManagePermissions && (
+                <Button onClick={handleAddNewRole}>
+                {t("userManagement.addRole", "Add Role")}
+                </Button>
+            )} */}
+            </CardHeader>
         <CardContent>
-          <RolesDataTable roles={roles} onDelete={handleDeleteRole} />
+            {isRoleLoading ? (
+                <div className="text-center py-12">
+                  {t("userManagement.loadingRoles", "Loading roles...")}
+                </div>
+              ) : (
+                <RolesDataTable
+                  roles={roles}
+                  onEdit={handleEditRole}
+                  onDelete={handleDeleteRole}
+                  onAddNew={handleAddNewRole}
+                />
+              )}
         </CardContent>
       </Card>
-
-      <AddRoleModal />
-      <RolePermissionsModal />
     </div>
   );
 }
