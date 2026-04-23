@@ -72,11 +72,11 @@
       }]
     },
     "collectCoverageFrom": [
-      "src/**/*.(t|j)s",
+      "*.ts",
+      "src/**/*.ts",
+      "!*.module.ts",
       "!src/**/*.module.ts",
-      "!src/**/main.ts",
-      "**/*.service.ts",
-      "**/*.controller.ts",
+      "!src/main.ts",
       "!**/node_modules/**",
       "!**/dist/**"
     ],

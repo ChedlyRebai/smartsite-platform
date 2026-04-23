@@ -56,7 +56,8 @@ pipeline {
                                 sonar-scanner \
                                     -Dsonar.projectKey=${SONAR_PROJECT} \
                                     -Dsonar.projectName='SmartSite - Gestion Site' \
-                                    -Dsonar.sources=src \
+                                    -Dsonar.sources=. \
+                                    -Dsonar.inclusions=**/*.ts \
                                     -Dsonar.exclusions=**/*.spec.ts,**/node_modules/**,**/dist/** \
                                     -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
                             """
