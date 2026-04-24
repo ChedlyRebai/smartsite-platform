@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { API_GATEWAY_URL } from '@/lib/api-gateway-url';
 
 /**
  * URLs de tous les services backend avec leur endpoint chat Gemini
@@ -19,7 +20,7 @@ const SERVICES = {
     keywords: ['site', 'chantier', 'construction', 'localisation', 'budget', 'terrain'],
   },
   'gestion-planing': {
-    url: import.meta.env.VITE_PLANNING_URL?.trim() || 'http://localhost:3002',
+    url: `${API_GATEWAY_URL}/planning`,
     endpoint: '/chat/message',
     useAuthEndpoint: false,
     label: 'Planning',
@@ -33,7 +34,7 @@ const SERVICES = {
     keywords: ['incident', 'accident', 'safety', 'sécurité', 'danger', 'risque', 'urgence'],
   },
   'notification': {
-    url: import.meta.env.VITE_NOTIFICATION_URL?.trim() || 'http://localhost:3004',
+    url: `${API_GATEWAY_URL}/notification`,
     endpoint: '/chat/message',
     useAuthEndpoint: false,
     label: 'Notifications',

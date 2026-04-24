@@ -61,18 +61,18 @@ export class ChatbotController {
     return this.chatbotService.sendMessage(userId, userRole, dto);
   }
 
-  @Post('voice')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('audio', {
-    storage: diskStorage({
-      destination: './uploads',
-      filename: (req, file, cb) => {
-        const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
-        cb(null, `${randomName}${extname(file.originalname)}`);
-      }
-    })
-  }))
+  // @Post('voice')
+  // @HttpCode(HttpStatus.OK)
+  // @UseGuards(JwtAuthGuard)
+  // @UseInterceptors(FileInterceptor('audio', {
+  //   storage: diskStorage({
+  //     destination: './uploads',
+  //     filename: (req, file, cb) => {
+  //       const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
+  //       cb(null, `${randomName}${extname(file.originalname)}`);
+  //     }
+  //   })
+  // }))
   async processVoice(
     @Req() req: any,
     @UploadedFile() audio: any,

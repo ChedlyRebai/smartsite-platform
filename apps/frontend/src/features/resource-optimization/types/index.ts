@@ -4,7 +4,8 @@ const API_BASE_URL = (import.meta as any).env?.VITE_RESOURCE_OPTIMIZATION_URL ||
 // Other microservice URLs
 const GESTION_SITE_URL = (import.meta as any).env?.VITE_GESTION_SITE_URL || 'http://localhost:3001/api';
 const AUTH_API_URL = (import.meta as any).env?.VITE_AUTH_API_URL || 'http://localhost:3000';
-const PLANNING_URL = (import.meta as any).env?.VITE_PLANNING_URL || 'http://localhost:3002';
+const API_GATEWAY_URL = (import.meta as any).env?.VITE_API_GATEWAY_URL || 'http://localhost:3000';
+const PLANNING_URL = `${API_GATEWAY_URL}/planning`;
 
 // ============ UTILITY FUNCTIONS ============
 
