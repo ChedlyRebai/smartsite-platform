@@ -47,7 +47,7 @@ interface Supplier {
   address: string;
   siret: string;
   contractUrl: string;
-  insuranceUrl: string;
+  insuranceDocumentUrl: string;
   status: 'pending_qhse' | 'approved' | 'rejected';
   createdByName: string;
   createdAt: string;
@@ -287,53 +287,52 @@ export default function SupplierDetail() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-3">
-            {/* Contract */}
-            <div className="flex items-center gap-3 bg-gray-50 border rounded-lg px-4 py-3">
-              <FileText className="w-5 h-5 text-blue-600" />
-              <span className="text-sm font-medium text-gray-700">Contract</span>
-              <a
-                href={`${FILES_URL}${supplier.contractUrl}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1"
-              >
-                <Eye className="w-3.5 h-3.5" /> View
-              </a>
-              <a
-                href={`${FILES_URL}${supplier.contractUrl}`}
-                download
-                className="flex items-center gap-1 text-xs text-green-600 hover:text-green-800 border border-green-200 rounded px-2 py-1"
-              >
-                <Download className="w-3.5 h-3.5" /> Download
-              </a>
+          <div className="space-y-4">
+            <div className="flex flex-wrap gap-3">
+              {/* Contract */}
+              <div className="flex items-center gap-3 bg-gray-50 border rounded-lg px-4 py-3">
+                <FileText className="w-5 h-5 text-blue-600" />
+                <span className="text-sm font-medium text-gray-700">Contract</span>
+                <a
+                  href={`${FILES_URL}${supplier.contractUrl}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1"
+                >
+                  <Eye className="w-3.5 h-3.5" /> View
+                </a>
+                <a
+                  href={`${FILES_URL}${supplier.contractUrl}`}
+                  download
+                  className="flex items-center gap-1 text-xs text-green-600 hover:text-green-800 border border-green-200 rounded px-2 py-1"
+                >
+                  <Download className="w-3.5 h-3.5" /> Download
+                </a>
+              </div>
+
+              {/* Insurance Document */}
+              <div className="flex items-center gap-3 bg-gray-50 border rounded-lg px-4 py-3">
+                <Shield className="w-5 h-5 text-blue-600" />
+                <span className="text-sm font-medium text-gray-700">Insurance Document</span>
+                <a
+                  href={`${FILES_URL}${supplier.insuranceDocumentUrl}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1"
+                >
+                  <Eye className="w-3.5 h-3.5" /> View
+                </a>
+                <a
+                  href={`${FILES_URL}${supplier.insuranceDocumentUrl}`}
+                  download
+                  className="flex items-center gap-1 text-xs text-green-600 hover:text-green-800 border border-green-200 rounded px-2 py-1"
+                >
+                  <Download className="w-3.5 h-3.5" /> Download
+                </a>
+              </div>
             </div>
 
-            {/* Insurance */}
-            <div className="flex items-center gap-3 bg-gray-50 border rounded-lg px-4 py-3">
-              <Shield className="w-5 h-5 text-blue-600" />
-              <span className="text-sm font-medium text-gray-700">Insurance</span>
-              <a
-                href={`${FILES_URL}${supplier.insuranceUrl}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1"
-              >
-                <Eye className="w-3.5 h-3.5" /> View
-              </a>
-              <a
-                href={`${FILES_URL}${supplier.insuranceUrl}`}
-                download
-                className="flex items-center gap-1 text-xs text-green-600 hover:text-green-800 border border-green-200 rounded px-2 py-1"
-              >
-                <Download className="w-3.5 h-3.5" /> Download
-              </a>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Actions — only for qhse on pending suppliers */}
+            {/* Actions */}
       {isQhse && isPending && (
         <div className="flex gap-3">
           <Button
@@ -364,8 +363,11 @@ export default function SupplierDetail() {
           >
             Edit Supplier
           </Button>
+         </div>
+       )}
         </div>
-      )}
+        </CardContent>
+      </Card>
 
       {/* Approve Modal */}
       <Dialog open={showApprove} onOpenChange={setShowApprove}>
@@ -442,18 +444,18 @@ export default function SupplierDetail() {
         </DialogContent>
       </Dialog>
 
-      {/* Rate Supplier Modal */}
-      <RateSupplierModal
-        isOpen={showRateModal}
-        onClose={() => setShowRateModal(false)}
-        supplierId={supplier._id}
-        supplierName={supplier.name}
-        userRole={userRole}
-        userId={(user as any)?._id || 'unknown'}
-        userName={`${(user as any)?.firstName || ''} ${(user as any)?.lastName || ''}`.trim() || 'Unknown User'}
-        onSubmitSuccess={() => fetchSupplier()}
-        criteriaAverages={supplier.criteriaAverages}
-      />
-    </div>
+       {/* Rate Supplier Modal */}
+       <RateSupplierModal
+         isOpen={showRateModal}
+         onClose={() => setShowRateModal(false)}
+         supplierId={supplier._id}
+         supplierName={supplier.name}
+         userRole={userRole}
+         userId={(user as any)?._id || 'unknown'}
+         userName={`${(user as any)?.firstName || ''} ${(user as any)?.lastName || ''}`.trim() || 'Unknown User'}
+         onSubmitSuccess={() => fetchSupplier()}
+         criteriaAverages={supplier.criteriaAverages}
+       />
+     </div>
   );
 }
