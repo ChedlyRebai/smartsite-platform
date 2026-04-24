@@ -28,7 +28,7 @@ import {
   type SyncedProject,
 } from "../../action/synced-project.action";
 
-const API_URL = "http://localhost:3010";
+const API_URL = import.meta.env.VITE_GESTION_PROJECTS_URL ?? "http://localhost:3010/api";
 
 export default function Projects() {
   const navigate = useNavigate();
