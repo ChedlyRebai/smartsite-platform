@@ -4,7 +4,20 @@ NestJS microservice for managing construction sites.
 
 ## 🚀 Deployment
 
-**Production URL:** [https://smartsite-gestion-site.onrender.com](https://smartsite-gestion-site.onrender.com)
+| Environnement | URL |
+|---|---|
+| **Backend (Render)** | [https://smartsite-gestion-site.onrender.com](https://smartsite-gestion-site.onrender.com) |
+| **Frontend (Vercel)** | [https://smartsite-platform-exhx.vercel.app/sites](https://smartsite-platform-exhx.vercel.app/sites) |
+
+## 🏗️ CI/CD
+
+| Pipeline | Job Jenkins | Description |
+|---|---|---|
+| CI | `gestion-site` | Checkout → Install → Tests → Build → SonarQube → Quality Gate → Trigger CD |
+| CD | `gestion-site-CD` | Checkout → Docker Build → Docker Push → Deploy → Render |
+
+- **Image Docker** : `asmaamh/smartsite-gestion-site:latest`
+- **SonarQube** : [SmartSite - Gestion Site](http://localhost:9000/dashboard?id=smartsite-gestion-site)
 
 ## 📋 Available Endpoints
 
