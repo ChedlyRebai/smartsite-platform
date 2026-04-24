@@ -7,6 +7,7 @@ Microservice NestJS pour la gestion des projets SmartSite.
 | Environnement | URL |
 |---|---|
 | Production (Render) | https://smartsite-gestion-projects-latest.onrender.com |
+| Frontend (Vercel) | https://smartsite-platform-2yawk528c-asmammhs-projects.vercel.app |
 
 ## 📡 API Endpoints
 
