@@ -7,19 +7,19 @@ import { TaskPriorityEnum } from './TaskPriorityEnum';
 @Schema({ timestamps: true })
 export class Task extends Document {
   @Prop({ required: true })
-  title: string;
+  title!: string;
 
   @Prop()
-  description: string;
+  description!: string;
 
   @Prop({ type: Types.ObjectId, ref: 'Milestone', required: true })
-  milestoneId: Types.ObjectId;
+  milestoneId!: Types.ObjectId;
 
   @Prop({ type: [String], default: [] })
-  assignedTeams: string[];
+  assignedTeams!: string[];
 
   @Prop({ type: String, enum: TaskPriorityEnum, default: TaskPriorityEnum.MEDIUM })
-  priority: TaskPriorityEnum;
+  priority!: TaskPriorityEnum;
 
   @Prop({ type: String, enum: TaskTypeEnum, default: TaskTypeEnum.TASK })
   type: string;

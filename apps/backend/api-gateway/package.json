@@ -1,7 +1,7 @@
 {
-  "name": "gestion-site",
+  "name": "api-gateway",
   "version": "0.0.1",
-  "description": "Gestion Site API for testing with Postman",
+  "description": "",
   "author": "",
   "private": true,
   "license": "UNLICENSED",
@@ -13,24 +13,17 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "jest --forceExit --detectOpenHandles",
+    "test": "jest",
     "test:watch": "jest --watch",
-    "test:cov": "jest --coverage --forceExit --detectOpenHandles",
+    "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
     "@nestjs/common": "^11.0.1",
-    "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.0.1",
-    "@nestjs/mongoose": "^11.0.4",
-    "@nestjs/platform-express": "^11.1.17",
-    "axios": "^1.15.0",
-    "class-transformer": "^0.5.1",
-    "class-validator": "^0.14.4",
-    "mongoose": "^9.2.1",
-    "openai": "^4.100.0",
+    "@nestjs/microservices": "^11.1.19",
+    "@nestjs/platform-express": "^11.0.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },
@@ -60,30 +53,20 @@
     "typescript-eslint": "^8.20.0"
   },
   "jest": {
-    "moduleFileExtensions": ["js", "json", "ts"],
-    "rootDir": ".",
-    "testRegex": "src/.*\\.spec\\.ts$",
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": "src",
+    "testRegex": ".*\\.spec\\.ts$",
     "transform": {
-      "^.+\\.ts$": ["ts-jest", {
-        "tsconfig": {
-          "emitDecoratorMetadata": true,
-          "experimentalDecorators": true
-        }
-      }]
+      "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "*.ts",
-      "src/**/*.ts",
-      "!*.module.ts",
-      "!src/**/*.module.ts",
-      "!src/main.ts",
-      "!**/node_modules/**",
-      "!**/dist/**"
+      "**/*.(t|j)s"
     ],
-    "coverageDirectory": "./coverage",
-    "testEnvironment": "node",
-    "moduleNameMapper": {
-      "^src/(.*)$": "<rootDir>/src/$1"
-    }
+    "coverageDirectory": "../coverage",
+    "testEnvironment": "node"
   }
 }
