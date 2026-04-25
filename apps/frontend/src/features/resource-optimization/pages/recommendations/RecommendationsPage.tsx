@@ -23,6 +23,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import type { Incident } from '../../types';
+import type { RecommendationStatus } from '../../types';
 
 interface RecommendationsPageProps {
   siteId: string;
@@ -108,6 +109,7 @@ export const RecommendationsPage: React.FC<RecommendationsPageProps> = ({ siteId
   const handleApprove = (id: string) => updateStatus.mutate({ id, status: 'approved' });
   const handleReject  = (id: string) => updateStatus.mutate({ id, status: 'rejected' });
   const handleImplement = (id: string) => updateStatus.mutate({ id, status: 'implemented' });
+  const handleMoveStatus = (id: string, status: RecommendationStatus) => updateStatus.mutate({ id, status });
 
   return (
     <div className="space-y-6 p-6">
@@ -224,6 +226,7 @@ export const RecommendationsPage: React.FC<RecommendationsPageProps> = ({ siteId
                 onApprove={handleApprove}
                 onReject={handleReject}
                 onImplement={handleImplement}
+                onMoveStatus={handleMoveStatus}
                 filter={filter}
               />
             </CardContent>
@@ -243,6 +246,7 @@ export const RecommendationsPage: React.FC<RecommendationsPageProps> = ({ siteId
                 onApprove={handleApprove}
                 onReject={handleReject}
                 onImplement={handleImplement}
+                onMoveStatus={handleMoveStatus}
                 filter="budget"
               />
             </CardContent>
@@ -262,6 +266,7 @@ export const RecommendationsPage: React.FC<RecommendationsPageProps> = ({ siteId
                 onApprove={handleApprove}
                 onReject={handleReject}
                 onImplement={handleImplement}
+                onMoveStatus={handleMoveStatus}
                 filter="timeline"
               />
             </CardContent>
@@ -279,6 +284,7 @@ export const RecommendationsPage: React.FC<RecommendationsPageProps> = ({ siteId
                 onApprove={handleApprove}
                 onReject={handleReject}
                 onImplement={handleImplement}
+                onMoveStatus={handleMoveStatus}
                 filter="task_distribution"
               />
             </CardContent>
@@ -296,6 +302,7 @@ export const RecommendationsPage: React.FC<RecommendationsPageProps> = ({ siteId
                 onApprove={handleApprove}
                 onReject={handleReject}
                 onImplement={handleImplement}
+                onMoveStatus={handleMoveStatus}
                 filter="resource_allocation"
               />
             </CardContent>
@@ -313,6 +320,7 @@ export const RecommendationsPage: React.FC<RecommendationsPageProps> = ({ siteId
                 onApprove={handleApprove}
                 onReject={handleReject}
                 onImplement={handleImplement}
+                onMoveStatus={handleMoveStatus}
                 filter="energy"
               />
             </CardContent>
@@ -338,6 +346,7 @@ export const RecommendationsPage: React.FC<RecommendationsPageProps> = ({ siteId
                     onApprove={handleApprove}
                     onReject={handleReject}
                     onImplement={handleImplement}
+                    onMoveStatus={handleMoveStatus}
                   />
                 </CardContent>
               </Card>

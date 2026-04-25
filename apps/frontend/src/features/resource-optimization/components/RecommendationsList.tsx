@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -22,7 +22,21 @@ import {
   BarChart3,
   TrendingUp,
   UserCheck,
+  GripVertical,
 } from 'lucide-react';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  PieChart,
+  Pie,
+  Cell,
+  CartesianGrid,
+} from 'recharts';
 
 interface RecommendationCardProps {
   rec: {
@@ -221,45 +235,289 @@ interface RecommendationsListProps {
   onApprove: (id: string) => void;
   onReject: (id: string) => void;
   onImplement: (id: string) => void;
+  onMoveStatus?: (id: string, status: RecommendationStatus) => void;
   loading?: boolean;
   filter?: string;
 }
+
+type RecommendationStatus = 'pending' | 'approved' | 'implemented' | 'rejected';
+
+const BOARD_COLUMNS: Array<{
+  status: RecommendationStatus;
+  title: string;
+  hint: string;
+  color: string;
+}> = [
+  {
+    status: 'pending',
+    title: 'Pending',
+    hint: 'Drag to Approved or Rejected',
+    color: 'border-amber-200 bg-amber-50/40',
+  },
+  {
+    status: 'approved',
+    title: 'Approved',
+    hint: 'Drag to Implemented',
+    color: 'border-blue-200 bg-blue-50/40',
+  },
+  {
+    status: 'implemented',
+    title: 'Implemented',
+    hint: 'Completed workflow',
+    color: 'border-emerald-200 bg-emerald-50/40',
+  },
+  {
+    status: 'rejected',
+    title: 'Rejected',
+    hint: 'Declined recommendations',
+    color: 'border-slate-200 bg-slate-50/40',
+  },
+];
 
 export const RecommendationsList: React.FC<RecommendationsListProps> = ({
   recommendations,
   onApprove,
   onReject,
   onImplement,
+  onMoveStatus,
   loading,
   filter,
 }) => {
+  const [draggedRecommendationId, setDraggedRecommendationId] = useState<string | null>(null);
+  const [activeDropZone, setActiveDropZone] = useState<RecommendationStatus | null>(null);
+  const [pendingPage, setPendingPage] = useState(1);
+
   const filtered = filter
     ? recommendations.filter((r) => r.type === filter)
     : recommendations;
 
+  const recommendationsByStatus = useMemo(() => {
+    const grouped: Record<RecommendationStatus, RecommendationsListProps['recommendations']> = {
+      pending: [],
+      approved: [],
+      implemented: [],
+      rejected: [],
+    };
+
+    for (const recommendation of filtered) {
+      const status = recommendation.status as RecommendationStatus;
+      if (grouped[status]) {
+        grouped[status].push(recommendation);
+      }
+    }
+
+    return grouped;
+  }, [filtered]);
+  const pendingPageSize = 5;
+  const pendingPageCount = Math.max(
+    1,
+    Math.ceil(recommendationsByStatus.pending.length / pendingPageSize),
+  );
+  const paginatedPending = recommendationsByStatus.pending.slice(
+    (pendingPage - 1) * pendingPageSize,
+    pendingPage * pendingPageSize,
+  );
+  const analyticsData = useMemo(() => {
+    const statusSeries = [
+      { status: 'Pending', count: recommendationsByStatus.pending.length },
+      { status: 'Approved', count: recommendationsByStatus.approved.length },
+      { status: 'Implemented', count: recommendationsByStatus.implemented.length },
+      { status: 'Rejected', count: recommendationsByStatus.rejected.length },
+    ];
+    const typeMap = filtered.reduce((acc, recommendation) => {
+      acc[recommendation.type] = (acc[recommendation.type] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    const typeSeries = Object.entries(typeMap).map(([name, value]) => ({ name, value }));
+    return { statusSeries, typeSeries };
+  }, [filtered, recommendationsByStatus]);
+
+  useEffect(() => {
+    setPendingPage(1);
+  }, [filter, recommendationsByStatus.pending.length]);
+
+  const moveRecommendation = (recommendationId: string, targetStatus: RecommendationStatus) => {
+    const recommendation = filtered.find((item) => item._id === recommendationId);
+    if (!recommendation) return;
+    if ((recommendation.status as RecommendationStatus) === targetStatus) return;
+
+    if (onMoveStatus) {
+      onMoveStatus(recommendationId, targetStatus);
+      return;
+    }
+
+    if (targetStatus === 'approved') {
+      onApprove(recommendationId);
+      return;
+    }
+
+    if (targetStatus === 'rejected') {
+      onReject(recommendationId);
+      return;
+    }
+
+    if (targetStatus === 'implemented') {
+      onImplement(recommendationId);
+    }
+  };
+
   if (loading) {
-    return <div className="text-center py-4">Chargement des recommandations...</div>;
+    return <div className="text-center py-4">Loading recommendations...</div>;
   }
 
   if (!filtered || filtered.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
-        Aucune recommandation pour ce filtre
+        No recommendations found for this filter
       </div>
     );
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {filtered.map((rec) => (
-        <RecommendationCard
-          key={rec._id}
-          rec={rec}
-          onApprove={onApprove}
-          onReject={onReject}
-          onImplement={onImplement}
-        />
-      ))}
+    <div className="space-y-4">
+      <div className="rounded-lg border border-border bg-muted/20 p-3 text-sm text-muted-foreground">
+        Drag and drop recommendations between columns to change status quickly.
+      </div>
+      <div className="grid gap-4 xl:grid-cols-4">
+        {BOARD_COLUMNS.map((column) => (
+          <div
+            key={column.status}
+            className={`rounded-xl border p-3 transition-colors ${column.color} ${
+              activeDropZone === column.status ? 'ring-2 ring-indigo-400/60' : ''
+            }`}
+            onDragOver={(event) => {
+              event.preventDefault();
+              setActiveDropZone(column.status);
+            }}
+            onDragLeave={() => setActiveDropZone(null)}
+            onDrop={(event) => {
+              event.preventDefault();
+              const recommendationId = event.dataTransfer.getData('text/plain') || draggedRecommendationId;
+              if (recommendationId) {
+                moveRecommendation(recommendationId, column.status);
+              }
+              setDraggedRecommendationId(null);
+              setActiveDropZone(null);
+            }}
+          >
+            <div className="mb-3 border-b border-border/60 pb-2">
+              <div className="flex items-center justify-between">
+                <h4 className="font-semibold">{column.title}</h4>
+                <span className="rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-gray-700">
+                  {recommendationsByStatus[column.status].length}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">{column.hint}</p>
+            </div>
+            <div className="space-y-3">
+              {(column.status === 'pending' ? paginatedPending : recommendationsByStatus[column.status]).length === 0 && (
+                <div className="rounded-md border border-dashed border-border bg-white/70 px-3 py-4 text-center text-xs text-muted-foreground">
+                  Empty
+                </div>
+              )}
+              {(column.status === 'pending' ? paginatedPending : recommendationsByStatus[column.status]).map((rec) => (
+                <div
+                  key={rec._id}
+                  draggable
+                  onDragStart={(event) => {
+                    setDraggedRecommendationId(rec._id);
+                    event.dataTransfer.setData('text/plain', rec._id);
+                    event.dataTransfer.effectAllowed = 'move';
+                  }}
+                  onDragEnd={() => {
+                    setDraggedRecommendationId(null);
+                    setActiveDropZone(null);
+                  }}
+                  className="group"
+                >
+                  <div className="mb-1 flex items-center justify-between px-1 text-xs text-muted-foreground">
+                    <span className="inline-flex items-center gap-1">
+                      <GripVertical className="h-3.5 w-3.5" />
+                      Drag
+                    </span>
+                    <span>Priority {rec.priority}/10</span>
+                  </div>
+                  <RecommendationCard
+                    rec={rec}
+                    onApprove={onApprove}
+                    onReject={onReject}
+                    onImplement={onImplement}
+                  />
+                </div>
+              ))}
+              {column.status === 'pending' && recommendationsByStatus.pending.length > pendingPageSize && (
+                <div className="flex items-center justify-between gap-2 rounded-md border border-border bg-white p-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPendingPage((current) => Math.max(1, current - 1))}
+                    disabled={pendingPage <= 1}
+                  >
+                    Prev
+                  </Button>
+                  <span className="text-xs text-muted-foreground">
+                    Pending page {pendingPage}/{pendingPageCount}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPendingPage((current) => Math.min(pendingPageCount, current + 1))}
+                    disabled={pendingPage >= pendingPageCount}
+                  >
+                    Next
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Professional Recommendation Dashboard</CardTitle>
+          <CardDescription>
+            Workflow statistics and distribution charts with legend.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4 md:grid-cols-2">
+          <div className="rounded-lg border border-border p-3">
+            <p className="mb-2 text-sm font-semibold">Status distribution</p>
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={analyticsData.statusSeries}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="status" />
+                <YAxis allowDecimals={false} />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="count" fill="#6366f1" name="Recommendations" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="rounded-lg border border-border p-3">
+            <p className="mb-2 text-sm font-semibold">Recommendation types</p>
+            <ResponsiveContainer width="100%" height={260}>
+              <PieChart>
+                <Pie
+                  data={analyticsData.typeSeries}
+                  dataKey="value"
+                  nameKey="name"
+                  outerRadius={90}
+                  label
+                >
+                  {analyticsData.typeSeries.map((entry, index) => (
+                    <Cell
+                      key={`type-cell-${entry.name}`}
+                      fill={['#4f46e5', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'][index % 6]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

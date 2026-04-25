@@ -1,3 +1,11 @@
 export { EquipmentTable } from './EquipmentTable';
 export { WorkersTable } from './WorkersTable';
 export { EnergyConsumptionChart } from './EnergyConsumptionChart';
+export { DashboardCharts } from './DashboardCharts';
+export { RecommendationAnalytics } from './RecommendationAnalytics';
+export { RecommendationsList, RecommendationCard } from './RecommendationsList';
+export { AlertsList } from './AlertsList';
+export { SiteRecommendationCard } from './SiteRecommendationCard';
+export { BeforeAfterAnalyticsCharts } from './BeforeAfterAnalyticsCharts';
+export { BudgetInfluenceApprovalChart } from './BudgetInfluenceApprovalChart';
+export { PowerBiDashboard } from './PowerBiDashboard';
