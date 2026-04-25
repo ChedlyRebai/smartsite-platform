@@ -169,20 +169,6 @@ export const PowerBiDashboard: React.FC<PowerBiDashboardProps> = ({
           </CardContent>
         </Card>
 
-        <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-white">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Critical Alerts</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-amber-700">
-              {data.realTimeMetrics.criticalAlerts}
-            </div>
-            <p className="text-xs text-gray-500 mt-1">
-              {data.realTimeMetrics.activeAlerts} total active
-            </p>
-          </CardContent>
-        </Card>
-
         <Card className="border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-white">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-600">Live Savings</CardTitle>
@@ -230,11 +216,9 @@ export const PowerBiDashboard: React.FC<PowerBiDashboardProps> = ({
 
       {/* Main Dashboard Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="trends">Trends</TabsTrigger>
           <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
-          <TabsTrigger value="alerts">Alerts</TabsTrigger>
           <TabsTrigger value="predictive">Predictive</TabsTrigger>
         </TabsList>
 
@@ -369,72 +353,6 @@ export const PowerBiDashboard: React.FC<PowerBiDashboardProps> = ({
           </div>
         </TabsContent>
 
-        {/* Trends Tab */}
-        <TabsContent value="trends" className="space-y-6">
-          <div className="grid gap-6 md:grid-cols-1">
-            {/* Daily Recommendations & Savings */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Daily Recommendations & Savings</CardTitle>
-                <CardDescription>30-day trend analysis</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={400}>
-                  <LineChart data={data.trends.recommendationsByDay}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis yAxisId="left" />
-                    <YAxis yAxisId="right" orientation="right" />
-                    <Tooltip />
-                    <Legend />
-                    <Line
-                      yAxisId="left"
-                      type="monotone"
-                      dataKey="count"
-                      name="Recommendations"
-                      stroke="#8884d8"
-                      strokeWidth={2}
-                    />
-                    <Line
-                      yAxisId="right"
-                      type="monotone"
-                      dataKey="savings"
-                      name="Savings (TND)"
-                      stroke="#82ca9d"
-                      strokeWidth={2}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            {/* Alerts by Hour */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Alert Activity by Hour</CardTitle>
-                <CardDescription>Last 24 hours distribution</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={400}>
-                  <BarChart data={data.trends.alertsByHour}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="hour" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar
-                      dataKey="count"
-                      name="Alert Count"
-                      fill="#f59e0b"
-                      radius={[8, 8, 0, 0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
         {/* Recommendations Analysis Tab */}
         <TabsContent value="recommendations" className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2">
@@ -518,108 +436,6 @@ export const PowerBiDashboard: React.FC<PowerBiDashboardProps> = ({
                     <Tooltip />
                     <Legend />
                     <Bar dataKey="value" name="Count" fill="#8b5cf6" radius={[8, 8, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        {/* Alerts Analysis Tab */}
-        <TabsContent value="alerts" className="space-y-6">
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* Alerts by Type */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Alerts by Type</CardTitle>
-                <CardDescription>Category breakdown</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={Object.entries(data.alertsAnalysis.byType).map(([name, value]) => ({
-                        name: name.charAt(0).toUpperCase() + name.slice(1),
-                        value,
-                      }))}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                      label
-                    >
-                      {Object.entries(data.alertsAnalysis.byType).map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            {/* Alerts by Severity */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Alerts by Severity</CardTitle>
-                <CardDescription>Risk level distribution</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart
-                    data={Object.entries(data.alertsAnalysis.bySeverity)
-                      .sort((a, b) => {
-                        const order = { critical: 4, high: 3, medium: 2, low: 1 };
-                        return (order[b[0] as keyof typeof order] || 0) - (order[a[0] as keyof typeof order] || 0);
-                      })
-                      .map(([name, value]) => ({
-                        name: name.charAt(0).toUpperCase() + name.slice(1),
-                        value,
-                      }))}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar
-                      dataKey="value"
-                      name="Count"
-                      fill="#ef4444"
-                      radius={[8, 8, 0, 0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            {/* Response Times */}
-            <Card className="md:col-span-2">
-              <CardHeader>
-                <CardTitle>Average Response Times</CardTitle>
-                <CardDescription>Time to resolution by alert type (hours)</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart
-                    data={data.alertsAnalysis.responseTimes.map(item => ({
-                      type: item.alertType.replace('_', ' ').toUpperCase(),
-                      hours: item.avgResponseTime,
-                    }))}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="type" />
-                    <YAxis />
-                    <Tooltip formatter={(value: number) => `${value.toFixed(1)} hours`} />
-                    <Legend />
-                    <Bar
-                      dataKey="hours"
-                      name="Response Time (hours)"
-                      fill="#06b6d4"
-                      radius={[8, 8, 0, 0]}
-                    />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
