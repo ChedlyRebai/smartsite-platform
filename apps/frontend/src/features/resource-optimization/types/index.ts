@@ -215,6 +215,59 @@ export interface RecommendationsSummary {
   totalCO2Reduction: string;
 }
 
+// ============ POWER BI TYPES ============
+
+export interface PowerBiRealTimeMetrics {
+  activeRecommendations: number;
+  pendingApprovals: number;
+  activeAlerts: number;
+  criticalAlerts: number;
+  liveSavings: number;
+  liveCO2Reduction: number;
+}
+
+export interface PowerBiTrends {
+  recommendationsByDay: Array<{ date: string; count: number; savings: number }>;
+  alertsByHour: Array<{ hour: string; count: number; severity: string }>;
+  performanceByWeek: Array<{ week: string; savings: number; co2: number }>;
+}
+
+export interface PowerBiKPIs {
+  roi: number;
+  efficiencyScore: number;
+  sustainabilityIndex: number;
+  budgetVariance: number;
+}
+
+export interface PowerBiRecommendationsAnalysis {
+  byType: Record<string, number>;
+  byPriority: Record<string, number>;
+  byStatus: Record<string, number>;
+  topPerforming: Array<{ type: string; savings: number; impact: number }>;
+}
+
+export interface PowerBiAlertsAnalysis {
+  byType: Record<string, number>;
+  bySeverity: Record<string, number>;
+  responseTimes: Array<{ alertType: string; avgResponseTime: number }>;
+}
+
+export interface PowerBiPredictiveInsights {
+  nextWeekSavings: number;
+  riskAlerts: Array<{ type: string; probability: number; impact: string }>;
+  optimizationOpportunities: Array<{ area: string; potentialSavings: number }>;
+}
+
+export interface PowerBiDashboardData {
+  realTimeMetrics: PowerBiRealTimeMetrics;
+  trends: PowerBiTrends;
+  kpis: PowerBiKPIs;
+  recommendationsAnalysis: PowerBiRecommendationsAnalysis;
+  alertsAnalysis: PowerBiAlertsAnalysis;
+  predictiveInsights: PowerBiPredictiveInsights;
+  lastUpdated: string;
+}
+
 // Alert Interfaces
 export type AlertSeverity = 'low' | 'medium' | 'high' | 'critical';
 export type AlertType = 'equipment' | 'energy' | 'workforce' | 'scheduling' | 'environmental' | 'safety' | 'budget';

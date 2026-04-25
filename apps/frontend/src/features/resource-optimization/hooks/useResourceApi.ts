@@ -16,6 +16,7 @@ import type {
   AlertSummary,
   DashboardData,
   RecommendationsSummary,
+  PowerBiDashboardData,
 } from '../types';
 
 // ============ EXTERNAL MICROSERVICE CONFIG ============
@@ -397,6 +398,91 @@ export const useDashboard = (siteId: string) => {
     queryKey: ['reports', 'dashboard', siteId],
     queryFn: async () => {
       const response = await axios.get<DashboardData>(`${API_BASE_URL}/reports/dashboard/${siteId}`);
+      return response.data;
+    },
+    enabled: isValid,
+  });
+};
+
+// ============ POWER BI HOOKS ============
+
+export const usePowerBiDashboard = (siteId: string, refreshInterval: number = 30000) => {
+  const isValid = !!siteId && siteId !== 'undefined' && siteId !== '';
+  return useQuery<PowerBiDashboardData>({
+    queryKey: ['power-bi', 'dashboard', siteId],
+    queryFn: async () => {
+      const response = await axios.get<PowerBiDashboardData>(`${API_BASE_URL}/power-bi/dashboard-data/${siteId}?refresh=true`);
+      return response.data;
+    },
+    enabled: isValid,
+    refetchInterval: refreshInterval > 0 ? refreshInterval : false,
+  });
+};
+
+export const usePowerBiRecommendationsStream = (siteId: string) => {
+  const isValid = !!siteId && siteId !== 'undefined' && siteId !== '';
+  return useQuery<{
+    data: Array<{
+      id: string;
+      type: string;
+      title: string;
+      status: string;
+      estimatedSavings: number;
+      estimatedCO2Reduction: number;
+      priority: number;
+      createdAt: string;
+      timestamp: string;
+    }>;
+    total: number;
+  }>({
+    queryKey: ['power-bi', 'recommendations-stream', siteId],
+    queryFn: async () => {
+      const response = await axios.get(`${API_BASE_URL}/power-bi/recommendations-stream/${siteId}`);
+      return response.data;
+    },
+    enabled: isValid,
+    refetchInterval: 5000, // Every 5 seconds for streaming
+  });
+};
+
+export const usePowerBiAlertsStream = (siteId: string) => {
+  const isValid = !!siteId && siteId !== 'undefined' && siteId !== '';
+  return useQuery<{
+    data: Array<{
+      id: string;
+      type: string;
+      severity: string;
+      title: string;
+      message: string;
+      isRead: boolean;
+      createdAt: string;
+      timestamp: string;
+    }>;
+    total: number;
+  }>({
+    queryKey: ['power-bi', 'alerts-stream', siteId],
+    queryFn: async () => {
+      const response = await axios.get(`${API_BASE_URL}/power-bi/alerts-stream/${siteId}`);
+      return response.data;
+    },
+    enabled: isValid,
+    refetchInterval: 5000, // Every 5 seconds for streaming
+  });
+};
+
+export const usePowerBiPerformanceMetrics = (siteId: string, period: string = '7d') => {
+  const isValid = !!siteId && siteId !== 'undefined' && siteId !== '';
+  return useQuery<{
+    totalRecommendations: number;
+    implementedCount: number;
+    totalSavings: number;
+    totalCO2Reduction: number;
+    averagePriority: number;
+    period: string;
+  }>({
+    queryKey: ['power-bi', 'performance', siteId, period],
+    queryFn: async () => {
+      const response = await axios.get(`${API_BASE_URL}/power-bi/performance-metrics/${siteId}?period=${period}`);
       return response.data;
     },
     enabled: isValid,

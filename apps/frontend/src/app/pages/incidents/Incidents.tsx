@@ -47,7 +47,6 @@ import { trackAuditEvent } from "../../action/audit.action";
 import { incidentMatchesSearch } from "../../utils/incidentSearchFilter";
 import { incidentEvents } from "../../components/IncidentBadge";
 import { NotificationPanel } from "../../components/NotificationPanel";
-import { IncidentBiDashboard } from "../../components/IncidentBiDashboard";
 
 // API pour rechercher des utilisateurs
 const api = axios.create({
@@ -1247,9 +1246,6 @@ Pour toute question, veuillez contacter l'administrateur système.
           )}
         </div>
       </div>
-
-      <IncidentBiDashboard userCin={user?.cin} />
-
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
