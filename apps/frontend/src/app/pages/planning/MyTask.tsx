@@ -1,9 +1,16 @@
 import {
+  CircleIcon,
+  Edit2Icon,
+  Link,
+  MoreHorizontalIcon,
+  PenIcon,
   PlusIcon,
+  Trash2Icon,
+  TrashIcon,
   Warehouse,
 } from "lucide-react";
 import type { ChangeEvent, FormEvent, KeyboardEvent } from "react";
-import {  useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 
 import type {
@@ -11,15 +18,19 @@ import type {
   KanbanBoardDropDirection,
 } from "@/components/kanban";
 import {
+  KANBAN_BOARD_CIRCLE_COLORS,
   KanbanBoard,
   KanbanBoardCard,
+  KanbanBoardCardButton,
   KanbanBoardCardButtonGroup,
   KanbanBoardCardDescription,
   KanbanBoardCardTextarea,
   KanbanBoardColumn,
+  KanbanBoardColumnButton,
   kanbanBoardColumnClassNames,
   KanbanBoardColumnFooter,
   KanbanBoardColumnHeader,
+  KanbanBoardColumnIconButton,
   KanbanBoardColumnList,
   KanbanBoardColumnListItem,
   kanbanBoardColumnListItemClassNames,
@@ -38,11 +49,13 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
+  AlertDialogMedia,
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/app/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -60,14 +73,21 @@ import {
 } from "@/components/ui/tooltip";
 import { useJsLoaded } from "@/hooks/use-js-loaded";
 import { CardHeader, CardTitle, CardContent, Card } from "@/components/ui/card";
-import { Task, TaskStatusEnum } from "@/app/types";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Task, TaskPriorityEnum, TaskStatusEnum } from "@/app/types";
 import { useQuery } from "@tanstack/react-query";
-import { deleteTask, updateTAskNew } from "@/app/action/planing.action";
+import GanttChart from "./GanttManage";
+import {
+  deleteTask,
+  updateTask,
+  updateTAskNew,
+} from "@/app/action/planing.action";
 import { useParams } from "react-router";
 import useTaskModal from "@/app/hooks/use-task-modal";
+import useTaskDetailsModal from "@/app/hooks/use-task-details-modal";
 import {
-  getMyTAsks,
   getTaskByTeamid,
+  getTaskStageByteamIdandMilestoneId,
   getTaskSTagesByMilestoneId,
 } from "@/app/action/task.actions";
 import useTaskStageModal from "@/app/hooks/use-task-stage-modal";
@@ -84,6 +104,21 @@ type Column = {
   tasks: Task[];
 };
 
+function getPriorityStyles(priority?: TaskPriorityEnum) {
+  switch (priority) {
+    case TaskPriorityEnum.CRITICAL:
+      return "bg-red-100 text-red-700 border-red-200";
+    case TaskPriorityEnum.HIGH:
+      return "bg-orange-100 text-orange-700 border-orange-200";
+    case TaskPriorityEnum.MEDIUM:
+      return "bg-amber-100 text-amber-700 border-amber-200";
+    case TaskPriorityEnum.LOW:
+      return "bg-emerald-100 text-emerald-700 border-emerald-200";
+    default:
+      return "bg-slate-100 text-slate-600 border-slate-200";
+  }
+}
+
 export default function MyTask() {
   const { milestoneId } = useParams();
 
@@ -91,26 +126,28 @@ export default function MyTask() {
   console.log(milestoneId);
   const { isOpen, setType, onOpen, setMilestoneid } = useTaskModal();
 
-  const { data: user } = useQuery({
+
+  const { data: userdata } = useQuery({
     queryKey: ["currentUser"],
     queryFn: getCuureentUser,
   });
 
+  const teamId = userdata?.data?.assignedTeam?.[0];
 
-  const { data: tasks } = useQuery({
-    queryKey: ["tasks", user?.teamId],
-    enabled: !!user?.teamId,
-    queryFn: () => getTaskByTeamid(user.teamId[0]),
+  const { data: cols } = useQuery({
+    queryKey: ["getTaskSTagesByMilestoneId", milestoneId],
+    enabled: !!teamId,
+    queryFn: () => getTaskStageByteamIdandMilestoneId(milestoneId || "", teamId || ""),
   });
-
-  console.log("tasks by team id", tasks, user);
-
   
+  console.log("cols", cols);
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-scroll max-w-[95%]">
       <div className="flex taskssetType-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white dark:text-white">Milestone</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Milestone
+          </h1>
           <p className="text-gray-500 mt-1">
             Manage site relationships and orders
           </p>
@@ -124,30 +161,43 @@ export default function MyTask() {
               Milestone Tasks
             </CardTitle>
 
-            {/* <Button
+            <Button
               variant="default"
               size="sm"
               onClick={() => {
-                setMilestoneid(milestoneId);
+                setMilestoneid(milestoneId as string);
                 setType("add");
                 onOpen();
               }}
             >
               <PlusIcon className="h-4 w-4" />
               <span className="ml-2">Add Task</span>
-            </Button> */}
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid h-screen grid-rows-[var(--header-height)_1fr_6rem] overflow-x-hidden sm:grid-rows-[var(--header-height)_1fr_var(--header-height)]">
-            <main className="relative">
-              <div className="absolute inset-0 h-full overflow-x-hidden px-4 py-4 md:px-6">
-                <KanbanBoardProvider>
-                  <MyKanbanBoard />
-                </KanbanBoardProvider>
+          <Tabs defaultValue="kanban" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="kanban">Kanban</TabsTrigger>
+              <TabsTrigger value="gantt">Gantt</TabsTrigger>
+            </TabsList>
+            <TabsContent value="kanban" className="w-full">
+              <div className="grid h-screen grid-rows-[var(--header-height)_1fr_6rem] overflow-x-hidden sm:grid-rows-[var(--header-height)_1fr_var(--header-height)]">
+                <main className="relative">
+                  <div className="absolute inset-0 h-full overflow-x-hidden px-4 py-4 md:px-6">
+                    <KanbanBoardProvider>
+                      <MyKanbanBoard />
+                    </KanbanBoardProvider>
+                  </div>
+                </main>
               </div>
-            </main>
-          </div>
+            </TabsContent>
+            <TabsContent value="gantt" className="w-full">
+              <div className="h-screen overflow-hidden">
+                <GanttChart />
+              </div>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>
@@ -168,14 +218,11 @@ export function MyKanbanBoard() {
   //   },
   // });
   //console.log(data);
-  const {data:user}= useQuery({
-    queryKey: ["currentUser"],
-    queryFn: getCuureentUser,
-  })
+
   const { data } = useQuery({
     queryKey: ["getTaskSTagesByMilestoneId", milestoneId],
     queryFn: () =>
-      getMyTAsks(milestoneId || "", user.assignedTeam[0]).then((data) => {
+      getTaskSTagesByMilestoneId(milestoneId || "").then((data) => {
         console.log("fetching tasks by milestone id:", milestoneId);
         console.log("Fetched columns data:", data);
         setColumns(data);
@@ -551,7 +598,7 @@ export function MyKanbanBoard() {
             onDeleteColumn={handleDeleteColumn}
             onMoveCardToColumn={handleMoveCardToColumn}
             onUpdateCardTitle={handleUpdateCardTitle}
-            //onUpdateColumnTitle={handleUpdateColumnTitle}
+            // onUpdateColumnTitle={handleUpdateColumnTitle}
           />
         ) : (
           <KanbanBoardColumnSkeleton key={column._id} />
@@ -564,11 +611,11 @@ export function MyKanbanBoard() {
       ) : (
         <Skeleton className="h-9 w-10.5 flex-shrink-0" />
       )}  */}
-{/* 
+
       <div className="w-64 flex-shrink-0 rounded-lg border-2   flex justify-center items-center border-dashed bg-sidebar py-2 h-2/3 max-h-full">
         <Button
           onClick={() => {
-            setMilestoneid(milestoneId);
+            setMilestoneid(milestoneId as string);
             setType("add");
             onOpen();
           }}
@@ -578,7 +625,7 @@ export function MyKanbanBoard() {
         >
           <PlusIcon className="  w-full h-full text-[200px] text-gray-500" />
         </Button>
-      </div> */}
+      </div>
       <KanbanBoardExtraMargin />
     </KanbanBoard>
   );
@@ -633,7 +680,7 @@ function MyKanbanBoardColumn({
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const columnTitle = formData.get("columnTitle") as string;
-   // onUpdateColumnTitle(column._id, columnTitle);
+    // onUpdateColumnTitle(column._id, columnTitle);
     closeDropdownMenu();
   }
 
@@ -709,7 +756,7 @@ function MyKanbanBoardColumn({
               /> */}
           {column.name}
         </KanbanBoardColumnTitle>
-        {/* <DropdownMenu>
+        <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <MoreHorizontalIcon className="text-gray-400 size-7 cursor-pointer hover:bg-gray-300 hover:rounded-sm" />
           </DropdownMenuTrigger>
@@ -744,7 +791,7 @@ function MyKanbanBoardColumn({
               Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu> */}
+        </DropdownMenu>
 
         <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
           <AlertDialogContent size="sm">
@@ -866,15 +913,12 @@ function MyKanbanBoardCard({
     handleBlur();
   }
 
+  const { setId: setTaskId, setMilestoneid, onOpen, setType } = useTaskModal();
   const {
-    setId: setTaskId,
-    isOpen,
-    setMilestoneid,
-    onOpen,
-    onClose,
-    setType,
-    id,
-  } = useTaskModal();
+    setId: setDetailsTaskId,
+    setTask: setDetailsTask,
+    onOpen: onOpenTaskDetails,
+  } = useTaskDetailsModal();
   const { milestoneId } = useParams();
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   return isEditingTitle ? (
@@ -912,6 +956,7 @@ function MyKanbanBoardCard({
     </form>
   ) : (
     <KanbanBoardCard
+      className="group rounded-xl border border-slate-200/90 bg-gradient-to-b from-white to-slate-50/60 p-3 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-md"
       color={bordercolor}
       data={card}
       isActive={isActive}
@@ -934,31 +979,52 @@ function MyKanbanBoardCard({
       }}
       ref={kanbanBoardCardReference}
     >
-      <KanbanBoardCardDescription
-        className="cursor-pointer hover:underline  w-fit"
-        onClick={() => {
-          setMilestoneid(milestoneId as string);
-          setTaskId(card._id);
-          console.log("card id===================", card._id);
-          (setType("edit"), onOpen());
-        }}
-      >
-        {card.title}
-      </KanbanBoardCardDescription>
-      {card.description}
+      <div className="flex items-start justify-between gap-2">
+        <KanbanBoardCardDescription
+          className="line-clamp-2 w-fit cursor-pointer text-sm font-semibold leading-5 text-slate-800 transition group-hover:text-sky-700"
+          onClick={() => {
+            setMilestoneid(milestoneId as string);
+            setTaskId(card._id);
+            setDetailsTaskId(card._id);
+            setDetailsTask(card);
+            onOpenTaskDetails();
+          }}
+        >
+          {card.title}
+        </KanbanBoardCardDescription>
+
+        <Badge
+          className={`shrink-0 border text-[10px] font-semibold tracking-wide ${getPriorityStyles(card.priority)}`}
+          variant="outline"
+        >
+          {card.priority ?? TaskPriorityEnum.MEDIUM}
+        </Badge>
+      </div>
+
+      {card.description ? (
+        <p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-600">
+          {card.description}
+        </p>
+      ) : (
+        <p className="mt-2 text-xs italic text-slate-400">No description</p>
+      )}
 
       {/* and start and end date */}
       {card.startDate && card.endDate && (
-        <div className="mt-2 flex items-center gap-1 text-xs text-gray-500">
-          <span>
+        <div className="mt-3 inline-flex items-center rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-600">
+          <span className="tabular-nums">
             {new Date(card.startDate).toLocaleDateString()} -{" "}
             {new Date(card.endDate).toLocaleDateString()}
           </span>
         </div>
       )}
-      <KanbanBoardCardButtonGroup disabled={isActive}>
-        {/* <KanbanBoardCardButton
-          className="text-destructive cursor-pointer w-full size-5"
+
+      <KanbanBoardCardButtonGroup
+        className="mt-3 border-t border-slate-200/80 pt-2"
+        disabled={isActive}
+      >
+        <KanbanBoardCardButton
+          className="h-8 w-8 cursor-pointer rounded-full border border-red-100 bg-red-50 p-0 text-red-600 transition hover:bg-red-100"
           // onClick={() => {
           //   ( setOpenDeleteModal(true));
           // }}
@@ -966,8 +1032,8 @@ function MyKanbanBoardCard({
         >
           <AlertDialog open={openDeleteModal} onOpenChange={setOpenDeleteModal}>
             <AlertDialogTrigger asChild>
-              <Button variant="outline" className="rounded-full my-auto ">
-                <Trash2Icon />
+              <Button variant="ghost" className="h-8 w-8 rounded-full p-0">
+                <Trash2Icon className="h-4 w-4" />
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent size="sm">
@@ -1000,7 +1066,7 @@ function MyKanbanBoardCard({
           </AlertDialog>
 
           <span className="sr-only">Delete card</span>
-        </KanbanBoardCardButton> */}
+        </KanbanBoardCardButton>
       </KanbanBoardCardButtonGroup>
     </KanbanBoardCard>
   );
@@ -1012,7 +1078,7 @@ function MyNewKanbanBoardCard({
   scrollList,
 }: {
   column: Column;
-  onAddCard?: (columnId?: string, cardContent?: string) => void;
+  onAddCard: (columnId: string, cardContent: string) => void;
   scrollList: () => void;
 }) {
   const [cardContent, setCardContent] = useState("");
@@ -1045,7 +1111,7 @@ function MyNewKanbanBoardCard({
     event.preventDefault();
 
     flushSync(() => {
-      onAddCard?.(column._id, cardContent.trim());
+      onAddCard(column._id, cardContent.trim());
       setCardContent("");
     });
 

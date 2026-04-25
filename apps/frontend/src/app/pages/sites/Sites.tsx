@@ -178,7 +178,9 @@ export default function Sites() {
     address: '', 
     area: 0, 
     budget: 0,
-    priority: 'medium' as 'low' | 'medium' | 'high' | 'critical'
+    priority: 'medium' as 'low' | 'medium' | 'high' | 'critical',
+    clientName: '',
+    teamId: ''
   });
   const [mapPosition, setMapPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [editMapPosition, setEditMapPosition] = useState<{ lat: number; lng: number } | null>(null);
@@ -746,10 +748,16 @@ export default function Sites() {
       address: site.address, 
       area: site.area, 
       budget: site.budget,
-      priority: site.priority || 'medium'
+      priority: site.priority || 'medium',
+      clientName: site.clientName || '',
+      teamId: (site.teams?.[0] as any)?._id || (site.teams?.[0] as any) || ''
     });
     setEditMapPosition(site.coordinates || null);
     setErrors({});
+    // Charger les teams disponibles si pas encore chargées
+    if (availableTeams.length === 0) {
+      loadAvailableTeams();
+    }
     setManageDialogOpen(true);
   };
 
@@ -810,8 +818,9 @@ export default function Sites() {
           name: manageData.name,
           address: manageData.address,
           area: manageData.area,
-          budget: manageData.budget,
           coordinates: editMapPosition || undefined,
+          clientName: manageData.clientName,
+          ...(manageData.teamId && { teamIds: [manageData.teamId] }),
         });
         
         setSites(sites.map(s => 
@@ -1800,22 +1809,16 @@ export default function Sites() {
                 
                 <div className="space-y-2">
                   <Label htmlFor="edit-budget" className="text-sm font-medium">
-                    Budget (TND) <span className="text-red-500">*</span>
+                    Budget (TND)
                   </Label>
                   <Input
                     id="edit-budget"
                     type="number"
-                    min="1"
                     value={manageData.budget}
-                    onChange={(e) => setManageData({ ...manageData, budget: parseInt(e.target.value) || 0 })}
-                    className={errors.budget ? 'border-red-500 focus:ring-red-500' : ''}
+                    disabled
+                    className="bg-gray-100 cursor-not-allowed text-gray-500"
                   />
-                  {errors.budget && (
-                    <p className="text-red-500 text-sm flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {errors.budget}
-                    </p>
-                  )}
+                  <p className="text-gray-400 text-xs">Budget cannot be modified after site creation.</p>
                 </div>
               </div>
 
@@ -1859,6 +1862,33 @@ export default function Sites() {
                   <option value="high">High</option>
                   <option value="critical">Critical</option>
                 </select>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-client" className="text-sm font-medium">Client Name</Label>
+                  <Input
+                    id="edit-client"
+                    placeholder="e.g., Client ABC"
+                    value={manageData.clientName}
+                    onChange={(e) => setManageData({ ...manageData, clientName: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-team" className="text-sm font-medium">Assigned Team</Label>
+                  <select
+                    id="edit-team"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value={manageData.teamId}
+                    onChange={(e) => setManageData({ ...manageData, teamId: e.target.value })}
+                  >
+                    <option value="">-- No team assigned --</option>
+                    {availableTeams.map((team) => (
+                      <option key={team._id} value={team._id}>{team.name}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <div className="space-y-2">

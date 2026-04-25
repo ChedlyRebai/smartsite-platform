@@ -1,0 +1,97 @@
+pipeline {
+    agent any
+
+    environment {
+        SERVICE_NAME  = 'gestion-site'
+        SERVICE_DIR   = 'apps/backend/gestion-site'
+        SONAR_PROJECT = 'smartsite-gestion-site'
+    }
+
+    tools {
+        nodejs 'NodeJS-20'
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+                echo "✅ Code récupéré depuis GitHub"
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                dir("${SERVICE_DIR}") {
+                    sh 'npm ci'
+                    echo "✅ Dépendances installées"
+                }
+            }
+        }
+
+        stage('Unit Tests') {
+            steps {
+                dir("${SERVICE_DIR}") {
+                    sh 'npm test -- --coverage --coverageReporters=lcov --forceExit'
+                    echo "✅ Tests unitaires terminés"
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                dir("${SERVICE_DIR}") {
+                    sh 'npm run build'
+                    echo "✅ Build terminé"
+                }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                dir("${SERVICE_DIR}") {
+                    withSonarQubeEnv('SonarQube') {
+                        withEnv(["PATH+SONAR=${tool 'SonarScanner'}/bin"]) {
+                            sh """
+                                sonar-scanner \
+                                    -Dsonar.projectKey=${SONAR_PROJECT} \
+                                    -Dsonar.projectName='SmartSite - Gestion Site' \
+                                    -Dsonar.sources=src,gestion-site.controller.ts,gestion-site.service.ts \
+                                    -Dsonar.exclusions=**/*.spec.ts,**/node_modules/**,**/dist/** \
+                                    -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+                                    -Dsonar.javascript.node.maxspace=4096
+                            """
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 15, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: false  // ✅ non bloquant
+                }
+            }
+        }
+
+        stage('Trigger CD') {
+            steps {
+                build job: 'gestion-site-CD', wait: false
+                echo "🚀 Pipeline CD déclenché automatiquement"
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "🎉 CI réussi pour ${SERVICE_NAME} — build #${BUILD_NUMBER}"
+        }
+        failure {
+            echo "❌ CI échoué pour ${SERVICE_NAME} — build #${BUILD_NUMBER}"
+        }
+        always {
+            cleanWs()
+        }
+    }
+}

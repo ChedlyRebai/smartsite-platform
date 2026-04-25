@@ -27,7 +27,7 @@ export const getPermissions = async () => {
       });
     }
     return res.data.permissions || [];
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching permissions:", error);
     return Promise.resolve({
       status: error?.response.status,

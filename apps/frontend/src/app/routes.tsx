@@ -25,6 +25,8 @@ import Analytics from "./pages/analytics/Analytics";
 import Map from "./pages/map/Map";
 import Notifications from "./pages/notifications/Notifications";
 import UserManagement from "./pages/users/UserManagement";
+import RolesPage from "./pages/admin/RolesPage";
+import PermissionsPage from "./pages/admin/PermissionsPage";
 import PendingUsers from "./pages/admin/PendingUsers";
 import SystemLogs from "./pages/admin/SystemLogs";
 import Profile from "./pages/profile/Profile";
@@ -310,6 +312,14 @@ export const router = createBrowserRouter([
       {
         path: "users",
         element: <UserManagement />,
+      },
+      {
+        path: "roles",
+        element: <RolesPage />,
+      },
+      {
+        path: "permissions",
+        element: <PermissionsPage />,
       },
       {
         path: "admin/pending-users",

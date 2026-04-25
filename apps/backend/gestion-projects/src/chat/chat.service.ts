@@ -21,7 +21,7 @@ export class ChatService implements OnModuleInit {
     if (!apiKey) {
       this.logger.error('GROQ_API_KEY is missing! Check your .env file.');
     } else {
-      this.logger.log('Groq initialized — model: ' + model + ' — key: ' + apiKey.substring(0, 10) + '...');
+      this.logger.log('Groq initialized ï¿½ model: ' + model + ' ï¿½ key: ' + apiKey.substring(0, 10) + '...');
     }
   }
 

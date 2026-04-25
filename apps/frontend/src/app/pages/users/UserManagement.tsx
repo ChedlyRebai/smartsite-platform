@@ -17,10 +17,7 @@ import { data, useNavigate } from "react-router";
 import { toast } from "react-hot-toast";
 import { Permission, Role, User } from "@/app/types";
 
-import {
-  getAllRoles,
-  deleteRole,
-} from "@/app/action/role.action";
+import { getAllRoles, deleteRole } from "@/app/action/role.action";
 
 import { RolesDataTable } from "./_components/roles-data-table";
 import { UserDataTable } from "./_components/user-data-table";
@@ -48,54 +45,15 @@ export default function UserManagement() {
   // Contournement : si le role est null, utiliser un role par défaut
   const userRole = user?.role || { name: "super_admin" as const };
 
-  const { setOnUserChange } = useAddUserModal();
-  const { setOnPermissionChange } = useAddPermissionModal();
-  const { setOnRoleChange } = useRoleModal();
-  const { setOnPermissionsChange, setRefreshData } = useRolePermissionsModal();
-
-  const [statics, setStatics] = useState({
-    totalRoles: 0,
-    totalUsers: 0,
-    totalPermissions: 0,
-  });
-  const [isLoading, setIsLoading] = useState(true);
+ 
   const canManagePermissions = user && canEdit(userRole.name, "users");
 
-  useEffect(() => {
-    loadStatics();
-  }, []);
 
-  const { data, isError, error } = useQuery({
+  const {data:staticsData, isError: isStaticsError} = useQuery({
     queryKey: ["statics"],
     queryFn: () => getAllStatics(),
     staleTime: Infinity,
   });
-
-  useEffect(() => {
-    if (data) {
-      setStatics(data.data);
-    }
-  }, [data]);
-
-
-  useEffect(() => {
-    if (isError) {
-      toast.error(
-        t("userManagement.toast.failedLoadStatics", "Failed to load statistics"),
-      );
-    }
-  }, [isError, error]);
-
-  const loadStatics = async () => {
-    try {
-      const response = await getAllStatics();
-      if (response?.status === 200) {
-        setStatics(response.data);
-      }
-    } catch (error) {
-      console.error("Failed to load statics:", error);
-    }
-  };
   const { data: users, isLoading: isUsersLoading } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
@@ -128,73 +86,7 @@ export default function UserManagement() {
       );
     }
   };
-
-  const { data: permissionsList, isLoading: isPermissionLoading } = useQuery({
-    queryKey: ["permissions"],
-    queryFn: getAllPermissions,
-    staleTime: Infinity,
-  });
-
-  const handleEditPermission = (permission: Permission) => {
-    const { setId, setType, onOpen } = useAddPermissionModal.getState();
-    setId(permission._id);
-    setType("edit");
-    onOpen();
-  };
-
-  const handleDeletePermission = async (permissionId: string) => {
-    try {
-      const response = await deletePermission(permissionId);
-      if (response?.status === 200) {
-        toast.success(
-          t(
-            "userManagement.toast.permissionDeleted",
-            "Permission deleted successfully",
-          ),
-        );
-        // loadPermissions();
-      } else {
-        toast.error(
-          response?.data ||
-            t(
-              "userManagement.toast.failedDeletePermission",
-              "Failed to delete permission",
-            ),
-        );
-      }
-    } catch (error) {
-      console.error("Failed to delete permission:", error);
-      toast.error(
-        t(
-          "userManagement.toast.failedDeletePermission",
-          "Failed to delete permission",
-        ),
-      );
-    }
-  };
-
-  const handleAddNewPermission = () => {
-    toast.success("Add new permission");
-    // TODO: Implement create dialog
-  };
-  // const loadRoles = async () => {
-  //   setIsLoading(true);
-  //   try {
-  //     const response = await getAllRoles();
-  //     if (response.status === 200 && Array.isArray(response.data)) {
-  //       setRoles(response.data);
-  //     }
-  //   } catch (error) {
-  //     console.error("Failed to load roles:", error);
-  //     toast.error("Failed to load roles");
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-  const { data: roles, isLoading: isRoleLoading } = useQuery({
-    queryKey: ["roles"],
-    queryFn: () => getAllRoles(),
-  });
+  
   const handleBanUser = async (userId: string, isActif: boolean) => {
     try {
       const response = await banUser(userId, isActif);
@@ -227,65 +119,13 @@ export default function UserManagement() {
       );
     }
   };
-  const handleEditRole = (role: Role) => {
-    const { setId, setType, onOpen } = useRoleModal.getState();
-    setId(role._id);
-    setType("edit");
-    onOpen();
-  };
-
-  const handleDeleteRole = async (roleId: string) => {
-    try {
-      const response = await deleteRole(roleId);
-      if (response?.status === 200) {
-        toast.success(
-          t("userManagement.toast.roleDeleted", "Role deleted successfully"),
-        );
-        // loadRoles();
-      } else {
-        toast.error(
-          response?.data ||
-            t("userManagement.toast.failedDeleteRole", "Failed to delete role"),
-        );
-      }
-    } catch (error) {
-      console.error("Failed to delete role:", error);
-      toast.error(
-        t("userManagement.toast.failedDeleteRole", "Failed to delete role"),
-      );
-    }
-  };
-
-  const handleAddNewRole = () => {
-    toast.success("Add new role");
-    // TODO: Implement create dialog
-  };
-
-  // const { data: accessData, isLoading: isAccessLoading } = useQuery({
-  //   queryKey: ["access", "users"],
-  //   queryFn: () => accessPermissionByurl("users"),
-
-  // });
-
-  // console.log("Access permissions for /dashboard/users:", accessData);
-  // if (accessData && !isAccessLoading) {
-  //   if (!accessData.access) {
-  //     return (
-  //       <Forbidden/>
-  //     );
-  //   }
-  // }
-
+  
   const access = usePermissionStore((s) => s.permissions);
-  // console.log("Access permissions for /dashboard/users:", access["users"]);
-  // if (!access["users"]?.access) {
-  //   return <Forbidden />;
-  // }
-
+  
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white dark:text-white">
+        <h1 className="text-3xl font-bold text-gray-900  dark:text-white">
           {t("userManagement.title", "User Management")}
         </h1>
         <p className="text-gray-500 mt-1">
@@ -305,11 +145,14 @@ export default function UserManagement() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-4xl font-bold text-gray-900 dark:text-white dark:text-white">
-              {statics.totalUsers || 0}
+            <p className="text-4xl font-bold text-gray-900  dark:text-white">
+              {staticsData?.data.totalUsers || 0}
             </p>
             <p className="text-sm text-gray-500 mt-2">
-              {t("userManagement.stats.usersAssigned", "Users assigned to roles")}
+              {t(
+                "userManagement.stats.usersAssigned",
+                "Users assigned to roles",
+              )}
             </p>
           </CardContent>
         </Card>
@@ -321,11 +164,14 @@ export default function UserManagement() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-4xl font-bold text-gray-900 dark:text-white dark:text-white">
-              {statics.totalRoles || 0}
+            <p className="text-4xl font-bold text-gray-900  dark:text-white">
+              {staticsData?.data.totalRoles || 0}
             </p>
             <p className="text-sm text-gray-500 mt-2">
-              {t("userManagement.stats.activeRoles", "Active roles in the system")}
+              {t(
+                "userManagement.stats.activeRoles",
+                "Active roles in the system",
+              )}
             </p>
           </CardContent>
         </Card>
@@ -339,7 +185,7 @@ export default function UserManagement() {
           </CardHeader>
           <CardContent>
             <p className="text-4xl font-bold text-gray-900 dark:text-white dark:text-white">
-              {statics.totalPermissions || 0}
+              {staticsData?.data.totalPermissions || 0}
             </p>
             <p className="text-sm text-gray-500 mt-2">
               {t(
@@ -352,71 +198,25 @@ export default function UserManagement() {
       </div>
 
       <Card>
-        <Tabs defaultValue="users">
-          <CardHeader>
-            <CardTitle>
-              <TabsList>
-                <TabsTrigger value="users">
-                  {t("userManagement.tabs.users", "Users")}
-                </TabsTrigger>
-                <TabsTrigger value="role">
-                  {t("userManagement.tabs.roles", "Roles")}
-                </TabsTrigger>
-
-                <TabsTrigger value="permissions">
-                  {t("userManagement.tabs.permissions", "Permissions")}
-                </TabsTrigger>
-              </TabsList>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <TabsContent value="role">
-              {isRoleLoading ? (
-                <div className="text-center py-12">
-                  {t("userManagement.loadingRoles", "Loading roles...")}
-                </div>
-              ) : (
-                <RolesDataTable
-                  roles={roles}
-                  onEdit={handleEditRole}
-                  onDelete={handleDeleteRole}
-                  onAddNew={handleAddNewRole}
-                />
-              )}
-            </TabsContent>
-
-            <TabsContent value="users">
-              {isUsersLoading ? (
-                <div className="text-center py-12">
-                  {t("userManagement.loadingUsers", "Loading users...")}
-                </div>
-              ) : (
-                <UserDataTable
-                  onBan={handleBanUser}
-                  users={users as User[]}
-                  onDelete={handleDeleteUser}
-                />
-              )}
-            </TabsContent>
-
-            <TabsContent value="permissions">
-              {isPermissionLoading ? (
-                <div className="text-center py-12">
-                  {t(
-                    "userManagement.loadingPermissions",
-                    "Loading permissions...",
-                  )}
-                </div>
-              ) : (
-                <PermissionsDataTable
-                  permissions={permissionsList}
-                  onEdit={handleEditPermission}
-                  onDelete={handleDeletePermission}
-                />
-              )}
-            </TabsContent>
-          </CardContent>
-        </Tabs>
+        <CardHeader className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <UsersIcon className="h-5 w-5" />
+            {t("userManagement.users", "Users")}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isUsersLoading ? (
+            <div className="text-center py-12">
+              {t("userManagement.loadingUsers", "Loading users...")}
+            </div>
+          ) : (
+            <UserDataTable
+              onBan={handleBanUser}
+              users={users as User[]}
+              onDelete={handleDeleteUser}
+            />
+          )}
+        </CardContent>
       </Card>
     </div>
   );

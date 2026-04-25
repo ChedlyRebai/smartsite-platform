@@ -13,7 +13,6 @@ import { Button } from "../../components/ui/button";
 
 import type { Milestone, Site } from "../../types";
 
-import "leaflet/dist/leaflet.css";
 import { useState } from "react";
 import { Link, useParams } from "react-router";
 import { getMilestonesByProjectId } from "@/app/action/milestone.action";
@@ -32,12 +31,13 @@ const MyMilestones = () => {
     queryKey: ["milestones", projectId],
     queryFn: () => getMilestonesByProjectId(projectId || ""),
   });
+  console.log("milestones from milestone page", milestones);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Planing</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Planning</h1>
           <p className="text-gray-500 mt-1">
             Manage site relationships and orders
           </p>
@@ -51,10 +51,10 @@ const MyMilestones = () => {
               Project Milestone
             </CardTitle>
 
-            {/* <Button
+             <Button
               className="cursor-pointer"
               onClick={() => {
-                setProjectId(projectId);
+                setProjectId(projectId as string);
                 console.log(
                   "project id from milestone page on click",
                   projectId,
@@ -64,7 +64,7 @@ const MyMilestones = () => {
             >
               <PlusIcon />
               Add Milestone
-            </Button> */}
+            </Button> 
           </div>
         </CardHeader>
         <CardContent>
