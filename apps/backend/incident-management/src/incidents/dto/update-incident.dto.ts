@@ -58,4 +58,8 @@ export class UpdateIncidentDto {
   @IsString()
   @IsOptional()
   assignedToCin?: string;
+
+  @IsString()
+  @IsOptional()
+  assignedUserRole?: string;
 }

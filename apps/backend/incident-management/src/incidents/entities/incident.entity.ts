@@ -57,8 +57,8 @@ export class Incident {
   @Prop({ type: Types.ObjectId, ref: "Site", required: false })
   site?: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: "User", required: false })
-  reportedBy?: Types.ObjectId;
+  @Prop({ trim: true, required: false })
+  reportedBy?: string;
 
   @Prop({ type: Types.ObjectId, ref: "User", required: false })
   assignedTo?: Types.ObjectId;
