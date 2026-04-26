@@ -169,6 +169,7 @@ function extractRows(data: unknown): Record<string, unknown>[] {
         data?: unknown;
         items?: unknown;
         value?: unknown;
+        projects?: unknown;
       }
     | undefined;
 
@@ -176,7 +177,29 @@ function extractRows(data: unknown): Record<string, unknown>[] {
   if (Array.isArray(payload.data)) return payload.data as Record<string, unknown>[];
   if (Array.isArray(payload.items)) return payload.items as Record<string, unknown>[];
   if (Array.isArray(payload.value)) return payload.value as Record<string, unknown>[];
+  if (Array.isArray(payload.projects)) {
+    return payload.projects as Record<string, unknown>[];
+  }
   return [];
+}
+
+function logRequestIssue(context: string, error: unknown): void {
+  if (axios.isAxiosError(error)) {
+    const status = error.response?.status;
+    const code = error.code;
+
+    if (code === "ERR_NETWORK" || code === "ECONNREFUSED") {
+      console.warn(`${context}: service unreachable`);
+      return;
+    }
+
+    if (status != null) {
+      console.warn(`${context}: HTTP ${status}`);
+      return;
+    }
+  }
+
+  console.error(context, error);
 }
 
 function normalizeProject(raw: Record<string, unknown>): Project {
@@ -218,23 +241,15 @@ export const getProjects = async (): Promise<Project[]> => {
     const rows = extractRows(response.data);
     if (rows.length > 0) return rows.map(normalizeProject);
   } catch (error) {
-    console.error("Error fetching projects from planning API:", error);
-  }
-
-  try {
-    const response = await gestionProjectsApi.get("/projects/all");
-    const rows = extractRows(response.data);
-    if (rows.length > 0) return rows.map(normalizeProject);
-  } catch (error) {
-    console.error("Error fetching projects/all from gestion-projects API:", error);
+    logRequestIssue("Error fetching projects from planning API", error);
   }
 
   try {
     const response = await gestionProjectsApi.get("/projects");
     const rows = extractRows(response.data);
-    return rows.map(normalizeProject);
+    if (rows.length > 0) return rows.map(normalizeProject);
   } catch (error) {
-    console.error("Error fetching projects from gestion-projects API:", error);
+    logRequestIssue("Error fetching projects from gestion-projects API", error);
   }
 
   return [];
@@ -246,7 +261,7 @@ export const getUrgentTasks = async (): Promise<Task[]> => {
     const data = response.data;
     return Array.isArray(data) ? data : [];
   } catch (error) {
-    console.error("Error fetching urgent tasks:", error);
+    logRequestIssue("Error fetching urgent tasks", error);
     return [];
   }
 };

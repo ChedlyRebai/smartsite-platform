@@ -4343,7 +4343,10 @@
     "exports": [
       "default"
     ],
-    "imports": []
+    "imports": [
+      "react",
+      "lucide-react"
+    ]
   },
   "apps\\frontend\\src\\app\\pages\\dashboards\\DirectorDashboard.tsx": {
     "purpose": "component",
@@ -7561,6 +7564,57 @@
       "react",
       "axios",
       "socket.io-client"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\IntegratedPowerBiDashboard.tsx": {
+    "purpose": "component",
+    "exports": [
+      "IntegratedPowerBiDashboard",
+      "default"
+    ],
+    "imports": [
+      "react",
+      "motion/react",
+      "@/components/ui/card",
+      "@/components/ui/badge",
+      "@/components/ui/button",
+      "@/components/ui/tabs",
+      "@/components/ui/input",
+      "@/components/ui/progress"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\PowerBiAdvancedDashboard.tsx": {
+    "purpose": "component",
+    "exports": [
+      "PowerBiAdvancedDashboard",
+      "default"
+    ],
+    "imports": [
+      "react",
+      "motion/react",
+      "@/components/ui/card",
+      "@/components/ui/badge",
+      "@/components/ui/button",
+      "@/components/ui/tabs",
+      "@/components/ui/select",
+      "axios",
+      "@/features/resource-optimization/types"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\ProfessionalPowerBiDashboard.tsx": {
+    "purpose": "component",
+    "exports": [
+      "ProfessionalPowerBiDashboard",
+      "default"
+    ],
+    "imports": [
+      "react",
+      "motion/react",
+      "@/components/ui/card",
+      "@/components/ui/badge",
+      "@/components/ui/button",
+      "@/components/ui/tabs",
+      "axios"
     ]
   }
 }
