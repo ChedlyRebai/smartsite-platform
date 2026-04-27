@@ -3,7 +3,6 @@ import { SmartSiteLogo } from "@/app/components/branding/SmartSiteLogo";
 import { Facebook, Github, Instagram, Twitter, Dribbble, Menu } from "lucide-react";
 import { LanguageSelector } from "@/app/components/LanguageSelector";
 import { ThemeButton } from "@/app/components/ThemeButton";
-import { NavbarAccessibilityButton } from "@/app/components/NavbarAccessibilityButton";
 import { TextSizeButton } from "@/app/components/TextSizeButton";
 import { DemoModal } from "@/app/components/DemoModal";
 import { useTranslation } from "@/app/hooks/useTranslation";
@@ -154,7 +153,6 @@ export default function Home2() {
             ))}
           </div>
           <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:items-center lg:gap-4">
-            <NavbarAccessibilityButton />
             <TextSizeButton />
             <ThemeButton />
             <LanguageSelector />

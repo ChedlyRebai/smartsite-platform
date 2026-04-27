@@ -284,10 +284,19 @@ export const ProfessionalPowerBiDashboard: React.FC = () => {
       return doneByStatus || progress >= 100;
     };
 
-    const inProgressProjects = projects.filter((p) => {
-      const progress = toProgressNumber(p.progress);
-      return !isCompletedProject(p) && progress > 0 && progress < 100;
+    // Filter by project status, not just progress percentage
+    const actualInProgressProjects = projects.filter((p) => {
+      const status = normalizeStatus(String(p.status || ''));
+      const isRunning =
+        status.includes('en_cours') ||
+        status.includes('in_progress') ||
+        status.includes('running') ||
+        status.includes('active');
+
+      return isRunning && !isCompletedProject(p);
     }).length;
+
+    const inProgressProjects = actualInProgressProjects;
     const completedProjects = projects.filter(isCompletedProject).length;
     const completedRate = projects.length ? Math.round((completedProjects / projects.length) * 100) : 0;
     const avgProgress = projects.length

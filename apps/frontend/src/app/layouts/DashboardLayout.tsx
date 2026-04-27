@@ -14,7 +14,6 @@ import {
   Menu,
   X,
   Bell,
-  User,
   ChevronDown,
   Type,
   Plus,
@@ -28,14 +27,6 @@ import {
 import { Slider } from "../components/ui/slider";
 import { useAuthStore } from "../store/authStore";
 import { Button } from "../components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../components/ui/dropdown-menu";
 import { Badge } from "../components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { getMynavigationAccess } from "../action/permission.action";
@@ -47,7 +38,6 @@ import { getCurrentUser } from "../action/auth.action";
 
 import { ThemeButton } from "../components/ThemeButton";
 import { LanguageSelector } from "../components/LanguageSelector";
-import { NavbarAccessibilityButton } from "../components/NavbarAccessibilityButton";
 import { useTranslation } from "../hooks/useTranslation";
 import SiteInfoPanel from "../components/SiteInfoPanel";
 import {
@@ -288,9 +278,8 @@ export default function DashboardLayout() {
               </span>
             </div>
 
-            {/* Accessibility, Theme & Language Selectors */}
-            <NavbarAccessibilityButton />
-            
+            {/* Theme & Language Selectors */}
+
             {/* Font Size Control */}
             <Popover>
               <PopoverTrigger asChild>
@@ -368,57 +357,6 @@ export default function DashboardLayout() {
                 </Badge>
               )}
             </Button>
-
-
-            {/* User Menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="gap-2">
-                  {/* <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-gradient-to-br from-blue-600 to-green-600 text-white">
-                      {getInitials(user?.firstName || "", user?.lastName || "")}
-                    </AvatarFallback>
-                  </Avatar> */}
-                  <div className="hidden md:flex flex-col items-start">
-                    <span className="text-sm font-semibold">
-                      {user?.firstName} {user?.lastName}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {/* {roleLabels[user.role]} */}
-                    </span>
-                  </div>
-                  <ChevronDown
-                    aria-hidden="true"
-                    className="h-4 w-4 hidden md:block"
-                  />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>
-                  <div className="flex flex-col">
-                    <span>
-                      {user.firstName} {user.lastName}
-                    </span>
-                    <span className="text-xs font-normal text-muted-foreground">
-                      {user.cin}
-                    </span>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate("/profile")}>
-                  <User className="mr-2 h-4 w-4" />
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={handleLogout}
-                  className="text-red-600"
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
       </header>
@@ -429,14 +367,14 @@ export default function DashboardLayout() {
           id="primary-sidebar"
           aria-label="Sidebar navigation"
           className={cn(
-            "fixed lg:sticky top-0 left-0 z-30 h-screen w-68 flex flex-col",
+            "fixed lg:sticky top-0 left-0 z-30 h-screen w-72 xl:w-80 flex flex-col",
             "bg-sidebar text-sidebar-foreground border-r border-sidebar-border",
             "transition-transform duration-300 ease-out lg:translate-x-0",
-            "pt-16 lg:pt-6 shadow-sm",
+            "pt-16 lg:pt-7 shadow-sm",
             sidebarOpen ? "translate-x-0" : "-translate-x-full",
           )}
         >
-          <nav className="p-3 space-y-2 overflow-y-auto flex-1">
+          <nav className="px-5 py-5 space-y-4 overflow-y-auto flex-1 lg:px-6 lg:py-6">
             {!isLoading &&
               groupedNavigationItems.map((section: PermissionModuleGroup) => {
                 const isExpanded = expandedModules.has(section.key);
@@ -444,11 +382,11 @@ export default function DashboardLayout() {
                   <div key={section.key} className="group">
                     <button
                       onClick={() => toggleModuleExpanded(section.key)}
-                      className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-md transition-all duration-200 ease-out text-left group-hover:bg-accent/30  focus:outline-none "
+                      className="w-full flex items-center justify-between px-4 py-3.5 rounded-xl transition-all duration-200 ease-out text-left group-hover:bg-accent/30 focus:outline-none"
                       aria-expanded={isExpanded}
                       aria-controls={`module-${section.key}`}
                     >
-                      <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70 group-hover:text-muted-foreground transition-colors duration-200">
+                      <p className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground/75 group-hover:text-muted-foreground transition-colors duration-200 leading-5">
                         {t(`sidebar.modules.${section.key}`, section.label)}
                       </p>
                       <ChevronDown
@@ -462,7 +400,7 @@ export default function DashboardLayout() {
                     {isExpanded && (
                       <div
                         id={`module-${section.key}`}
-                        className="mt-1.5 space-y-1 pl-2 overflow-hidden animate-in fade-in duration-200"
+                        className="mt-2.5 space-y-2 pl-2.5 overflow-hidden animate-in fade-in duration-200"
                       >
                         {section.items.map((item: Permission, idx: number) => {
                           const isActive =
@@ -482,7 +420,7 @@ export default function DashboardLayout() {
                                 transform: isExpanded ? "translateY(0)" : "translateY(-8px)",
                               }}
                               className={`
-                              flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-200
+                              flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
                               ${
                                 isActive
                                   ? "bg-linear-to-r from-blue-500/90 to-green-500/90 text-white shadow-sm hover:shadow-md"
@@ -493,7 +431,7 @@ export default function DashboardLayout() {
                               <div className={`h-1.5 w-1.5 rounded-full shrink-0 ${
                                 isActive ? "bg-white/70" : "bg-muted-foreground/40 group-hover/link:bg-muted-foreground/60"
                               }`} />
-                              <span className="font-medium text-sm truncate">{getSidebarLabel(item)}</span>
+                              <span className="font-medium text-sm leading-6 truncate">{getSidebarLabel(item)}</span>
                             </Link>
                           );
                         })}
@@ -516,7 +454,7 @@ export default function DashboardLayout() {
               }
             }
           `}</style>
-          <div className="p-3 mt-auto border-t border-sidebar-border bg-sidebar/95 backdrop-blur-sm">
+          <div className="px-5 py-5 mt-auto border-t border-sidebar-border bg-sidebar/95 backdrop-blur-sm lg:px-6">
             <Button
               variant="outline"
               onClick={handleLogout}
@@ -546,9 +484,11 @@ export default function DashboardLayout() {
           id="main-content"
           data-app-content
           tabIndex={-1}
-          className="flex-1 p-6 lg:p-8 outline-none"
+          className="flex-1 px-4 py-6 sm:px-6 lg:px-10 lg:py-8 xl:px-14 outline-none"
         >
-          <Outlet />
+          <div className="mx-auto w-full max-w-[1440px] space-y-6 lg:space-y-8">
+            <Outlet />
+          </div>
         </main>
       </div>
 
