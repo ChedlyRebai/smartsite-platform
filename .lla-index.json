@@ -2934,8 +2934,7 @@
     ],
     "imports": [
       "react",
-      "@/components/ui/button",
-      "lucide-react"
+      "@/components/ui/button"
     ]
   },
   "apps\\frontend\\src\\app\\components\\branding\\SmartSiteLogo.tsx": {
@@ -4516,7 +4515,6 @@
       "lucide-react",
       "@/app/components/LanguageSelector",
       "@/app/components/ThemeButton",
-      "@/app/components/NavbarAccessibilityButton",
       "@/app/components/TextSizeButton",
       "@/app/components/DemoModal",
       "@/app/hooks/useTranslation"
