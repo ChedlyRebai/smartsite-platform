@@ -1,7 +1,8 @@
 import { useAuthStore } from "@/app/store/authStore";
+import { API_GATEWAY_URL } from "@/lib/api-gateway-url";
 import axios from "axios";
 
-const BASE_URL = "http://localhost:9000/api";
+const BASE_URL = `${API_GATEWAY_URL}/videocall/api`;
 
 export const axiosInstance = axios.create({
   baseURL: BASE_URL,
@@ -13,8 +14,6 @@ axiosInstance.interceptors.request.use((config) => {
   try {
     const persistedAuth = localStorage.getItem("smartsite-auth");
     const accessToken= useAuthStore().user?.access_token;
-  
-    
       // const parsedAuth = JSON.parse(persistedAuth);
       // const accessToken = parsedAuth?.state?.user?.access_token;
 

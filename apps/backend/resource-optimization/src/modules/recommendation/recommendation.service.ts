@@ -674,13 +674,13 @@ export class RecommendationService {
     }
 
     // Recommandations basées sur les milestones
-    const milestoneRecs = this.buildMilestoneRecommendations(siteId, context.milestones, context.site);
+    const milestoneRecs = this.buildMilestoneRecommendations(siteId, context.milestones);
     for (const dto of milestoneRecs) {
       saved.push(await this.create(dto));
     }
 
     // Recommandations basées sur les tâches
-    const taskRecs = this.buildTaskRecommendations(siteId, context.tasks, context.site);
+    const taskRecs = this.buildTaskRecommendations(siteId, context.tasks);
     for (const dto of taskRecs) {
       saved.push(await this.create(dto));
     }

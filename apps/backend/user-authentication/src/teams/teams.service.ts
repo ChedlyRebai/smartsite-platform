@@ -203,4 +203,13 @@ export class TeamsService {
       )
       .exec();
   }
+
+  async getUserTeamMembers(userId:string){
+    const teams = await this.teamModel.find({ members: userId }).populate({
+      path: 'members',
+      select:
+        '-role -password -emailVerificationOtp -otpExpiresAt -passwordResetCode -passwordResetCodeExpiresAt',
+    });
+    return teams;
+  }
 }

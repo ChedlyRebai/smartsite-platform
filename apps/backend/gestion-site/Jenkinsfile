@@ -56,7 +56,7 @@ pipeline {
                                 sonar-scanner \
                                     -Dsonar.projectKey=${SONAR_PROJECT} \
                                     -Dsonar.projectName='SmartSite - Gestion Site' \
-                                    -Dsonar.sources=src \
+                                    -Dsonar.sources=src,gestion-site.controller.ts,gestion-site.service.ts \
                                     -Dsonar.exclusions=**/*.spec.ts,**/node_modules/**,**/dist/** \
                                     -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
                                     -Dsonar.javascript.node.maxspace=4096

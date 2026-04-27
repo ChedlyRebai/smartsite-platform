@@ -341,6 +341,10 @@ export const router = createBrowserRouter([
         path: "resource-optimization/:siteId",
         element: <ResourceOptimizationDashboard />,
       },
+      {
+        path: "power-bi/:siteId",
+        element: <ResourceOptimizationDashboard />,
+      },
     ],
   },
   {

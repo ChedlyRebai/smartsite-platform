@@ -9,12 +9,55 @@ import {
   IncidentSeverity,
   IncidentStatus,
 } from "./entities/incident.entity";
+import { IncidentEventsService } from "./incidents-events.service";
+
+type DashboardBucket = {
+  label: string;
+  value: number;
+};
+
+type DashboardEntityStats = {
+  label: string;
+  total: number;
+  open: number;
+  critical: number;
+  resolved: number;
+};
+
+type IncidentDashboardStats = {
+  summary: {
+    total: number;
+    open: number;
+    investigating: number;
+    resolved: number;
+    closed: number;
+    critical: number;
+    high: number;
+    assigned: number;
+    unassigned: number;
+    resolutionRate: number;
+  };
+  bySeverity: DashboardBucket[];
+  byStatus: DashboardBucket[];
+  byType: DashboardBucket[];
+  byUser: DashboardEntityStats[];
+  byProject: DashboardEntityStats[];
+  bySite: DashboardEntityStats[];
+  trend: Array<{
+    date: string;
+    total: number;
+    resolved: number;
+    critical: number;
+  }>;
+  updatedAt: string;
+};
 
 @Injectable()
 export class IncidentsService {
   constructor(
     @InjectModel(Incident.name)
     private readonly incidentModel: Model<IncidentDocument>,
+    private readonly eventsService: IncidentEventsService,
   ) { }
 
   async findAll(): Promise<Incident[]> {
@@ -64,7 +107,14 @@ export class IncidentsService {
     }
 
     const created = new this.incidentModel(payload);
-    return created.save();
+    const saved = await created.save();
+
+    // Emit notification if assigned to a user
+    if ((payload as any).assignedToCin) {
+      this.eventsService.notifyIncidentAssigned((payload as any).assignedToCin, saved);
+    }
+
+    return saved;
   }
 
   async update(id: string, dto: UpdateIncidentDto): Promise<Incident> {
@@ -107,6 +157,20 @@ export class IncidentsService {
     if (!updated) {
       throw new NotFoundException("Incident not found");
     }
+
+    // Emit notification based on what was updated
+    if (updatePayload.assignedToCin) {
+      // New assignment
+      this.eventsService.notifyIncidentAssigned(updatePayload.assignedToCin, updated);
+    } else if (updatePayload.status === IncidentStatus.RESOLVED || updatePayload.status === 'resolved') {
+      // Incident resolved - notify whoever had it assigned
+      if ((updated as any).assignedToCin) {
+        this.eventsService.notifyIncidentUpdated((updated as any).assignedToCin, updated, 'resolved');
+      }
+      // Broadcast to everyone
+      this.eventsService.broadcastIncidentUpdate(updated, 'resolved');
+    }
+
     return updated;
   }
 
@@ -159,5 +223,403 @@ export class IncidentsService {
     return this.incidentModel
       .countDocuments({ project: new Types.ObjectId(projectId) })
       .exec();
+  }
+
+  async findOpenByAssignedUserCin(userCin: string): Promise<Incident[]> {
+    if (!userCin) {
+      return [];
+    }
+
+    return this.incidentModel
+      .find({
+        assignedToCin: userCin,
+        status: { $ne: IncidentStatus.RESOLVED },
+      })
+      .sort({ createdAt: -1 })
+      .exec();
+  }
+
+  async getDashboardStats(filters?: {
+    assignedToCin?: string;
+    projectId?: string;
+    siteId?: string;
+  }): Promise<IncidentDashboardStats> {
+    const baseMatch: any = {};
+
+    if (filters?.assignedToCin) {
+      baseMatch.assignedToCin = filters.assignedToCin;
+    }
+    if (filters?.projectId && Types.ObjectId.isValid(filters.projectId)) {
+      baseMatch.project = new Types.ObjectId(filters.projectId);
+    }
+    if (filters?.siteId && Types.ObjectId.isValid(filters.siteId)) {
+      baseMatch.site = new Types.ObjectId(filters.siteId);
+    }
+
+    const [summaryRow] = await this.incidentModel
+      .aggregate([
+        { $match: baseMatch },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: 1 },
+            open: {
+              $sum: {
+                $cond: [{ $eq: ["$status", IncidentStatus.OPEN] }, 1, 0],
+              },
+            },
+            investigating: {
+              $sum: {
+                $cond: [{ $eq: ["$status", IncidentStatus.INVESTIGATING] }, 1, 0],
+              },
+            },
+            resolved: {
+              $sum: {
+                $cond: [{ $eq: ["$status", IncidentStatus.RESOLVED] }, 1, 0],
+              },
+            },
+            closed: {
+              $sum: {
+                $cond: [{ $eq: ["$status", IncidentStatus.CLOSED] }, 1, 0],
+              },
+            },
+            critical: {
+              $sum: {
+                $cond: [{ $eq: ["$severity", IncidentSeverity.CRITICAL] }, 1, 0],
+              },
+            },
+            high: {
+              $sum: {
+                $cond: [{ $eq: ["$severity", IncidentSeverity.HIGH] }, 1, 0],
+              },
+            },
+            assigned: {
+              $sum: {
+                $cond: [{ $ifNull: ["$assignedToCin", false] }, 1, 0],
+              },
+            },
+          },
+        },
+      ])
+      .exec();
+
+    const total = summaryRow?.total ?? 0;
+    const resolvedLike = (summaryRow?.resolved ?? 0) + (summaryRow?.closed ?? 0);
+
+    const summary = {
+      total,
+      open: summaryRow?.open ?? 0,
+      investigating: summaryRow?.investigating ?? 0,
+      resolved: summaryRow?.resolved ?? 0,
+      closed: summaryRow?.closed ?? 0,
+      critical: summaryRow?.critical ?? 0,
+      high: summaryRow?.high ?? 0,
+      assigned: summaryRow?.assigned ?? 0,
+      unassigned: Math.max(0, total - (summaryRow?.assigned ?? 0)),
+      resolutionRate: total > 0 ? Math.round((resolvedLike / total) * 1000) / 10 : 0,
+    };
+
+    const [severityRows, statusRows, typeRows, userRows, projectRows, siteRows, trendRows] =
+      await Promise.all([
+        this.incidentModel
+          .aggregate([
+            { $match: baseMatch },
+            { $group: { _id: "$severity", value: { $sum: 1 } } },
+          ])
+          .exec(),
+        this.incidentModel
+          .aggregate([
+            { $match: baseMatch },
+            { $group: { _id: "$status", value: { $sum: 1 } } },
+          ])
+          .exec(),
+        this.incidentModel
+          .aggregate([
+            { $match: baseMatch },
+            { $group: { _id: "$type", value: { $sum: 1 } } },
+          ])
+          .exec(),
+        this.incidentModel
+          .aggregate([
+            { $match: baseMatch },
+            {
+              $addFields: {
+                entityKey: { $ifNull: ["$assignedToCin", "unassigned"] },
+              },
+            },
+            {
+              $group: {
+                _id: "$entityKey",
+                total: { $sum: 1 },
+                open: {
+                  $sum: {
+                    $cond: [
+                      {
+                        $in: [
+                          "$status",
+                          [IncidentStatus.OPEN, IncidentStatus.INVESTIGATING],
+                        ],
+                      },
+                      1,
+                      0,
+                    ],
+                  },
+                },
+                critical: {
+                  $sum: {
+                    $cond: [
+                      {
+                        $in: [
+                          "$severity",
+                          [IncidentSeverity.CRITICAL, IncidentSeverity.HIGH],
+                        ],
+                      },
+                      1,
+                      0,
+                    ],
+                  },
+                },
+                resolved: {
+                  $sum: {
+                    $cond: [
+                      {
+                        $in: [
+                          "$status",
+                          [IncidentStatus.RESOLVED, IncidentStatus.CLOSED],
+                        ],
+                      },
+                      1,
+                      0,
+                    ],
+                  },
+                },
+              },
+            },
+            { $sort: { total: -1 } },
+            { $limit: 8 },
+          ])
+          .exec(),
+        this.incidentModel
+          .aggregate([
+            { $match: baseMatch },
+            {
+              $addFields: {
+                entityKey: {
+                  $cond: [
+                    { $ifNull: ["$project", false] },
+                    { $toString: "$project" },
+                    "no-project",
+                  ],
+                },
+              },
+            },
+            {
+              $group: {
+                _id: "$entityKey",
+                total: { $sum: 1 },
+                open: {
+                  $sum: {
+                    $cond: [
+                      {
+                        $in: [
+                          "$status",
+                          [IncidentStatus.OPEN, IncidentStatus.INVESTIGATING],
+                        ],
+                      },
+                      1,
+                      0,
+                    ],
+                  },
+                },
+                critical: {
+                  $sum: {
+                    $cond: [
+                      {
+                        $in: [
+                          "$severity",
+                          [IncidentSeverity.CRITICAL, IncidentSeverity.HIGH],
+                        ],
+                      },
+                      1,
+                      0,
+                    ],
+                  },
+                },
+                resolved: {
+                  $sum: {
+                    $cond: [
+                      {
+                        $in: [
+                          "$status",
+                          [IncidentStatus.RESOLVED, IncidentStatus.CLOSED],
+                        ],
+                      },
+                      1,
+                      0,
+                    ],
+                  },
+                },
+              },
+            },
+            { $sort: { total: -1 } },
+            { $limit: 8 },
+          ])
+          .exec(),
+        this.incidentModel
+          .aggregate([
+            { $match: baseMatch },
+            {
+              $addFields: {
+                entityKey: {
+                  $cond: [
+                    { $ifNull: ["$site", false] },
+                    { $toString: "$site" },
+                    "no-site",
+                  ],
+                },
+              },
+            },
+            {
+              $group: {
+                _id: "$entityKey",
+                total: { $sum: 1 },
+                open: {
+                  $sum: {
+                    $cond: [
+                      {
+                        $in: [
+                          "$status",
+                          [IncidentStatus.OPEN, IncidentStatus.INVESTIGATING],
+                        ],
+                      },
+                      1,
+                      0,
+                    ],
+                  },
+                },
+                critical: {
+                  $sum: {
+                    $cond: [
+                      {
+                        $in: [
+                          "$severity",
+                          [IncidentSeverity.CRITICAL, IncidentSeverity.HIGH],
+                        ],
+                      },
+                      1,
+                      0,
+                    ],
+                  },
+                },
+                resolved: {
+                  $sum: {
+                    $cond: [
+                      {
+                        $in: [
+                          "$status",
+                          [IncidentStatus.RESOLVED, IncidentStatus.CLOSED],
+                        ],
+                      },
+                      1,
+                      0,
+                    ],
+                  },
+                },
+              },
+            },
+            { $sort: { total: -1 } },
+            { $limit: 8 },
+          ])
+          .exec(),
+        this.incidentModel
+          .aggregate([
+            {
+              $match: {
+                ...baseMatch,
+                createdAt: {
+                  $gte: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7),
+                },
+              },
+            },
+            {
+              $group: {
+                _id: {
+                  $dateToString: {
+                    format: "%Y-%m-%d",
+                    date: "$createdAt",
+                  },
+                },
+                total: { $sum: 1 },
+                resolved: {
+                  $sum: {
+                    $cond: [
+                      {
+                        $in: [
+                          "$status",
+                          [IncidentStatus.RESOLVED, IncidentStatus.CLOSED],
+                        ],
+                      },
+                      1,
+                      0,
+                    ],
+                  },
+                },
+                critical: {
+                  $sum: {
+                    $cond: [
+                      {
+                        $in: [
+                          "$severity",
+                          [IncidentSeverity.CRITICAL, IncidentSeverity.HIGH],
+                        ],
+                      },
+                      1,
+                      0,
+                    ],
+                  },
+                },
+              },
+            },
+            { $sort: { _id: 1 } },
+          ])
+          .exec(),
+      ]);
+
+    const toBucket = (rows: Array<{ _id: string; value: number }>) =>
+      rows.map((r) => ({ label: r._id || "unknown", value: r.value }));
+
+    const toEntityBuckets = (
+      rows: Array<{
+        _id: string;
+        total: number;
+        open: number;
+        critical: number;
+        resolved: number;
+      }>,
+    ) =>
+      rows.map((r) => ({
+        label: r._id || "unknown",
+        total: r.total ?? 0,
+        open: r.open ?? 0,
+        critical: r.critical ?? 0,
+        resolved: r.resolved ?? 0,
+      }));
+
+    return {
+      summary,
+      bySeverity: toBucket(severityRows),
+      byStatus: toBucket(statusRows),
+      byType: toBucket(typeRows),
+      byUser: toEntityBuckets(userRows),
+      byProject: toEntityBuckets(projectRows),
+      bySite: toEntityBuckets(siteRows),
+      trend: trendRows.map((r) => ({
+        date: r._id,
+        total: r.total ?? 0,
+        resolved: r.resolved ?? 0,
+        critical: r.critical ?? 0,
+      })),
+      updatedAt: new Date().toISOString(),
+    };
   }
 }

@@ -10,6 +10,8 @@ export class AppController {
     process.env.GESTION_PLANING_URL ?? 'http://localhost:3002';
   private readonly notificationServiceUrl =
     process.env.NOTIFICATION_SERVICE_URL ?? 'http://localhost:3004';
+  private readonly videocallServiceUrl =
+    process.env.VIDEOCALL_SERVICE_URL ?? 'http://localhost:9000';
 
   private async proxyToPlanning(req: Request, res: Response): Promise<void> {
     const pathAndQuery = req.originalUrl.replace(/^\/(planing|planning)/, '');
@@ -89,6 +91,68 @@ export class AppController {
   ): Promise<void> {
     const pathAndQuery = req.originalUrl.replace(/^\/notification/, '');
     const targetUrl = new URL(pathAndQuery || '/', this.notificationServiceUrl);
+
+    const forwardedHeaders = new Headers();
+
+    Object.entries(req.headers).forEach(([key, value]) => {
+      if (value === undefined) {
+        return;
+      }
+
+      const lowerKey = key.toLowerCase();
+
+      if (lowerKey === 'host' || lowerKey === 'content-length') {
+        return;
+      }
+
+      if (Array.isArray(value)) {
+        value.forEach((item) => forwardedHeaders.append(key, item));
+        return;
+      }
+
+      forwardedHeaders.set(key, value);
+    });
+
+    const supportsBody = !['GET', 'HEAD'].includes(req.method.toUpperCase());
+    let body: BodyInit | undefined;
+
+    if (supportsBody && req.body !== undefined && req.body !== null) {
+      if (typeof req.body === 'string') {
+        body = req.body;
+      } else if (Buffer.isBuffer(req.body)) {
+        body = new Uint8Array(req.body);
+      } else {
+        body = JSON.stringify(req.body);
+      }
+    }
+
+    const upstreamResponse = await fetch(targetUrl, {
+      method: req.method,
+      headers: forwardedHeaders,
+      body,
+    });
+
+    res.status(upstreamResponse.status);
+
+    upstreamResponse.headers.forEach((value, key) => {
+      if (key.toLowerCase() === 'transfer-encoding') {
+        return;
+      }
+
+      res.setHeader(key, value);
+    });
+
+    const rawBody = await upstreamResponse.text();
+    res.send(rawBody);
+  }
+
+  @All(['videocall', 'videocall/*path', 'video-call', 'video-call/*path'])
+  async handleVideocallProxy(
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<void> {
+    const pathAndQuery = req.originalUrl.replace(/^\/(videocall|video-call)/, '');
+    const targetUrl = new URL(pathAndQuery || '/', this.videocallServiceUrl);
 
     const forwardedHeaders = new Headers();
 

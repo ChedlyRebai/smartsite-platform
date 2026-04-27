@@ -43,7 +43,7 @@ export class AIRecommendationService {
         ...this.generateTimelineRecommendations(analysis),
         ...this.generateResourceAllocationRecommendations(analysis),
         ...this.generateIndividualTaskManagementRecommendations(analysis),
-        ...this.generateIncidentRecommendations(request.incidents || [], request.budget, request.budgetScope || 'site', request.siteId || request.projectId),
+        ...this.generateIncidentRecommendations(request.incidents || [], request.budget, request.budgetScope || 'site'),
       ];
 
       // Tri par priorité

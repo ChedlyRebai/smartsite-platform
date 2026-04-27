@@ -32,9 +32,12 @@ export const translations = {
         step1: "1. Personal Info",
         step2: "2. Criteria",
         step3: "3. Regulations",
-        step1Description: "Fill in your information, then validate to read the conditions one by one.",
-        step2Description: "Read the criteria carefully. Click the button when you accept them.",
-        step3Description: "Final step: read the regulations then send your registration request.",
+        step1Description:
+          "Fill in your information, then validate to read the conditions one by one.",
+        step2Description:
+          "Read the criteria carefully. Click the button when you accept them.",
+        step3Description:
+          "Final step: read the regulations then send your registration request.",
         cin: "CIN *",
         cinPlaceholder: "Enter your CIN",
         emailPlaceholder: "Enter your email",
@@ -44,7 +47,8 @@ export const translations = {
         countryCodePlaceholder: "Code",
         phone: "Phone *",
         phonePlaceholder: "12345678",
-        phoneDescription: "Enter numbers only, country code is selected on the left.",
+        phoneDescription:
+          "Enter numbers only, country code is selected on the left.",
         country: "Country *",
         countryPlaceholder: "Tunisia",
         city: "City *",
@@ -57,17 +61,24 @@ export const translations = {
         rolePlaceholder: "Select a role",
         continueButton: "Continue to acceptance criteria",
         acceptanceCriteriaTitle: "📋 Acceptance Criteria",
-        acceptanceCriteriaIntro: "Before submitting your registration request, please note that:",
-        acceptanceCriteria1: "The information provided must be accurate and verifiable",
-        acceptanceCriteria2: "The profile must match the requirements of the requested role",
-        acceptanceCriteria3: "A verification will be performed by our administrative team",
+        acceptanceCriteriaIntro:
+          "Before submitting your registration request, please note that:",
+        acceptanceCriteria1:
+          "The information provided must be accurate and verifiable",
+        acceptanceCriteria2:
+          "The profile must match the requirements of the requested role",
+        acceptanceCriteria3:
+          "A verification will be performed by our administrative team",
         acceptanceCriteria4: "The approval process may take 24-48 hours",
-        acceptanceCriteria5: "A confirmation email will be sent after validation",
-        acceptanceCriteriaScroll: "Scroll the text above if needed, then confirm your agreement.",
+        acceptanceCriteria5:
+          "A confirmation email will be sent after validation",
+        acceptanceCriteriaScroll:
+          "Scroll the text above if needed, then confirm your agreement.",
         backToForm: "Back to form",
         acceptButton: "I have read and accept these criteria",
         platformRegulationsTitle: "📜 Platform Regulations",
-        platformRegulationsIntro: "By using the SmartSite platform, you commit to respecting:",
+        platformRegulationsIntro:
+          "By using the SmartSite platform, you commit to respecting:",
         regulation1: "Privacy and security policies",
         regulation2: "Provide accurate and up-to-date information",
         regulation3: "Use the platform for professional purposes only",
@@ -75,7 +86,8 @@ export const translations = {
         regulation5: "Respect other users and collaborators",
         regulation6: "Report any issues or anomalies promptly",
         regulation7: "Accept final administrative decisions",
-        regulationWarning: "Any violation of the regulations may result in the suspension or deletion of your account.",
+        regulationWarning:
+          "Any violation of the regulations may result in the suspension or deletion of your account.",
         backToCriteria: "Back to criteria",
         acceptRegulationButton: "I accept the regulations and send my request",
         sending: "Sending...",
@@ -83,7 +95,8 @@ export const translations = {
       },
       forgotPassword: {
         title: "Forgot your password?",
-        description: "Enter your email and we'll send you a link to reset your password",
+        description:
+          "Enter your email and we'll send you a link to reset your password",
         email: "Email address",
         sendReset: "Send reset link",
         backToLogin: "Back to login",
@@ -91,8 +104,10 @@ export const translations = {
     },
     hero: {
       subtitle: "Intelligent construction platform",
-      title: "SmartSite: Manage your construction sites with artificial intelligence",
-      description: "Real-time tracking, AI predictions for delays and risks, automatic alerts, instant reports, mobile app for the field. Control costs, deadlines, and security like never before.",
+      title:
+        "SmartSite: Manage your construction sites with artificial intelligence",
+      description:
+        "Real-time tracking, AI predictions for delays and risks, automatic alerts, instant reports, mobile app for the field. Control costs, deadlines, and security like never before.",
       discoverBtn: "Discover the platform",
       previewBtn: "See the overview",
     },
@@ -103,9 +118,12 @@ export const translations = {
     },
     mission: {
       title: "Our Mission",
-      subtitle: "Transforming construction site management in the Maghreb with AI: fewer delays, fewer accidents, more profitability.",
-      description: "SmartSite centralizes all your construction site data (progress, resources, security, budget) and uses artificial intelligence to predict risks, optimize schedules, and generate automatic reports. Adapted for Tunisian companies, from small construction sites to large infrastructure.",
-      footer: "Available on web and mobile, even with limited connection on the field. Try for free and take control today.",
+      subtitle:
+        "Transforming construction site management in the Maghreb with AI: fewer delays, fewer accidents, more profitability.",
+      description:
+        "SmartSite centralizes all your construction site data (progress, resources, security, budget) and uses artificial intelligence to predict risks, optimize schedules, and generate automatic reports. Adapted for Tunisian companies, from small construction sites to large infrastructure.",
+      footer:
+        "Available on web and mobile, even with limited connection on the field. Try for free and take control today.",
     },
     statsDetail: {
       activeSites: "Active construction sites",
@@ -115,13 +133,15 @@ export const translations = {
     cta: {
       title: "Take Control of Your Construction Projects.",
       subtitle: "Build Smarter Starting Today.",
-      description: "Manage workers, materials, budgets, and deadlines in one powerful platform designed specifically for construction companies. Reduce delays, cut costs, and improve site productivity.",
+      description:
+        "Manage workers, materials, budgets, and deadlines in one powerful platform designed specifically for construction companies. Reduce delays, cut costs, and improve site productivity.",
       startTrial: "Start Free Trial",
       requestDemo: "Request Demo",
     },
     values: {
       title: "Our Values",
-      subtitle: "Building the future of construction sites with precision, innovation, and field proximity.",
+      subtitle:
+        "Building the future of construction sites with precision, innovation, and field proximity.",
       excellence: {
         title: "Excellence on site",
         desc: "Control every detail of your construction sites in real-time with reliable and intuitive tools.",
@@ -149,7 +169,8 @@ export const translations = {
     },
     buildSmarter: {
       title: "Build Smarter. Deliver Projects On Time.",
-      description: "Our construction management platform helps contractors and engineers reduce delays, control costs, and improve productivity across all active sites.",
+      description:
+        "Our construction management platform helps contractors and engineers reduce delays, control costs, and improve productivity across all active sites.",
       stats: {
         projects: "Active Construction Projects",
         companies: "Companies Using Our Platform",
@@ -160,7 +181,8 @@ export const translations = {
     features: {
       title: "Smart Construction Management",
       subtitle: "Manage Your Construction Sites Efficiently",
-      description: "Control projects, workers, materials, and budgets in one centralized platform designed specifically for construction teams.",
+      description:
+        "Control projects, workers, materials, and budgets in one centralized platform designed specifically for construction teams.",
       tracking: {
         title: "Real-Time Project Tracking",
         desc: "Monitor progress, deadlines, and task completion across all active construction sites.",
@@ -180,7 +202,8 @@ export const translations = {
       company: "Company",
       legal: "Legal",
       newsletter: "Subscribe to our newsletter",
-      newsletterDesc: "The latest news, articles, and resources, sent to your inbox weekly.",
+      newsletterDesc:
+        "The latest news, articles, and resources, sent to your inbox weekly.",
       copyright: "© 2026 SmartSite. All rights reserved.",
     },
     dashboard: {
@@ -198,7 +221,10 @@ export const translations = {
       loadingDashboard: "Loading dashboard...",
       criticalIncidents: "Critical Incidents",
       activeSites: "Active Sites",
-      teamMembers: "Team Members",
+       totalSites: "Total Sites",
+       active: "active",
+       sitesTotal: "sites total",
+       teamMembers: "Team Members",
       total: "total",
       urgentTasks: "Urgent Tasks",
       completedTasks: "Completed Tasks",
@@ -225,7 +251,8 @@ export const translations = {
       noSitesFound: "No sites found",
       noProjectsFound: "No projects found",
       noTeamMembersFound: "No team members found",
-      progress: "Progress",    },
+      progress: "Progress",
+    },
     common: {
       loading: "Loading...",
       error: "Error",
@@ -303,7 +330,8 @@ export const translations = {
       materialSupplierListTitle: "Material Supplier List",
       materialSupplierListSubtitle: "View all suppliers for a given material",
       supplierMaterialListTitle: "Supplier Material List",
-      supplierMaterialListSubtitle: "View all materials provided by a given supplier",
+      supplierMaterialListSubtitle:
+        "View all materials provided by a given supplier",
       selectMaterial: "Select Material",
       selectSupplier: "Select Supplier",
       selectMaterialPlaceholder: "Select a material...",
@@ -361,16 +389,16 @@ export const translations = {
       reports: "Reports",
       map: "Map View",
       catalog: "Catalog",
-      "supplier_materials": "Supplier Materials",
-      "material_suppliers": "Material Suppliers",
-      "suppliers_comparison": "Supplier Comparison",
-      "resource_optimization": "Resource Optimization",
-      "checkout_simulator": "Checkout Simulator",
-      "user_guide": "User Guide",
+      supplier_materials: "Supplier Materials",
+      material_suppliers: "Material Suppliers",
+      suppliers_comparison: "Supplier Comparison",
+      resource_optimization: "Resource Optimization",
+      checkout_simulator: "Checkout Simulator",
+      user_guide: "User Guide",
       "admin.pending_users": "Pending Approvals",
       "admin.system_logs": "System Logs",
-      "my_sites": "My tasks",
-      "my_team_members": "My Team",
+      my_sites: "My tasks",
+      my_team_members: "My Team",
       dashboard: "Dashboard",
     },
     systemLogs: {
@@ -502,9 +530,12 @@ export const translations = {
         step1: "1. Informations personnelles",
         step2: "2. Critères",
         step3: "3. Règlements",
-        step1Description: "Remplissez vos informations, puis validez pour lire les conditions une par une.",
-        step2Description: "Lisez attentivement les critères. Cliquez sur le bouton lorsque vous les acceptez.",
-        step3Description: "Étape finale: lisez les règlements puis envoyez votre demande d'inscription.",
+        step1Description:
+          "Remplissez vos informations, puis validez pour lire les conditions une par une.",
+        step2Description:
+          "Lisez attentivement les critères. Cliquez sur le bouton lorsque vous les acceptez.",
+        step3Description:
+          "Étape finale: lisez les règlements puis envoyez votre demande d'inscription.",
         cin: "CIN *",
         cinPlaceholder: "Entrez votre CIN",
         emailPlaceholder: "Entrez votre e-mail",
@@ -514,7 +545,8 @@ export const translations = {
         countryCodePlaceholder: "Code",
         phone: "Téléphone *",
         phonePlaceholder: "12345678",
-        phoneDescription: "Entrez les chiffres uniquement, le code pays est sélectionné à gauche.",
+        phoneDescription:
+          "Entrez les chiffres uniquement, le code pays est sélectionné à gauche.",
         country: "Pays *",
         countryPlaceholder: "Tunisie",
         city: "Ville *",
@@ -527,25 +559,35 @@ export const translations = {
         rolePlaceholder: "Sélectionnez un rôle",
         continueButton: "Continuer vers les critères d'acceptation",
         acceptanceCriteriaTitle: "📋 Critères d'acceptation",
-        acceptanceCriteriaIntro: "Avant de soumettre votre demande d'inscription, veuillez noter que:",
-        acceptanceCriteria1: "Les informations fournies doivent être exactes et vérifiables",
-        acceptanceCriteria2: "Le profil doit correspondre aux exigences du rôle demandé",
-        acceptanceCriteria3: "Une vérification sera effectuée par notre équipe administrative",
-        acceptanceCriteria4: "Le processus d'approbation peut prendre 24 à 48 heures",
-        acceptanceCriteria5: "Un e-mail de confirmation sera envoyé après validation",
-        acceptanceCriteriaScroll: "Faites défiler le texte ci-dessus si nécessaire, puis confirmez votre accord.",
+        acceptanceCriteriaIntro:
+          "Avant de soumettre votre demande d'inscription, veuillez noter que:",
+        acceptanceCriteria1:
+          "Les informations fournies doivent être exactes et vérifiables",
+        acceptanceCriteria2:
+          "Le profil doit correspondre aux exigences du rôle demandé",
+        acceptanceCriteria3:
+          "Une vérification sera effectuée par notre équipe administrative",
+        acceptanceCriteria4:
+          "Le processus d'approbation peut prendre 24 à 48 heures",
+        acceptanceCriteria5:
+          "Un e-mail de confirmation sera envoyé après validation",
+        acceptanceCriteriaScroll:
+          "Faites défiler le texte ci-dessus si nécessaire, puis confirmez votre accord.",
         backToForm: "Retour au formulaire",
         acceptButton: "J'ai lu et accepte ces critères",
         platformRegulationsTitle: "📜 Règlements de la plateforme",
-        platformRegulationsIntro: "En utilisant la plateforme SmartSite, vous vous engagez à respecter:",
+        platformRegulationsIntro:
+          "En utilisant la plateforme SmartSite, vous vous engagez à respecter:",
         regulation1: "Politiques de confidentialité et de sécurité",
         regulation2: "Fournir des informations exactes et à jour",
-        regulation3: "Utiliser la plateforme à des fins professionnelles uniquement",
+        regulation3:
+          "Utiliser la plateforme à des fins professionnelles uniquement",
         regulation4: "Ne pas partager vos identifiants avec des tiers",
         regulation5: "Respecter les autres utilisateurs et collaborateurs",
         regulation6: "Signaler rapidement tout problème ou anomalie",
         regulation7: "Accepter les décisions administratives finales",
-        regulationWarning: "Toute violation des règlements peut entraîner la suspension ou la suppression de votre compte.",
+        regulationWarning:
+          "Toute violation des règlements peut entraîner la suspension ou la suppression de votre compte.",
         backToCriteria: "Retour aux critères",
         acceptRegulationButton: "J'accepte les règlements et envoie ma demande",
         sending: "Envoi en cours...",
@@ -553,7 +595,8 @@ export const translations = {
       },
       forgotPassword: {
         title: "Mot de passe oublié?",
-        description: "Entrez votre e-mail et nous vous enverrons un lien pour réinitialiser votre mot de passe",
+        description:
+          "Entrez votre e-mail et nous vous enverrons un lien pour réinitialiser votre mot de passe",
         email: "Adresse e-mail",
         sendReset: "Envoyer le lien de réinitialisation",
         backToLogin: "Retour à la connexion",
@@ -562,7 +605,8 @@ export const translations = {
     hero: {
       subtitle: "Plateforme de construction intelligente",
       title: "SmartSite : Gérez vos chantiers avec l'intelligence artificielle",
-      description: "Suivi en temps réel, prédictions IA des retards et risques, alertes automatiques, rapports instantanés, application mobile sur le terrain. Contrôlez les coûts, les délais et la sécurité comme jamais auparavant.",
+      description:
+        "Suivi en temps réel, prédictions IA des retards et risques, alertes automatiques, rapports instantanés, application mobile sur le terrain. Contrôlez les coûts, les délais et la sécurité comme jamais auparavant.",
       discoverBtn: "Découvrir la plateforme",
       previewBtn: "Voir l'aperçu",
     },
@@ -573,9 +617,12 @@ export const translations = {
     },
     mission: {
       title: "Notre Mission",
-      subtitle: "Transformer la gestion des chantiers du Maghreb avec l'IA : moins de retards, moins d'accidents, plus de rentabilité.",
-      description: "SmartSite centralise toutes vos données de chantier (progression, ressources, sécurité, budget) et utilise l'intelligence artificielle pour prédire les risques, optimiser les plannings et générer des rapports automatiques. Adapté aux entreprises tunisiennes, des petits chantiers aux grandes infrastructures.",
-      footer: "Disponible sur web et mobile, même avec connexion limitée sur le terrain. Essayez gratuitement et prenez le contrôle aujourd'hui.",
+      subtitle:
+        "Transformer la gestion des chantiers du Maghreb avec l'IA : moins de retards, moins d'accidents, plus de rentabilité.",
+      description:
+        "SmartSite centralise toutes vos données de chantier (progression, ressources, sécurité, budget) et utilise l'intelligence artificielle pour prédire les risques, optimiser les plannings et générer des rapports automatiques. Adapté aux entreprises tunisiennes, des petits chantiers aux grandes infrastructures.",
+      footer:
+        "Disponible sur web et mobile, même avec connexion limitée sur le terrain. Essayez gratuitement et prenez le contrôle aujourd'hui.",
     },
     statsDetail: {
       activeSites: "Chantiers actifs",
@@ -585,13 +632,15 @@ export const translations = {
     cta: {
       title: "Prenez le Contrôle de Vos Projets de Construction.",
       subtitle: "Construisez Plus Intelligemment Dès Aujourd'hui.",
-      description: "Gérez les travailleurs, les matériaux, les budgets et les délais dans une seule plateforme puissante conçue spécifiquement pour les entreprises de construction. Réduisez les retards, coupez les coûts et améliorez la productivité du chantier.",
+      description:
+        "Gérez les travailleurs, les matériaux, les budgets et les délais dans une seule plateforme puissante conçue spécifiquement pour les entreprises de construction. Réduisez les retards, coupez les coûts et améliorez la productivité du chantier.",
       startTrial: "Commencer l'essai gratuit",
       requestDemo: "Demander une démo",
     },
     values: {
       title: "Nos Valeurs",
-      subtitle: "Construire l'avenir des chantiers avec précision, innovation et proximité terrain.",
+      subtitle:
+        "Construire l'avenir des chantiers avec précision, innovation et proximité terrain.",
       excellence: {
         title: "Excellence sur le chantier",
         desc: "Contrôlez chaque détail de vos chantiers en temps réel avec des outils fiables et intuitifs.",
@@ -619,7 +668,8 @@ export const translations = {
     },
     buildSmarter: {
       title: "Construisez Intelligemment. Livrez les Projets à Temps.",
-      description: "Notre plateforme de gestion de construction aide les entrepreneurs et les ingénieurs à réduire les retards, maîtriser les coûts et améliorer la productivité sur tous les chantiers actifs.",
+      description:
+        "Notre plateforme de gestion de construction aide les entrepreneurs et les ingénieurs à réduire les retards, maîtriser les coûts et améliorer la productivité sur tous les chantiers actifs.",
       stats: {
         projects: "Projets de Construction Actifs",
         companies: "Entreprises utilisant notre plateforme",
@@ -630,7 +680,8 @@ export const translations = {
     features: {
       title: "Gestion de Construction Intelligente",
       subtitle: "Gérez Efficacement Vos Chantiers",
-      description: "Gérez les projets, les travailleurs, les matériaux et les budgets dans une seule plateforme centralisée conçue spécifiquement pour les équipes de construction.",
+      description:
+        "Gérez les projets, les travailleurs, les matériaux et les budgets dans une seule plateforme centralisée conçue spécifiquement pour les équipes de construction.",
       tracking: {
         title: "Suivi de Projet en Temps Réel",
         desc: "Suivez la progression, les délais et l'achèvement des tâches sur tous les chantiers actifs.",
@@ -650,7 +701,8 @@ export const translations = {
       company: "Entreprise",
       legal: "Légal",
       newsletter: "Abonnez-vous à notre newsletter",
-      newsletterDesc: "Les dernières nouvelles, articles et ressources, envoyés à votre boîte de réception hebdomadaire.",
+      newsletterDesc:
+        "Les dernières nouvelles, articles et ressources, envoyés à votre boîte de réception hebdomadaire.",
       copyright: "© 2026 SmartSite. Tous droits réservés.",
     },
     dashboard: {
@@ -668,7 +720,10 @@ export const translations = {
       loadingDashboard: "Chargement du tableau de bord...",
       criticalIncidents: "Incidents critiques",
       activeSites: "Chantiers actifs",
-      teamMembers: "Membres de l'équipe",
+        totalSites: "Total Chantiers",
+        active: "actifs",
+        sitesTotal: "sites au total",
+        teamMembers: "Membres de l'équipe",
       total: "total",
       urgentTasks: "Tâches urgentes",
       completedTasks: "Tâches complétées",
@@ -682,7 +737,8 @@ export const translations = {
       noResultsFound: "Aucun incident trouvé pour cette recherche",
       noUrgent: "Aucun élément urgent",
       noRecentSites: "Aucun chantier récent",
-      superAdminOverview: "Vue d'ensemble du système - Tableau de bord Super Administrateur",
+      superAdminOverview:
+        "Vue d'ensemble du système - Tableau de bord Super Administrateur",
       totalProjects: "Projets totaux",
       totalBudget: "Budget total",
       activeProjects: "Projets actifs",
@@ -835,22 +891,23 @@ export const translations = {
       reports: "Rapports",
       map: "Carte",
       catalog: "Catalogue",
-      "supplier_materials": "Matériaux fournisseurs",
-      "material_suppliers": "Fournisseurs par matériau",
-      "suppliers_comparison": "Comparaison fournisseurs",
-      "resource_optimization": "Optimisation des ressources",
-      "checkout_simulator": "Simulateur de paiement",
-      "user_guide": "Guide utilisateur",
+      supplier_materials: "Matériaux fournisseurs",
+      material_suppliers: "Fournisseurs par matériau",
+      suppliers_comparison: "Comparaison fournisseurs",
+      resource_optimization: "Optimisation des ressources",
+      checkout_simulator: "Simulateur de paiement",
+      user_guide: "Guide utilisateur",
       "admin.pending_users": "Approbations en attente",
       "admin.system_logs": "Journaux système",
-      "my_sites": "Mes tâches",
-      "my_team_members": "Mon équipe",
+      my_sites: "Mes tâches",
+      my_team_members: "Mon équipe",
       dashboard: "Tableau de bord",
     },
     systemLogs: {
       title: "Journaux système et traçabilité d'audit",
       subtitle: "Surveillance des actions et détection d'anomalies",
-      retention: "Rétention automatique : {days} jours. Suppression manuelle désactivée.",
+      retention:
+        "Rétention automatique : {days} jours. Suppression manuelle désactivée.",
       filters: "Filtres",
       user: "Utilisateur",
       all: "Tous",
@@ -978,8 +1035,10 @@ export const translations = {
         step2: "2. المعايير",
         step3: "3. الأنظمة",
         step1Description: "أدخل معلوماتك، ثم تحقق من الشروط واحدًا تلو الآخر.",
-        step2Description: "اقرأ المعايير بعناية. انقر على الزر عندما توافق عليها.",
-        step3Description: "الخطوة الأخيرة: اقرأ الأنظمة ثم أرسل طلب التسجيل الخاص بك.",
+        step2Description:
+          "اقرأ المعايير بعناية. انقر على الزر عندما توافق عليها.",
+        step3Description:
+          "الخطوة الأخيرة: اقرأ الأنظمة ثم أرسل طلب التسجيل الخاص بك.",
         cin: "رقم التعريف *",
         cinPlaceholder: "أدخل رقم التعريف الخاص بك",
         emailPlaceholder: "أدخل بريدك الإلكتروني",
@@ -1002,17 +1061,22 @@ export const translations = {
         rolePlaceholder: "اختر دورًا",
         continueButton: "المتابعة إلى معايير القبول",
         acceptanceCriteriaTitle: "📋 معايير القبول",
-        acceptanceCriteriaIntro: "قبل تقديم طلب التسجيل الخاص بك، يرجى ملاحظة ما يلي:",
-        acceptanceCriteria1: "يجب أن تكون المعلومات المقدمة دقيقة وقابلة للتحقق منها",
-        acceptanceCriteria2: "يجب أن يتطابق الملف الشخصي مع متطلبات الدور المطلوب",
+        acceptanceCriteriaIntro:
+          "قبل تقديم طلب التسجيل الخاص بك، يرجى ملاحظة ما يلي:",
+        acceptanceCriteria1:
+          "يجب أن تكون المعلومات المقدمة دقيقة وقابلة للتحقق منها",
+        acceptanceCriteria2:
+          "يجب أن يتطابق الملف الشخصي مع متطلبات الدور المطلوب",
         acceptanceCriteria3: "سيتم إجراء التحقق من قبل فريقنا الإداري",
         acceptanceCriteria4: "قد تستغرق عملية الموافقة 24-48 ساعة",
         acceptanceCriteria5: "سيتم إرسال بريد إلكتروني للتأكيد بعد التحقق",
-        acceptanceCriteriaScroll: "قم بالتمرير فوق النص أعلاه إذا لزم الأمر، ثم أكد موافقتك.",
+        acceptanceCriteriaScroll:
+          "قم بالتمرير فوق النص أعلاه إذا لزم الأمر، ثم أكد موافقتك.",
         backToForm: "العودة إلى النموذج",
         acceptButton: "لقد قرأت وأقبل هذه المعايير",
         platformRegulationsTitle: "📜 أنظمة المنصة",
-        platformRegulationsIntro: "باستخدام منصة SmartSite، فإنك توافق على احترام:",
+        platformRegulationsIntro:
+          "باستخدام منصة SmartSite، فإنك توافق على احترام:",
         regulation1: "سياسات الخصوصية والأمان",
         regulation2: "تقديم معلومات دقيقة وحديثة",
         regulation3: "استخدام المنصة للأغراض المهنية فقط",
@@ -1028,7 +1092,8 @@ export const translations = {
       },
       forgotPassword: {
         title: "هل نسيت كلمة المرور؟",
-        description: "أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور",
+        description:
+          "أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور",
         email: "عنوان البريد الإلكتروني",
         sendReset: "إرسال رابط إعادة التعيين",
         backToLogin: "العودة إلى تسجيل الدخول",
@@ -1037,7 +1102,8 @@ export const translations = {
     hero: {
       subtitle: "منصة البناء الذكية",
       title: "SmartSite: أدر مشاريع البناء الخاصة بك بالذكاء الاصطناعي",
-      description: "التتبع في الوقت الفعلي، تنبؤات الذكاء الاصطناعي للتأخيرات والمخاطر، التنبيهات التلقائية، التقارير الفورية، تطبيق جوال في الميدان. تحكم في التكاليف والمواعيد والأمان كما لم يحدث من قبل.",
+      description:
+        "التتبع في الوقت الفعلي، تنبؤات الذكاء الاصطناعي للتأخيرات والمخاطر، التنبيهات التلقائية، التقارير الفورية، تطبيق جوال في الميدان. تحكم في التكاليف والمواعيد والأمان كما لم يحدث من قبل.",
       discoverBtn: "اكتشف المنصة",
       previewBtn: "اعرض المعاينة",
     },
@@ -1048,9 +1114,12 @@ export const translations = {
     },
     mission: {
       title: "مهمتنا",
-      subtitle: "تحويل إدارة مشاريع البناء في المغرب العربي باستخدام الذكاء الاصطناعي: تأخيرات أقل، حوادث أقل، ربحية أكثر.",
-      description: "يجمع SmartSite جميع بيانات الموقع الخاصة بك (التقدم والموارد والأمان والميزانية) ويستخدم الذكاء الاصطناعي للتنبؤ بالمخاطر وتحسين الجداول الزمنية وإنشاء التقارير التلقائية. مخصص لشركات تونسية من مشاريع بناء صغيرة إلى البنية الأساسية الكبيرة.",
-      footer: "متاح على الويب والهاتف المحمول، حتى مع الاتصال المحدود في الميدان. جربه مجانًا وتحكم اليوم.",
+      subtitle:
+        "تحويل إدارة مشاريع البناء في المغرب العربي باستخدام الذكاء الاصطناعي: تأخيرات أقل، حوادث أقل، ربحية أكثر.",
+      description:
+        "يجمع SmartSite جميع بيانات الموقع الخاصة بك (التقدم والموارد والأمان والميزانية) ويستخدم الذكاء الاصطناعي للتنبؤ بالمخاطر وتحسين الجداول الزمنية وإنشاء التقارير التلقائية. مخصص لشركات تونسية من مشاريع بناء صغيرة إلى البنية الأساسية الكبيرة.",
+      footer:
+        "متاح على الويب والهاتف المحمول، حتى مع الاتصال المحدود في الميدان. جربه مجانًا وتحكم اليوم.",
     },
     statsDetail: {
       activeSites: "المواقع الحالية",
@@ -1060,7 +1129,8 @@ export const translations = {
     cta: {
       title: "حكم مشاريع البناء الخاصة بك.",
       subtitle: "ابن بذكاء ابتداءً من اليوم.",
-      description: "أدر العمال والمواد والميزانيات والمواعيد في منصة واحدة قوية مصممة خصيصًا لشركات البناء. قلل التأخيرات وقلل التكاليف وحسن إنتاجية الموقع.",
+      description:
+        "أدر العمال والمواد والميزانيات والمواعيد في منصة واحدة قوية مصممة خصيصًا لشركات البناء. قلل التأخيرات وقلل التكاليف وحسن إنتاجية الموقع.",
       startTrial: "ابدأ النسخة التجريبية المجانية",
       requestDemo: "طلب عرض توضيحي",
     },
@@ -1094,7 +1164,8 @@ export const translations = {
     },
     buildSmarter: {
       title: "ابن بذكاء. سلم المشاريع في الوقت المحدد.",
-      description: "تساعد منصة إدارة البناء الخاصة بنا المقاولين والمهندسين على تقليل التأخيرات والتحكم في التكاليف وتحسين الإنتاجية عبر جميع المواقع النشطة.",
+      description:
+        "تساعد منصة إدارة البناء الخاصة بنا المقاولين والمهندسين على تقليل التأخيرات والتحكم في التكاليف وتحسين الإنتاجية عبر جميع المواقع النشطة.",
       stats: {
         projects: "مشاريع البناء النشطة",
         companies: "شركات تستخدم منصتنا",
@@ -1105,7 +1176,8 @@ export const translations = {
     features: {
       title: "إدارة البناء الذكية",
       subtitle: "أدر مواقع البناء الخاصة بك بكفاءة",
-      description: "أدر المشاريع والعمال والمواد والميزانيات في منصة واحدة مركزية مصممة خصيصًا لفرق البناء.",
+      description:
+        "أدر المشاريع والعمال والمواد والميزانيات في منصة واحدة مركزية مصممة خصيصًا لفرق البناء.",
       tracking: {
         title: "تتبع المشروع في الوقت الفعلي",
         desc: "راقب التقدم والمواعيد واكتمال المهام عبر جميع مواقع البناء النشطة.",
@@ -1125,7 +1197,8 @@ export const translations = {
       company: "الشركة",
       legal: "القانوني",
       newsletter: "اشترك في النشرة الإخبارية لدينا",
-      newsletterDesc: "أحدث الأخبار والمقالات والموارد، المرسلة إلى صندوق الوارد الخاص بك أسبوعيًا.",
+      newsletterDesc:
+        "أحدث الأخبار والمقالات والموارد، المرسلة إلى صندوق الوارد الخاص بك أسبوعيًا.",
       copyright: "© 2026 SmartSite. جميع الحقوق محفوظة.",
     },
     dashboard: {
@@ -1141,9 +1214,12 @@ export const translations = {
       welcome: "أهلا وسهلا",
       overview: "مراجعة يومية",
       loadingDashboard: "جاري تحميل لوحة التحكم...",
-      criticalIncidents: "الحوادث الحرجة",
-      activeSites: "المواقع النشطة",
-      teamMembers: "أعضاء الفريق",
+       criticalIncidents: "الحوادث الحرجة",
+       activeSites: "المواقع النشطة",
+       totalSites: "إجمالي المواقع",
+       active: "نشطة",
+       sitesTotal: "مواقع إجمالي",
+       teamMembers: "أعضاء الفريق",
       total: "الإجمالي",
       urgentTasks: "المهام العاجلة",
       completedTasks: "المهام المكتملة",
@@ -1306,16 +1382,16 @@ export const translations = {
       reports: "التقارير",
       map: "عرض الخريطة",
       catalog: "الكتالوج",
-      "supplier_materials": "مواد الموردين",
-      "material_suppliers": "موردو المواد",
-      "suppliers_comparison": "مقارنة الموردين",
-      "resource_optimization": "تحسين الموارد",
-      "checkout_simulator": "محاكي الدفع",
-      "user_guide": "دليل المستخدم",
+      supplier_materials: "مواد الموردين",
+      material_suppliers: "موردو المواد",
+      suppliers_comparison: "مقارنة الموردين",
+      resource_optimization: "تحسين الموارد",
+      checkout_simulator: "محاكي الدفع",
+      user_guide: "دليل المستخدم",
       "admin.pending_users": "الموافقات المعلقة",
       "admin.system_logs": "سجلات النظام",
-      "my_sites": "مهامي",
-      "my_team_members": "فريقي",
+      my_sites: "مهامي",
+      my_team_members: "فريقي",
       dashboard: "لوحة التحكم",
     },
     systemLogs: {
@@ -1419,7 +1495,7 @@ export const translations = {
 export const t = (
   lang: "en" | "fr" | "ar",
   key: string,
-  defaultValue: string = key
+  defaultValue: string = key,
 ) => {
   const keys = key.split(".");
   let value: any = translations[lang];
@@ -1430,3 +1506,4 @@ export const t = (
 
   return value || defaultValue;
 };
+

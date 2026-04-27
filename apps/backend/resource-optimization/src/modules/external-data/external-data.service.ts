@@ -128,7 +128,7 @@ export interface ProjectContextResponse {
 @Injectable()
 export class ExternalDataService {
   private readonly logger = new Logger(ExternalDataService.name);
-  
+
   private readonly GESTION_SITE_URL: string;
   private readonly GESTION_PROJECT_URL: string;
   private readonly AUTH_API_URL: string;
@@ -143,12 +143,12 @@ export class ExternalDataService {
     this.GESTION_PROJECT_URL = this.configService.get('GESTION_PROJECT_URL') || 'http://localhost:3010';
     this.AUTH_API_URL = this.configService.get('AUTH_API_URL') || 'http://localhost:3000';
     this.PLANNING_URL = this.configService.get('PLANNING_URL') || 'http://localhost:3002';
-    this.INCIDENT_URL = this.configService.get('INCIDENT_URL') || 'http://localhost:3005';
+    this.INCIDENT_URL = this.configService.get('INCIDENT_URL') || 'http://localhost:3003';
   }
 
   async getSiteData(siteId: string): Promise<SiteData | null> {
     if (!siteId) return null;
-    
+
     try {
       const url = `${this.GESTION_SITE_URL}/gestion-sites/${siteId}`;
       this.logger.log(`Fetching site from: ${url}`);
@@ -164,7 +164,7 @@ export class ExternalDataService {
 
   async getSiteTeams(siteId: string): Promise<UserData[]> {
     if (!siteId) return [];
-    
+
     try {
       const response = await firstValueFrom(
         this.httpService.get<UserData[]>(`${this.GESTION_SITE_URL}/gestion-sites/${siteId}/teams`)
@@ -178,7 +178,7 @@ export class ExternalDataService {
 
   async getSiteTasks(siteId: string): Promise<TaskData[]> {
     if (!siteId) return [];
-    
+
     try {
       // Tasks are linked to milestones, not directly to sites
       // Get milestones for the site first, then get tasks for each milestone
@@ -211,7 +211,7 @@ export class ExternalDataService {
 
   async getSiteMilestones(siteId: string): Promise<MilestoneData[]> {
     if (!siteId) return [];
-    
+
     try {
       const response = await firstValueFrom(
         this.httpService.get<MilestoneData[]>(`${this.PLANNING_URL}/milestone?siteId=${siteId}&limit=100`)
@@ -225,7 +225,7 @@ export class ExternalDataService {
 
   async getSiteIncidents(siteId: string): Promise<IncidentData[]> {
     if (!siteId) return [];
-    
+
     try {
       const response = await firstValueFrom(
         this.httpService.get<IncidentData[]>(`${this.INCIDENT_URL}/incidents/by-site/${siteId}`)
@@ -239,7 +239,7 @@ export class ExternalDataService {
 
   async getProjectIncidents(projectId: string): Promise<IncidentData[]> {
     if (!projectId) return [];
-    
+
     try {
       const response = await firstValueFrom(
         this.httpService.get<IncidentData[]>(`${this.INCIDENT_URL}/incidents/by-project/${projectId}`)

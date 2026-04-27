@@ -6,6 +6,7 @@ import {
   Param,
   Put,
   Delete,
+  Query,
 } from "@nestjs/common";
 import { IncidentsService } from "./incidents.service";
 import { CreateIncidentDto } from "./dto/create-incident.dto";
@@ -40,6 +41,19 @@ export class IncidentsController {
   async countByProject(@Param("projectId") projectId: string) {
     const count = await this.incidentsService.countByProject(projectId);
     return { count, projectId };
+  }
+
+  @Get("dashboard/stats")
+  getDashboardStats(
+    @Query("assignedToCin") assignedToCin?: string,
+    @Query("projectId") projectId?: string,
+    @Query("siteId") siteId?: string,
+  ) {
+    return this.incidentsService.getDashboardStats({
+      assignedToCin,
+      projectId,
+      siteId,
+    });
   }
 
   @Get(":id")

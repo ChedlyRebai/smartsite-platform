@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/ca
 import { AssignedIncidentFlash } from '../../components/AssignedIncidentFlash';
 import { Badge } from '../../components/ui/badge';
 import { Input } from '../../components/ui/input';
-import { AlertTriangle, Users, MapPin, Clock, CheckCircle, TrendingUp, Search, Lightbulb, Quote } from 'lucide-react';
+import { AlertTriangle, Users, MapPin, Clock, CheckCircle, TrendingUp, Search, Lightbulb, Quote, Building2 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from '../../hooks/useTranslation';
 import {
@@ -186,6 +186,12 @@ export default function UserDashboard() {
           value={stats.activeSites}
           icon={MapPin}
           trend={{ value: 8.2, isPositive: true }}
+        />
+        <StatCard
+          title={t("dashboard.totalSites")}
+          value={stats.activeSites}
+          icon={Building2}
+          subtitle={`${stats.totalSites} ${t("dashboard.sitesTotal")}`}
         />
         <StatCard
           title={t("dashboard.teamMembers")}

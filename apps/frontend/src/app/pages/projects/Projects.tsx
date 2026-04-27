@@ -28,7 +28,7 @@ import {
   type SyncedProject,
 } from "../../action/synced-project.action";
 
-const API_URL = "http://localhost:3007";
+const API_URL = import.meta.env.VITE_GESTION_PROJECTS_URL ?? "http://localhost:3010/api";
 
 export default function Projects() {
   const navigate = useNavigate();
@@ -320,7 +320,10 @@ export default function Projects() {
               <CardHeader>
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <CardTitle className="text-xl font-bold text-blue-600">
+                    <CardTitle className="flex items-center gap-2 cursor-pointer hover:text-blue-600 text-xl font-bold text-blue-600"
+                      onClick={() => navigate(`/projects/${project._id}/sites`)}
+                    >
+                      <Briefcase className="h-5 w-5" />
                       {project.name}
                     </CardTitle>
                     <IncidentBadge projectId={project._id} size="sm" />

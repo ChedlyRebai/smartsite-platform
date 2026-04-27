@@ -13,6 +13,8 @@ import {
   Video,
 } from "lucide-react";
 import { getTeamMembers, type TeamMember } from "@/app/action/dashboard.action";
+import { getTeamById } from "@/app/action/team.action";
+import { getCurrentUser } from "@/app/action/auth.action";
 
 function getRoleLabel(role: TeamMember["role"]) {
   if (!role) return "Member";
@@ -63,6 +65,12 @@ export default function MyTeamMembers() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
 
+  const {data:currentUser}= useQuery({
+    queryKey: ["currentUser"],
+    queryFn: getCurrentUser
+  })
+
+console.log(currentUser);
   const { data: members = [], isLoading, isError } = useQuery({
     queryKey: ["myTeamMembers"],
     queryFn: getTeamMembers,
