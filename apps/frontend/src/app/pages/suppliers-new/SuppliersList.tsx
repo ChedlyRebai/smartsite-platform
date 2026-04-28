@@ -19,9 +19,10 @@ import {
   Edit,
   Archive,
   Trash2,
+  Star,
 } from 'lucide-react';
 
-const API_URL = 'http://localhost:3010/suppliers';
+const API_URL = 'http://localhost:3014/suppliers';
 
 interface Supplier {
   _id: string;
@@ -35,6 +36,8 @@ interface Supplier {
   status: 'pending_qhse' | 'approved' | 'rejected';
   createdByName: string;
   createdAt: string;
+  averageRating?: number;
+  ratingCount?: number;
 }
 
 const STATUS_CONFIG = {
@@ -200,6 +203,12 @@ export default function SuppliersList() {
                         <Badge className={`text-xs border ${status.className}`}>
                           {status.label}
                         </Badge>
+                        {supplier.ratingCount && supplier.ratingCount > 0 && (
+                          <span className="flex items-center gap-1 text-xs text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded">
+                            <Star className="w-3 h-3 fill-yellow-500 text-yellow-500" />
+                            {supplier.averageRating?.toFixed(1)}/10 ({supplier.ratingCount})
+                          </span>
+                        )}
                       </div>
                       <p className="text-sm text-gray-500 mt-0.5">{supplier.category}</p>
                       <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-gray-500">

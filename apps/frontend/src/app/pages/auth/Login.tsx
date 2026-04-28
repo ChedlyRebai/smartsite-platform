@@ -67,6 +67,10 @@ export default function Login() {
 
       toast.success("Login successful!");
 
+      // Debug: log permissions
+      console.log("Login - User data:", userData);
+      console.log("Login - User role:", userData.role);
+
       if (userData.firstLogin) {
         console.log("Login - First login, showing welcome modal");
         setShowWelcome(true);
@@ -74,6 +78,7 @@ export default function Login() {
       }
 
       const userRole = userData.role?.name || userData.role;
+      console.log("Login - Redirecting to:", userRole === "project_manager" ? "/project-manager-dashboard" : userRole === "super_admin" ? "/super-admin-projects" : "/dashboard");
       if (userRole === "project_manager") {
         navigate("/project-manager-dashboard");
       } else if (userRole === "super_admin") {

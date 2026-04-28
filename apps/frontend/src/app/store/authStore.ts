@@ -46,8 +46,8 @@ export const useAuthStore = create<AuthState>()(
 
           const expires = new Date(Date.now() + 1000 * 1000 * 1000);
 
-          cookieStore.set("jwt", res.data.access_token);
-          console.log("Login successful, token stored in cookie", res.data.access_token);
+          localStorage.setItem("jwt", res.data.access_token);
+          console.log("Login successful, token stored in localStorage", res.data.access_token);
 
           // Debug logging
           console.log("AuthStore login - res.data:", res.data);

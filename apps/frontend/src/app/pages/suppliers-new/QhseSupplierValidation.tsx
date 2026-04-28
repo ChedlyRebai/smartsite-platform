@@ -36,8 +36,8 @@ import {
   Calendar,
 } from 'lucide-react';
 
-const API_URL = 'http://localhost:3010/suppliers';
-const FILES_URL = 'http://localhost:3010';
+const API_URL = 'http://localhost:3014/suppliers';
+const FILES_URL = 'http://localhost:3014';
 
 interface Supplier {
   _id: string;
@@ -49,7 +49,7 @@ interface Supplier {
   address: string;
   siret: string;
   contractUrl: string;
-  insuranceUrl: string;
+  insuranceDocumentUrl: string;
   status: 'pending_qhse' | 'approved' | 'rejected';
   createdByName: string;
   createdAt: string;
@@ -291,54 +291,55 @@ export default function QhseSupplierValidation() {
                         </div>
                       </div>
 
-                      {/* Documents */}
-                      <div className="space-y-2">
-                        <p className="text-sm font-semibold text-gray-700">Documents</p>
-                        <div className="flex flex-wrap gap-2">
-                          {/* Contract */}
-                          <div className="flex items-center gap-2 bg-gray-50 border rounded-lg px-3 py-2">
-                            <FileText className="w-4 h-4 text-blue-600" />
-                            <span className="text-sm text-gray-700">Contract</span>
-                            <a
-                              href={getFileUrl(supplier.contractUrl)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:text-blue-800"
-                              title="View"
-                            >
-                              <Eye className="w-4 h-4" />
-                            </a>
-                            <a
-                              href={getFileUrl(supplier.contractUrl)}
-                              download
-                              className="text-green-600 hover:text-green-800"
-                              title="Download"
-                            >
-                              <Download className="w-4 h-4" />
-                            </a>
-                          </div>
+                        {/* Documents */}
+                        <div className="space-y-2">
+                          <p className="text-sm font-semibold text-gray-700">Documents</p>
+                          <div className="flex flex-wrap gap-2">
+                            {/* Contract */}
+                            <div className="flex items-center gap-2 bg-gray-50 border rounded-lg px-3 py-2">
+                              <FileText className="w-4 h-4 text-blue-600" />
+                              <span className="text-sm text-gray-700">Contract</span>
+                              <a
+                                href={getFileUrl(supplier.contractUrl)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:text-blue-800"
+                                title="View"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </a>
+                              <a
+                                href={getFileUrl(supplier.contractUrl)}
+                                download
+                                className="text-green-600 hover:text-green-800"
+                                title="Download"
+                              >
+                                <Download className="w-4 h-4" />
+                              </a>
+                            </div>
 
-                          {/* Insurance */}
-                          <div className="flex items-center gap-2 bg-gray-50 border rounded-lg px-3 py-2">
-                            <Shield className="w-4 h-4 text-blue-600" />
-                            <span className="text-sm text-gray-700">Insurance</span>
-                            <a
-                              href={getFileUrl(supplier.insuranceUrl)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:text-blue-800"
-                              title="View"
-                            >
-                              <Eye className="w-4 h-4" />
-                            </a>
-                            <a
-                              href={getFileUrl(supplier.insuranceUrl)}
-                              download
-                              className="text-green-600 hover:text-green-800"
-                              title="Download"
-                            >
-                              <Download className="w-4 h-4" />
-                            </a>
+                            {/* Insurance Document */}
+                            <div className="flex items-center gap-2 bg-gray-50 border rounded-lg px-3 py-2">
+                              <Shield className="w-4 h-4 text-blue-600" />
+                              <span className="text-sm text-gray-700">Insurance Document</span>
+                              <a
+                                href={getFileUrl(supplier.insuranceDocumentUrl)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:text-blue-800"
+                                title="View"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </a>
+                              <a
+                                href={getFileUrl(supplier.insuranceDocumentUrl)}
+                                download
+                                className="text-green-600 hover:text-green-800"
+                                title="Download"
+                              >
+                                <Download className="w-4 h-4" />
+                              </a>
+                            </div>
                           </div>
                         </div>
                       </div>

@@ -40,13 +40,27 @@ export class PermissionsService {
   }
 
   async create(createPermissionDto: any) {
-    createPermissionDto.module = this.normalizeModule(
-      createPermissionDto.module,
-      createPermissionDto.href,
-    );
+    try {
+      // Check if permission with same name already exists
+      const existing = await this.permissionModel.findOne({ name: createPermissionDto.name }).exec();
+      if (existing) {
+        throw new Error(`Permission with name "${createPermissionDto.name}" already exists`);
+      }
 
-    const createdPermission = new this.permissionModel(createPermissionDto);
-    return createdPermission.save();
+      createPermissionDto.module = this.normalizeModule(
+        createPermissionDto.module,
+        createPermissionDto.href,
+      );
+
+      const createdPermission = new this.permissionModel(createPermissionDto);
+      return await createdPermission.save();
+    } catch (error: any) {
+      if (error.code === 11000 || error.message?.includes('already exists')) {
+        throw new Error(`Permission with name "${createPermissionDto.name}" already exists`);
+      }
+      console.error('Error in permissionsService.create:', error);
+      throw error;
+    }
   }
 
   // async getNvigationAccess(userId:string){

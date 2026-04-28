@@ -29,10 +29,10 @@ import { CatalogModule } from './catalog/catalog.module';
     PermissionsModule,
     StaticsModule,
     TeamsModule,
-
     ChatbotModule,
     AiChatModule,
     AuditLogsModule,
+    CatalogModule,
 
     CatalogModule,
 

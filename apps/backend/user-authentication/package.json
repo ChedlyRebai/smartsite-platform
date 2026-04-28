@@ -28,7 +28,7 @@
     "@nestjs/mongoose": "^11.0.4",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
-    "@nestjs/swagger": "^11.2.6",
+    "@nestjs/swagger": "^11.3.2",
     "@nestjs/typeorm": "^11.0.0",
     "@types/nodemailer": "^7.0.11",
     "@types/passport-local": "^1.0.38",
@@ -50,6 +50,7 @@
     "save": "^2.9.0",
     "sharp": "^0.34.5",
     "stream-chat": "^8.60.0",
+    "swagger-ui-express": "^5.0.1",
     "typeorm": "^0.3.28",
     "yargs": "^18.0.0"
   },

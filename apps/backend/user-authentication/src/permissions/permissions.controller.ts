@@ -9,7 +9,12 @@ export class PermissionsController {
 
   @Post()
   async create(@Body() createPermissionDto: any) {
-    return this.permissionsService.create(createPermissionDto);
+    try {
+      return await this.permissionsService.create(createPermissionDto);
+    } catch (error) {
+      console.error('Error creating permission:', error);
+      throw error;
+    }
   }
 
   @Get()

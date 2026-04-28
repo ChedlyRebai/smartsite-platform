@@ -56,17 +56,17 @@ interface FormErrors {
   address?: string;
   siret?: string;
   contract?: string;
-  insurance?: string;
+  insuranceDocument?: string;
 }
 
 interface SuccessData {
   supplierCode: string;
   name: string;
   contractName: string;
-  insuranceName: string;
+  insuranceDocumentName: string;
 }
 
-const API_URL = 'http://localhost:3010/suppliers';
+const API_URL = 'http://localhost:3014/suppliers';
 
 export default function AddSupplier() {
   const navigate = useNavigate();
@@ -93,13 +93,13 @@ export default function AddSupplier() {
   });
 
   const [contractFile, setContractFile] = useState<File | null>(null);
-  const [insuranceFile, setInsuranceFile] = useState<File | null>(null);
+  const [insuranceDocumentFile, setInsuranceDocumentFile] = useState<File | null>(null);
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
   const [successData, setSuccessData] = useState<SuccessData | null>(null);
 
   const contractRef = useRef<HTMLInputElement>(null);
-  const insuranceRef = useRef<HTMLInputElement>(null);
+  const insuranceDocumentRef = useRef<HTMLInputElement>(null);
 
   // ── Validation ──────────────────────────────────────────────────────────────
   const validate = (): boolean => {
@@ -128,8 +128,8 @@ export default function AddSupplier() {
     if (!contractFile)
       newErrors.contract = 'Contract document is required. Please upload a PDF, JPG, or PNG file (max 5MB)';
 
-    if (!insuranceFile)
-      newErrors.insurance = 'Insurance document is required. Please upload a PDF, JPG, or PNG file (max 5MB)';
+    if (!insuranceDocumentFile)
+      newErrors.insuranceDocument = 'Insurance document is required. Please upload a PDF, JPG, or PNG file (max 5MB)';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -138,7 +138,7 @@ export default function AddSupplier() {
   // ── File handlers ────────────────────────────────────────────────────────────
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    type: 'contract' | 'insurance',
+    type: 'contract' | 'insuranceDocument',
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -146,7 +146,7 @@ export default function AddSupplier() {
     if (!ALLOWED_TYPES.includes(file.type)) {
       setErrors((prev) => ({
         ...prev,
-        [type]: 'Contract document is required. Please upload a PDF, JPG, or PNG file (max 5MB)',
+        [type]: 'Only PDF, JPG, and PNG files are allowed (max 5MB)',
       }));
       return;
     }
@@ -163,8 +163,8 @@ export default function AddSupplier() {
       setContractFile(file);
       setErrors((prev) => ({ ...prev, contract: undefined }));
     } else {
-      setInsuranceFile(file);
-      setErrors((prev) => ({ ...prev, insurance: undefined }));
+      setInsuranceDocumentFile(file);
+      setErrors((prev) => ({ ...prev, insuranceDocument: undefined }));
     }
   };
 
@@ -175,36 +175,37 @@ export default function AddSupplier() {
 
     setLoading(true);
     try {
-      const formData = new FormData();
-      formData.append('name', form.name.trim());
-      formData.append('category', form.category);
-      formData.append('email', form.email.trim());
-      formData.append('phone', form.phone.trim());
-      formData.append('address', form.address.trim());
-      formData.append('siret', form.siret.trim());
-      formData.append('createdBy', (user as any)?._id || 'unknown');
-      formData.append(
-        'createdByName',
-        `${(user as any)?.firstName || ''} ${(user as any)?.lastName || ''}`.trim() || 'Procurement Manager',
-      );
-      formData.append('contract', contractFile!);
-      formData.append('insurance', insuranceFile!);
+       const formData = new FormData();
+       formData.append('name', form.name.trim());
+       formData.append('category', form.category);
+       formData.append('email', form.email.trim());
+       formData.append('phone', form.phone.trim());
+       formData.append('address', form.address.trim());
+       formData.append('siret', form.siret.trim());
+       formData.append('createdBy', (user as any)?._id || 'unknown');
+       formData.append(
+         'createdByName',
+         `${(user as any)?.firstName || ''} ${(user as any)?.lastName || ''}`.trim() || 'Procurement Manager',
+       );
+       formData.append('contract', contractFile!);
+       formData.append('insuranceDocument', insuranceDocumentFile!);
 
-      const res = await fetch(API_URL, { method: 'POST', body: formData });
+       const res = await fetch(API_URL, { method: 'POST', body: formData });
 
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || 'Failed to create supplier');
-      }
+       if (!res.ok) {
+         const err = await res.json();
+         console.error('Backend error:', err);
+         throw new Error(err.message || 'Failed to create supplier');
+       }
 
-      const data = await res.json();
+       const data = await res.json();
 
-      setSuccessData({
-        supplierCode: data.supplierCode,
-        name: data.name,
-        contractName: contractFile!.name,
-        insuranceName: insuranceFile!.name,
-      });
+       setSuccessData({
+         supplierCode: data.supplierCode,
+         name: data.name,
+         contractName: contractFile!.name,
+         insuranceDocumentName: insuranceDocumentFile!.name,
+       });
     } catch (err: any) {
       toast.error(err.message || 'An error occurred. Please try again.');
     } finally {
@@ -441,7 +442,7 @@ export default function AddSupplier() {
               )}
             </div>
 
-            {/* Insurance */}
+            {/* Insurance Document */}
             <div className="space-y-1.5">
               <Label>
                 <Shield className="w-3.5 h-3.5 inline mr-1" />
@@ -449,37 +450,36 @@ export default function AddSupplier() {
               </Label>
               <div
                 className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors ${
-                  errors.insurance
+                  errors.insuranceDocument
                     ? 'border-red-400 bg-red-50'
-                    : insuranceFile
+                    : insuranceDocumentFile
                     ? 'border-green-400 bg-green-50'
                     : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'
                 }`}
-                onClick={() => insuranceRef.current?.click()}
+                onClick={() => insuranceDocumentRef.current?.click()}
               >
                 <input
-                  ref={insuranceRef}
+                  ref={insuranceDocumentRef}
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png"
                   className="hidden"
-                  onChange={(e) => handleFileChange(e, 'insurance')}
+                  onChange={(e) => handleFileChange(e, 'insuranceDocument')}
                 />
-                {insuranceFile ? (
-                  <div className="flex items-center justify-center gap-2 text-green-700">
-                    <CheckCircle2 className="w-5 h-5" />
-                    <span className="text-sm font-medium">{insuranceFile.name}</span>
-                  </div>
-                ) : (
-                  <div className="text-gray-500">
-                    <Upload className="w-6 h-6 mx-auto mb-1" />
-                    <p className="text-sm">Click to upload insurance</p>
-                    <p className="text-xs text-gray-400 mt-0.5">PDF, JPG, PNG — max 5MB</p>
-                  </div>
-                )}
-              </div>
-              {errors.insurance && (
-                <p className="text-xs text-red-500">{errors.insurance}</p>
-              )}
+                 {insuranceDocumentFile ? (
+                   <div className="flex items-center justify-center gap-2 text-green-700">
+                     <FileText className="w-4 h-4" />
+                     <span className="text-sm font-medium">{insuranceDocumentFile.name}</span>
+                   </div>
+                 ) : (
+                    <div className="text-gray-500">
+                      <Upload className="w-6 h-6 mx-auto mb-1 opacity-50" />
+                      <span className="text-sm">Click to upload insurance document (PDF, JPG, PNG)</span>
+                    </div>
+                 )}
+               </div>
+               {errors.insuranceDocument && (
+                 <p className="text-xs text-red-500">{errors.insuranceDocument}</p>
+               )}
             </div>
           </CardContent>
         </Card>
@@ -535,28 +535,29 @@ export default function AddSupplier() {
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Contract</span>
-                <span className="text-green-700">{successData?.contractName} (uploaded)</span>
+                <span className="text-green-700">{successData?.contractName} ✓</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Insurance</span>
-                <span className="text-green-700">{successData?.insuranceName} (uploaded)</span>
-              </div>
-              <div className="flex justify-between items-center pt-1 border-t">
-                <span className="text-gray-500">Status</span>
-                <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">
-                  Pending QHSE validation
-                </Badge>
-              </div>
-            </div>
+               <div className="flex justify-between">
+                 <span className="text-gray-500">Insurance Document</span>
+                 <span className="text-green-700">{successData?.insuranceDocumentName} ✓</span>
+               </div>
+               <div className="flex justify-between items-center pt-1 border-t">
+                 <span className="text-gray-500">Status</span>
+                 <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">
+                   Pending QHSE validation
+                 </Badge>
+               </div>
+             </div>
+
             <p className="text-xs text-gray-500 text-center">
               The supplier will be activated after QHSE Manager approval.
             </p>
           </div>
           <Button
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800"
             onClick={handleSuccessClose}
           >
-            OK
+            Close
           </Button>
         </DialogContent>
       </Dialog>

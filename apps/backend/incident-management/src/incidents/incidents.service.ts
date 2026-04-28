@@ -109,6 +109,9 @@ export class IncidentsService {
     const created = new this.incidentModel(payload);
     const saved = await created.save();
 
+    // Broadcast to all connected clients (ex: AI model created a new incident)
+    this.eventsService.broadcastIncidentUpdate(saved, 'created');
+
     // Emit notification if assigned to a user
     if ((payload as any).assignedToCin) {
       this.eventsService.notifyIncidentAssigned((payload as any).assignedToCin, saved);

@@ -46,14 +46,14 @@ interface Supplier {
   address: string;
   siret: string;
   contractUrl: string;
-  insuranceUrl: string;
+  insuranceDocumentUrl: string;
   status: 'pending_qhse' | 'approved' | 'rejected';
   createdByName: string;
   createdAt: string;
   estArchive: boolean;
 }
 
-const API_URL = 'http://localhost:3010/suppliers';
+const API_URL = 'http://localhost:3014/suppliers';
 
 export default function EditSupplier() {
   const { id } = useParams<{ id: string }>();
@@ -69,15 +69,15 @@ export default function EditSupplier() {
     siret: '',
   });
 
-  const [contractFile, setContractFile] = useState<File | null>(null);
-  const [insuranceFile, setInsuranceFile] = useState<File | null>(null);
-  const [supplier, setSupplier] = useState<Supplier | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
+   const [contractFile, setContractFile] = useState<File | null>(null);
+   const [insuranceDocumentFile, setInsuranceDocumentFile] = useState<File | null>(null);
+   const [supplier, setSupplier] = useState<Supplier | null>(null);
+   const [loading, setLoading] = useState(true);
+   const [saving, setSaving] = useState(false);
+   const [error, setError] = useState('');
 
-  const contractRef = useRef<HTMLInputElement>(null);
-  const insuranceRef = useRef<HTMLInputElement>(null);
+   const contractRef = useRef<HTMLInputElement>(null);
+   const insuranceDocumentRef = useRef<HTMLInputElement>(null);
 
   const userRole = (user as any)?.role?.name || (user as any)?.role;
   const isProcurement = userRole === 'procurement_manager';
@@ -117,7 +117,7 @@ export default function EditSupplier() {
 
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    type: 'contract' | 'insurance',
+    type: 'contract' | 'insuranceDocument',
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -135,7 +135,7 @@ export default function EditSupplier() {
     if (type === 'contract') {
       setContractFile(file);
     } else {
-      setInsuranceFile(file);
+      setInsuranceDocumentFile(file);
     }
     setError('');
   };
@@ -146,15 +146,15 @@ export default function EditSupplier() {
 
     setSaving(true);
     try {
-      const formData = new FormData();
-      formData.append('name', form.name.trim());
-      formData.append('category', form.category);
-      formData.append('email', form.email.trim());
-      formData.append('phone', form.phone.trim());
-      formData.append('address', form.address.trim());
-      formData.append('siret', form.siret.trim());
-      if (contractFile) formData.append('contract', contractFile);
-      if (insuranceFile) formData.append('insurance', insuranceFile);
+       const formData = new FormData();
+       formData.append('name', form.name.trim());
+       formData.append('category', form.category);
+       formData.append('email', form.email.trim());
+       formData.append('phone', form.phone.trim());
+       formData.append('address', form.address.trim());
+       formData.append('siret', form.siret.trim());
+       if (contractFile) formData.append('contract', contractFile);
+       if (insuranceDocumentFile) formData.append('insuranceDocument', insuranceDocumentFile);
 
       const res = await fetch(`${API_URL}/${supplier._id}`, {
         method: 'PUT',
@@ -381,10 +381,10 @@ export default function EditSupplier() {
               <div className="flex items-center gap-3">
                 <Shield className="w-5 h-5 text-blue-600" />
                 <span className="text-sm text-gray-700">
-                  {supplier.insuranceUrl.split('/').pop()}
+                  {supplier.insuranceDocumentUrl.split('/').pop()}
                 </span>
                 <a
-                  href={supplier.insuranceUrl}
+                  href={supplier.insuranceDocumentUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:text-blue-800 text-sm"
@@ -393,20 +393,20 @@ export default function EditSupplier() {
                 </a>
               </div>
               <input
-                ref={insuranceRef}
+                ref={insuranceDocumentRef}
                 type="file"
                 accept=".pdf,.jpg,.jpeg,.png"
                 className="hidden"
-                onChange={(e) => handleFileChange(e, 'insurance')}
+                onChange={(e) => handleFileChange(e, 'insuranceDocument')}
               />
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 className="mt-2"
-                onClick={() => insuranceRef.current?.click()}
+                onClick={() => insuranceDocumentRef.current?.click()}
               >
-                Replace insurance file
+                Replace insurance document
               </Button>
             </div>
           </CardContent>
@@ -458,18 +458,20 @@ export default function EditSupplier() {
         )}
 
         {/* Delete button */}
-        <div className="mt-4">
-          <Button
-            type="button"
-            variant="destructive"
-            className="w-full"
-            onClick={handleDelete}
-            disabled={saving}
-          >
-            <Trash2 className="w-4 h-4 mr-2" />
-            Delete Supplier
-          </Button>
-        </div>
+        {supplier._id && (
+          <div className="mt-4">
+            <Button
+              type="button"
+              variant="destructive"
+              className="w-full"
+              onClick={handleDelete}
+              disabled={saving}
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete Supplier
+            </Button>
+          </div>
+        )}
       </form>
     </div>
   );
