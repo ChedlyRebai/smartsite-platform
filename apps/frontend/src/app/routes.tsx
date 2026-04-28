@@ -15,7 +15,6 @@ import Planning from "./pages/planning/MyTask";
 import Team from "./pages/team/Team";
 import MyTeamMembers from "./pages/team/MyTeamMembers";
 import Clients from "./pages/clients/Clients";
-import Materials from "./pages/materials/Materials";
 import Finance from "./pages/finance/Finance";
 import Payments from "./pages/payments/Payments";
 import QHSE from "./pages/qhse/QHSE";
@@ -268,10 +267,6 @@ export const router = createBrowserRouter([
       {
         path:"reset-password-first-login",
         element:<ChangePasswordFirstLogin />
-      },
-      {
-        path: "materials",
-        element: <Materials />,
       },
       {
         path: "finance",
