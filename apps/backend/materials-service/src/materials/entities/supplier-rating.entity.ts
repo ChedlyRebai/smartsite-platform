@@ -54,8 +54,13 @@ export class SupplierRating extends Document {
   @Prop({ required: true, default: new Date() })
   ratingDate: Date;
 
-  @Prop({ required: true, enum: ['PENDING', 'REVIEWED', 'RESOLVED'], default: 'REVIEWED' })
+  @Prop({
+    required: true,
+    enum: ['PENDING', 'REVIEWED', 'RESOLVED'],
+    default: 'REVIEWED',
+  })
   status: 'PENDING' | 'REVIEWED' | 'RESOLVED';
 }
 
-export const SupplierRatingSchema = SchemaFactory.createForClass(SupplierRating);
+export const SupplierRatingSchema =
+  SchemaFactory.createForClass(SupplierRating);

@@ -142,7 +142,7 @@ curl "http://localhost:3002/api/materials/weather?lat=36.8065&lng=10.1815"
 **3. Vérifier la clé API** :
 ```bash
 # Dans apps/backend/materials-service/.env
-OPENWEATHER_API_KEY=9d61b206e0b8dbb7fa1b56b65205d2cc
+
 ```
 
 ---

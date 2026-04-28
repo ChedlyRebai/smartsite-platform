@@ -62,7 +62,11 @@ export class MaterialOrder extends Document {
   @Prop({ type: Number, default: 0 })
   progress: number;
 
-  @Prop({ type: String, enum: Object.values(OrderStatus), default: OrderStatus.PENDING })
+  @Prop({
+    type: String,
+    enum: Object.values(OrderStatus),
+    default: OrderStatus.PENDING,
+  })
   status: OrderStatus;
 
   @Prop({ type: Date })

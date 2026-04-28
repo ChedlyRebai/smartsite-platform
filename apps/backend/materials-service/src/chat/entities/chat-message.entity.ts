@@ -35,7 +35,11 @@ export class ChatMessage extends Document {
   @Prop({ required: true })
   content: string;
 
-  @Prop({ type: String, enum: Object.values(MessageType), default: MessageType.TEXT })
+  @Prop({
+    type: String,
+    enum: Object.values(MessageType),
+    default: MessageType.TEXT,
+  })
   type: MessageType;
 
   @Prop()

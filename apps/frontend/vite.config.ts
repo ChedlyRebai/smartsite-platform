@@ -40,14 +40,9 @@ export default defineConfig({
         target: 'http://localhost:3002',
         changeOrigin: true,
       },
-      '/api/flows': {
-        target: 'http://localhost:3002',
-        changeOrigin: true,
-      },
       '/api/material-flow': {
         target: 'http://localhost:3002',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/material-flow/, '/api/flows'),
       },
       '/api/consumption': {
         target: 'http://localhost:3002',

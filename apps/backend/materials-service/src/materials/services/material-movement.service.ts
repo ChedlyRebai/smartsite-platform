@@ -1,8 +1,19 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Material } from '../entities/material.entity';
-import { ConsumptionHistory, FlowType, AnomalyType, AnomalySeverity, SourceCollection } from '../entities/consumption-history.entity';
+import {
+  ConsumptionHistory,
+  FlowType,
+  AnomalyType,
+  AnomalySeverity,
+  SourceCollection,
+} from '../entities/consumption-history.entity';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 
@@ -36,15 +47,21 @@ export class MaterialMovementService {
 
   constructor(
     @InjectModel(Material.name) private materialModel: Model<Material>,
-    @InjectModel(ConsumptionHistory.name) private historyModel: Model<ConsumptionHistory>,
+    @InjectModel(ConsumptionHistory.name)
+    private historyModel: Model<ConsumptionHistory>,
     private readonly httpService: HttpService,
   ) {}
 
   /**
    * Ajoute un mouvement (Entrée ou Sortie) pour un matériau
    */
-  async addMovement(materialId: string, movementDto: AddMovementDto): Promise<MovementResult> {
-    this.logger.log(`📦 Ajout mouvement ${movementDto.type}: material=${materialId}, qty=${movementDto.quantity}`);
+  async addMovement(
+    materialId: string,
+    movementDto: AddMovementDto,
+  ): Promise<MovementResult> {
+    this.logger.log(
+      `📦 Ajout mouvement ${movementDto.type}: material=${materialId}, qty=${movementDto.quantity}`,
+    );
 
     // 1. Récupérer le matériau
     const material = await this.materialModel.findById(materialId);
@@ -68,10 +85,12 @@ export class MaterialMovementService {
     } else {
       material.stockSortie = (material.stockSortie || 0) + movementDto.quantity;
       stockAfter = stockBefore - movementDto.quantity;
-      
+
       // Vérifier qu'on ne va pas en négatif
       if (stockAfter < 0) {
-        throw new BadRequestException(`Stock insuffisant. Stock actuel: ${stockBefore}, demandé: ${movementDto.quantity}`);
+        throw new BadRequestException(
+          `Stock insuffisant. Stock actuel: ${stockBefore}, demandé: ${movementDto.quantity}`,
+        );
       }
     }
 
@@ -82,7 +101,9 @@ export class MaterialMovementService {
     material.lastMovementType = movementDto.type;
 
     // 6. Vérifier si besoin de commander
-    material.needsReorder = material.stockActuel < (material.stockMinimum || material.minimumStock || 0);
+    material.needsReorder =
+      material.stockActuel <
+      (material.stockMinimum || material.minimumStock || 0);
 
     // 7. Sauvegarder le matériau
     await material.save();
@@ -92,7 +113,9 @@ export class MaterialMovementService {
     if (material.siteId) {
       try {
         const response = await firstValueFrom(
-          this.httpService.get(`http://localhost:3001/api/gestion-sites/${material.siteId.toString()}`),
+          this.httpService.get(
+            `http://localhost:3001/api/gestion-sites/${material.siteId.toString()}`,
+          ),
         );
         siteName = response.data?.nom || response.data?.name || siteName;
       } catch (error) {
@@ -120,7 +143,9 @@ export class MaterialMovementService {
       stockAfter: stockAfter,
       sourceCollection: SourceCollection.DIRECT,
       sourceId: material._id,
-      reason: movementDto.reason || (movementDto.type === 'IN' ? 'Entrée manuelle' : 'Sortie manuelle'),
+      reason:
+        movementDto.reason ||
+        (movementDto.type === 'IN' ? 'Entrée manuelle' : 'Sortie manuelle'),
       notes: movementDto.notes,
       recordedBy: movementDto.userId,
     });
@@ -128,9 +153,13 @@ export class MaterialMovementService {
     // 10. Détecter les anomalies pour les SORTIES
     let anomalyDetected = false;
     let anomalyType = '';
-    
+
     if (movementDto.type === 'OUT') {
-      const anomalyResult = await this.detectAnomaly(material, movementDto.quantity, historyEntry);
+      const anomalyResult = await this.detectAnomaly(
+        material,
+        movementDto.quantity,
+        historyEntry,
+      );
       anomalyDetected = anomalyResult.detected;
       anomalyType = anomalyResult.type;
     }
@@ -138,7 +167,9 @@ export class MaterialMovementService {
     // 11. Sauvegarder l'historique
     await historyEntry.save();
 
-    this.logger.log(`✅ Mouvement enregistré: ${movementDto.type} ${movementDto.quantity} ${material.unit}, stock: ${stockBefore} → ${stockAfter}`);
+    this.logger.log(
+      `✅ Mouvement enregistré: ${movementDto.type} ${movementDto.quantity} ${material.unit}, stock: ${stockBefore} → ${stockAfter}`,
+    );
 
     return {
       success: true,
@@ -180,13 +211,18 @@ export class MaterialMovementService {
       }
 
       // Calculer la moyenne des sorties
-      const totalQuantity = recentHistory.reduce((sum, entry) => sum + entry.quantity, 0);
+      const totalQuantity = recentHistory.reduce(
+        (sum, entry) => sum + entry.quantity,
+        0,
+      );
       const average = totalQuantity / recentHistory.length;
 
       // Calculer l'écart
       const deviation = ((quantity - average) / average) * 100;
 
-      this.logger.log(`📊 Analyse anomalie: qty=${quantity}, avg=${average.toFixed(2)}, deviation=${deviation.toFixed(1)}%`);
+      this.logger.log(
+        `📊 Analyse anomalie: qty=${quantity}, avg=${average.toFixed(2)}, deviation=${deviation.toFixed(1)}%`,
+      );
 
       // Détection selon les seuils
       if (quantity > average * this.SEUIL_CRITIQUE) {
@@ -195,12 +231,20 @@ export class MaterialMovementService {
         historyEntry.anomalySeverity = AnomalySeverity.CRITICAL;
         historyEntry.anomalyScore = 100;
         historyEntry.expectedQuantity = average;
-        
-        this.logger.warn(`🚨 VOL PROBABLE détecté: ${quantity} vs ${average.toFixed(1)} (${deviation.toFixed(1)}%)`);
-        
+
+        this.logger.warn(
+          `🚨 VOL PROBABLE détecté: ${quantity} vs ${average.toFixed(1)} (${deviation.toFixed(1)}%)`,
+        );
+
         // TODO: Envoyer notification + email
-        await this.sendCriticalAlert(material, quantity, average, deviation, 'VOL_PROBABLE');
-        
+        await this.sendCriticalAlert(
+          material,
+          quantity,
+          average,
+          deviation,
+          'VOL_PROBABLE',
+        );
+
         return { detected: true, type: 'VOL_PROBABLE' };
       } else if (quantity > average * this.SEUIL_VOL) {
         // ⚠️ DANGER: Gaspillage probable (>200%)
@@ -208,12 +252,20 @@ export class MaterialMovementService {
         historyEntry.anomalySeverity = AnomalySeverity.HIGH;
         historyEntry.anomalyScore = 80;
         historyEntry.expectedQuantity = average;
-        
-        this.logger.warn(`⚠️ GASPILLAGE détecté: ${quantity} vs ${average.toFixed(1)} (${deviation.toFixed(1)}%)`);
-        
+
+        this.logger.warn(
+          `⚠️ GASPILLAGE détecté: ${quantity} vs ${average.toFixed(1)} (${deviation.toFixed(1)}%)`,
+        );
+
         // TODO: Envoyer notification
-        await this.sendWarningAlert(material, quantity, average, deviation, 'GASPILLAGE');
-        
+        await this.sendWarningAlert(
+          material,
+          quantity,
+          average,
+          deviation,
+          'GASPILLAGE',
+        );
+
         return { detected: true, type: 'GASPILLAGE' };
       } else if (quantity > average * this.SEUIL_GASPILLAGE) {
         // 📊 WARNING: Surconsommation (>150%)
@@ -221,9 +273,11 @@ export class MaterialMovementService {
         historyEntry.anomalySeverity = AnomalySeverity.MEDIUM;
         historyEntry.anomalyScore = 60;
         historyEntry.expectedQuantity = average;
-        
-        this.logger.log(`📊 SURCONSOMMATION: ${quantity} vs ${average.toFixed(1)} (${deviation.toFixed(1)}%)`);
-        
+
+        this.logger.log(
+          `📊 SURCONSOMMATION: ${quantity} vs ${average.toFixed(1)} (${deviation.toFixed(1)}%)`,
+        );
+
         return { detected: true, type: 'SURCONSOMMATION' };
       }
 
@@ -246,8 +300,10 @@ export class MaterialMovementService {
   ): Promise<void> {
     try {
       // TODO: Implémenter l'envoi de notification
-      this.logger.log(`🚨 ALERTE CRITIQUE: ${type} - ${material.name} (${quantity} vs ${average.toFixed(1)})`);
-      
+      this.logger.log(
+        `🚨 ALERTE CRITIQUE: ${type} - ${material.name} (${quantity} vs ${average.toFixed(1)})`,
+      );
+
       // TODO: Implémenter l'envoi d'email
       // await this.emailService.sendCriticalAlert({...});
     } catch (error) {
@@ -267,7 +323,9 @@ export class MaterialMovementService {
   ): Promise<void> {
     try {
       // TODO: Implémenter l'envoi de notification
-      this.logger.log(`⚠️ ALERTE WARNING: ${type} - ${material.name} (${quantity} vs ${average.toFixed(1)})`);
+      this.logger.log(
+        `⚠️ ALERTE WARNING: ${type} - ${material.name} (${quantity} vs ${average.toFixed(1)})`,
+      );
     } catch (error) {
       this.logger.error(`❌ Erreur envoi alerte warning:`, error);
     }
@@ -276,7 +334,10 @@ export class MaterialMovementService {
   /**
    * Récupère les mouvements récents d'un matériau
    */
-  async getRecentMovements(materialId: string, days: number = 7): Promise<ConsumptionHistory[]> {
+  async getRecentMovements(
+    materialId: string,
+    days: number = 7,
+  ): Promise<ConsumptionHistory[]> {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 

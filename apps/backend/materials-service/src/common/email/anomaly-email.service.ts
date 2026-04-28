@@ -27,23 +27,33 @@ export class AnomalyEmailService {
   private transporter: nodemailer.Transporter;
 
   constructor(private configService: ConfigService) {
-    const smtpUser = this.configService.get<string>('SMTP_USER') || this.configService.get<string>('EMAIL_USER') || '';
-    const smtpPass = this.configService.get<string>('SMTP_PASS') || this.configService.get<string>('EMAIL_PASSWORD') || '';
+    const smtpUser =
+      this.configService.get<string>('SMTP_USER') ||
+      this.configService.get<string>('EMAIL_USER') ||
+      '';
+    const smtpPass =
+      this.configService.get<string>('SMTP_PASS') ||
+      this.configService.get<string>('EMAIL_PASSWORD') ||
+      '';
 
     if (smtpUser && smtpPass) {
       this.transporter = nodemailer.createTransport({
         host: this.configService.get<string>('SMTP_HOST') || 'smtp.gmail.com',
         port: this.configService.get<number>('SMTP_PORT') || 587,
         secure: false,
-        auth: { 
-          user: smtpUser, 
-          pass: smtpPass 
+        auth: {
+          user: smtpUser,
+          pass: smtpPass,
         },
       });
       this.logger.log('✅ Email transporter configured for anomaly alerts');
-      this.logger.log(`📧 SMTP: ${this.configService.get<string>('SMTP_HOST')}:${this.configService.get<number>('SMTP_PORT')}`);
+      this.logger.log(
+        `📧 SMTP: ${this.configService.get<string>('SMTP_HOST')}:${this.configService.get<number>('SMTP_PORT')}`,
+      );
     } else {
-      this.logger.warn('⚠️ Email not configured - anomaly alerts will not be sent');
+      this.logger.warn(
+        '⚠️ Email not configured - anomaly alerts will not be sent',
+      );
     }
   }
 
@@ -55,7 +65,10 @@ export class AnomalyEmailService {
 
     const subject = this.getSubject(data);
     const html = this.generateAnomalyEmailHtml(data);
-    const smtpFrom = this.configService.get<string>('SMTP_FROM') || this.configService.get<string>('EMAIL_FROM') || `"SmartSite Alert" <${this.configService.get<string>('SMTP_USER')}>`;
+    const smtpFrom =
+      this.configService.get<string>('SMTP_FROM') ||
+      this.configService.get<string>('EMAIL_FROM') ||
+      `"SmartSite Alert" <${this.configService.get<string>('SMTP_USER')}>`;
 
     try {
       await this.transporter.sendMail({
@@ -104,7 +117,7 @@ export class AnomalyEmailService {
 
   private generateAnomalyEmailHtml(data: AnomalyAlertData): string {
     const severityColor = this.getSeverityColor(data.anomalyType);
-    
+
     return `<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -162,19 +175,27 @@ export class AnomalyEmailService {
         <div class="info-value"><strong>${data.quantity}</strong> unités</div>
       </div>
 
-      ${data.expectedQuantity ? `
+      ${
+        data.expectedQuantity
+          ? `
       <div class="info-row">
         <div class="info-label">📊 Quantité normale attendue:</div>
         <div class="info-value">${data.expectedQuantity.toFixed(1)} unités/jour</div>
       </div>
-      ` : ''}
+      `
+          : ''
+      }
 
-      ${data.deviationPercent ? `
+      ${
+        data.deviationPercent
+          ? `
       <div class="info-row">
         <div class="info-label">⚠️ Déviation:</div>
         <div class="info-value" style="color: #dc2626;">+${data.deviationPercent.toFixed(1)}% au-dessus de la normale</div>
       </div>
-      ` : ''}
+      `
+          : ''
+      }
 
       <div class="info-row">
         <div class="info-label">📈 Stock avant mouvement:</div>
@@ -185,12 +206,16 @@ export class AnomalyEmailService {
         <div class="info-value ${data.currentStock < 0 ? 'warning-value' : ''}"><strong>${data.currentStock} unités</strong></div>
       </div>
 
-      ${data.reason ? `
+      ${
+        data.reason
+          ? `
       <div class="info-row">
         <div class="info-label">💬 Raison:</div>
         <div class="info-value">${this.escapeHtml(data.reason)}</div>
       </div>
-      ` : ''}
+      `
+          : ''
+      }
 
       <div class="warning-box">
         <p><strong>🔔 Message d'alerte:</strong></p>

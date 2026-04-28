@@ -31,7 +31,8 @@ export class MaterialRequirement extends Document {
   createdBy: Types.ObjectId;
 }
 
-export const MaterialRequirementSchema = SchemaFactory.createForClass(MaterialRequirement);
+export const MaterialRequirementSchema =
+  SchemaFactory.createForClass(MaterialRequirement);
 
 // Index compose pour eviter les doublons par (site, material)
 MaterialRequirementSchema.index({ siteId: 1, materialId: 1 }, { unique: true });

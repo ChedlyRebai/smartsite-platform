@@ -12,6 +12,7 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  Req,
 } from '@nestjs/common';
 import { Logger } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -20,7 +21,11 @@ import { CreateMaterialDto } from './dto/create-material.dto';
 import { UpdateMaterialDto, UpdateStockDto } from './dto/update-material.dto';
 import { MaterialQueryDto } from './dto/material-query.dto';
 import { ScanQRDto } from './dto/scan-qr.dto';
-import { MaterialForecast, StockAlert, QRScanResult } from './interfaces/material.interface';
+import {
+  MaterialForecast,
+  StockAlert,
+  QRScanResult,
+} from './interfaces/material.interface';
 import { QRScannerUtil } from '../common/utils/qr-scanner.util';
 import * as fs from 'fs';
 import { Material } from './entities/material.entity';
@@ -41,7 +46,7 @@ import { DailyReportService } from './services/daily-report.service';
 @Controller('materials')
 export class MaterialsController {
   private readonly logger = new Logger(MaterialsController.name);
-  
+
   constructor(
     private readonly materialsService: MaterialsService,
     private readonly predictionService: StockPredictionService,
@@ -108,6 +113,11 @@ export class MaterialsController {
     return this.materialsService.getStockAlerts();
   }
 
+  @Get('predictions')
+  async getPredictions() {
+    return this.materialsService.getPredictionsForAllMaterials();
+  }
+
   @Get('forecast/:id')
   async getForecast(@Param('id') id: string): Promise<MaterialForecast> {
     return this.materialsService.generateForecast(id);
@@ -158,12 +168,18 @@ export class MaterialsController {
 
       if (!OPENWEATHER_API_KEY) {
         this.logger.warn('⚠️ Clé API météo non configurée');
-        return { success: false, weather: null, message: 'Clé API météo non configurée' };
+        return {
+          success: false,
+          weather: null,
+          message: 'Clé API météo non configurée',
+        };
       }
 
       const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${OPENWEATHER_API_KEY}&units=metric&lang=fr`;
-      
-      this.logger.log(`🌍 Fetching weather for coordinates: ${latitude}, ${longitude}`);
+
+      this.logger.log(
+        `🌍 Fetching weather for coordinates: ${latitude}, ${longitude}`,
+      );
       const response = await axios.get(url, { timeout: 5000 });
 
       if (!response?.data) {
@@ -182,7 +198,9 @@ export class MaterialsController {
         condition: this.mapWeatherCondition(response.data.weather[0].id),
       };
 
-      this.logger.log(`✅ Weather fetched for coordinates (${latitude}, ${longitude}): ${weatherData.temperature}°C`);
+      this.logger.log(
+        `✅ Weather fetched for coordinates (${latitude}, ${longitude}): ${weatherData.temperature}°C`,
+      );
       return { success: true, weather: weatherData };
     } catch (error) {
       this.logger.error(`❌ Weather fetch failed: ${error.message}`);
@@ -204,22 +222,26 @@ export class MaterialsController {
   @Get(['prediction/all', 'predictions/all'])
   async getAllPredictions() {
     const materials = await this.materialsService.findAll({ limit: 100 });
-    const materialList = Array.isArray(materials) ? materials : (materials as any).data || [];
-    
+    const materialList = Array.isArray(materials)
+      ? materials
+      : (materials as any).data || [];
+
     const predictions = await Promise.all(
       materialList.map(async (material: any) => {
         try {
           // Use ML training service if historical data exists
-          if (this.mlTrainingService.hasHistoricalData(material._id.toString())) {
+          if (
+            this.mlTrainingService.hasHistoricalData(material._id.toString())
+          ) {
             const mlPrediction = await this.mlTrainingService.predictStock(
               material._id.toString(),
               24,
               material.quantity,
-              material.reorderPoint
+              material.reorderPoint,
             );
             return this.mapMlPredictionToClientFormat(material, mlPrediction);
           }
-          
+
           // Fallback to stock prediction service
           return await this.predictionService.predictStockDepletion(
             material._id.toString(),
@@ -228,21 +250,21 @@ export class MaterialsController {
             material.minimumStock,
             material.maximumStock,
             material.stockMinimum,
-            material.consumptionRate || 1
+            material.consumptionRate || 1,
           );
         } catch (error) {
           return null;
         }
-      })
+      }),
     );
-    
-    return predictions.filter(p => p !== null);
+
+    return predictions.filter((p) => p !== null);
   }
 
   @Get(':id/prediction')
   async getStockPrediction(@Param('id') id: string) {
     const material = await this.materialsService.findOne(id);
-    
+
     if (!material) {
       throw new BadRequestException('Matériau non trouvé');
     }
@@ -253,7 +275,7 @@ export class MaterialsController {
         id,
         24,
         material.quantity,
-        material.stockMinimum
+        material.stockMinimum,
       );
       return this.mapMlPredictionToClientFormat(material, mlPrediction);
     }
@@ -266,13 +288,15 @@ export class MaterialsController {
       material.minimumStock,
       material.maximumStock,
       material.stockMinimum,
-      material.consumptionRate || 1
+      material.consumptionRate || 1,
     );
   }
 
   @Get('auto-order/recommendations')
   async getAutoOrderRecommendations(@Query('siteId') siteId?: string) {
-    return this.intelligentRecommendationService.getAllAutoOrderMaterials(siteId);
+    return this.intelligentRecommendationService.getAllAutoOrderMaterials(
+      siteId,
+    );
   }
 
   @Get(':id/auto-order')
@@ -283,9 +307,11 @@ export class MaterialsController {
   @Get('sites')
   async getSites() {
     try {
-      this.logger.log('🏗️ Récupération des sites depuis MongoDB smartsite/sites');
+      this.logger.log(
+        '🏗️ Récupération des sites depuis MongoDB smartsite/sites',
+      );
       const sites = await this.sitesService.findAll();
-      
+
       return {
         success: true,
         data: sites,
@@ -311,7 +337,7 @@ export class MaterialsController {
       this.logger.log('🧪 Test de connexion aux sites MongoDB...');
       const count = await this.sitesService.getSiteCount();
       const sites = await this.sitesService.findAll();
-      
+
       return {
         success: true,
         message: 'Connexion MongoDB sites OK',
@@ -320,7 +346,7 @@ export class MaterialsController {
           collection: 'sites',
           totalSites: count,
           sitesFound: sites.length,
-          sites: sites.slice(0, 3).map(s => ({
+          sites: sites.slice(0, 3).map((s) => ({
             _id: s._id,
             nom: s.nom,
             ville: s.ville,
@@ -343,7 +369,7 @@ export class MaterialsController {
     try {
       this.logger.log(`🔍 Récupération du site ${id}`);
       const site = await this.sitesService.findOne(id);
-      
+
       if (!site) {
         this.logger.warn(`⚠️ Site ${id} non trouvé`);
         return {
@@ -352,7 +378,7 @@ export class MaterialsController {
           data: null,
         };
       }
-      
+
       this.logger.log(`✅ Site trouvé: ${site.nom}`);
       return site;
     } catch (error) {
@@ -369,9 +395,11 @@ export class MaterialsController {
   async testSuppliersConnection(): Promise<any> {
     try {
       this.logger.log('🧪 Test de connexion aux fournisseurs MongoDB...');
-      const count = await this.intelligentRecommendationService.suppliersService.getSupplierCount();
-      const suppliers = await this.intelligentRecommendationService.suppliersService.findAll();
-      
+      const count =
+        await this.intelligentRecommendationService.suppliersService.getSupplierCount();
+      const suppliers =
+        await this.intelligentRecommendationService.suppliersService.findAll();
+
       return {
         success: true,
         message: 'Connexion MongoDB fournisseurs OK',
@@ -380,7 +408,7 @@ export class MaterialsController {
           collection: 'fournisseurs',
           totalSuppliers: count,
           suppliersFound: suppliers.length,
-          suppliers: suppliers.slice(0, 3).map(s => ({
+          suppliers: suppliers.slice(0, 3).map((s) => ({
             _id: s._id,
             nom: s.nom,
             ville: s.ville,
@@ -401,13 +429,16 @@ export class MaterialsController {
   }
 
   @Post('email/test')
-  async testEmailAlert(@Body() testData?: { email?: string; materialName?: string }): Promise<any> {
+  async testEmailAlert(
+    @Body() testData?: { email?: string; materialName?: string },
+  ): Promise<any> {
     try {
-      this.logger.log('📧 Test d\'envoi d\'email d\'alerte...');
-      
-      const testEmail = testData?.email || process.env.ADMIN_EMAIL || 'kacey8@ethereal.email';
+      this.logger.log("📧 Test d'envoi d'email d'alerte...");
+
+      const testEmail =
+        testData?.email || process.env.ADMIN_EMAIL || 'kacey8@ethereal.email';
       const materialName = testData?.materialName || 'Ciment Portland (Test)';
-      
+
       await this.anomalyEmailService.sendStockAnomalyAlert({
         toEmail: testEmail,
         userName: 'Utilisateur Test',
@@ -417,17 +448,18 @@ export class MaterialsController {
         flowType: 'OUT',
         quantity: 150,
         anomalyType: AnomalyType.EXCESSIVE_OUT,
-        anomalyMessage: 'Sortie excessive détectée : 150 unités sorties alors que la consommation normale est de 50 unités/jour. Risque de vol ou gaspillage.',
+        anomalyMessage:
+          'Sortie excessive détectée : 150 unités sorties alors que la consommation normale est de 50 unités/jour. Risque de vol ou gaspillage.',
         currentStock: 50,
         previousStock: 200,
         expectedQuantity: 50,
         deviationPercent: 200,
         timestamp: new Date(),
-        reason: 'Test de l\'envoi d\'email d\'alerte pour anomalie de stock',
+        reason: "Test de l'envoi d'email d'alerte pour anomalie de stock",
       });
-      
+
       this.logger.log(`✅ Email de test envoyé à ${testEmail}`);
-      
+
       return {
         success: true,
         message: `Email de test envoyé avec succès à ${testEmail}`,
@@ -435,14 +467,14 @@ export class MaterialsController {
         etherealUrl: 'https://ethereal.email/messages',
         credentials: {
           username: process.env.EMAIL_USER,
-          note: 'Connectez-vous sur https://ethereal.email avec ces identifiants pour voir l\'email',
+          note: "Connectez-vous sur https://ethereal.email avec ces identifiants pour voir l'email",
         },
       };
     } catch (error) {
-      this.logger.error('❌ Erreur lors de l\'envoi de l\'email de test:', error);
+      this.logger.error("❌ Erreur lors de l'envoi de l'email de test:", error);
       return {
         success: false,
-        message: 'Erreur lors de l\'envoi de l\'email de test',
+        message: "Erreur lors de l'envoi de l'email de test",
         error: error.message,
       };
     }
@@ -451,12 +483,17 @@ export class MaterialsController {
   @Get('suppliers')
   async getAllSuppliers(): Promise<any> {
     try {
-      this.logger.log('🏪 Récupération de tous les fournisseurs depuis MongoDB');
-      
-      const suppliers = await this.intelligentRecommendationService.suppliersService.findAll();
-      
-      this.logger.log(`✅ ${suppliers.length} fournisseurs trouvés depuis MongoDB`);
-      
+      this.logger.log(
+        '🏪 Récupération de tous les fournisseurs depuis MongoDB',
+      );
+
+      const suppliers =
+        await this.intelligentRecommendationService.suppliersService.findAll();
+
+      this.logger.log(
+        `✅ ${suppliers.length} fournisseurs trouvés depuis MongoDB`,
+      );
+
       return {
         success: true,
         data: suppliers,
@@ -465,7 +502,10 @@ export class MaterialsController {
         source: 'MongoDB smartsite-fournisseurs',
       };
     } catch (error) {
-      this.logger.error(`❌ Erreur lors de la récupération des fournisseurs:`, error);
+      this.logger.error(
+        `❌ Erreur lors de la récupération des fournisseurs:`,
+        error,
+      );
       return {
         success: false,
         message: 'Erreur lors de la récupération des fournisseurs',
@@ -484,10 +524,12 @@ export class MaterialsController {
     @Query('siteId') siteId?: string,
   ) {
     try {
-      this.logger.log(`🏪 Récupération des fournisseurs recommandés pour matériau ${materialId}`);
-      
+      this.logger.log(
+        `🏪 Récupération des fournisseurs recommandés pour matériau ${materialId}`,
+      );
+
       let siteCoordinates: { latitude: number; longitude: number } | undefined;
-      
+
       // Récupérer les coordonnées du site si siteId est fourni
       if (siteId && !siteLatitude && !siteLongitude) {
         try {
@@ -497,28 +539,41 @@ export class MaterialsController {
               latitude: site.coordonnees.latitude,
               longitude: site.coordonnees.longitude,
             };
-            this.logger.log(`📍 Coordonnées du site ${siteId}: ${siteCoordinates.latitude}, ${siteCoordinates.longitude}`);
+            this.logger.log(
+              `📍 Coordonnées du site ${siteId}: ${siteCoordinates.latitude}, ${siteCoordinates.longitude}`,
+            );
           }
         } catch (error) {
-          this.logger.warn(`⚠️ Impossible de récupérer les coordonnées du site ${siteId}:`, error.message);
+          this.logger.warn(
+            `⚠️ Impossible de récupérer les coordonnées du site ${siteId}:`,
+            error.message,
+          );
         }
       }
-      
+
       // Récupérer les coordonnées du site si disponibles en paramètres
       if (siteLatitude && siteLongitude) {
         const lat = parseFloat(siteLatitude);
         const lon = parseFloat(siteLongitude);
         if (!isNaN(lat) && !isNaN(lon)) {
           siteCoordinates = { latitude: lat, longitude: lon };
-          this.logger.log(`📍 Coordonnées du site (paramètres): ${lat}, ${lon}`);
+          this.logger.log(
+            `📍 Coordonnées du site (paramètres): ${lat}, ${lon}`,
+          );
         }
       }
 
       // Récupérer les suggestions de fournisseurs depuis MongoDB
-      const suppliers = await this.intelligentRecommendationService.suggestSuppliers(materialId, siteCoordinates);
-      
-      this.logger.log(`✅ ${suppliers.length} fournisseurs recommandés trouvés depuis MongoDB`);
-      
+      const suppliers =
+        await this.intelligentRecommendationService.suggestSuppliers(
+          materialId,
+          siteCoordinates,
+        );
+
+      this.logger.log(
+        `✅ ${suppliers.length} fournisseurs recommandés trouvés depuis MongoDB`,
+      );
+
       return {
         success: true,
         data: suppliers,
@@ -530,7 +585,10 @@ export class MaterialsController {
         sortedBy: siteCoordinates ? 'distance' : 'evaluation',
       };
     } catch (error) {
-      this.logger.error(`❌ Erreur lors de la récupération des fournisseurs recommandés:`, error);
+      this.logger.error(
+        `❌ Erreur lors de la récupération des fournisseurs recommandés:`,
+        error,
+      );
       return {
         success: false,
         message: 'Erreur lors de la récupération des fournisseurs recommandés',
@@ -546,9 +604,11 @@ export class MaterialsController {
   async sendDailyReport(@Body() body?: { email?: string }): Promise<any> {
     try {
       this.logger.log('📊 Déclenchement manuel du rapport quotidien...');
-      
-      const result = await this.dailyReportService.sendManualReport(body?.email);
-      
+
+      const result = await this.dailyReportService.sendManualReport(
+        body?.email,
+      );
+
       if (result.success) {
         this.logger.log(`✅ ${result.message}`);
         return {
@@ -565,7 +625,10 @@ export class MaterialsController {
         };
       }
     } catch (error) {
-      this.logger.error('❌ Erreur lors de l\'envoi du rapport quotidien:', error);
+      this.logger.error(
+        "❌ Erreur lors de l'envoi du rapport quotidien:",
+        error,
+      );
       return {
         success: false,
         message: `Erreur lors de l'envoi du rapport: ${error.message}`,
@@ -577,7 +640,7 @@ export class MaterialsController {
   // ========== DYNAMIC ROUTES (MUST BE LAST) ==========
   // Ces routes doivent être placées APRÈS toutes les routes spécifiques
   // pour éviter les conflits (ex: /materials/sites/:id capturé par /materials/:id)
-  
+
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.materialsService.findOne(id);
@@ -595,8 +658,10 @@ export class MaterialsController {
   async updateStock(
     @Param('id') id: string,
     @Body() updateStockDto: UpdateStockDto,
+    @Req() req: any,
   ) {
-    return this.materialsService.updateStock(id, updateStockDto, null);
+    const userId = req.user?.id || 'system';
+    return this.materialsService.updateStock(id, updateStockDto, userId);
   }
 
   @Delete(':id')
@@ -627,7 +692,9 @@ export class MaterialsController {
 
   @Post('scan-qr')
   @UseInterceptors(FileInterceptor('image'))
-  async scanQRCode(@UploadedFile() file: Express.Multer.File): Promise<QRScanResult> {
+  async scanQRCode(
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<QRScanResult> {
     if (!file) {
       throw new BadRequestException('Image requise pour le scan QR');
     }
@@ -635,12 +702,12 @@ export class MaterialsController {
     try {
       const qrData = await QRScannerUtil.scanFromImage(file.path);
       console.log('📸 QR Data scanné:', qrData);
-      
+
       const parsedData = QRScannerUtil.parseQRData(qrData);
       console.log('📦 Données parsées:', parsedData);
-      
+
       let material: Material | null = null;
-      
+
       if (parsedData.id) {
         try {
           material = await this.materialsService.findOne(parsedData.id);
@@ -649,7 +716,7 @@ export class MaterialsController {
           console.log('❌ Matériau non trouvé par ID:', parsedData.id);
         }
       }
-      
+
       if (!material && parsedData.code) {
         try {
           material = await this.materialsService.findByCode(parsedData.code);
@@ -658,7 +725,7 @@ export class MaterialsController {
           console.log('❌ Matériau non trouvé par code:', parsedData.code);
         }
       }
-      
+
       if (!material) {
         try {
           material = await this.materialsService.findByQRCode(qrData);
@@ -694,9 +761,9 @@ export class MaterialsController {
 
     const parsedData = QRScannerUtil.parseQRData(scanDto.qrCode);
     console.log('📦 Données parsées (texte):', parsedData);
-    
+
     let material: Material | null = null;
-    
+
     if (parsedData.id) {
       try {
         material = await this.materialsService.findOne(parsedData.id);
@@ -704,7 +771,7 @@ export class MaterialsController {
         console.log('Matériau non trouvé par ID:', error.message);
       }
     }
-    
+
     if (!material && parsedData.code) {
       try {
         material = await this.materialsService.findByCode(parsedData.code);
@@ -712,7 +779,7 @@ export class MaterialsController {
         console.log('Matériau non trouvé par code:', error.message);
       }
     }
-    
+
     if (!material) {
       try {
         material = await this.materialsService.findByQRCode(scanDto.qrCode);
@@ -756,11 +823,11 @@ export class MaterialsController {
 
     try {
       const result = await this.materialsService.importFromExcel(file.path);
-      
+
       if (fs.existsSync(file.path)) {
         fs.unlinkSync(file.path);
       }
-      
+
       return result;
     } catch (error) {
       if (file && fs.existsSync(file.path)) {
@@ -770,29 +837,23 @@ export class MaterialsController {
     }
   }
 
-   @Post('export/excel')
-   async exportToExcel(
-  @Res() res: Response,
-  @Body() materialIds?: string[]
-) {
-  const result = await this.materialsService.exportToExcel(materialIds);
+  @Post('export/excel')
+  async exportToExcel(@Res() res: Response, @Body() materialIds?: string[]) {
+    const result = await this.materialsService.exportToExcel(materialIds);
 
-  if (!result || !result.filePath) {
-    throw new BadRequestException('Erreur export Excel');
+    if (!result || !result.filePath) {
+      throw new BadRequestException('Erreur export Excel');
+    }
+
+    return res.download(result.filePath, result.filename);
   }
-
-  return res.download(result.filePath, result.filename);
-}
 
   /*@Post('export/pdf')
   async exportToPDF(@Body() materialIds?: string[]) {
     return this.materialsService.exportToPDF(materialIds);
   }*/
   @Post('export/pdf')
-  async exportToPDF(
-    @Res() res: Response,
-    @Body() materialIds?: string[]
-  ) {
+  async exportToPDF(@Res() res: Response, @Body() materialIds?: string[]) {
     try {
       const result = await this.materialsService.exportToPDF(materialIds);
 
@@ -834,9 +895,12 @@ export class MaterialsController {
       } else {
         throw new BadRequestException('Impossible de lire le fichier');
       }
-      
-      console.log('📄 CSV Content (first 200 chars):', csvContent.substring(0, 200));
-      
+
+      console.log(
+        '📄 CSV Content (first 200 chars):',
+        csvContent.substring(0, 200),
+      );
+
       const parsedData = this.mlTrainingService.parseCSV(csvContent, id);
 
       return {
@@ -864,14 +928,16 @@ export class MaterialsController {
 
     const hasData = this.mlTrainingService.hasHistoricalData(id);
     if (!hasData) {
-      throw new BadRequestException('Aucune donnée historique. Upload CSV first.');
+      throw new BadRequestException(
+        'Aucune donnée historique. Upload CSV first.',
+      );
     }
 
     const result = await this.mlTrainingService.trainModel(
       id,
       material.name,
       material.quantity,
-      material.stockMinimum
+      material.stockMinimum,
     );
 
     return {
@@ -898,7 +964,7 @@ export class MaterialsController {
       id,
       hoursAhead,
       material.quantity,
-      material.stockMinimum
+      material.stockMinimum,
     );
 
     prediction.materialName = material.name;
@@ -924,7 +990,14 @@ export class MaterialsController {
   @Post(':id/predict-advanced')
   async predictAdvanced(
     @Param('id') id: string,
-    @Body() features: { hourOfDay: number; dayOfWeek: number; siteActivityLevel: number; weather: string; projectType: string }
+    @Body()
+    features: {
+      hourOfDay: number;
+      dayOfWeek: number;
+      siteActivityLevel: number;
+      weather: string;
+      projectType: string;
+    },
   ) {
     const material = await this.materialsService.findOne(id);
     if (!material) {
@@ -941,7 +1014,7 @@ export class MaterialsController {
         projectType: features.projectType,
       },
       material.quantity,
-      material.stockMinimum
+      material.stockMinimum,
     );
 
     prediction.materialName = material.name;
@@ -1000,7 +1073,9 @@ export class MaterialsController {
       // Données
       entries.forEach((entry: any) => {
         worksheet.addRow({
-          timestamp: new Date(entry.timestamp || entry.createdAt).toLocaleString('fr-FR'),
+          timestamp: new Date(
+            entry.timestamp || entry.createdAt,
+          ).toLocaleString('fr-FR'),
           materialName: entry.materialName,
           materialCode: entry.materialCode,
           siteName: entry.siteName,
@@ -1023,8 +1098,14 @@ export class MaterialsController {
       // Générer le buffer
       const buffer = await workbook.xlsx.writeBuffer();
 
-      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      res.setHeader('Content-Disposition', `attachment; filename=historique_consommation_${Date.now()}.xlsx`);
+      res.setHeader(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      );
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename=historique_consommation_${Date.now()}.xlsx`,
+      );
       res.send(buffer);
     } catch (error) {
       this.logger.error(`❌ Export failed: ${error.message}`);
@@ -1064,7 +1145,9 @@ export class MaterialsController {
         total: entries.length,
       };
     } catch (error) {
-      this.logger.error(`❌ Consumption history fetch failed: ${error.message}`);
+      this.logger.error(
+        `❌ Consumption history fetch failed: ${error.message}`,
+      );
       return {
         success: false,
         entries: [],

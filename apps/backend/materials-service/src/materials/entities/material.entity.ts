@@ -25,7 +25,8 @@ export class MaterialSiteStock extends Document {
   lastUpdated: Date;
 }
 
-export const MaterialSiteStockSchema = SchemaFactory.createForClass(MaterialSiteStock);
+export const MaterialSiteStockSchema =
+  SchemaFactory.createForClass(MaterialSiteStock);
 MaterialSiteStockSchema.index({ materialId: 1, siteId: 1 }, { unique: true });
 
 @Schema({ timestamps: true })
@@ -105,7 +106,11 @@ export class Material extends Document {
   @Prop({ type: Number, default: 0 })
   damagedQuantity: number;
 
-  @Prop({ type: String, enum: ['active', 'discontinued', 'obsolete'], default: 'active' })
+  @Prop({
+    type: String,
+    enum: ['active', 'discontinued', 'obsolete'],
+    default: 'active',
+  })
   status: string;
 
   @Prop({ type: Object })

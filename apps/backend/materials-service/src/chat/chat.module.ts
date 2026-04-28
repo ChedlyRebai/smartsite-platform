@@ -15,11 +15,20 @@ import { ChatMessage, ChatMessageSchema } from './entities/chat-message.entity';
     HttpModule,
     MongooseModule.forFeature([
       { name: ChatMessage.name, schema: ChatMessageSchema },
-      { name: 'MaterialOrder', schema: require('../materials/entities/material-order.entity').MaterialOrderSchema },
+      {
+        name: 'MaterialOrder',
+        schema: require('../materials/entities/material-order.entity')
+          .MaterialOrderSchema,
+      },
     ]),
   ],
   controllers: [ChatController],
-  providers: [ChatGateway, ChatService, AiMessageAnalyzerService, WeatherService],
+  providers: [
+    ChatGateway,
+    ChatService,
+    AiMessageAnalyzerService,
+    WeatherService,
+  ],
   exports: [ChatService, ChatGateway, AiMessageAnalyzerService, WeatherService],
 })
 export class ChatModule {}

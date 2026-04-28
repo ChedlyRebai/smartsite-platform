@@ -11,7 +11,10 @@ import { Server, Socket } from 'socket.io';
 import { Logger, UsePipes, ValidationPipe } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { ChatService } from './chat.service';
-import { AiMessageAnalyzerService, MessageAnalysisResult } from './ai-message-analyzer.service';
+import {
+  AiMessageAnalyzerService,
+  MessageAnalysisResult,
+} from './ai-message-analyzer.service';
 import {
   SendMessageDto,
   SendVoiceMessageDto,
@@ -47,7 +50,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   private logger = new Logger(ChatGateway.name);
   private rooms: Map<string, ChatRoom> = new Map();
-  private userSockets: Map<string, { socketId: string; userId: string; role: string }> = new Map();
+  private userSockets: Map<
+    string,
+    { socketId: string; userId: string; role: string }
+  > = new Map();
 
   constructor(
     private readonly chatService: ChatService,
@@ -56,7 +62,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   async handleConnection(client: Socket) {
     this.logger.log(`Client connected: ${client.id}`);
-    client.emit('connected', { message: 'Connected to chat service', createdAt: new Date().toISOString() });
+    client.emit('connected', {
+      message: 'Connected to chat service',
+      createdAt: new Date().toISOString(),
+    });
   }
 
   async handleDisconnect(client: Socket) {
@@ -64,7 +73,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     // Find user by socket ID
     let disconnectedUserId: string | null = null;
-    let disconnectedUserData: { socketId: string; userId: string; role: string } | null = null;
+    let disconnectedUserData: {
+      socketId: string;
+      userId: string;
+      role: string;
+    } | null = null;
 
     for (const [userId, data] of this.userSockets.entries()) {
       if (data.socketId === client.id) {
@@ -78,15 +91,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (disconnectedUserId && disconnectedUserData) {
       // Remove user from all rooms and clean up
       const roomsToClean: string[] = [];
-      
+
       for (const [orderId, room] of this.rooms.entries()) {
         if (room.participants.has(disconnectedUserId)) {
           // Remove participant from room
           room.participants.delete(disconnectedUserId);
-          
+
           // Make client leave the room
           client.leave(`order-${orderId}`);
-          
+
           // Notify other participants
           this.server.to(`order-${orderId}`).emit('userLeft', {
             userId: disconnectedUserId,
@@ -100,7 +113,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             roomsToClean.push(orderId);
           }
 
-          this.logger.log(`👤 User ${disconnectedUserData.userId} left room order-${orderId}`);
+          this.logger.log(
+            `👤 User ${disconnectedUserData.userId} left room order-${orderId}`,
+          );
         }
       }
 
@@ -110,9 +125,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.logger.log(`🧹 Cleaned up empty room: order-${orderId}`);
       }
 
-      this.logger.log(`✅ Disconnection cleanup completed for user: ${disconnectedUserData.userId}`);
+      this.logger.log(
+        `✅ Disconnection cleanup completed for user: ${disconnectedUserData.userId}`,
+      );
     } else {
-      this.logger.warn(`⚠️ Could not find user data for disconnected socket: ${client.id}`);
+      this.logger.warn(
+        `⚠️ Could not find user data for disconnected socket: ${client.id}`,
+      );
     }
   }
 
@@ -202,8 +221,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // Analyze message with AI before sending
     let analysis: MessageAnalysisResult | null = null;
     try {
-      analysis = await this.aiAnalyzer.analyzeMessage(data.content, data.senderRole);
-      
+      analysis = await this.aiAnalyzer.analyzeMessage(
+        data.content,
+        data.senderRole,
+      );
+
       // Send analysis result back to sender for UI feedback
       client.emit('messageAnalysis', {
         originalMessage: data.content,
@@ -213,7 +235,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       // If message is blocked (CONFLICT), don't send it
       if (analysis && !analysis.allow_send) {
-        this.logger.warn(`🚫 Message blocked due to conflict: ${data.content.substring(0, 50)}`);
+        this.logger.warn(
+          `🚫 Message blocked due to conflict: ${data.content.substring(0, 50)}`,
+        );
         return;
       }
     } catch (error) {
@@ -262,7 +286,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     const roomId = `order-${data.orderId}`;
     this.server.to(roomId).emit('newMessage', message);
-    this.logger.log(`📨 Message sent to room ${roomId}: ${data.content.substring(0, 50)} [${analysis?.emotion || 'no-analysis'}]`);
+    this.logger.log(
+      `📨 Message sent to room ${roomId}: ${data.content.substring(0, 50)} [${analysis?.emotion || 'no-analysis'}]`,
+    );
   }
 
   @SubscribeMessage('sendVoiceMessage')
@@ -338,9 +364,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('markAsRead')
-  async handleMarkAsRead(
-    @MessageBody() data: MarkAsReadDto,
-  ) {
+  async handleMarkAsRead(@MessageBody() data: MarkAsReadDto) {
     await this.chatService.markAsRead(data.orderId, data.userId);
 
     const room = this.rooms.get(data.orderId);
@@ -360,17 +384,25 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { orderId: string; userId: string },
   ) {
-    const unreadCount = await this.chatService.getUnreadCount(data.orderId, data.userId);
+    const unreadCount = await this.chatService.getUnreadCount(
+      data.orderId,
+      data.userId,
+    );
     client.emit('unreadCount', { orderId: data.orderId, count: unreadCount });
   }
 
   @SubscribeMessage('addReaction')
   async handleAddReaction(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: { messageId: string; userId: string; emoji: string; orderId: string },
+    @MessageBody()
+    data: { messageId: string; userId: string; emoji: string; orderId: string },
   ) {
     try {
-      const message = await this.chatService.addReaction(data.messageId, data.userId, data.emoji);
+      const message = await this.chatService.addReaction(
+        data.messageId,
+        data.userId,
+        data.emoji,
+      );
       const roomId = `order-${data.orderId}`;
       this.server.to(roomId).emit('reactionAdded', {
         messageId: data.messageId,
@@ -389,7 +421,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { messageId: string; userId: string; orderId: string },
   ) {
     try {
-      const message = await this.chatService.removeReaction(data.messageId, data.userId);
+      const message = await this.chatService.removeReaction(
+        data.messageId,
+        data.userId,
+      );
       const roomId = `order-${data.orderId}`;
       this.server.to(roomId).emit('reactionRemoved', {
         messageId: data.messageId,
@@ -412,7 +447,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     try {
       const roomId = `order-${data.orderId}`;
-      
+
       // Créer un message système
       const systemMessage = {
         id: uuidv4(),
@@ -446,7 +481,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   // Method to emit delivery progress from OrdersService
-  emitDeliveryProgress(orderId: string, progress: number, location: { lat: number; lng: number }) {
+  emitDeliveryProgress(
+    orderId: string,
+    progress: number,
+    location: { lat: number; lng: number },
+  ) {
     const roomId = `order-${orderId}`;
     this.server.to(roomId).emit('deliveryProgress', {
       orderId,

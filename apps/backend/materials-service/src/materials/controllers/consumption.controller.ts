@@ -33,7 +33,11 @@ export class ConsumptionController {
   ) {
     const start = startDate ? new Date(startDate) : undefined;
     const end = endDate ? new Date(endDate) : undefined;
-    const consumptions = await this.anomalyService.getConsumptionsBySite(siteId, start, end);
+    const consumptions = await this.anomalyService.getConsumptionsBySite(
+      siteId,
+      start,
+      end,
+    );
     return {
       success: true,
       data: consumptions,
@@ -49,7 +53,11 @@ export class ConsumptionController {
   ) {
     const start = startDate ? new Date(startDate) : undefined;
     const end = endDate ? new Date(endDate) : undefined;
-    const consumptions = await this.anomalyService.getConsumptionsByMaterial(materialId, start, end);
+    const consumptions = await this.anomalyService.getConsumptionsByMaterial(
+      materialId,
+      start,
+      end,
+    );
     return {
       success: true,
       data: consumptions,

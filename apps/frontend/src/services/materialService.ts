@@ -586,6 +586,17 @@ const materialService = {
     }
   },
 
+  // ✅ Nouvelle méthode pour récupérer toutes les prédictions IA
+  async getAllPredictions(): Promise<any[]> {
+    try {
+      const response = await apiClient.get('/predictions');
+      return response.data;
+    } catch (error) {
+      console.error('Erreur getAllPredictions:', error);
+      throw error;
+    }
+  },
+
 };
 
 export default materialService;

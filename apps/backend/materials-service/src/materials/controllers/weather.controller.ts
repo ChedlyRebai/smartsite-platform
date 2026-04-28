@@ -13,35 +13,38 @@ export class WeatherController {
   @Get()
   async getWeatherByCoordinates(
     @Query('lat') lat: string,
-    @Query('lng') lng: string
+    @Query('lng') lng: string,
   ) {
     this.logger.log(`🌍 Getting weather for coordinates: ${lat}, ${lng}`);
-    
+
     try {
       const latitude = parseFloat(lat);
       const longitude = parseFloat(lng);
-      
+
       if (isNaN(latitude) || isNaN(longitude)) {
         return {
           success: false,
           message: 'Coordonnées GPS invalides',
-          weather: null
+          weather: null,
         };
       }
 
-      const weather = await this.weatherService.getWeatherByCoordinates(latitude, longitude);
-      
+      const weather = await this.weatherService.getWeatherByCoordinates(
+        latitude,
+        longitude,
+      );
+
       return {
         success: true,
         message: 'Météo récupérée avec succès',
-        weather
+        weather,
       };
     } catch (error) {
       this.logger.error(`❌ Error getting weather: ${error.message}`);
       return {
         success: false,
         message: 'Erreur lors de la récupération de la météo',
-        weather: null
+        weather: null,
       };
     }
   }
@@ -52,29 +55,29 @@ export class WeatherController {
   @Get('city')
   async getWeatherByCity(@Query('city') city: string) {
     this.logger.log(`🏙️ Getting weather for city: ${city}`);
-    
+
     try {
       if (!city) {
         return {
           success: false,
           message: 'Nom de ville requis',
-          weather: null
+          weather: null,
         };
       }
 
       const weather = await this.weatherService.getWeatherByCity(city);
-      
+
       return {
         success: true,
         message: 'Météo récupérée avec succès',
-        weather
+        weather,
       };
     } catch (error) {
       this.logger.error(`❌ Error getting weather for city: ${error.message}`);
       return {
         success: false,
         message: 'Erreur lors de la récupération de la météo',
-        weather: null
+        weather: null,
       };
     }
   }

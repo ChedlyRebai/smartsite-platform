@@ -12,7 +12,11 @@ import {
 } from '@nestjs/common';
 import { ConsumptionHistoryService } from '../services/consumption-history.service';
 import { ConsumptionAIAnalyzerService } from '../services/consumption-ai-analyzer.service';
-import { HistoryFiltersDto, StatisticsFiltersDto, CleanupDto } from '../dto/history-filters.dto';
+import {
+  HistoryFiltersDto,
+  StatisticsFiltersDto,
+  CleanupDto,
+} from '../dto/history-filters.dto';
 
 @Controller('consumption-history')
 export class ConsumptionHistoryController {
@@ -30,7 +34,9 @@ export class ConsumptionHistoryController {
   @Get()
   @HttpCode(HttpStatus.OK)
   async getHistory(@Query() filters: HistoryFiltersDto) {
-    this.logger.log(`GET /consumption-history - Filtres: ${JSON.stringify(filters)}`);
+    this.logger.log(
+      `GET /consumption-history - Filtres: ${JSON.stringify(filters)}`,
+    );
     return this.historyService.getHistory(filters);
   }
 
@@ -41,7 +47,9 @@ export class ConsumptionHistoryController {
   @Get('statistics')
   @HttpCode(HttpStatus.OK)
   async getStatistics(@Query() filters: StatisticsFiltersDto) {
-    this.logger.log(`GET /consumption-history/statistics - Filtres: ${JSON.stringify(filters)}`);
+    this.logger.log(
+      `GET /consumption-history/statistics - Filtres: ${JSON.stringify(filters)}`,
+    );
     return this.historyService.getStatistics(filters);
   }
 
@@ -55,7 +63,9 @@ export class ConsumptionHistoryController {
     @Param('materialId') materialId: string,
     @Query('days') days?: number,
   ) {
-    this.logger.log(`GET /consumption-history/material/${materialId}/trend?days=${days || 30}`);
+    this.logger.log(
+      `GET /consumption-history/material/${materialId}/trend?days=${days || 30}`,
+    );
     return this.historyService.getMaterialTrend(materialId, days || 30);
   }
 
@@ -77,7 +87,9 @@ export class ConsumptionHistoryController {
   @Post('sync')
   @HttpCode(HttpStatus.OK)
   async sync() {
-    this.logger.log('POST /consumption-history/sync - Démarrage de la synchronisation');
+    this.logger.log(
+      'POST /consumption-history/sync - Démarrage de la synchronisation',
+    );
     const report = await this.historyService.syncFromExistingData();
     this.logger.log(`✅ Synchronisation terminée: ${JSON.stringify(report)}`);
     return report;
@@ -90,7 +102,9 @@ export class ConsumptionHistoryController {
   @Delete('cleanup')
   @HttpCode(HttpStatus.OK)
   async cleanup(@Body() cleanupDto: CleanupDto) {
-    this.logger.log(`DELETE /consumption-history/cleanup - beforeDate: ${cleanupDto.beforeDate}`);
+    this.logger.log(
+      `DELETE /consumption-history/cleanup - beforeDate: ${cleanupDto.beforeDate}`,
+    );
     return this.historyService.cleanup(cleanupDto.beforeDate);
   }
 
@@ -105,7 +119,9 @@ export class ConsumptionHistoryController {
     @Param('siteId') siteId: string,
     @Query('days') days?: number,
   ) {
-    this.logger.log(`GET /consumption-history/ai-report/${materialId}/${siteId}?days=${days || 30}`);
+    this.logger.log(
+      `GET /consumption-history/ai-report/${materialId}/${siteId}?days=${days || 30}`,
+    );
     try {
       const report = await this.aiAnalyzerService.generateConsumptionReport(
         materialId,

@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param, Query, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  Logger,
+} from '@nestjs/common';
 import { SupplierRatingService } from '../services/supplier-rating.service';
 import type { CreateRatingDto } from '../services/supplier-rating.service';
 
@@ -19,7 +27,9 @@ export class SupplierRatingController {
     @Param('materialId') materialId: string,
     @Query('userId') userId: string,
   ) {
-    this.logger.log(`🔍 Checking rating needed for material: ${materialId}, user: ${userId}`);
+    this.logger.log(
+      `🔍 Checking rating needed for material: ${materialId}, user: ${userId}`,
+    );
     return this.supplierRatingService.checkIfRatingNeeded(materialId, userId);
   }
 

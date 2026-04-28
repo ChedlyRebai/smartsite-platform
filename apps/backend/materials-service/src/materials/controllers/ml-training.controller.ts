@@ -22,10 +22,15 @@ export class MLTrainingController {
   @Post('detect-anomaly/:materialId')
   async detectAnomaly(
     @Param('materialId') materialId: string,
-    @Body() body: { consumption: number }
+    @Body() body: { consumption: number },
   ) {
-    this.logger.log(`🚨 Detecting anomaly for material: ${materialId}, consumption: ${body.consumption}`);
-    return this.mlTrainingService.detectConsumptionAnomaly(materialId, body.consumption);
+    this.logger.log(
+      `🚨 Detecting anomaly for material: ${materialId}, consumption: ${body.consumption}`,
+    );
+    return this.mlTrainingService.detectConsumptionAnomaly(
+      materialId,
+      body.consumption,
+    );
   }
 
   /**

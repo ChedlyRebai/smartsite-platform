@@ -9,7 +9,10 @@ import {
   Request,
 } from '@nestjs/common';
 import { MaterialFlowService } from '../services/material-flow.service';
-import { CreateMaterialFlowDto, MaterialFlowQueryDto } from '../dto/material-flow.dto';
+import {
+  CreateMaterialFlowDto,
+  MaterialFlowQueryDto,
+} from '../dto/material-flow.dto';
 
 @Controller('material-flow')
 export class MaterialFlowController {
@@ -56,7 +59,11 @@ export class MaterialFlowController {
     @Param('siteId') siteId: string,
     @Query('days') days: string = '30',
   ) {
-    return this.flowService.getFlowStatistics(materialId, siteId, parseInt(days));
+    return this.flowService.getFlowStatistics(
+      materialId,
+      siteId,
+      parseInt(days),
+    );
   }
 
   /**

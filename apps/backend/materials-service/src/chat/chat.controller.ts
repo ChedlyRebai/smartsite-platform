@@ -31,13 +31,20 @@ export class ChatController {
 
   @Get('health')
   async healthCheck() {
-    return { success: true, message: 'Chat service is running', timestamp: new Date() };
+    return {
+      success: true,
+      message: 'Chat service is running',
+      timestamp: new Date(),
+    };
   }
 
   @Post('analyze-message')
   async analyzeMessage(@Body() body: { message: string; senderRole: string }) {
     try {
-      const analysis = await this.aiAnalyzer.analyzeMessage(body.message, body.senderRole);
+      const analysis = await this.aiAnalyzer.analyzeMessage(
+        body.message,
+        body.senderRole,
+      );
       return { success: true, analysis };
     } catch (error) {
       this.logger.error(`Analysis error: ${error.message}`);
@@ -46,9 +53,15 @@ export class ChatController {
   }
 
   @Get('messages/:orderId')
-  async getMessages(@Param('orderId') orderId: string, @Query('limit') limit?: string) {
+  async getMessages(
+    @Param('orderId') orderId: string,
+    @Query('limit') limit?: string,
+  ) {
     try {
-      const messages = await this.chatService.getMessages(orderId, limit ? parseInt(limit) : 50);
+      const messages = await this.chatService.getMessages(
+        orderId,
+        limit ? parseInt(limit) : 50,
+      );
       return { success: true, messages };
     } catch (error) {
       return { success: false, messages: [], error: error.message };
@@ -56,13 +69,16 @@ export class ChatController {
   }
 
   @Post('messages')
-  async sendMessage(@Body() body: { 
-    orderId: string; 
-    senderType: string; 
-    content: string; 
-    type?: string;
-    location?: { lat: number; lng: number; address?: string };
-  }) {
+  async sendMessage(
+    @Body()
+    body: {
+      orderId: string;
+      senderType: string;
+      content: string;
+      type?: string;
+      location?: { lat: number; lng: number; address?: string };
+    },
+  ) {
     try {
       let senderId, senderName, senderRole;
       if (body.senderType === 'site') {
@@ -78,7 +94,7 @@ export class ChatController {
         senderName = 'Système';
         senderRole = 'system';
       }
-      
+
       const message = {
         id: uuidv4(),
         orderId: body.orderId,
@@ -91,7 +107,7 @@ export class ChatController {
         createdAt: new Date(),
         readBy: [],
       };
-      
+
       const saved = await this.chatService.saveMessage(message);
       return { success: true, message: saved };
     } catch (error) {
@@ -101,7 +117,10 @@ export class ChatController {
   }
 
   @Get('unread/:orderId/:userType')
-  async getUnreadCount(@Param('orderId') orderId: string, @Param('userType') userType: string) {
+  async getUnreadCount(
+    @Param('orderId') orderId: string,
+    @Param('userType') userType: string,
+  ) {
     try {
       const userId = userType === 'site' ? 'site-user' : 'supplier-user';
       const count = await this.chatService.getUnreadCount(orderId, userId);
@@ -112,7 +131,9 @@ export class ChatController {
   }
 
   @Post('messages/read')
-  async markAsRead(@Body() body: { orderId: string; userId: string; userType: string }) {
+  async markAsRead(
+    @Body() body: { orderId: string; userId: string; userType: string },
+  ) {
     try {
       const userId = body.userType === 'site' ? 'site-user' : 'supplier-user';
       await this.chatService.markAsRead(body.orderId, userId);
@@ -123,27 +144,32 @@ export class ChatController {
   }
 
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file', {
-    storage: diskStorage({
-      destination: './uploads/chat',
-      filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${uuidv4()}${extname(file.originalname)}`);
-      },
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads/chat',
+        filename: (req, file, cb) => {
+          cb(null, `${Date.now()}-${uuidv4()}${extname(file.originalname)}`);
+        },
+      }),
+      limits: { fileSize: 10 * 1024 * 1024 },
     }),
-    limits: { fileSize: 10 * 1024 * 1024 },
-  }))
-  async uploadFile(@UploadedFile() file: Express.Multer.File, @Body() body: { orderId: string; senderType: string }) {
+  )
+  async uploadFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body: { orderId: string; senderType: string },
+  ) {
     try {
       if (!file) return { success: false, error: 'No file' };
-      
+
       // 🔥 PROBLÈME 2 FIX: URL complète avec domaine pour accès public
       const baseUrl = process.env.BASE_URL || 'http://localhost:3002';
       const fileUrl = `${baseUrl}/uploads/chat/${file.filename}`;
-      
+
       let fileType = 'document';
       if (file.mimetype.startsWith('image/')) fileType = 'image';
       else if (file.mimetype.startsWith('video/')) fileType = 'video';
-      
+
       let senderId, senderName, senderRole;
       if (body.senderType === 'site') {
         senderId = 'site-user';
@@ -154,7 +180,7 @@ export class ChatController {
         senderName = 'Fournisseur';
         senderRole = 'supplier';
       }
-      
+
       const message = {
         id: uuidv4(),
         orderId: body.orderId,
@@ -168,9 +194,9 @@ export class ChatController {
         createdAt: new Date(),
         readBy: [],
       };
-      
+
       const saved = await this.chatService.saveMessage(message);
-      
+
       this.logger.log(`✅ File uploaded: ${fileUrl}`);
       return { success: true, message: saved, fileUrl };
     } catch (error) {
@@ -179,22 +205,27 @@ export class ChatController {
   }
 
   @Post('upload-voice')
-  @UseInterceptors(FileInterceptor('audio', {
-    storage: diskStorage({
-      destination: './uploads/voice',
-      filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${uuidv4()}.webm`);
-      },
+  @UseInterceptors(
+    FileInterceptor('audio', {
+      storage: diskStorage({
+        destination: './uploads/voice',
+        filename: (req, file, cb) => {
+          cb(null, `${Date.now()}-${uuidv4()}.webm`);
+        },
+      }),
+      limits: { fileSize: 5 * 1024 * 1024 },
     }),
-    limits: { fileSize: 5 * 1024 * 1024 },
-  }))
-  async uploadVoice(@UploadedFile() file: Express.Multer.File, @Body() body: { orderId: string; senderType: string; duration: string }) {
+  )
+  async uploadVoice(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body: { orderId: string; senderType: string; duration: string },
+  ) {
     try {
       if (!file) return { success: false, error: 'No audio' };
-      
+
       const audioUrl = `/uploads/voice/${file.filename}`;
       const duration = parseInt(body.duration) || 0;
-      
+
       let senderId, senderName, senderRole;
       if (body.senderType === 'site') {
         senderId = 'site-user';
@@ -205,7 +236,7 @@ export class ChatController {
         senderName = 'Fournisseur';
         senderRole = 'supplier';
       }
-      
+
       const message = {
         id: uuidv4(),
         orderId: body.orderId,
@@ -220,7 +251,7 @@ export class ChatController {
         createdAt: new Date(),
         readBy: [],
       };
-      
+
       const saved = await this.chatService.saveMessage(message);
       return { success: true, message: saved };
     } catch (error) {
@@ -229,7 +260,9 @@ export class ChatController {
   }
 
   @Post('location')
-  async shareLocation(@Body() body: { orderId: string; senderType: string; location: any }) {
+  async shareLocation(
+    @Body() body: { orderId: string; senderType: string; location: any },
+  ) {
     try {
       let senderId, senderName, senderRole;
       if (body.senderType === 'site') {
@@ -241,7 +274,7 @@ export class ChatController {
         senderName = 'Fournisseur';
         senderRole = 'supplier';
       }
-      
+
       const message = {
         id: uuidv4(),
         orderId: body.orderId,
@@ -254,7 +287,7 @@ export class ChatController {
         createdAt: new Date(),
         readBy: [],
       };
-      
+
       const saved = await this.chatService.saveMessage(message);
       return { success: true, message: saved };
     } catch (error) {
@@ -271,12 +304,13 @@ export class ChatController {
         senderId: 'system-user',
         senderName: 'Système',
         senderRole: 'system',
-        content: '✅ Confirmation d\'arrivée - Le camion est arrivé chez le fournisseur',
+        content:
+          "✅ Confirmation d'arrivée - Le camion est arrivé chez le fournisseur",
         type: 'arrival_confirmation',
         createdAt: new Date(),
         readBy: [],
       };
-      
+
       const saved = await this.chatService.saveMessage(message);
       return { success: true, message: saved };
     } catch (error) {
@@ -285,9 +319,15 @@ export class ChatController {
   }
 
   @Post('reactions/add')
-  async addReaction(@Body() body: { messageId: string; userId: string; emoji: string }) {
+  async addReaction(
+    @Body() body: { messageId: string; userId: string; emoji: string },
+  ) {
     try {
-      const message = await this.chatService.addReaction(body.messageId, body.userId, body.emoji);
+      const message = await this.chatService.addReaction(
+        body.messageId,
+        body.userId,
+        body.emoji,
+      );
       return { success: true, message };
     } catch (error) {
       this.logger.error(`Add reaction error: ${error.message}`);
@@ -298,7 +338,10 @@ export class ChatController {
   @Post('reactions/remove')
   async removeReaction(@Body() body: { messageId: string; userId: string }) {
     try {
-      const message = await this.chatService.removeReaction(body.messageId, body.userId);
+      const message = await this.chatService.removeReaction(
+        body.messageId,
+        body.userId,
+      );
       return { success: true, message };
     } catch (error) {
       this.logger.error(`Remove reaction error: ${error.message}`);

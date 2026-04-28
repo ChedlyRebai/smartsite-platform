@@ -1,4 +1,8 @@
-import { FlowType, AnomalyType, AnomalySeverity } from '../entities/consumption-history.entity';
+import {
+  FlowType,
+  AnomalyType,
+  AnomalySeverity,
+} from '../entities/consumption-history.entity';
 
 export interface SyncReport {
   synced: number;

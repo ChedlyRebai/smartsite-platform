@@ -1,4 +1,13 @@
-import { IsString, IsEnum, IsOptional, IsObject, IsNumber, Min, Max, IsBoolean } from 'class-validator';
+import {
+  IsString,
+  IsEnum,
+  IsOptional,
+  IsObject,
+  IsNumber,
+  Min,
+  Max,
+  IsBoolean,
+} from 'class-validator';
 import { MessageType } from '../entities/chat-message.entity';
 
 export class SendMessageDto {

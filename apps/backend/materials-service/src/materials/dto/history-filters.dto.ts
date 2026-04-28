@@ -1,6 +1,20 @@
-import { IsOptional, IsString, IsNumber, IsDate, IsEnum, IsArray, Min, Max, IsIn } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsNumber,
+  IsDate,
+  IsEnum,
+  IsArray,
+  Min,
+  Max,
+  IsIn,
+} from 'class-validator';
 import { Type, Transform } from 'class-transformer';
-import { FlowType, AnomalyType, AnomalySeverity } from '../entities/consumption-history.entity';
+import {
+  FlowType,
+  AnomalyType,
+  AnomalySeverity,
+} from '../entities/consumption-history.entity';
 
 export class HistoryFiltersDto {
   // Filtres de base

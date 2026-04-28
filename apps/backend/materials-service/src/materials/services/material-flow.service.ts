@@ -1,24 +1,46 @@
-import { Injectable, Logger, NotFoundException, BadRequestException, forwardRef, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  BadRequestException,
+  forwardRef,
+  Inject,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { MaterialFlowLog, FlowType, AnomalyType } from '../entities/material-flow-log.entity';
+import {
+  MaterialFlowLog,
+  FlowType,
+  AnomalyType,
+} from '../entities/material-flow-log.entity';
 import { Material } from '../entities/material.entity';
-import { CreateMaterialFlowDto, FlowValidationResult, DailyConsumptionStats, MaterialFlowQueryDto } from '../dto/material-flow.dto';
+import {
+  CreateMaterialFlowDto,
+  FlowValidationResult,
+  DailyConsumptionStats,
+  MaterialFlowQueryDto,
+} from '../dto/material-flow.dto';
 import { AnomalyEmailService } from '../../common/email/anomaly-email.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { ConsumptionHistoryService } from './consumption-history.service';
-import { FlowType as HistoryFlowType, SourceCollection, AnomalyType as HistoryAnomalyType, AnomalySeverity } from '../entities/consumption-history.entity';
+import {
+  FlowType as HistoryFlowType,
+  SourceCollection,
+  AnomalyType as HistoryAnomalyType,
+  AnomalySeverity,
+} from '../entities/consumption-history.entity';
 
 @Injectable()
 export class MaterialFlowService {
   private readonly logger = new Logger(MaterialFlowService.name);
 
   // Configuration des seuils d'anomalies
-  private readonly MAX_DEVIATION_PERCENT = 30;  // 30% de déviation maximum (plus sensible)
+  private readonly MAX_DEVIATION_PERCENT = 30; // 30% de déviation maximum (plus sensible)
   private readonly DEFAULT_CONSUMPTION_RATE = 10; // 10 unités par jour par défaut
 
   constructor(
-    @InjectModel(MaterialFlowLog.name) private flowLogModel: Model<MaterialFlowLog>,
+    @InjectModel(MaterialFlowLog.name)
+    private flowLogModel: Model<MaterialFlowLog>,
     @InjectModel(Material.name) private materialModel: Model<Material>,
     private readonly anomalyEmailService: AnomalyEmailService,
     @Inject(forwardRef(() => ConsumptionHistoryService))
@@ -35,8 +57,12 @@ export class MaterialFlowService {
   ): Promise<MaterialFlowLog> {
     try {
       this.logger.log(`📝 ========== ENREGISTREMENT MOUVEMENT ==========`);
-      this.logger.log(`📝 Type: ${createFlowDto.type}, Quantité: ${createFlowDto.quantity}`);
-      this.logger.log(`📝 Material: ${createFlowDto.materialId}, Site: ${createFlowDto.siteId}`);
+      this.logger.log(
+        `📝 Type: ${createFlowDto.type}, Quantité: ${createFlowDto.quantity}`,
+      );
+      this.logger.log(
+        `📝 Material: ${createFlowDto.materialId}, Site: ${createFlowDto.siteId}`,
+      );
       this.logger.log(`📝 User: ${userId}`);
 
       // 1. Récupérer le matériau et son stock actuel
@@ -45,7 +71,9 @@ export class MaterialFlowService {
         createFlowDto.siteId,
       );
 
-      this.logger.log(`📦 Matériau: ${material.name}, Stock actuel: ${material.quantity}`);
+      this.logger.log(
+        `📦 Matériau: ${material.name}, Stock actuel: ${material.quantity}`,
+      );
 
       const previousStock = material.quantity;
       let newStock = previousStock;
@@ -69,13 +97,17 @@ export class MaterialFlowService {
           newStock = createFlowDto.quantity;
           break;
         case FlowType.RESERVE:
-          material.reservedQuantity = (material.reservedQuantity || 0) + createFlowDto.quantity;
+          material.reservedQuantity =
+            (material.reservedQuantity || 0) + createFlowDto.quantity;
           newStock = previousStock;
           break;
       }
 
       // 3. Détecter les anomalies
-      const validation = await this.validateMovement(createFlowDto, previousStock);
+      const validation = await this.validateMovement(
+        createFlowDto,
+        previousStock,
+      );
 
       // 4. Créer l'enregistrement de flux
       const flowLog = new this.flowLogModel({
@@ -114,7 +146,9 @@ export class MaterialFlowService {
           expectedQuantity: 0,
           anomalyScore: 0,
           anomalyType: this.mapToHistoryAnomalyType(validation.anomalyType),
-          anomalySeverity: this.calculateHistorySeverity(validation.anomalyType),
+          anomalySeverity: this.calculateHistorySeverity(
+            validation.anomalyType,
+          ),
           stockBefore: previousStock,
           stockAfter: newStock,
           sourceCollection: SourceCollection.MATERIAL_FLOW_LOG,
@@ -126,14 +160,18 @@ export class MaterialFlowService {
         });
       } catch (error) {
         // Ne pas faire échouer l'opération principale
-        this.logger.error(`⚠️ Erreur lors de l'ajout à l'historique: ${error.message}`);
+        this.logger.error(
+          `⚠️ Erreur lors de l'ajout à l'historique: ${error.message}`,
+        );
       }
 
       // 6. Mettre à jour le stock du matériau
       await this.updateMaterialStock(
         createFlowDto.materialId,
         newStock,
-        createFlowDto.type === FlowType.RESERVE ? material.reservedQuantity : undefined,
+        createFlowDto.type === FlowType.RESERVE
+          ? material.reservedQuantity
+          : undefined,
       );
 
       // 7. Si anomalie détectée, envoyer un email
@@ -143,7 +181,9 @@ export class MaterialFlowService {
         await savedFlow.save();
       }
 
-      this.logger.log(`✅ Movement recorded: ${createFlowDto.type} ${createFlowDto.quantity} units`);
+      this.logger.log(
+        `✅ Movement recorded: ${createFlowDto.type} ${createFlowDto.quantity} units`,
+      );
 
       return savedFlow;
     } catch (error) {
@@ -159,8 +199,10 @@ export class MaterialFlowService {
     flow: CreateMaterialFlowDto,
     currentStock: number,
   ): Promise<FlowValidationResult> {
-    this.logger.log(`🔍 Validation du mouvement: ${flow.type} ${flow.quantity} unités`);
-    
+    this.logger.log(
+      `🔍 Validation du mouvement: ${flow.type} ${flow.quantity} unités`,
+    );
+
     // Récupérer les statistiques de consommation normale
     const consumptionStats = await this.getNormalConsumptionStats(
       flow.materialId,
@@ -173,28 +215,42 @@ export class MaterialFlowService {
     let deviationPercent: number | undefined;
 
     // Calculer la consommation normale par jour
-    const normalDailyConsumption = consumptionStats?.averageDailyConsumption || this.DEFAULT_CONSUMPTION_RATE;
+    const normalDailyConsumption =
+      consumptionStats?.averageDailyConsumption ||
+      this.DEFAULT_CONSUMPTION_RATE;
     const expectedDailyConsumption = normalDailyConsumption;
-    
-    this.logger.log(`📊 Consommation normale: ${expectedDailyConsumption.toFixed(1)} unités/jour`);
-    this.logger.log(`📊 Seuil d'anomalie: ${(expectedDailyConsumption * (1 + this.MAX_DEVIATION_PERCENT / 100)).toFixed(1)} unités`);
+
+    this.logger.log(
+      `📊 Consommation normale: ${expectedDailyConsumption.toFixed(1)} unités/jour`,
+    );
+    this.logger.log(
+      `📊 Seuil d'anomalie: ${(expectedDailyConsumption * (1 + this.MAX_DEVIATION_PERCENT / 100)).toFixed(1)} unités`,
+    );
 
     if (flow.type === FlowType.OUT) {
-      const threshold = expectedDailyConsumption * (1 + this.MAX_DEVIATION_PERCENT / 100);
-      this.logger.log(`🔍 Sortie de ${flow.quantity} unités vs seuil ${threshold.toFixed(1)}`);
-      
+      const threshold =
+        expectedDailyConsumption * (1 + this.MAX_DEVIATION_PERCENT / 100);
+      this.logger.log(
+        `🔍 Sortie de ${flow.quantity} unités vs seuil ${threshold.toFixed(1)}`,
+      );
+
       // Vérifier si la sortie dépasse la normale
       const isExcessive = flow.quantity > threshold;
-      
+
       if (isExcessive) {
         anomalyType = AnomalyType.EXCESSIVE_OUT;
-        deviationPercent = ((flow.quantity - expectedDailyConsumption) / expectedDailyConsumption) * 100;
+        deviationPercent =
+          ((flow.quantity - expectedDailyConsumption) /
+            expectedDailyConsumption) *
+          100;
         expectedQuantity = expectedDailyConsumption;
         message = `🚨 ALERTE: Sortie excessive détectée! Quantité: ${flow.quantity} unités, Normale: ${expectedDailyConsumption.toFixed(1)} unités/jour. Déviation: ${deviationPercent.toFixed(1)}%. RISQUE DE VOL OU GASPILLAGE!`;
-        
+
         this.logger.warn(`🚨 ANOMALIE DÉTECTÉE: ${message}`);
       } else {
-        this.logger.log(`✅ Sortie normale (${flow.quantity} <= ${threshold.toFixed(1)})`);
+        this.logger.log(
+          `✅ Sortie normale (${flow.quantity} <= ${threshold.toFixed(1)})`,
+        );
       }
 
       // Vérifier le stock de sécurité
@@ -208,10 +264,11 @@ export class MaterialFlowService {
     if (flow.type === FlowType.IN) {
       // Pour les entrées, vérifier si c'est anormalement élevé
       const maxExpectedIn = expectedDailyConsumption * 10; // 10 jours de consommation max
-      
+
       if (flow.quantity > maxExpectedIn) {
         anomalyType = AnomalyType.EXCESSIVE_IN;
-        deviationPercent = ((flow.quantity - maxExpectedIn) / maxExpectedIn) * 100;
+        deviationPercent =
+          ((flow.quantity - maxExpectedIn) / maxExpectedIn) * 100;
         expectedQuantity = maxExpectedIn;
         message = `⚠️ ALERTE: Entrée anormalement élevée! Quantité: ${flow.quantity} unités, Attendue max: ${maxExpectedIn} unités. Déviation: ${deviationPercent.toFixed(1)}%.`;
         this.logger.warn(`⚠️ ${message}`);
@@ -225,9 +282,11 @@ export class MaterialFlowService {
       expectedQuantity,
       deviationPercent,
     };
-    
-    this.logger.log(`✅ Résultat validation: ${anomalyType === AnomalyType.NONE ? 'NORMAL' : anomalyType}`);
-    
+
+    this.logger.log(
+      `✅ Résultat validation: ${anomalyType === AnomalyType.NONE ? 'NORMAL' : anomalyType}`,
+    );
+
     return result;
   }
 
@@ -265,8 +324,9 @@ export class MaterialFlowService {
       return null;
     }
 
-    const dailyTotals = outMovements.map(m => m.dailyTotal);
-    const averageDaily = dailyTotals.reduce((a, b) => a + b, 0) / dailyTotals.length;
+    const dailyTotals = outMovements.map((m) => m.dailyTotal);
+    const averageDaily =
+      dailyTotals.reduce((a, b) => a + b, 0) / dailyTotals.length;
     const maxDaily = Math.max(...dailyTotals);
     const minDaily = Math.min(...dailyTotals);
     const totalConsumption = dailyTotals.reduce((a, b) => a + b, 0);
@@ -292,14 +352,17 @@ export class MaterialFlowService {
     material: any,
   ): Promise<void> {
     try {
-      this.logger.log(`📧 Sending anomaly alert email for material ${material.name}`);
+      this.logger.log(
+        `📧 Sending anomaly alert email for material ${material.name}`,
+      );
 
       // Récupérer les informations du site et de l'utilisateur
       const siteInfo = await this.getSiteInfo(flow.siteId.toString());
       const userInfo = await this.getUserInfo(flow.userId.toString());
 
       await this.anomalyEmailService.sendStockAnomalyAlert({
-        toEmail: userInfo?.email || process.env.ADMIN_EMAIL || 'admin@smartsite.com',
+        toEmail:
+          userInfo?.email || process.env.ADMIN_EMAIL || 'admin@smartsite.com',
         userName: userInfo?.name || userInfo?.firstName || 'Admin',
         siteName: siteInfo?.nom || siteInfo?.name || 'Site inconnu',
         materialName: material.name,
@@ -341,7 +404,10 @@ export class MaterialFlowService {
   /**
    * Récupérer le matériau avec son stock par site
    */
-  private async getMaterialWithSiteStock(materialId: string, siteId: string): Promise<any> {
+  private async getMaterialWithSiteStock(
+    materialId: string,
+    siteId: string,
+  ): Promise<any> {
     const material = await this.materialModel.findById(materialId);
     if (!material) {
       throw new NotFoundException(`Material ${materialId} not found`);
@@ -355,7 +421,9 @@ export class MaterialFlowService {
   private async getSiteInfo(siteId: string): Promise<any> {
     try {
       const axios = require('axios');
-      const response = await axios.get(`http://localhost:3001/api/gestion-sites/${siteId}`);
+      const response = await axios.get(
+        `http://localhost:3001/api/gestion-sites/${siteId}`,
+      );
       return response.data;
     } catch (error) {
       this.logger.warn(`Could not fetch site ${siteId}: ${error.message}`);
@@ -369,7 +437,9 @@ export class MaterialFlowService {
   private async getUserInfo(userId: string): Promise<any> {
     try {
       const axios = require('axios');
-      const response = await axios.get(`http://localhost:3000/api/users/${userId}`);
+      const response = await axios.get(
+        `http://localhost:3000/api/users/${userId}`,
+      );
       return response.data;
     } catch (error) {
       this.logger.warn(`Could not fetch user ${userId}: ${error.message}`);
@@ -380,11 +450,14 @@ export class MaterialFlowService {
   /**
    * Obtenir tous les flux pour un matériau/site
    */
-  async getFlows(query: MaterialFlowQueryDto): Promise<{ data: MaterialFlowLog[]; total: number }> {
+  async getFlows(
+    query: MaterialFlowQueryDto,
+  ): Promise<{ data: MaterialFlowLog[]; total: number }> {
     const filter: any = {};
 
     if (query.siteId) filter.siteId = new Types.ObjectId(query.siteId);
-    if (query.materialId) filter.materialId = new Types.ObjectId(query.materialId);
+    if (query.materialId)
+      filter.materialId = new Types.ObjectId(query.materialId);
     if (query.type) filter.type = query.type;
     if (query.anomalyDetected && query.anomalyDetected !== AnomalyType.NONE) {
       filter.anomalyDetected = query.anomalyDetected;
@@ -396,7 +469,7 @@ export class MaterialFlowService {
     }
 
     const skip = ((query.page || 1) - 1) * (query.limit || 50);
-    
+
     const [data, total] = await Promise.all([
       this.flowLogModel
         .find(filter)
@@ -415,7 +488,7 @@ export class MaterialFlowService {
    */
   async getUnresolvedAnomalies(): Promise<MaterialFlowLog[]> {
     return this.flowLogModel
-      .find({ 
+      .find({
         anomalyDetected: { $ne: AnomalyType.NONE },
         emailSent: true,
       })
@@ -436,7 +509,11 @@ export class MaterialFlowService {
     netFlow: number;
     totalAnomalies: number;
     lastMovement: Date | null;
-    breakdownByType: Array<{ _id: FlowType; totalQuantity: number; count: number }>;
+    breakdownByType: Array<{
+      _id: FlowType;
+      totalQuantity: number;
+      count: number;
+    }>;
   }> {
     const filter: any = { materialId: new Types.ObjectId(materialId) };
     if (siteId) {
@@ -515,7 +592,7 @@ export class MaterialFlowService {
 
     const flows = await this.flowLogModel
       .find(filter)
-      .populate('materialId', 'name code category')
+      .populate('materialId', 'name code category stockEntree stockSortie quantity minimumStock maximumStock')
       .populate('siteId', 'nom name')
       .populate('userId', 'firstName lastName email')
       .sort({ timestamp: -1 })
@@ -527,17 +604,28 @@ export class MaterialFlowService {
 
     const enrichedData = flows.map((flow) => {
       const flowObj = flow.toObject ? flow.toObject() : flow;
+      const material = (flowObj as any).materialId;
+      
       return {
         ...flowObj,
-        materialName: (flowObj as any).materialId?.name || 'Unknown',
-        materialCode: (flowObj as any).materialId?.code || 'N/A',
-        materialCategory: (flowObj as any).materialId?.category || 'N/A',
-        siteName: (flowObj as any).siteId?.nom || (flowObj as any).siteId?.name || 'Unknown Site',
+        materialName: material?.name || 'Unknown',
+        materialCode: material?.code || 'N/A',
+        materialCategory: material?.category || 'N/A',
+        stockEntree: material?.stockEntree || 0,
+        stockSortie: material?.stockSortie || 0,
+        currentStock: material?.quantity || 0,
+        minimumStock: material?.minimumStock || 0,
+        maximumStock: material?.maximumStock || 0,
+        siteName:
+          (flowObj as any).siteId?.nom ||
+          (flowObj as any).siteId?.name ||
+          'Unknown Site',
         userName:
-          (flowObj as any).userId?.firstName && (flowObj as any).userId?.lastName
+          (flowObj as any).userId?.firstName &&
+          (flowObj as any).userId?.lastName
             ? `${(flowObj as any).userId.firstName} ${(flowObj as any).userId.lastName}`
             : (flowObj as any).userId?.email || 'System',
-      };  
+      };
     });
 
     return { data: enrichedData, total };
@@ -546,7 +634,11 @@ export class MaterialFlowService {
   /**
    * Obtenir les statistiques de flux pour un matériau
    */
-  async getFlowStatistics(materialId: string, siteId: string, days: number = 30): Promise<any> {
+  async getFlowStatistics(
+    materialId: string,
+    siteId: string,
+    days: number = 30,
+  ): Promise<any> {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
@@ -563,8 +655,10 @@ export class MaterialFlowService {
           _id: '$type',
           totalQuantity: { $sum: '$quantity' },
           count: { $sum: 1 },
-          anomalies: { 
-            $sum: { $cond: [{ $ne: ['$anomalyDetected', AnomalyType.NONE] }, 1, 0] },
+          anomalies: {
+            $sum: {
+              $cond: [{ $ne: ['$anomalyDetected', AnomalyType.NONE] }, 1, 0],
+            },
           },
         },
       },
@@ -615,8 +709,8 @@ export class MaterialFlowService {
     if (type === AnomalyType.EXCESSIVE_OUT) return AnomalySeverity.CRITICAL;
     if (type === AnomalyType.BELOW_SAFETY_STOCK) return AnomalySeverity.WARNING;
     if (type === AnomalyType.EXCESSIVE_IN) return AnomalySeverity.WARNING;
-    if (type === AnomalyType.UNEXPECTED_MOVEMENT) return AnomalySeverity.WARNING;
+    if (type === AnomalyType.UNEXPECTED_MOVEMENT)
+      return AnomalySeverity.WARNING;
     return AnomalySeverity.LOW;
   }
-
 }

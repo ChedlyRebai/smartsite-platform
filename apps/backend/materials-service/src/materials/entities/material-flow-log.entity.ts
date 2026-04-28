@@ -12,8 +12,8 @@ export enum FlowType {
 
 export enum AnomalyType {
   NONE = 'NONE',
-  EXCESSIVE_OUT = 'EXCESSIVE_OUT',      // Sortie > usage normal
-  EXCESSIVE_IN = 'EXCESSIVE_IN',        // Entrée > quantité attendue
+  EXCESSIVE_OUT = 'EXCESSIVE_OUT', // Sortie > usage normal
+  EXCESSIVE_IN = 'EXCESSIVE_IN', // Entrée > quantité attendue
   UNEXPECTED_MOVEMENT = 'UNEXPECTED_MOVEMENT',
   BELOW_SAFETY_STOCK = 'BELOW_SAFETY_STOCK',
 }
@@ -47,7 +47,11 @@ export class MaterialFlowLog extends Document {
   @Prop({ type: String })
   reason?: string;
 
-  @Prop({ type: String, enum: Object.values(AnomalyType), default: AnomalyType.NONE })
+  @Prop({
+    type: String,
+    enum: Object.values(AnomalyType),
+    default: AnomalyType.NONE,
+  })
   anomalyDetected: AnomalyType;
 
   @Prop({ type: Boolean, default: false })
@@ -63,7 +67,8 @@ export class MaterialFlowLog extends Document {
   reference?: string;
 }
 
-export const MaterialFlowLogSchema = SchemaFactory.createForClass(MaterialFlowLog);
+export const MaterialFlowLogSchema =
+  SchemaFactory.createForClass(MaterialFlowLog);
 
 // Indexes pour les recherches rapides
 MaterialFlowLogSchema.index({ siteId: 1, materialId: 1 });

@@ -1,4 +1,12 @@
-import { IsString, IsNumber, IsObject, IsOptional, IsUUID, Min, IsEnum } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsObject,
+  IsOptional,
+  IsUUID,
+  Min,
+  IsEnum,
+} from 'class-validator';
 
 export class CreateMaterialOrderDto {
   @IsString()

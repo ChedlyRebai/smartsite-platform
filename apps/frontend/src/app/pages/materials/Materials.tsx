@@ -230,30 +230,43 @@ export default function Materials() {
     setLoadingPredictions(true);
     const newPredictions = new Map<string, StockPrediction>();
     try {
-      // Charger seulement les 10 premiers matériaux pour éviter les timeouts
-      // Et les charger séquentiellement avec un délai pour éviter la surcharge
-      const materialsToPredict = materials.slice(0, 10);
+      // Charger toutes les prédictions depuis le nouvel endpoint
+      const predictionsData = await materialService.getAllPredictions();
       
-      for (const material of materialsToPredict) {
-        try {
-          const prediction = await materialService.getStockPrediction(material._id);
-          newPredictions.set(material._id, prediction);
+      if (Array.isArray(predictionsData)) {
+        predictionsData.forEach((pred: any) => {
+          // Convertir le format du backend vers le format attendu par le frontend
+          const prediction: StockPrediction = {
+            materialId: pred.materialId,
+            materialName: pred.materialName,
+            currentStock: pred.currentStock,
+            consumptionRate: pred.hourlyConsumption,
+            hoursToLowStock: pred.hoursRemaining * 0.7, // 70% du temps avant rupture
+            hoursToOutOfStock: pred.hoursRemaining,
+            status: pred.status === 'critical' ? 'critical' : pred.status === 'warning' ? 'warning' : 'safe',
+            recommendedOrderQuantity: pred.currentStock * 2, // Estimation simple
+            predictionModelUsed: pred.confidence > 0.7,
+            confidence: pred.confidence,
+            message: `Rupture prévue dans ${pred.hoursRemaining}h (${pred.daysRemaining}j)`
+          };
           
+          newPredictions.set(pred.materialId, prediction);
+          
+          // Afficher les alertes critiques
           if (prediction.status === 'critical') {
-            toast.error(`🚨 ${prediction.materialName}: Rupture dans ${prediction.hoursToOutOfStock}h!`, { duration: 5000 });
+            toast.error(`🚨 ${prediction.materialName}: Rupture dans ${Math.round(prediction.hoursToOutOfStock)}h!`, { duration: 5000 });
+          } else if (prediction.status === 'warning') {
+            toast.warning(`⚠️ ${prediction.materialName}: Stock bas dans ${Math.round(prediction.hoursToOutOfStock)}h`, { duration: 3000 });
           }
-          
-          // Petit délai entre chaque prédiction pour éviter la surcharge
-          await new Promise(resolve => setTimeout(resolve, 100));
-        } catch (err: any) {
-          console.warn(`Prediction failed for ${material._id}:`, err.message);
-          // Continuer avec les autres matériaux même si un échoue
-        }
+        });
       }
       
       setPredictions(newPredictions);
-    } catch (err) {
+      console.log(`✅ ${newPredictions.size} prédictions chargées`);
+    } catch (err: any) {
       console.error('Error loading predictions:', err);
+      // Ne pas afficher d'erreur à l'utilisateur si les prédictions échouent
+      // toast.error('Impossible de charger les prédictions IA');
     } finally {
       setLoadingPredictions(false);
     }
@@ -261,7 +274,7 @@ export default function Materials() {
 
   useEffect(() => { 
     if (materials.length > 0) {
-      loadPredictions();
+      loadPredictions(); // ✅ RÉACTIVÉ
       
       // Check for supplier ratings needed after 30% consumption
       // Seulement si on n'a pas encore vérifié ET qu'aucun dialog n'est ouvert
@@ -743,7 +756,7 @@ export default function Materials() {
             <span>🚚</span>
             Commandes Auto
           </TabsTrigger>
-          <TabsTrigger value="consumption" className="flex items-center gap-2">
+          <TabsTrigger  value="consumption" className="flex items-center gap-2">
             <span>📊</span>
             Consommation
           </TabsTrigger>

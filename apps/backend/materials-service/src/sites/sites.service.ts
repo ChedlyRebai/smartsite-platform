@@ -30,7 +30,9 @@ export class SitesService {
 
   private async initializeSiteConnection() {
     try {
-      const uri = this.configService.get('SITES_MONGODB_URI') || 'mongodb://localhost:27017/smartsite';
+      const uri =
+        this.configService.get('SITES_MONGODB_URI') ||
+        'mongodb://localhost:27017/smartsite';
       this.client = new MongoClient(uri);
       await this.client.connect();
       this.db = this.client.db();
@@ -46,11 +48,11 @@ export class SitesService {
       if (!this.sitesCollection) {
         await this.initializeSiteConnection();
       }
-      
+
       const sites = await this.sitesCollection
         .find({ $or: [{ isActive: true }, { isActive: { $exists: false } }] })
         .toArray();
-      
+
       this.logger.log(`${sites.length} sites trouvés dans la base de données`);
       return sites;
     } catch (error) {
@@ -67,7 +69,7 @@ export class SitesService {
 
       const { ObjectId } = require('mongodb');
       let query: any;
-      
+
       try {
         query = { _id: new ObjectId(id) };
       } catch {
@@ -86,9 +88,9 @@ export class SitesService {
       if (!this.sitesCollection) {
         await this.initializeSiteConnection();
       }
-      
-      return await this.sitesCollection.countDocuments({ 
-        $or: [{ isActive: true }, { isActive: { $exists: false } }] 
+
+      return await this.sitesCollection.countDocuments({
+        $or: [{ isActive: true }, { isActive: { $exists: false } }],
       });
     } catch (error) {
       this.logger.error('Erreur lors du comptage des sites:', error);

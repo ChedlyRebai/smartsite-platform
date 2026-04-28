@@ -1,4 +1,12 @@
-import { IsString, IsNumber, IsOptional, IsEnum, Min, IsDate, IsMongoId } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsEnum,
+  Min,
+  IsDate,
+  IsMongoId,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { FlowType, AnomalyType } from '../entities/material-flow-log.entity';
 
@@ -72,16 +80,16 @@ export class MaterialFlowQueryDto {
 export class AnomalyDetectionConfig {
   @IsNumber()
   @Min(0)
-  normalConsumptionRate: number;      // Quantité normale par jour
-  
+  normalConsumptionRate: number; // Quantité normale par jour
+
   @IsNumber()
   @Min(0)
-  maxDeviationPercent: number;        // Déviation max en % (ex: 50%)
-  
+  maxDeviationPercent: number; // Déviation max en % (ex: 50%)
+
   @IsOptional()
   @IsNumber()
   @Min(0)
-  safetyStockLevel?: number;           // Niveau de sécurité
+  safetyStockLevel?: number; // Niveau de sécurité
 }
 
 export interface FlowValidationResult {

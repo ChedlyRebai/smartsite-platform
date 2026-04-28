@@ -10,12 +10,13 @@ export class QRCodeController {
   @Get(':materialId')
   async getQRCodeImage(@Param('materialId') id: string, @Res() res: Response) {
     try {
-      const { imagePath, filename } = await this.materialsService.getQRCodeImage(id);
-      
+      const { imagePath, filename } =
+        await this.materialsService.getQRCodeImage(id);
+
       // Définir les headers pour l'affichage
       res.setHeader('Content-Type', 'image/png');
       res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
-      
+
       // Envoyer le fichier
       const fileStream = fs.createReadStream(imagePath);
       fileStream.pipe(res);
@@ -25,14 +26,21 @@ export class QRCodeController {
   }
 
   @Get('download/:materialId')
-  async downloadQRCodeImage(@Param('materialId') id: string, @Res() res: Response) {
+  async downloadQRCodeImage(
+    @Param('materialId') id: string,
+    @Res() res: Response,
+  ) {
     try {
-      const { imagePath, filename } = await this.materialsService.getQRCodeImage(id);
-      
+      const { imagePath, filename } =
+        await this.materialsService.getQRCodeImage(id);
+
       // Définir les headers pour le téléchargement
       res.setHeader('Content-Type', 'image/png');
-      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-      
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${filename}"`,
+      );
+
       // Envoyer le fichier
       const fileStream = fs.createReadStream(imagePath);
       fileStream.pipe(res);

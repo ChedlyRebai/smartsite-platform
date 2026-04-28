@@ -3,10 +3,18 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import { ConsumptionHistory, FlowType, AnomalyType, AnomalySeverity } from '../entities/consumption-history.entity';
+import {
+  ConsumptionHistory,
+  FlowType,
+  AnomalyType,
+  AnomalySeverity,
+} from '../entities/consumption-history.entity';
 import { Material } from '../entities/material.entity';
 import { CreateConsumptionHistoryDto } from '../dto/create-consumption-history.dto';
-import { HistoryFiltersDto, StatisticsFiltersDto } from '../dto/history-filters.dto';
+import {
+  HistoryFiltersDto,
+  StatisticsFiltersDto,
+} from '../dto/history-filters.dto';
 import {
   SyncReport,
   PaginationResult,
@@ -24,10 +32,12 @@ import {
 @Injectable()
 export class ConsumptionHistoryService {
   private readonly logger = new Logger(ConsumptionHistoryService.name);
-  private readonly SITES_SERVICE_URL = process.env.SITES_SERVICE_URL || 'http://localhost:3001';
+  private readonly SITES_SERVICE_URL =
+    process.env.SITES_SERVICE_URL || 'http://localhost:3001';
 
   constructor(
-    @InjectModel(ConsumptionHistory.name) private historyModel: Model<ConsumptionHistory>,
+    @InjectModel(ConsumptionHistory.name)
+    private historyModel: Model<ConsumptionHistory>,
     @InjectModel(Material.name) private materialModel: Model<Material>,
     @InjectModel('MaterialFlowLog') private flowLogModel: Model<any>,
     @InjectModel('DailyConsumptionLog') private consumptionLogModel: Model<any>,
@@ -43,15 +53,19 @@ export class ConsumptionHistoryService {
     try {
       // Synchroniser MaterialFlowLog
       const flowLogs = await this.flowLogModel.find().lean().exec();
-      this.logger.log(`📦 ${flowLogs.length} entrées trouvées dans MaterialFlowLog`);
+      this.logger.log(
+        `📦 ${flowLogs.length} entrées trouvées dans MaterialFlowLog`,
+      );
 
       for (const log of flowLogs) {
         try {
           // Vérifier si déjà synchronisé
-          const existing = await this.historyModel.findOne({
-            sourceCollection: 'MaterialFlowLog',
-            sourceId: log._id,
-          }).exec();
+          const existing = await this.historyModel
+            .findOne({
+              sourceCollection: 'MaterialFlowLog',
+              sourceId: log._id,
+            })
+            .exec();
 
           if (existing) {
             report.skipped++;
@@ -59,10 +73,15 @@ export class ConsumptionHistoryService {
           }
 
           // Enrichir avec les données du matériau
-          const material = await this.materialModel.findById(log.materialId).lean().exec();
+          const material = await this.materialModel
+            .findById(log.materialId)
+            .lean()
+            .exec();
           if (!material) {
             report.errors++;
-            this.logger.warn(`⚠️ Matériau ${log.materialId} introuvable pour FlowLog ${log._id}`);
+            this.logger.warn(
+              `⚠️ Matériau ${log.materialId} introuvable pour FlowLog ${log._id}`,
+            );
             continue;
           }
 
@@ -102,16 +121,23 @@ export class ConsumptionHistoryService {
       }
 
       // Synchroniser DailyConsumptionLog
-      const consumptionLogs = await this.consumptionLogModel.find().lean().exec();
-      this.logger.log(`📊 ${consumptionLogs.length} entrées trouvées dans DailyConsumptionLog`);
+      const consumptionLogs = await this.consumptionLogModel
+        .find()
+        .lean()
+        .exec();
+      this.logger.log(
+        `📊 ${consumptionLogs.length} entrées trouvées dans DailyConsumptionLog`,
+      );
 
       for (const log of consumptionLogs) {
         try {
           // Vérifier si déjà synchronisé
-          const existing = await this.historyModel.findOne({
-            sourceCollection: 'DailyConsumptionLog',
-            sourceId: log._id,
-          }).exec();
+          const existing = await this.historyModel
+            .findOne({
+              sourceCollection: 'DailyConsumptionLog',
+              sourceId: log._id,
+            })
+            .exec();
 
           if (existing) {
             report.skipped++;
@@ -119,10 +145,15 @@ export class ConsumptionHistoryService {
           }
 
           // Enrichir avec les données du matériau
-          const material = await this.materialModel.findById(log.materialId).lean().exec();
+          const material = await this.materialModel
+            .findById(log.materialId)
+            .lean()
+            .exec();
           if (!material) {
             report.errors++;
-            this.logger.warn(`⚠️ Matériau ${log.materialId} introuvable pour ConsumptionLog ${log._id}`);
+            this.logger.warn(
+              `⚠️ Matériau ${log.materialId} introuvable pour ConsumptionLog ${log._id}`,
+            );
             continue;
           }
 
@@ -131,7 +162,10 @@ export class ConsumptionHistoryService {
 
           // Mapper le type d'anomalie
           const anomalyType = this.mapAnomalyType(log.anomalyType);
-          const anomalySeverity = this.calculateAnomalySeverity(log.anomalyScore || 0, anomalyType);
+          const anomalySeverity = this.calculateAnomalySeverity(
+            log.anomalyScore || 0,
+            anomalyType,
+          );
 
           // Créer l'entrée d'historique
           await this.historyModel.create({
@@ -160,14 +194,20 @@ export class ConsumptionHistoryService {
           report.synced++;
         } catch (error) {
           report.errors++;
-          this.logger.error(`❌ Erreur ConsumptionLog ${log._id}: ${error.message}`);
+          this.logger.error(
+            `❌ Erreur ConsumptionLog ${log._id}: ${error.message}`,
+          );
         }
       }
 
-      this.logger.log(`✅ Synchronisation terminée: ${report.synced} synced, ${report.skipped} skipped, ${report.errors} errors`);
+      this.logger.log(
+        `✅ Synchronisation terminée: ${report.synced} synced, ${report.skipped} skipped, ${report.errors} errors`,
+      );
       return report;
     } catch (error) {
-      this.logger.error(`❌ Erreur lors de la synchronisation: ${error.message}`);
+      this.logger.error(
+        `❌ Erreur lors de la synchronisation: ${error.message}`,
+      );
       throw error;
     }
   }
@@ -175,7 +215,9 @@ export class ConsumptionHistoryService {
   /**
    * Ajoute une nouvelle entrée dans l'historique
    */
-  async addEntry(dto: CreateConsumptionHistoryDto): Promise<ConsumptionHistory> {
+  async addEntry(
+    dto: CreateConsumptionHistoryDto,
+  ): Promise<ConsumptionHistory> {
     try {
       // Enrichir avec le nom du site si non fourni
       if (!dto.siteName && dto.siteId) {
@@ -184,7 +226,9 @@ export class ConsumptionHistoryService {
       }
 
       const entry = await this.historyModel.create(dto);
-      this.logger.log(`✅ Entrée ajoutée: ${dto.materialName} - ${dto.quantity} ${dto.materialUnit} (${dto.flowType})`);
+      this.logger.log(
+        `✅ Entrée ajoutée: ${dto.materialName} - ${dto.quantity} ${dto.materialUnit} (${dto.flowType})`,
+      );
       return entry;
     } catch (error) {
       // Ne pas faire échouer l'opération principale
@@ -196,8 +240,16 @@ export class ConsumptionHistoryService {
   /**
    * Récupère l'historique paginé avec filtres
    */
-  async getHistory(filters: HistoryFiltersDto): Promise<PaginationResult<ConsumptionHistory>> {
-    const { page = 1, limit = 50, sortBy = 'date', sortOrder = 'desc', ...queryFilters } = filters;
+  async getHistory(
+    filters: HistoryFiltersDto,
+  ): Promise<PaginationResult<ConsumptionHistory>> {
+    const {
+      page = 1,
+      limit = 50,
+      sortBy = 'date',
+      sortOrder = 'desc',
+      ...queryFilters
+    } = filters;
 
     // Construction de la requête
     const query: any = {};
@@ -224,7 +276,10 @@ export class ConsumptionHistoryService {
       query.anomalyType = { $in: queryFilters.anomalyType };
     }
 
-    if (queryFilters.anomalySeverity && queryFilters.anomalySeverity.length > 0) {
+    if (
+      queryFilters.anomalySeverity &&
+      queryFilters.anomalySeverity.length > 0
+    ) {
       query.anomalySeverity = { $in: queryFilters.anomalySeverity };
     }
 
@@ -246,7 +301,13 @@ export class ConsumptionHistoryService {
 
     // Exécution de la requête
     const [data, total] = await Promise.all([
-      this.historyModel.find(query).sort(sortOptions).skip(skip).limit(limit).lean().exec(),
+      this.historyModel
+        .find(query)
+        .sort(sortOptions)
+        .skip(skip)
+        .limit(limit)
+        .lean()
+        .exec(),
       this.historyModel.countDocuments(query).exec(),
     ]);
 
@@ -269,7 +330,9 @@ export class ConsumptionHistoryService {
   /**
    * Récupère les statistiques pour graphiques
    */
-  async getStatistics(filters: StatisticsFiltersDto): Promise<ConsumptionStatistics> {
+  async getStatistics(
+    filters: StatisticsFiltersDto,
+  ): Promise<ConsumptionStatistics> {
     const { siteId, materialId, startDate, endDate, groupBy = 'day' } = filters;
 
     // Construction de la requête de base
@@ -283,18 +346,20 @@ export class ConsumptionHistoryService {
     }
 
     // Utiliser $facet pour exécuter plusieurs agrégations en une seule requête
-    const result: any = await this.historyModel.aggregate([
-      { $match: matchQuery },
-      {
-        $facet: {
-          timeline: this.buildTimelineAggregation(groupBy) as any,
-          flowTypeBreakdown: this.buildFlowTypeBreakdown() as any,
-          anomalyBreakdown: this.buildAnomalyBreakdown() as any,
-          topMaterials: this.buildTopMaterialsAggregation() as any,
-          summary: this.buildSummaryAggregation() as any,
+    const result: any = await this.historyModel
+      .aggregate([
+        { $match: matchQuery },
+        {
+          $facet: {
+            timeline: this.buildTimelineAggregation(groupBy) as any,
+            flowTypeBreakdown: this.buildFlowTypeBreakdown() as any,
+            anomalyBreakdown: this.buildAnomalyBreakdown() as any,
+            topMaterials: this.buildTopMaterialsAggregation() as any,
+            summary: this.buildSummaryAggregation() as any,
+          },
         },
-      },
-    ]).exec();
+      ])
+      .exec();
 
     const data = result[0];
 
@@ -314,8 +379,14 @@ export class ConsumptionHistoryService {
   /**
    * Récupère la tendance d'un matériau sur X jours
    */
-  async getMaterialTrend(materialId: string, days: number = 30): Promise<MaterialTrend> {
-    const material = await this.materialModel.findById(materialId).lean().exec();
+  async getMaterialTrend(
+    materialId: string,
+    days: number = 30,
+  ): Promise<MaterialTrend> {
+    const material = await this.materialModel
+      .findById(materialId)
+      .lean()
+      .exec();
     if (!material) {
       throw new NotFoundException(`Matériau ${materialId} introuvable`);
     }
@@ -323,35 +394,42 @@ export class ConsumptionHistoryService {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
-    const data = await this.historyModel.aggregate([
-      {
-        $match: {
-          materialId: new Types.ObjectId(materialId),
-          date: { $gte: startDate },
-        },
-      },
-      {
-        $group: {
-          _id: { $dateToString: { format: '%Y-%m-%d', date: '$date' } },
-          consumed: {
-            $sum: {
-              $cond: [
-                { $in: ['$flowType', [FlowType.OUT, FlowType.DAILY_CONSUMPTION]] },
-                '$quantity',
-                0,
-              ],
-            },
+    const data = await this.historyModel
+      .aggregate([
+        {
+          $match: {
+            materialId: new Types.ObjectId(materialId),
+            date: { $gte: startDate },
           },
-          received: {
-            $sum: {
-              $cond: [{ $eq: ['$flowType', FlowType.IN] }, '$quantity', 0],
-            },
-          },
-          stockLevel: { $last: '$stockAfter' },
         },
-      },
-      { $sort: { _id: 1 } },
-    ]).exec();
+        {
+          $group: {
+            _id: { $dateToString: { format: '%Y-%m-%d', date: '$date' } },
+            consumed: {
+              $sum: {
+                $cond: [
+                  {
+                    $in: [
+                      '$flowType',
+                      [FlowType.OUT, FlowType.DAILY_CONSUMPTION],
+                    ],
+                  },
+                  '$quantity',
+                  0,
+                ],
+              },
+            },
+            received: {
+              $sum: {
+                $cond: [{ $eq: ['$flowType', FlowType.IN] }, '$quantity', 0],
+              },
+            },
+            stockLevel: { $last: '$stockAfter' },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ])
+      .exec();
 
     const trendData: MaterialTrendDataPoint[] = data.map((d) => ({
       date: d._id,
@@ -404,7 +482,9 @@ export class ConsumptionHistoryService {
 
     try {
       const response = await firstValueFrom(
-        this.httpService.get(`${this.SITES_SERVICE_URL}/api/gestion-sites/${siteId}`),
+        this.httpService.get(
+          `${this.SITES_SERVICE_URL}/api/gestion-sites/${siteId}`,
+        ),
       );
       return response.data?.nom || response.data?.name || null;
     } catch (error) {
@@ -434,7 +514,10 @@ export class ConsumptionHistoryService {
     return mapping[type] || AnomalyType.NONE;
   }
 
-  private calculateAnomalySeverity(score: number, type: AnomalyType): AnomalySeverity {
+  private calculateAnomalySeverity(
+    score: number,
+    type: AnomalyType,
+  ): AnomalySeverity {
     if (type === AnomalyType.NONE || type === AnomalyType.NORMAL) {
       return AnomalySeverity.NONE;
     }
@@ -444,7 +527,8 @@ export class ConsumptionHistoryService {
   }
 
   private buildTimelineAggregation(groupBy: string) {
-    const dateFormat = groupBy === 'day' ? '%Y-%m-%d' : groupBy === 'week' ? '%Y-W%V' : '%Y-%m';
+    const dateFormat =
+      groupBy === 'day' ? '%Y-%m-%d' : groupBy === 'week' ? '%Y-W%V' : '%Y-%m';
 
     return [
       {
@@ -453,7 +537,12 @@ export class ConsumptionHistoryService {
           totalConsumed: {
             $sum: {
               $cond: [
-                { $in: ['$flowType', [FlowType.OUT, FlowType.DAILY_CONSUMPTION]] },
+                {
+                  $in: [
+                    '$flowType',
+                    [FlowType.OUT, FlowType.DAILY_CONSUMPTION],
+                  ],
+                },
                 '$quantity',
                 0,
               ],
@@ -576,7 +665,12 @@ export class ConsumptionHistoryService {
           totalConsumed: {
             $sum: {
               $cond: [
-                { $in: ['$flowType', [FlowType.OUT, FlowType.DAILY_CONSUMPTION]] },
+                {
+                  $in: [
+                    '$flowType',
+                    [FlowType.OUT, FlowType.DAILY_CONSUMPTION],
+                  ],
+                },
                 '$quantity',
                 0,
               ],
@@ -599,7 +693,11 @@ export class ConsumptionHistoryService {
           },
           criticalAnomalies: {
             $sum: {
-              $cond: [{ $eq: ['$anomalySeverity', AnomalySeverity.CRITICAL] }, 1, 0],
+              $cond: [
+                { $eq: ['$anomalySeverity', AnomalySeverity.CRITICAL] },
+                1,
+                0,
+              ],
             },
           },
           minDate: { $min: '$date' },
@@ -618,12 +716,20 @@ export class ConsumptionHistoryService {
           },
           criticalAnomalies: 1,
           periodDays: {
-            $divide: [{ $subtract: ['$maxDate', '$minDate'] }, 1000 * 60 * 60 * 24],
+            $divide: [
+              { $subtract: ['$maxDate', '$minDate'] },
+              1000 * 60 * 60 * 24,
+            ],
           },
           avgDailyConsumption: {
             $divide: [
               '$totalConsumed',
-              { $divide: [{ $subtract: ['$maxDate', '$minDate'] }, 1000 * 60 * 60 * 24] },
+              {
+                $divide: [
+                  { $subtract: ['$maxDate', '$minDate'] },
+                  1000 * 60 * 60 * 24,
+                ],
+              },
             ],
           },
         },
@@ -644,10 +750,14 @@ export class ConsumptionHistoryService {
     const firstHalf = timeline.slice(0, midpoint);
     const secondHalf = timeline.slice(midpoint);
 
-    const avgFirst = firstHalf.reduce((sum, d) => sum + d.totalConsumed, 0) / firstHalf.length;
-    const avgSecond = secondHalf.reduce((sum, d) => sum + d.totalConsumed, 0) / secondHalf.length;
+    const avgFirst =
+      firstHalf.reduce((sum, d) => sum + d.totalConsumed, 0) / firstHalf.length;
+    const avgSecond =
+      secondHalf.reduce((sum, d) => sum + d.totalConsumed, 0) /
+      secondHalf.length;
 
-    const percentage = avgFirst > 0 ? ((avgSecond - avgFirst) / avgFirst) * 100 : 0;
+    const percentage =
+      avgFirst > 0 ? ((avgSecond - avgFirst) / avgFirst) * 100 : 0;
 
     let direction: 'increasing' | 'decreasing' | 'stable';
     let interpretation: string;
@@ -663,10 +773,17 @@ export class ConsumptionHistoryService {
       interpretation = `La consommation diminue de ${Math.abs(percentage).toFixed(1)}%`;
     }
 
-    return { direction, percentage: Math.round(percentage * 10) / 10, interpretation };
+    return {
+      direction,
+      percentage: Math.round(percentage * 10) / 10,
+      interpretation,
+    };
   }
 
-  private calculateSimpleTrend(values: number[]): { direction: 'increasing' | 'decreasing' | 'stable'; percentage: number } {
+  private calculateSimpleTrend(values: number[]): {
+    direction: 'increasing' | 'decreasing' | 'stable';
+    percentage: number;
+  } {
     if (values.length < 2) {
       return { direction: 'stable', percentage: 0 };
     }
@@ -675,10 +792,13 @@ export class ConsumptionHistoryService {
     const firstHalf = values.slice(0, midpoint);
     const secondHalf = values.slice(midpoint);
 
-    const avgFirst = firstHalf.reduce((sum, v) => sum + v, 0) / firstHalf.length;
-    const avgSecond = secondHalf.reduce((sum, v) => sum + v, 0) / secondHalf.length;
+    const avgFirst =
+      firstHalf.reduce((sum, v) => sum + v, 0) / firstHalf.length;
+    const avgSecond =
+      secondHalf.reduce((sum, v) => sum + v, 0) / secondHalf.length;
 
-    const percentage = avgFirst > 0 ? ((avgSecond - avgFirst) / avgFirst) * 100 : 0;
+    const percentage =
+      avgFirst > 0 ? ((avgSecond - avgFirst) / avgFirst) * 100 : 0;
 
     let direction: 'increasing' | 'decreasing' | 'stable';
     if (Math.abs(percentage) < 5) {

@@ -21,10 +21,13 @@ export class WeatherService {
   /**
    * 🌤️ Récupérer les données météo par coordonnées GPS
    */
-  async getWeatherByCoordinates(lat: number, lng: number): Promise<WeatherData> {
+  async getWeatherByCoordinates(
+    lat: number,
+    lng: number,
+  ): Promise<WeatherData> {
     try {
       this.logger.log(`🌍 Fetching weather for coordinates: ${lat}, ${lng}`);
-      
+
       // En mode démo, simuler les données météo
       if (this.API_KEY === 'demo_key') {
         return this.simulateWeatherData(lat, lng);
@@ -55,7 +58,7 @@ export class WeatherService {
   async getWeatherByCity(cityName: string): Promise<WeatherData> {
     try {
       this.logger.log(`🏙️ Fetching weather for city: ${cityName}`);
-      
+
       if (this.API_KEY === 'demo_key') {
         return this.simulateWeatherData(0, 0, cityName);
       }
@@ -82,7 +85,11 @@ export class WeatherService {
   /**
    * 🎲 Simuler les données météo (pour la démo)
    */
-  private simulateWeatherData(lat: number, lng: number, cityName?: string): WeatherData {
+  private simulateWeatherData(
+    lat: number,
+    lng: number,
+    cityName?: string,
+  ): WeatherData {
     const conditions = [
       {
         condition: 'sunny' as const,
@@ -90,7 +97,7 @@ export class WeatherService {
         icon: '01d',
         temp: 25,
         humidity: 45,
-        wind: 8
+        wind: 8,
       },
       {
         condition: 'cloudy' as const,
@@ -98,7 +105,7 @@ export class WeatherService {
         icon: '03d',
         temp: 20,
         humidity: 65,
-        wind: 12
+        wind: 12,
       },
       {
         condition: 'rainy' as const,
@@ -106,7 +113,7 @@ export class WeatherService {
         icon: '10d',
         temp: 16,
         humidity: 85,
-        wind: 15
+        wind: 15,
       },
       {
         condition: 'windy' as const,
@@ -114,8 +121,8 @@ export class WeatherService {
         icon: '50d',
         temp: 18,
         humidity: 60,
-        wind: 25
-      }
+        wind: 25,
+      },
     ];
 
     // Sélectionner une condition aléatoire mais cohérente
@@ -129,14 +136,30 @@ export class WeatherService {
     const windVariation = (Math.random() - 0.5) * 10;
 
     const temperature = Math.round(selectedCondition.temp + tempVariation);
-    const humidity = Math.max(20, Math.min(100, Math.round(selectedCondition.humidity + humidityVariation)));
-    const windSpeed = Math.max(0, Math.round(selectedCondition.wind + windVariation));
+    const humidity = Math.max(
+      20,
+      Math.min(100, Math.round(selectedCondition.humidity + humidityVariation)),
+    );
+    const windSpeed = Math.max(
+      0,
+      Math.round(selectedCondition.wind + windVariation),
+    );
 
     // Déterminer le nom de la ville
     let finalCityName = cityName;
     if (!finalCityName) {
-      const cities = ['Paris', 'Lyon', 'Marseille', 'Toulouse', 'Nice', 'Nantes', 'Strasbourg', 'Montpellier'];
-      finalCityName = cities[Math.floor(Math.abs(Math.sin(lat * lng)) * cities.length)];
+      const cities = [
+        'Paris',
+        'Lyon',
+        'Marseille',
+        'Toulouse',
+        'Nice',
+        'Nantes',
+        'Strasbourg',
+        'Montpellier',
+      ];
+      finalCityName =
+        cities[Math.floor(Math.abs(Math.sin(lat * lng)) * cities.length)];
     }
 
     return {
@@ -148,7 +171,7 @@ export class WeatherService {
       humidity,
       windSpeed,
       cityName: finalCityName,
-      condition: selectedCondition.condition
+      condition: selectedCondition.condition,
     };
   }
 
@@ -157,7 +180,7 @@ export class WeatherService {
    */
   private parseWeatherResponse(data: any): WeatherData {
     const condition = this.mapWeatherCondition(data.weather[0].main);
-    
+
     return {
       temperature: Math.round(data.main.temp),
       feelsLike: Math.round(data.main.feels_like),
@@ -167,23 +190,26 @@ export class WeatherService {
       humidity: data.main.humidity,
       windSpeed: Math.round(data.wind.speed * 3.6), // m/s vers km/h
       cityName: data.name,
-      condition
+      condition,
     };
   }
 
   /**
    * 🗺️ Mapper les conditions météo de l'API vers nos conditions
    */
-  private mapWeatherCondition(apiCondition: string): 'sunny' | 'cloudy' | 'rainy' | 'snowy' | 'stormy' | 'windy' {
+  private mapWeatherCondition(
+    apiCondition: string,
+  ): 'sunny' | 'cloudy' | 'rainy' | 'snowy' | 'stormy' | 'windy' {
     const condition = apiCondition.toLowerCase();
-    
+
     if (condition.includes('clear')) return 'sunny';
     if (condition.includes('cloud')) return 'cloudy';
-    if (condition.includes('rain') || condition.includes('drizzle')) return 'rainy';
+    if (condition.includes('rain') || condition.includes('drizzle'))
+      return 'rainy';
     if (condition.includes('snow')) return 'snowy';
     if (condition.includes('thunder')) return 'stormy';
     if (condition.includes('wind')) return 'windy';
-    
+
     return 'cloudy'; // Par défaut
   }
 }

@@ -42,10 +42,12 @@ export class ChatService {
 
   async markAsRead(orderId: string, userId: string): Promise<void> {
     try {
-      await this.chatMessageModel.updateMany(
-        { orderId, readBy: { $ne: userId } },
-        { $addToSet: { readBy: userId } }
-      ).exec();
+      await this.chatMessageModel
+        .updateMany(
+          { orderId, readBy: { $ne: userId } },
+          { $addToSet: { readBy: userId } },
+        )
+        .exec();
     } catch (error) {
       this.logger.error(`❌ Mark read error: ${error.message}`);
     }
@@ -53,11 +55,13 @@ export class ChatService {
 
   async getUnreadCount(orderId: string, userId: string): Promise<number> {
     try {
-      return await this.chatMessageModel.countDocuments({
-        orderId,
-        readBy: { $ne: userId },
-        senderId: { $ne: userId },
-      }).exec();
+      return await this.chatMessageModel
+        .countDocuments({
+          orderId,
+          readBy: { $ne: userId },
+          senderId: { $ne: userId },
+        })
+        .exec();
     } catch (error) {
       return 0;
     }
@@ -65,17 +69,20 @@ export class ChatService {
 
   async deleteMessage(messageId: string): Promise<boolean> {
     try {
-      const result = await this.chatMessageModel.updateOne(
-        { _id: messageId },
-        { isDeleted: true }
-      ).exec();
+      const result = await this.chatMessageModel
+        .updateOne({ _id: messageId }, { isDeleted: true })
+        .exec();
       return result.modifiedCount > 0;
     } catch (error) {
       return false;
     }
   }
 
-  async addReaction(messageId: string, userId: string, emoji: string): Promise<any> {
+  async addReaction(
+    messageId: string,
+    userId: string,
+    emoji: string,
+  ): Promise<any> {
     try {
       const message = await this.chatMessageModel.findById(messageId);
       if (!message) {
@@ -87,7 +94,7 @@ export class ChatService {
       }
 
       message.reactionsByUser.set(userId, emoji);
-      
+
       if (!message.reactions) {
         message.reactions = [];
       }

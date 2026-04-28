@@ -1,10 +1,25 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { MaterialRequirement } from '../entities/material-requirement.entity';
 import { Material } from '../entities/material.entity';
-import { ConsumptionHistory, FlowType, AnomalyType, AnomalySeverity, SourceCollection } from '../entities/consumption-history.entity';
-import { CreateMaterialRequirementDto, UpdateConsumptionDto, SiteConsumptionStats } from '../dto/material-requirement.dto';
+import {
+  ConsumptionHistory,
+  FlowType,
+  AnomalyType,
+  AnomalySeverity,
+  SourceCollection,
+} from '../entities/consumption-history.entity';
+import {
+  CreateMaterialRequirementDto,
+  UpdateConsumptionDto,
+  SiteConsumptionStats,
+} from '../dto/material-requirement.dto';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 
@@ -13,16 +28,23 @@ export class SiteConsumptionService {
   private readonly logger = new Logger(SiteConsumptionService.name);
 
   constructor(
-    @InjectModel(MaterialRequirement.name) private requirementModel: Model<MaterialRequirement>,
+    @InjectModel(MaterialRequirement.name)
+    private requirementModel: Model<MaterialRequirement>,
     @InjectModel(Material.name) private materialModel: Model<Material>,
-    @InjectModel(ConsumptionHistory.name) private consumptionHistoryModel: Model<ConsumptionHistory>,
+    @InjectModel(ConsumptionHistory.name)
+    private consumptionHistoryModel: Model<ConsumptionHistory>,
     private readonly httpService: HttpService,
   ) {}
 
-  async createRequirement(createDto: CreateMaterialRequirementDto, userId: string | null): Promise<MaterialRequirement> {
+  async createRequirement(
+    createDto: CreateMaterialRequirementDto,
+    userId: string | null,
+  ): Promise<MaterialRequirement> {
     const material = await this.materialModel.findById(createDto.materialId);
     if (!material) {
-      throw new NotFoundException(`Materiau #${createDto.materialId} non trouve`);
+      throw new NotFoundException(
+        `Materiau #${createDto.materialId} non trouve`,
+      );
     }
 
     const existing = await this.requirementModel.findOne({
@@ -31,7 +53,9 @@ export class SiteConsumptionService {
     });
 
     if (existing) {
-      throw new BadRequestException(`Une exigence existe deja pour ce materiau sur ce chantier`);
+      throw new BadRequestException(
+        `Une exigence existe deja pour ce materiau sur ce chantier`,
+      );
     }
 
     const requirement = new this.requirementModel({
@@ -42,11 +66,16 @@ export class SiteConsumptionService {
       remainingQuantity: createDto.initialQuantity,
       progressPercentage: 0,
       notes: createDto.notes,
-      createdBy: userId && Types.ObjectId.isValid(userId) ? new Types.ObjectId(userId) : null,
+      createdBy:
+        userId && Types.ObjectId.isValid(userId)
+          ? new Types.ObjectId(userId)
+          : null,
     });
 
     const saved = await requirement.save();
-    this.logger.log(`Exigence creee: site=${createDto.siteId}, material=${createDto.materialId}, quantite=${createDto.initialQuantity}`);
+    this.logger.log(
+      `Exigence creee: site=${createDto.siteId}, material=${createDto.materialId}, quantite=${createDto.initialQuantity}`,
+    );
     return saved;
   }
 
@@ -55,13 +84,17 @@ export class SiteConsumptionService {
     materialId: string,
     updateDto: UpdateConsumptionDto,
   ): Promise<MaterialRequirement> {
-    const requirement = await this.requirementModel.findOne({
-      siteId: new Types.ObjectId(siteId),
-      materialId: new Types.ObjectId(materialId),
-    }).populate('materialId');
+    const requirement = await this.requirementModel
+      .findOne({
+        siteId: new Types.ObjectId(siteId),
+        materialId: new Types.ObjectId(materialId),
+      })
+      .populate('materialId');
 
     if (!requirement) {
-      throw new NotFoundException(`Aucune exigence trouvee pour ce materiau sur ce chantier`);
+      throw new NotFoundException(
+        `Aucune exigence trouvee pour ce materiau sur ce chantier`,
+      );
     }
 
     if (updateDto.consumedQuantity > requirement.initialQuantity) {
@@ -72,11 +105,16 @@ export class SiteConsumptionService {
 
     const material = requirement.materialId as any;
     const stockBefore = requirement.remainingQuantity;
-    const quantityDiff = updateDto.consumedQuantity - requirement.consumedQuantity;
+    const quantityDiff =
+      updateDto.consumedQuantity - requirement.consumedQuantity;
 
     requirement.consumedQuantity = updateDto.consumedQuantity;
-    requirement.remainingQuantity = requirement.initialQuantity - updateDto.consumedQuantity;
-    requirement.progressPercentage = requirement.initialQuantity > 0 ? (requirement.consumedQuantity / requirement.initialQuantity) * 100 : 0;
+    requirement.remainingQuantity =
+      requirement.initialQuantity - updateDto.consumedQuantity;
+    requirement.progressPercentage =
+      requirement.initialQuantity > 0
+        ? (requirement.consumedQuantity / requirement.initialQuantity) * 100
+        : 0;
     requirement.lastUpdated = new Date();
 
     if (updateDto.notes) {
@@ -84,7 +122,7 @@ export class SiteConsumptionService {
     }
 
     const updated = await requirement.save();
-    
+
     // 🔥 CRÉER UNE ENTRÉE DANS L'HISTORIQUE
     if (quantityDiff !== 0) {
       try {
@@ -111,13 +149,17 @@ export class SiteConsumptionService {
         });
 
         await historyEntry.save();
-        this.logger.log(`✅ Historique créé: ${Math.abs(quantityDiff)} ${material?.unit} (mise à jour)`);
+        this.logger.log(
+          `✅ Historique créé: ${Math.abs(quantityDiff)} ${material?.unit} (mise à jour)`,
+        );
       } catch (error) {
         this.logger.error(`❌ Erreur création historique:`, error);
       }
     }
-    
-    this.logger.log(`Consommation mise a jour: site=${siteId}, material=${materialId}, progress=${updated.progressPercentage.toFixed(1)}%`);
+
+    this.logger.log(
+      `Consommation mise a jour: site=${siteId}, material=${materialId}, progress=${updated.progressPercentage.toFixed(1)}%`,
+    );
     return updated;
   }
 
@@ -127,13 +169,17 @@ export class SiteConsumptionService {
     quantity: number,
     notes?: string,
   ): Promise<MaterialRequirement> {
-    const requirement = await this.requirementModel.findOne({
-      siteId: new Types.ObjectId(siteId),
-      materialId: new Types.ObjectId(materialId),
-    }).populate('materialId');
+    const requirement = await this.requirementModel
+      .findOne({
+        siteId: new Types.ObjectId(siteId),
+        materialId: new Types.ObjectId(materialId),
+      })
+      .populate('materialId');
 
     if (!requirement) {
-      throw new NotFoundException(`Aucune exigence trouvee pour ce materiau sur ce chantier`);
+      throw new NotFoundException(
+        `Aucune exigence trouvee pour ce materiau sur ce chantier`,
+      );
     }
 
     const material = requirement.materialId as any;
@@ -148,15 +194,20 @@ export class SiteConsumptionService {
 
     requirement.consumedQuantity = newConsumed;
     requirement.remainingQuantity = requirement.initialQuantity - newConsumed;
-    requirement.progressPercentage = requirement.initialQuantity > 0 ? (requirement.consumedQuantity / requirement.initialQuantity) * 100 : 0;
+    requirement.progressPercentage =
+      requirement.initialQuantity > 0
+        ? (requirement.consumedQuantity / requirement.initialQuantity) * 100
+        : 0;
     requirement.lastUpdated = new Date();
 
     if (notes) {
-      requirement.notes = requirement.notes ? `${requirement.notes}\n${notes}` : notes;
+      requirement.notes = requirement.notes
+        ? `${requirement.notes}\n${notes}`
+        : notes;
     }
 
     const updated = await requirement.save();
-    
+
     // 🔥 CRÉER UNE ENTRÉE DANS L'HISTORIQUE
     try {
       const historyEntry = new this.consumptionHistoryModel({
@@ -182,13 +233,17 @@ export class SiteConsumptionService {
       });
 
       await historyEntry.save();
-      this.logger.log(`✅ Historique créé: ${quantity} ${material?.unit} consommé(s) sur site ${siteId}`);
+      this.logger.log(
+        `✅ Historique créé: ${quantity} ${material?.unit} consommé(s) sur site ${siteId}`,
+      );
     } catch (error) {
       this.logger.error(`❌ Erreur création historique:`, error);
       // Ne pas bloquer l'opération si l'historique échoue
     }
-    
-    this.logger.log(`+${quantity} consomme: site=${siteId}, material=${materialId}, nouveau total=${updated.consumedQuantity}`);
+
+    this.logger.log(
+      `+${quantity} consomme: site=${siteId}, material=${materialId}, nouveau total=${updated.consumedQuantity}`,
+    );
     return updated;
   }
 
@@ -219,12 +274,24 @@ export class SiteConsumptionService {
     });
   }
 
-  async getSiteConsumptionStats(siteId: string, siteName?: string): Promise<SiteConsumptionStats> {
+  async getSiteConsumptionStats(
+    siteId: string,
+    siteName?: string,
+  ): Promise<SiteConsumptionStats> {
     const requirements = await this.getRequirementsBySite(siteId);
 
-    const totalInitial = requirements.reduce((sum, r) => sum + r.initialQuantity, 0);
-    const totalConsumed = requirements.reduce((sum, r) => sum + r.consumedQuantity, 0);
-    const totalRemaining = requirements.reduce((sum, r) => sum + r.remainingQuantity, 0);
+    const totalInitial = requirements.reduce(
+      (sum, r) => sum + r.initialQuantity,
+      0,
+    );
+    const totalConsumed = requirements.reduce(
+      (sum, r) => sum + r.consumedQuantity,
+      0,
+    );
+    const totalRemaining = requirements.reduce(
+      (sum, r) => sum + r.remainingQuantity,
+      0,
+    );
 
     let overallProgress = 0;
     if (totalInitial > 0) {
@@ -250,36 +317,40 @@ export class SiteConsumptionService {
       .sort({ lastUpdated: -1 })
       .exec();
 
-    const enriched = await Promise.all(requirements.map(async (req) => {
-      const material = req.materialId as any;
+    const enriched = await Promise.all(
+      requirements.map(async (req) => {
+        const material = req.materialId as any;
 
-      let siteName = 'Chantier inconnu';
-      try {
-        const response = await firstValueFrom(
-          this.httpService.get(`http://localhost:3001/api/gestion-sites/${req.siteId.toString()}`),
-        );
-        siteName = response.data?.nom || response.data?.name || siteName;
-      } catch (error) {
-        this.logger.warn(`Impossible de recuperer le site ${req.siteId}`);
-      }
+        let siteName = 'Chantier inconnu';
+        try {
+          const response = await firstValueFrom(
+            this.httpService.get(
+              `http://localhost:3001/api/gestion-sites/${req.siteId.toString()}`,
+            ),
+          );
+          siteName = response.data?.nom || response.data?.name || siteName;
+        } catch (error) {
+          this.logger.warn(`Impossible de recuperer le site ${req.siteId}`);
+        }
 
-      return {
-        _id: req._id,
-        siteId: req.siteId,
-        siteName,
-        materialId: req.materialId,
-        materialName: material?.name || 'Inconnu',
-        materialCode: material?.code || 'N/A',
-        materialCategory: material?.category || 'N/A',
-        materialUnit: material?.unit || 'unite',
-        initialQuantity: req.initialQuantity,
-        consumedQuantity: req.consumedQuantity,
-        remainingQuantity: req.remainingQuantity,
-        progressPercentage: req.progressPercentage,
-        lastUpdated: req.lastUpdated,
-        notes: req.notes,
-      };
-    }));
+        return {
+          _id: req._id,
+          siteId: req.siteId,
+          siteName,
+          materialId: req.materialId,
+          materialName: material?.name || 'Inconnu',
+          materialCode: material?.code || 'N/A',
+          materialCategory: material?.category || 'N/A',
+          materialUnit: material?.unit || 'unite',
+          initialQuantity: req.initialQuantity,
+          consumedQuantity: req.consumedQuantity,
+          remainingQuantity: req.remainingQuantity,
+          progressPercentage: req.progressPercentage,
+          lastUpdated: req.lastUpdated,
+          notes: req.notes,
+        };
+      }),
+    );
 
     return enriched;
   }
@@ -313,16 +384,25 @@ export class SiteConsumptionService {
     });
 
     if (result.deletedCount === 0) {
-      throw new NotFoundException(`Aucune exigence trouvee pour ce materiau sur ce chantier`);
+      throw new NotFoundException(
+        `Aucune exigence trouvee pour ce materiau sur ce chantier`,
+      );
     }
 
-    this.logger.log(`Exigence supprimee: site=${siteId}, material=${materialId}`);
+    this.logger.log(
+      `Exigence supprimee: site=${siteId}, material=${materialId}`,
+    );
   }
 
-  async getRequirement(siteId: string, materialId: string): Promise<MaterialRequirement | null> {
-    return this.requirementModel.findOne({
-      siteId: new Types.ObjectId(siteId),
-      materialId: new Types.ObjectId(materialId),
-    }).exec();
+  async getRequirement(
+    siteId: string,
+    materialId: string,
+  ): Promise<MaterialRequirement | null> {
+    return this.requirementModel
+      .findOne({
+        siteId: new Types.ObjectId(siteId),
+        materialId: new Types.ObjectId(materialId),
+      })
+      .exec();
   }
 }

@@ -24,22 +24,26 @@ export class OrdersController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async createOrder(
-    @Body() createOrderDto: CreateMaterialOrderDto,
-  ) {
+  async createOrder(@Body() createOrderDto: CreateMaterialOrderDto) {
     const userId = 'system';
     console.log('📥 === ORDERS CONTROLLER ===');
     console.log('📥 createOrderDto:', createOrderDto);
     console.log('📥 materialId raw:', createOrderDto.materialId);
-    console.log('📥 materialId JSON:', JSON.stringify(createOrderDto.materialId));
-    
+    console.log(
+      '📥 materialId JSON:',
+      JSON.stringify(createOrderDto.materialId),
+    );
+
     const dtoAsAny = createOrderDto as any;
     console.log('📥 Via any - materialId:', dtoAsAny.materialId);
     console.log('📥 Via any - destinationSiteId:', dtoAsAny.destinationSiteId);
     console.log('📥 Via any - supplierId:', dtoAsAny.supplierId);
-    
+
     try {
-      const result = await this.ordersService.createOrder(createOrderDto, userId);
+      const result = await this.ordersService.createOrder(
+        createOrderDto,
+        userId,
+      );
       console.log('✅ Commande créée avec succès:', result._id);
       return result;
     } catch (error: any) {
@@ -71,7 +75,7 @@ export class OrdersController {
     if (status) filters.status = status;
     if (siteId) filters.siteId = siteId;
     if (supplierId) filters.supplierId = supplierId;
-    
+
     return this.ordersService.getGlobalOrdersTracking(filters);
   }
 
@@ -98,7 +102,15 @@ export class OrdersController {
   @HttpCode(HttpStatus.OK)
   async updateProgress(
     @Param('id') id: string,
-    @Body() body: { currentPosition: { lat: number; lng: number; progress?: number; remainingTime?: number } },
+    @Body()
+    body: {
+      currentPosition: {
+        lat: number;
+        lng: number;
+        progress?: number;
+        remainingTime?: number;
+      };
+    },
   ) {
     return this.ordersService.updateOrderProgress(id, body.currentPosition);
   }
@@ -117,7 +129,9 @@ export class OrdersController {
     @Param('id') id: string,
     @Body() body: { paymentMethod: 'cash' | 'card' },
   ) {
-    this.logger.log(`💳 Payment request for order ${id}, method: ${body.paymentMethod}`);
+    this.logger.log(
+      `💳 Payment request for order ${id}, method: ${body.paymentMethod}`,
+    );
     return this.ordersService.processArrivalPayment(id, body.paymentMethod);
   }
 

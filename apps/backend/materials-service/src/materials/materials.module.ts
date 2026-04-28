@@ -37,12 +37,30 @@ import { SupplierRatingService } from './services/supplier-rating.service';
 import { IntelligentRecommendationService } from './services/intelligent-recommendation.service';
 import { SitesService } from '../sites/sites.service';
 import { Material, MaterialSchema } from './entities/material.entity';
-import { MaterialOrder, MaterialOrderSchema } from './entities/material-order.entity';
-import { MaterialRequirement, MaterialRequirementSchema } from './entities/material-requirement.entity';
-import { DailyConsumptionLog, DailyConsumptionLogSchema } from './entities/daily-consumption.entity';
-import { MaterialFlowLog, MaterialFlowLogSchema } from './entities/material-flow-log.entity';
-import { SupplierRating, SupplierRatingSchema } from './entities/supplier-rating.entity';
-import { ConsumptionHistory, ConsumptionHistorySchema } from './entities/consumption-history.entity';
+import {
+  MaterialOrder,
+  MaterialOrderSchema,
+} from './entities/material-order.entity';
+import {
+  MaterialRequirement,
+  MaterialRequirementSchema,
+} from './entities/material-requirement.entity';
+import {
+  DailyConsumptionLog,
+  DailyConsumptionLogSchema,
+} from './entities/daily-consumption.entity';
+import {
+  MaterialFlowLog,
+  MaterialFlowLogSchema,
+} from './entities/material-flow-log.entity';
+import {
+  SupplierRating,
+  SupplierRatingSchema,
+} from './entities/supplier-rating.entity';
+import {
+  ConsumptionHistory,
+  ConsumptionHistorySchema,
+} from './entities/consumption-history.entity';
 import { PaymentModule } from 'src/payment/payment.module';
 import { ChatModule } from '../chat/chat.module';
 import { SitesModule } from '../sites/sites.module';
@@ -61,10 +79,12 @@ import * as fs from 'fs';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        uri: configService.get('MONGODB_URI') || 'mongodb://localhost:27017/smartsite-materials',
+        uri:
+          configService.get('MONGODB_URI') ||
+          'mongodb://localhost:27017/smartsite-materials',
       }),
     }),
-    
+
     MongooseModule.forFeature([
       { name: Material.name, schema: MaterialSchema },
       { name: MaterialOrder.name, schema: MaterialOrderSchema },
@@ -74,7 +94,7 @@ import * as fs from 'fs';
       { name: ConsumptionHistory.name, schema: ConsumptionHistorySchema },
       { name: SupplierRating.name, schema: SupplierRatingSchema },
     ]),
-    
+
     HttpModule.register({ timeout: 5000, maxRedirects: 5 }),
     CacheModule.register({ ttl: 300, max: 1000, isGlobal: true }),
     ScheduleModule.forRoot(),
@@ -94,7 +114,8 @@ import * as fs from 'fs';
           cb(null, uploadPath);
         },
         filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
           const ext = path.extname(file.originalname);
           cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
         },
@@ -107,9 +128,9 @@ import * as fs from 'fs';
     PaymentModule,
   ],
   controllers: [
-    MaterialsController, 
-    QRCodeController, 
-    OrdersController, 
+    MaterialsController,
+    QRCodeController,
+    OrdersController,
     SiteMaterialsController,
     SiteConsumptionController,
     ConsumptionController,
@@ -144,10 +165,10 @@ import * as fs from 'fs';
     WeatherService,
   ],
   exports: [
-    MaterialsService, 
-    OrdersService, 
-    SiteMaterialsService, 
-    ImportExportService, 
+    MaterialsService,
+    OrdersService,
+    SiteMaterialsService,
+    ImportExportService,
     SiteConsumptionService,
     ConsumptionAnomalyService,
     MaterialFlowService,
@@ -156,8 +177,8 @@ import * as fs from 'fs';
     MLTrainingEnhancedService,
     OrdersTrackingService,
     SupplierRatingService,
-    StockPredictionService, 
-    MLTrainingService, 
+    StockPredictionService,
+    MLTrainingService,
     IntelligentRecommendationService,
     SitesService,
     WebSocketService,

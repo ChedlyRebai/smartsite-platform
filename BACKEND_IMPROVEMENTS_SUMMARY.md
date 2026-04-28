@@ -105,7 +105,7 @@ GET /api/chat/weather/:orderId
 #### 3. Configuration
 Variable d'environnement déjà présente dans `.env`:
 ```env
-OPENWEATHER_API_KEY=9d61b206e0b8dbb7fa1b56b65205d2cc
+
 ```
 
 **Obtenir une clé gratuite:** https://openweathermap.org/api

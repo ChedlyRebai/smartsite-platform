@@ -3,12 +3,20 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { DailyConsumptionLog } from '../entities/daily-consumption.entity';
 import { Material } from '../entities/material.entity';
-import { CreateDailyConsumptionDto, ConsumptionAnomalyResult } from '../dto/daily-consumption.dto';
+import {
+  CreateDailyConsumptionDto,
+  ConsumptionAnomalyResult,
+} from '../dto/daily-consumption.dto';
 import { Cron } from '@nestjs/schedule';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { ConsumptionHistoryService } from './consumption-history.service';
-import { FlowType, SourceCollection, AnomalyType as HistoryAnomalyType, AnomalySeverity } from '../entities/consumption-history.entity';
+import {
+  FlowType,
+  SourceCollection,
+  AnomalyType as HistoryAnomalyType,
+  AnomalySeverity,
+} from '../entities/consumption-history.entity';
 
 @Injectable()
 export class ConsumptionAnomalyService {
@@ -24,7 +32,10 @@ export class ConsumptionAnomalyService {
     private readonly historyService: ConsumptionHistoryService,
   ) {}
 
-  detectAnomaly(quantityUsed: number, expectedConsumption: number): {
+  detectAnomaly(
+    quantityUsed: number,
+    expectedConsumption: number,
+  ): {
     anomalyType: 'vol' | 'probleme' | 'normal';
     anomalyScore: number;
     severity: 'critical' | 'warning' | 'normal';
@@ -61,7 +72,8 @@ export class ConsumptionAnomalyService {
     createDto: CreateDailyConsumptionDto,
     userId?: string,
   ): Promise<ConsumptionAnomalyResult> {
-    const { materialId, siteId, date, quantityUsed, expectedConsumption } = createDto;
+    const { materialId, siteId, date, quantityUsed, expectedConsumption } =
+      createDto;
 
     const { anomalyType, anomalyScore, severity, message } = this.detectAnomaly(
       quantityUsed,
@@ -69,7 +81,10 @@ export class ConsumptionAnomalyService {
     );
 
     // Récupérer les informations du matériau pour l'historique
-    const material = await this.materialModel.findById(materialId).lean().exec();
+    const material = await this.materialModel
+      .findById(materialId)
+      .lean()
+      .exec();
     if (!material) {
       throw new Error(`Matériau ${materialId} introuvable`);
     }
@@ -105,7 +120,10 @@ export class ConsumptionAnomalyService {
         anomalyScore,
         anomalyType,
         anomalyReason: message,
-        recordedBy: userId && Types.ObjectId.isValid(userId) ? new Types.ObjectId(userId) : undefined,
+        recordedBy:
+          userId && Types.ObjectId.isValid(userId)
+            ? new Types.ObjectId(userId)
+            : undefined,
         emailSent: false,
       });
       await consumption.save();
@@ -137,10 +155,14 @@ export class ConsumptionAnomalyService {
       });
     } catch (error) {
       // Ne pas faire échouer l'opération principale
-      this.logger.error(`⚠️ Erreur lors de l'ajout à l'historique: ${error.message}`);
+      this.logger.error(
+        `⚠️ Erreur lors de l'ajout à l'historique: ${error.message}`,
+      );
     }
 
-    this.logger.log(`Consommation enregistree: ${materialId} - ${anomalyType} (score: ${anomalyScore})`);
+    this.logger.log(
+      `Consommation enregistree: ${materialId} - ${anomalyType} (score: ${anomalyScore})`,
+    );
 
     if (severity !== 'normal' && !consumption.emailSent) {
       await this.sendAnomalyEmail(consumption, anomalyType, severity, message);
@@ -151,7 +173,12 @@ export class ConsumptionAnomalyService {
 
     return {
       consumption,
-      anomalyType: anomalyType === 'vol' ? 'VOL_POSSIBLE' : anomalyType === 'probleme' ? 'CHANTIER_BLOQUE' : 'NORMAL',
+      anomalyType:
+        anomalyType === 'vol'
+          ? 'VOL_POSSIBLE'
+          : anomalyType === 'probleme'
+            ? 'CHANTIER_BLOQUE'
+            : 'NORMAL',
       anomalyScore,
       message,
       severity,
@@ -181,7 +208,9 @@ export class ConsumptionAnomalyService {
     severity: string,
     message: string,
   ): Promise<void> {
-    const material = await this.getMaterialInfo(consumption.materialId.toString());
+    const material = await this.getMaterialInfo(
+      consumption.materialId.toString(),
+    );
     const site = await this.getSiteInfo(consumption.siteId.toString());
     const recipients = process.env.ALERT_EMAILS || 'admin@smartsite.com';
 
@@ -192,7 +221,11 @@ export class ConsumptionAnomalyService {
     );
   }
 
-  async getConsumptionsBySite(siteId: string, startDate?: Date, endDate?: Date): Promise<DailyConsumptionLog[]> {
+  async getConsumptionsBySite(
+    siteId: string,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<DailyConsumptionLog[]> {
     const filter: any = { siteId: new Types.ObjectId(siteId) };
     if (startDate || endDate) {
       filter.date = {};
@@ -202,7 +235,11 @@ export class ConsumptionAnomalyService {
     return this.consumptionModel.find(filter).sort({ date: -1 }).exec();
   }
 
-  async getConsumptionsByMaterial(materialId: string, startDate?: Date, endDate?: Date): Promise<DailyConsumptionLog[]> {
+  async getConsumptionsByMaterial(
+    materialId: string,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<DailyConsumptionLog[]> {
     const filter: any = { materialId: new Types.ObjectId(materialId) };
     if (startDate || endDate) {
       filter.date = {};
@@ -213,10 +250,14 @@ export class ConsumptionAnomalyService {
   }
 
   async getActiveAnomalies(): Promise<DailyConsumptionLog[]> {
-    return this.consumptionModel.find({
-      anomalyType: { $in: ['vol', 'probleme'] },
-      emailSent: true,
-    }).sort({ date: -1 }).limit(50).exec();
+    return this.consumptionModel
+      .find({
+        anomalyType: { $in: ['vol', 'probleme'] },
+        emailSent: true,
+      })
+      .sort({ date: -1 })
+      .limit(50)
+      .exec();
   }
 
   async getAnomalyStats(startDate: Date, endDate: Date): Promise<any> {
@@ -234,7 +275,9 @@ export class ConsumptionAnomalyService {
 
   @Cron('0 20 * * *')
   async dailyAnomalyCheck() {
-    this.logger.log('Execution du check quotidien des anomalies de consommation...');
+    this.logger.log(
+      'Execution du check quotidien des anomalies de consommation...',
+    );
 
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
@@ -266,7 +309,11 @@ export class ConsumptionAnomalyService {
 
   private async getMaterialInfo(materialId: string): Promise<any> {
     try {
-      const response = await firstValueFrom(this.httpService.get(`http://localhost:3002/api/materials/${materialId}`));
+      const response = await firstValueFrom(
+        this.httpService.get(
+          `http://localhost:3002/api/materials/${materialId}`,
+        ),
+      );
       return response.data;
     } catch {
       return null;
@@ -275,7 +322,11 @@ export class ConsumptionAnomalyService {
 
   private async getSiteInfo(siteId: string): Promise<any> {
     try {
-      const response = await firstValueFrom(this.httpService.get(`http://localhost:3001/api/gestion-sites/${siteId}`));
+      const response = await firstValueFrom(
+        this.httpService.get(
+          `http://localhost:3001/api/gestion-sites/${siteId}`,
+        ),
+      );
       return response.data;
     } catch {
       return null;

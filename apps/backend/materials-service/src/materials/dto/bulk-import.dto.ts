@@ -1,4 +1,11 @@
-import { IsString, IsNumber, IsOptional, IsDateString, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsDateString,
+  Min,
+  Max,
+} from 'class-validator';
 import { Material } from '../entities/material.entity';
 
 export class BulkImportMaterialDto {

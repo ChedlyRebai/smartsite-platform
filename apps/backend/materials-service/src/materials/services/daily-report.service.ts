@@ -4,9 +4,15 @@ import { Model } from 'mongoose';
 import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Material } from '../entities/material.entity';
-import { MaterialFlowLog, AnomalyType } from '../entities/material-flow-log.entity';
+import {
+  MaterialFlowLog,
+  AnomalyType,
+} from '../entities/material-flow-log.entity';
 import { AnomalyEmailService } from '../../common/email/anomaly-email.service';
-import { IntelligentRecommendationService, AutoOrderRecommendation } from './intelligent-recommendation.service';
+import {
+  IntelligentRecommendationService,
+  AutoOrderRecommendation,
+} from './intelligent-recommendation.service';
 
 interface DailyReportData {
   date: string;
@@ -61,7 +67,8 @@ export class DailyReportService {
 
   constructor(
     @InjectModel(Material.name) private materialModel: Model<Material>,
-    @InjectModel(MaterialFlowLog.name) private flowLogModel: Model<MaterialFlowLog>,
+    @InjectModel(MaterialFlowLog.name)
+    private flowLogModel: Model<MaterialFlowLog>,
     private configService: ConfigService,
     private anomalyEmailService: AnomalyEmailService,
     private intelligentRecommendationService: IntelligentRecommendationService,
@@ -69,15 +76,20 @@ export class DailyReportService {
 
   @Cron(CronExpression.EVERY_DAY_AT_7AM)
   async sendDailyReport(): Promise<void> {
-    const isEnabled = this.configService.get<string>('DAILY_REPORT_ENABLED') === 'true';
+    const isEnabled =
+      this.configService.get<string>('DAILY_REPORT_ENABLED') === 'true';
     if (!isEnabled) {
-      this.logger.log('📊 Rapport quotidien désactivé (DAILY_REPORT_ENABLED=false)');
+      this.logger.log(
+        '📊 Rapport quotidien désactivé (DAILY_REPORT_ENABLED=false)',
+      );
       return;
     }
 
     const reportEmail = this.configService.get<string>('DAILY_REPORT_EMAIL');
     if (!reportEmail) {
-      this.logger.warn('⚠️ DAILY_REPORT_EMAIL non configuré, rapport non envoyé');
+      this.logger.warn(
+        '⚠️ DAILY_REPORT_EMAIL non configuré, rapport non envoyé',
+      );
       return;
     }
 
@@ -87,13 +99,19 @@ export class DailyReportService {
       await this.sendReportEmail(reportEmail, reportData);
       this.logger.log('✅ Rapport quotidien envoyé avec succès');
     } catch (error) {
-      this.logger.error('❌ Erreur lors de l\'envoi du rapport quotidien:', error);
+      this.logger.error(
+        "❌ Erreur lors de l'envoi du rapport quotidien:",
+        error,
+      );
     }
   }
 
-  async sendManualReport(email?: string): Promise<{ success: boolean; message: string }> {
+  async sendManualReport(
+    email?: string,
+  ): Promise<{ success: boolean; message: string }> {
     try {
-      const reportEmail = email || this.configService.get<string>('DAILY_REPORT_EMAIL');
+      const reportEmail =
+        email || this.configService.get<string>('DAILY_REPORT_EMAIL');
       if (!reportEmail) {
         return {
           success: false,
@@ -101,7 +119,9 @@ export class DailyReportService {
         };
       }
 
-      this.logger.log(`📊 Génération du rapport quotidien manuel pour ${reportEmail}...`);
+      this.logger.log(
+        `📊 Génération du rapport quotidien manuel pour ${reportEmail}...`,
+      );
       const reportData = await this.generateReportData();
       await this.sendReportEmail(reportEmail, reportData);
 
@@ -110,7 +130,7 @@ export class DailyReportService {
         message: `Rapport quotidien envoyé avec succès à ${reportEmail}`,
       };
     } catch (error) {
-      this.logger.error('❌ Erreur lors de l\'envoi du rapport manuel:', error);
+      this.logger.error("❌ Erreur lors de l'envoi du rapport manuel:", error);
       return {
         success: false,
         message: `Erreur lors de l'envoi: ${error.message}`,
@@ -123,7 +143,9 @@ export class DailyReportService {
     const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
 
     // 1. Nombre total de matériaux actifs
-    const totalActiveMaterials = await this.materialModel.countDocuments({ status: 'active' });
+    const totalActiveMaterials = await this.materialModel.countDocuments({
+      status: 'active',
+    });
 
     // 2. Matériaux en stock bas (quantity < minimumStock)
     const lowStockMaterials = await this.materialModel
@@ -145,7 +167,9 @@ export class DailyReportService {
       .exec();
 
     // 4. Matériaux expirant dans les 7 prochains jours
-    const sevenDaysFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const sevenDaysFromNow = new Date(
+      today.getTime() + 7 * 24 * 60 * 60 * 1000,
+    );
     const expiringMaterials = await this.materialModel
       .find({
         status: 'active',
@@ -170,26 +194,32 @@ export class DailyReportService {
     const ordersInTransit = []; // TODO: Implémenter selon votre système de commandes
 
     // 7. Recommandations urgentes (urgencyLevel = critical)
-    const criticalRecommendations = await this.intelligentRecommendationService.getAllAutoOrderMaterials();
-    const urgentRecommendations = criticalRecommendations.filter(rec => rec.urgencyLevel === 'critical');
+    const criticalRecommendations =
+      await this.intelligentRecommendationService.getAllAutoOrderMaterials();
+    const urgentRecommendations = criticalRecommendations.filter(
+      (rec) => rec.urgencyLevel === 'critical',
+    );
 
     return {
       date: today.toLocaleDateString('fr-FR'),
       totalActiveMaterials,
-      lowStockMaterials: lowStockMaterials.map(material => ({
+      lowStockMaterials: lowStockMaterials.map((material) => ({
         name: material.name,
         code: material.code,
         currentQuantity: material.quantity,
         minimumStock: material.minimumStock,
         siteName: (material as any).siteName || 'Non assigné',
       })),
-      outOfStockMaterials: outOfStockMaterials.map(material => ({
+      outOfStockMaterials: outOfStockMaterials.map((material) => ({
         name: material.name,
         code: material.code,
         siteName: (material as any).siteName || 'Non assigné',
       })),
-      expiringMaterials: expiringMaterials.map(material => {
-        const daysRemaining = Math.ceil((material.expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      expiringMaterials: expiringMaterials.map((material) => {
+        const daysRemaining = Math.ceil(
+          (material.expiryDate.getTime() - today.getTime()) /
+            (1000 * 60 * 60 * 24),
+        );
         return {
           name: material.name,
           code: material.code,
@@ -198,7 +228,7 @@ export class DailyReportService {
           siteName: (material as any).siteName || 'Non assigné',
         };
       }),
-      anomalies: anomalies.map(anomaly => ({
+      anomalies: anomalies.map((anomaly) => ({
         materialName: (anomaly as any).materialId?.name || 'Matériau inconnu',
         materialCode: (anomaly as any).materialId?.code || 'N/A',
         anomalyType: this.getAnomalyTypeLabel(anomaly.anomalyDetected),
@@ -207,7 +237,7 @@ export class DailyReportService {
         siteName: 'Site non spécifié', // TODO: Récupérer depuis siteId
       })),
       ordersInTransit,
-      criticalRecommendations: urgentRecommendations.map(rec => ({
+      criticalRecommendations: urgentRecommendations.map((rec) => ({
         materialName: rec.materialName,
         materialCode: rec.materialCode,
         urgencyLevel: rec.urgencyLevel,
@@ -218,7 +248,10 @@ export class DailyReportService {
     };
   }
 
-  private async sendReportEmail(email: string, reportData: DailyReportData): Promise<void> {
+  private async sendReportEmail(
+    email: string,
+    reportData: DailyReportData,
+  ): Promise<void> {
     const subject = `[SmartSite] Rapport quotidien matériaux — ${reportData.date}`;
     const html = this.generateReportHtml(reportData);
 
@@ -226,10 +259,14 @@ export class DailyReportService {
     await this.sendDailyReportEmail(email, subject, html);
   }
 
-  private async sendDailyReportEmail(email: string, subject: string, html: string): Promise<void> {
+  private async sendDailyReportEmail(
+    email: string,
+    subject: string,
+    html: string,
+  ): Promise<void> {
     // Créer un transporteur temporaire pour le rapport quotidien
     const nodemailer = require('nodemailer');
-    
+
     const transporter = nodemailer.createTransporter({
       host: this.configService.get<string>('SMTP_HOST'),
       port: this.configService.get<number>('SMTP_PORT'),
@@ -240,7 +277,9 @@ export class DailyReportService {
       },
     });
 
-    const smtpFrom = this.configService.get<string>('SMTP_FROM') || `"SmartSite Rapport" <${this.configService.get<string>('SMTP_USER')}>`;
+    const smtpFrom =
+      this.configService.get<string>('SMTP_FROM') ||
+      `"SmartSite Rapport" <${this.configService.get<string>('SMTP_USER')}>`;
 
     await transporter.sendMail({
       from: smtpFrom,
@@ -318,9 +357,10 @@ export class DailyReportService {
       <!-- Matériaux en stock bas -->
       <div class="section">
         <div class="section-title">📦 Matériaux en Stock Bas</div>
-        ${data.lowStockMaterials.length === 0 ? 
-          '<div class="no-data">✅ Aucun matériau en stock bas</div>' :
-          `<table class="table">
+        ${
+          data.lowStockMaterials.length === 0
+            ? '<div class="no-data">✅ Aucun matériau en stock bas</div>'
+            : `<table class="table">
             <thead>
               <tr>
                 <th>Matériau</th>
@@ -331,7 +371,9 @@ export class DailyReportService {
               </tr>
             </thead>
             <tbody>
-              ${data.lowStockMaterials.map(material => `
+              ${data.lowStockMaterials
+                .map(
+                  (material) => `
                 <tr>
                   <td><strong>${material.name}</strong></td>
                   <td>${material.code}</td>
@@ -339,7 +381,9 @@ export class DailyReportService {
                   <td>${material.minimumStock}</td>
                   <td>${material.siteName}</td>
                 </tr>
-              `).join('')}
+              `,
+                )
+                .join('')}
             </tbody>
           </table>`
         }
@@ -348,9 +392,10 @@ export class DailyReportService {
       <!-- Matériaux en rupture -->
       <div class="section">
         <div class="section-title">🚨 Matériaux en Rupture</div>
-        ${data.outOfStockMaterials.length === 0 ? 
-          '<div class="no-data">✅ Aucun matériau en rupture</div>' :
-          `<table class="table">
+        ${
+          data.outOfStockMaterials.length === 0
+            ? '<div class="no-data">✅ Aucun matériau en rupture</div>'
+            : `<table class="table">
             <thead>
               <tr>
                 <th>Matériau</th>
@@ -359,13 +404,17 @@ export class DailyReportService {
               </tr>
             </thead>
             <tbody>
-              ${data.outOfStockMaterials.map(material => `
+              ${data.outOfStockMaterials
+                .map(
+                  (material) => `
                 <tr>
                   <td><strong>${material.name}</strong></td>
                   <td>${material.code}</td>
                   <td>${material.siteName}</td>
                 </tr>
-              `).join('')}
+              `,
+                )
+                .join('')}
             </tbody>
           </table>`
         }
@@ -374,9 +423,10 @@ export class DailyReportService {
       <!-- Matériaux expirants -->
       <div class="section">
         <div class="section-title">⏰ Matériaux Expirant dans 7 jours</div>
-        ${data.expiringMaterials.length === 0 ? 
-          '<div class="no-data">✅ Aucun matériau expirant prochainement</div>' :
-          `<table class="table">
+        ${
+          data.expiringMaterials.length === 0
+            ? '<div class="no-data">✅ Aucun matériau expirant prochainement</div>'
+            : `<table class="table">
             <thead>
               <tr>
                 <th>Matériau</th>
@@ -387,7 +437,9 @@ export class DailyReportService {
               </tr>
             </thead>
             <tbody>
-              ${data.expiringMaterials.map(material => `
+              ${data.expiringMaterials
+                .map(
+                  (material) => `
                 <tr>
                   <td><strong>${material.name}</strong></td>
                   <td>${material.code}</td>
@@ -395,7 +447,9 @@ export class DailyReportService {
                   <td><span class="badge ${material.daysRemaining <= 3 ? 'badge-critical' : 'badge-warning'}">${material.daysRemaining} jour${material.daysRemaining > 1 ? 's' : ''}</span></td>
                   <td>${material.siteName}</td>
                 </tr>
-              `).join('')}
+              `,
+                )
+                .join('')}
             </tbody>
           </table>`
         }
@@ -404,9 +458,10 @@ export class DailyReportService {
       <!-- Anomalies détectées -->
       <div class="section">
         <div class="section-title">⚠️ Anomalies Détectées (24h)</div>
-        ${data.anomalies.length === 0 ? 
-          '<div class="no-data">✅ Aucune anomalie détectée</div>' :
-          `<table class="table">
+        ${
+          data.anomalies.length === 0
+            ? '<div class="no-data">✅ Aucune anomalie détectée</div>'
+            : `<table class="table">
             <thead>
               <tr>
                 <th>Matériau</th>
@@ -416,14 +471,18 @@ export class DailyReportService {
               </tr>
             </thead>
             <tbody>
-              ${data.anomalies.map(anomaly => `
+              ${data.anomalies
+                .map(
+                  (anomaly) => `
                 <tr>
                   <td><strong>${anomaly.materialName}</strong><br><small>${anomaly.materialCode}</small></td>
                   <td><span class="badge badge-warning">${anomaly.anomalyType}</span></td>
                   <td>${anomaly.message}</td>
                   <td>${anomaly.timestamp}</td>
                 </tr>
-              `).join('')}
+              `,
+                )
+                .join('')}
             </tbody>
           </table>`
         }
@@ -432,9 +491,10 @@ export class DailyReportService {
       <!-- Recommandations urgentes -->
       <div class="section">
         <div class="section-title">🚨 Recommandations Urgentes</div>
-        ${data.criticalRecommendations.length === 0 ? 
-          '<div class="no-data">✅ Aucune recommandation urgente</div>' :
-          `<table class="table">
+        ${
+          data.criticalRecommendations.length === 0
+            ? '<div class="no-data">✅ Aucune recommandation urgente</div>'
+            : `<table class="table">
             <thead>
               <tr>
                 <th>Matériau</th>
@@ -443,13 +503,17 @@ export class DailyReportService {
               </tr>
             </thead>
             <tbody>
-              ${data.criticalRecommendations.map(rec => `
+              ${data.criticalRecommendations
+                .map(
+                  (rec) => `
                 <tr>
                   <td><strong>${rec.materialName}</strong><br><small>${rec.materialCode}</small></td>
                   <td><span class="badge badge-critical">${rec.message}</span></td>
                   <td>${rec.recommendedQuantity} unités</td>
                 </tr>
-              `).join('')}
+              `,
+                )
+                .join('')}
             </tbody>
           </table>`
         }

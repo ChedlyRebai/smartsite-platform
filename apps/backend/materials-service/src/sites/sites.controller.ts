@@ -12,7 +12,7 @@ export class SitesController {
     try {
       this.logger.log('🏗️ Récupération de tous les sites depuis MongoDB');
       const sites = await this.sitesService.findAll();
-      
+
       return {
         success: true,
         data: sites,
@@ -38,7 +38,7 @@ export class SitesController {
       this.logger.log('🧪 Test de connexion aux sites MongoDB...');
       const count = await this.sitesService.getSiteCount();
       const sites = await this.sitesService.findAll();
-      
+
       return {
         success: true,
         message: 'Connexion MongoDB sites OK',
@@ -47,7 +47,7 @@ export class SitesController {
           collection: 'sites',
           totalSites: count,
           sitesFound: sites.length,
-          sites: sites.slice(0, 3).map(s => ({
+          sites: sites.slice(0, 3).map((s) => ({
             _id: s._id,
             nom: s.nom,
             ville: s.ville,
@@ -69,7 +69,7 @@ export class SitesController {
   async findOne(@Param('id') id: string) {
     try {
       const site = await this.sitesService.findOne(id);
-      
+
       if (!site) {
         return {
           success: false,
@@ -84,7 +84,10 @@ export class SitesController {
         message: 'Site trouvé',
       };
     } catch (error) {
-      this.logger.error(`❌ Erreur lors de la récupération du site ${id}:`, error);
+      this.logger.error(
+        `❌ Erreur lors de la récupération du site ${id}:`,
+        error,
+      );
       return {
         success: false,
         message: `Erreur lors de la récupération du site ${id}`,

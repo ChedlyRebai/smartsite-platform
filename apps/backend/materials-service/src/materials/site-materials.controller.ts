@@ -24,9 +24,16 @@ export class SiteMaterialsController {
   async createMaterialWithSite(
     @Body() body: { material: CreateMaterialDto; siteId: string },
   ) {
-    console.log('📥 createMaterialWithSite received:', { siteId: body.siteId, materialName: body.material?.name });
+    console.log('📥 createMaterialWithSite received:', {
+      siteId: body.siteId,
+      materialName: body.material?.name,
+    });
     const userId = 'system';
-    return this.siteMaterialsService.createMaterialWithSite(body.material, body.siteId, userId);
+    return this.siteMaterialsService.createMaterialWithSite(
+      body.material,
+      body.siteId,
+      userId,
+    );
   }
 
   @Post(':materialId/assign/:siteId')
@@ -73,7 +80,10 @@ export class SiteMaterialsController {
     @Param('materialId') materialId: string,
     @Param('siteId') siteId: string,
   ) {
-    return this.siteMaterialsService.getMaterialAvailabilityForSite(materialId, siteId);
+    return this.siteMaterialsService.getMaterialAvailabilityForSite(
+      materialId,
+      siteId,
+    );
   }
 
   @Get('all-with-sites')
@@ -86,7 +96,10 @@ export class SiteMaterialsController {
     @Param('category') category: string,
     @Param('siteId') siteId: string,
   ) {
-    return this.siteMaterialsService.getMaterialsByCategoryAndSite(category, siteId);
+    return this.siteMaterialsService.getMaterialsByCategoryAndSite(
+      category,
+      siteId,
+    );
   }
 
   @Post(':materialId/stock')
@@ -95,6 +108,10 @@ export class SiteMaterialsController {
     @Param('materialId') materialId: string,
     @Body() body: { quantity: number; operation: 'add' | 'remove' },
   ) {
-    return this.siteMaterialsService.updateMaterialStock(materialId, body.quantity, body.operation);
+    return this.siteMaterialsService.updateMaterialStock(
+      materialId,
+      body.quantity,
+      body.operation,
+    );
   }
 }

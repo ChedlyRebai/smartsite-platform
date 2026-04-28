@@ -158,7 +158,7 @@ npm run dev
 ### Variables d'Environnement
 ```env
 # Déjà configuré dans .env
-OPENWEATHER_API_KEY=9d61b206e0b8dbb7fa1b56b65205d2cc
+
 ```
 
 ### Dépendances

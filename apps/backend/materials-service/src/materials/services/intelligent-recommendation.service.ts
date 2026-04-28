@@ -83,18 +83,24 @@ export class IntelligentRecommendationService {
 
   private async initializeSupplierConnection() {
     try {
-      const uri = this.configService.get('SUPPLIERS_MONGODB_URI') || 'mongodb://localhost:27017/smartsite-fournisseurs';
+      const uri =
+        this.configService.get('SUPPLIERS_MONGODB_URI') ||
+        'mongodb://localhost:27017/smartsite-fournisseurs';
       this.client = new MongoClient(uri);
       await this.client.connect();
       this.db = this.client.db();
       this.suppliersCollection = this.db.collection('fournisseurs');
-      this.logger.log('✅ Connexion MongoDB fournisseurs établie dans IntelligentRecommendationService');
+      this.logger.log(
+        '✅ Connexion MongoDB fournisseurs établie dans IntelligentRecommendationService',
+      );
     } catch (error) {
       this.logger.error('❌ Erreur de connexion MongoDB fournisseurs:', error);
     }
   }
 
-  async checkAutoOrderNeeded(materialId: string): Promise<AutoOrderRecommendation> {
+  async checkAutoOrderNeeded(
+    materialId: string,
+  ): Promise<AutoOrderRecommendation> {
     const material = await this.materialModel.findById(materialId).exec();
     if (!material) {
       throw new Error(`Materiau ${materialId} non trouve`);
@@ -114,7 +120,9 @@ export class IntelligentRecommendationService {
         predictedHoursToOutOfStock = prediction.hoursToOutOfStock;
         consumptionRate = prediction.consumptionRate;
       } catch {
-        this.logger.warn(`ML prediction failed for ${materialId}, using fallback`);
+        this.logger.warn(
+          `ML prediction failed for ${materialId}, using fallback`,
+        );
       }
     }
 
@@ -127,7 +135,9 @@ export class IntelligentRecommendationService {
     const leadTimeDays = this.getLeadTimeForMaterial(material);
     const leadTimeHours = leadTimeDays * 24;
     const safetyStock = this.calculateSafetyStock(material, consumptionRate);
-    const recommendedQuantity = Math.ceil((consumptionRate * leadTimeHours) + safetyStock);
+    const recommendedQuantity = Math.ceil(
+      consumptionRate * leadTimeHours + safetyStock,
+    );
 
     let urgencyLevel: 'critical' | 'warning' | 'info' = 'info';
     let message = '';
@@ -163,7 +173,9 @@ export class IntelligentRecommendationService {
     };
   }
 
-  async getAllAutoOrderMaterials(siteId?: string): Promise<AutoOrderRecommendation[]> {
+  async getAllAutoOrderMaterials(
+    siteId?: string,
+  ): Promise<AutoOrderRecommendation[]> {
     const filter: any = { status: 'active' };
     if (siteId && Types.ObjectId.isValid(siteId)) {
       const siteObjId = new Types.ObjectId(siteId);
@@ -196,19 +208,30 @@ export class IntelligentRecommendationService {
     return this.DEFAULT_LEAD_TIME_DAYS;
   }
 
-  private calculateSafetyStock(material: Material, consumptionRate: number): number {
+  private calculateSafetyStock(
+    material: Material,
+    consumptionRate: number,
+  ): number {
     const dailyConsumption = consumptionRate * 24;
     const safetyStock = Math.ceil(dailyConsumption * this.SAFETY_STOCK_FACTOR);
     if (material.maximumStock > 0) {
-      return Math.max(0, Math.min(safetyStock, material.maximumStock - material.quantity));
+      return Math.max(
+        0,
+        Math.min(safetyStock, material.maximumStock - material.quantity),
+      );
     }
     return safetyStock;
   }
 
-  async suggestSuppliers(materialId: string, siteCoordinates?: { latitude: number; longitude: number }): Promise<SupplierSuggestion[]> {
+  async suggestSuppliers(
+    materialId: string,
+    siteCoordinates?: { latitude: number; longitude: number },
+  ): Promise<SupplierSuggestion[]> {
     try {
-      this.logger.log(`🔍 Recherche de fournisseurs pour matériau ${materialId} depuis MongoDB smartsite-fournisseurs`);
-      
+      this.logger.log(
+        `🔍 Recherche de fournisseurs pour matériau ${materialId} depuis MongoDB smartsite-fournisseurs`,
+      );
+
       const material = await this.materialModel.findById(materialId).exec();
       if (!material) {
         this.logger.warn(`❌ Matériau ${materialId} non trouvé`);
@@ -221,7 +244,9 @@ export class IntelligentRecommendationService {
       }
 
       if (!this.suppliersCollection) {
-        this.logger.error('❌ Impossible de se connecter à MongoDB fournisseurs');
+        this.logger.error(
+          '❌ Impossible de se connecter à MongoDB fournisseurs',
+        );
         return this.getFallbackSuppliers();
       }
 
@@ -230,7 +255,9 @@ export class IntelligentRecommendationService {
         .find({ $or: [{ isActive: true }, { isActive: { $exists: false } }] })
         .toArray();
 
-      this.logger.log(`✅ ${suppliers.length} fournisseurs trouvés dans MongoDB smartsite-fournisseurs`);
+      this.logger.log(
+        `✅ ${suppliers.length} fournisseurs trouvés dans MongoDB smartsite-fournisseurs`,
+      );
 
       if (suppliers.length === 0) {
         this.logger.warn('⚠️ Aucun fournisseur trouvé dans MongoDB');
@@ -238,11 +265,12 @@ export class IntelligentRecommendationService {
       }
 
       // Convertir en format SupplierSuggestion
-      const suggestions: SupplierSuggestion[] = suppliers.map(supplier => {
+      const suggestions: SupplierSuggestion[] = suppliers.map((supplier) => {
         const suggestion: SupplierSuggestion = {
           supplierId: String(supplier._id) || 'unknown',
           supplierName: supplier.nom,
-          estimatedDeliveryDays: supplier.delaiLivraison || this.DEFAULT_LEAD_TIME_DAYS,
+          estimatedDeliveryDays:
+            supplier.delaiLivraison || this.DEFAULT_LEAD_TIME_DAYS,
           isPreferred: false, // TODO: Vérifier si dans material.preferredSuppliers
           telephone: supplier.telephone,
           email: supplier.email,
@@ -254,12 +282,16 @@ export class IntelligentRecommendationService {
         };
 
         // Calculer la distance si les coordonnées du site et du fournisseur sont disponibles
-        if (siteCoordinates && supplier.coordonnees?.latitude && supplier.coordonnees?.longitude) {
+        if (
+          siteCoordinates &&
+          supplier.coordonnees?.latitude &&
+          supplier.coordonnees?.longitude
+        ) {
           const distance = this.calculateDistance(
             siteCoordinates.latitude,
             siteCoordinates.longitude,
             supplier.coordonnees.latitude,
-            supplier.coordonnees.longitude
+            supplier.coordonnees.longitude,
           );
           (suggestion as any).distance = Math.round(distance * 100) / 100; // Arrondir à 2 décimales
         }
@@ -274,29 +306,43 @@ export class IntelligentRecommendationService {
           const distanceB = (b as any).distance || 999999;
           return distanceA - distanceB;
         });
-        this.logger.log(`📍 Fournisseurs triés par distance depuis les coordonnées du site (${siteCoordinates.latitude}, ${siteCoordinates.longitude})`);
+        this.logger.log(
+          `📍 Fournisseurs triés par distance depuis les coordonnées du site (${siteCoordinates.latitude}, ${siteCoordinates.longitude})`,
+        );
       } else {
         suggestions.sort((a, b) => (b.evaluation || 0) - (a.evaluation || 0));
         this.logger.log('⭐ Fournisseurs triés par évaluation');
       }
 
-      this.logger.log(`✅ ${suggestions.length} suggestions de fournisseurs générées depuis MongoDB`);
+      this.logger.log(
+        `✅ ${suggestions.length} suggestions de fournisseurs générées depuis MongoDB`,
+      );
       return suggestions.slice(0, 10); // Limiter à 10 fournisseurs
     } catch (error) {
-      this.logger.error(`❌ Erreur lors de la récupération des fournisseurs depuis MongoDB:`, error);
+      this.logger.error(
+        `❌ Erreur lors de la récupération des fournisseurs depuis MongoDB:`,
+        error,
+      );
       return this.getFallbackSuppliers();
     }
   }
 
   // Calcul de distance en utilisant la formule de Haversine
-  private calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  private calculateDistance(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+  ): number {
     const R = 6371; // Rayon de la Terre en kilomètres
     const dLat = this.toRadians(lat2 - lat1);
     const dLon = this.toRadians(lon2 - lon1);
-    const a = 
+    const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(this.toRadians(lat1)) * Math.cos(this.toRadians(lat2)) * 
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      Math.cos(this.toRadians(lat1)) *
+        Math.cos(this.toRadians(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c; // Distance en kilomètres
   }
@@ -306,18 +352,20 @@ export class IntelligentRecommendationService {
   }
 
   private getFallbackSuppliers(): SupplierSuggestion[] {
-    return [{
-      supplierId: 'fallback-1',
-      supplierName: 'Fournisseur par défaut (MongoDB non disponible)',
-      estimatedDeliveryDays: this.DEFAULT_LEAD_TIME_DAYS,
-      isPreferred: false,
-      telephone: 'N/A',
-      email: 'contact@default.com',
-      adresse: 'Adresse non disponible',
-      ville: 'Ville non disponible',
-      specialites: ['Général'],
-      evaluation: 3,
-    }];
+    return [
+      {
+        supplierId: 'fallback-1',
+        supplierName: 'Fournisseur par défaut (MongoDB non disponible)',
+        estimatedDeliveryDays: this.DEFAULT_LEAD_TIME_DAYS,
+        isPreferred: false,
+        telephone: 'N/A',
+        email: 'contact@default.com',
+        adresse: 'Adresse non disponible',
+        ville: 'Ville non disponible',
+        specialites: ['Général'],
+        evaluation: 3,
+      },
+    ];
   }
 
   // Propriété pour compatibilité avec le contrôleur
@@ -328,28 +376,31 @@ export class IntelligentRecommendationService {
           await this.initializeSupplierConnection();
         }
         if (!this.suppliersCollection) return 0;
-        
-        return await this.suppliersCollection.countDocuments({ 
-          $or: [{ isActive: true }, { isActive: { $exists: false } }] 
+
+        return await this.suppliersCollection.countDocuments({
+          $or: [{ isActive: true }, { isActive: { $exists: false } }],
         });
       } catch (error) {
         this.logger.error('Erreur lors du comptage des fournisseurs:', error);
         return 0;
       }
     },
-    
+
     findAll: async (): Promise<SupplierDocument[]> => {
       try {
         if (!this.suppliersCollection) {
           await this.initializeSupplierConnection();
         }
         if (!this.suppliersCollection) return [];
-        
+
         return await this.suppliersCollection
           .find({ $or: [{ isActive: true }, { isActive: { $exists: false } }] })
           .toArray();
       } catch (error) {
-        this.logger.error('Erreur lors de la récupération des fournisseurs:', error);
+        this.logger.error(
+          'Erreur lors de la récupération des fournisseurs:',
+          error,
+        );
         return [];
       }
     },

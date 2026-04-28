@@ -32,7 +32,7 @@ function getCorsOrigins(): string[] {
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(MaterialsModule);
-  
+
   // Créer tous les dossiers nécessaires
   const uploadsDirs = [
     join(process.cwd(), 'uploads', 'qrcodes'),
@@ -41,20 +41,22 @@ async function bootstrap() {
     join(process.cwd(), 'uploads', 'imports'),
     join(process.cwd(), 'exports'),
   ];
-  
+
   for (const dir of uploadsDirs) {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
       console.log(`📁 Dossier créé: ${dir}`);
     }
   }
-  
+
   app.useStaticAssets(join(process.cwd(), 'uploads'), {
     prefix: '/uploads/',
   });
-  
-  console.log(`📁 Dossier statique monté: ${join(process.cwd(), 'uploads')} -> /uploads/`);
-  
+
+  console.log(
+    `📁 Dossier statique monté: ${join(process.cwd(), 'uploads')} -> /uploads/`,
+  );
+
   const corsOrigins = getCorsOrigins();
   app.enableCors({
     origin: corsOrigins,
@@ -62,23 +64,25 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   });
-  
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: false,
-    transform: true,
-    forbidNonWhitelisted: false,
-    transformOptions: {
-      enableImplicitConversion: true,
-    },
-    disableErrorMessages: false,
-  }));
-  
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: false,
+      transform: true,
+      forbidNonWhitelisted: false,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+      disableErrorMessages: false,
+    }),
+  );
+
   app.setGlobalPrefix('api');
-  
+
   const port = process.env.PORT || 3002;
-  
+
   await app.listen(port);
-  
+
   console.log('\n🚀 Materials Service démarré avec succès !');
   console.log('===========================================');
   console.log(`✅ Service: http://localhost:${port}/api`);

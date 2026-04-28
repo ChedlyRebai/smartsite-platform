@@ -1,4 +1,9 @@
-import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { SupplierRating } from '../entities/supplier-rating.entity';
@@ -35,7 +40,8 @@ export class SupplierRatingService {
   private readonly logger = new Logger(SupplierRatingService.name);
 
   constructor(
-    @InjectModel(SupplierRating.name) private ratingModel: Model<SupplierRating>,
+    @InjectModel(SupplierRating.name)
+    private ratingModel: Model<SupplierRating>,
     @InjectModel(Material.name) private materialModel: Model<Material>,
   ) {}
 
@@ -43,12 +49,16 @@ export class SupplierRatingService {
    * 📝 Créer un rating pour un fournisseur
    */
   async createRating(createDto: CreateRatingDto): Promise<SupplierRating> {
-    this.logger.log(`📝 Création rating: supplier=${createDto.supplierId}, avis=${createDto.avis}`);
+    this.logger.log(
+      `📝 Création rating: supplier=${createDto.supplierId}, avis=${createDto.avis}`,
+    );
 
     // Vérifier que le matériau existe
     const material = await this.materialModel.findById(createDto.materialId);
     if (!material) {
-      throw new NotFoundException(`Matériau #${createDto.materialId} non trouvé`);
+      throw new NotFoundException(
+        `Matériau #${createDto.materialId} non trouvé`,
+      );
     }
 
     // Vérifier que la note est valide
@@ -73,7 +83,7 @@ export class SupplierRatingService {
       existing.reclamationDescription = createDto.reclamationDescription;
       existing.consumptionPercentage = createDto.consumptionPercentage;
       existing.ratingDate = new Date();
-      
+
       await existing.save();
       this.logger.log(`✅ Rating mis à jour: ${existing._id}`);
       return existing;
@@ -127,9 +137,9 @@ export class SupplierRatingService {
       };
     }
 
-    const positifs = ratings.filter(r => r.avis === 'POSITIF').length;
-    const negatifs = ratings.filter(r => r.avis === 'NEGATIF').length;
-    const reclamations = ratings.filter(r => r.hasReclamation).length;
+    const positifs = ratings.filter((r) => r.avis === 'POSITIF').length;
+    const negatifs = ratings.filter((r) => r.avis === 'NEGATIF').length;
+    const reclamations = ratings.filter((r) => r.hasReclamation).length;
     const totalNotes = ratings.reduce((sum, r) => sum + r.note, 0);
     const averageNote = totalNotes / ratings.length;
     const tauxSatisfaction = (positifs / ratings.length) * 100;
@@ -165,10 +175,7 @@ export class SupplierRatingService {
       query.status = status;
     }
 
-    return this.ratingModel
-      .find(query)
-      .sort({ ratingDate: -1 })
-      .exec();
+    return this.ratingModel.find(query).sort({ ratingDate: -1 }).exec();
   }
 
   /**
@@ -190,7 +197,10 @@ export class SupplierRatingService {
   /**
    * 🔍 Vérifier si un rating est nécessaire pour un matériau
    */
-  async checkIfRatingNeeded(materialId: string, userId: string): Promise<{
+  async checkIfRatingNeeded(
+    materialId: string,
+    userId: string,
+  ): Promise<{
     needed: boolean;
     consumptionPercentage: number;
     material?: Material;
@@ -202,10 +212,12 @@ export class SupplierRatingService {
     }
 
     // Calculer le % de consommation
-    const totalInitial = (material.stockExistant || 0) + (material.stockEntree || 0);
-    const consumptionPercentage = totalInitial > 0 
-      ? Math.round(((material.stockSortie || 0) / totalInitial) * 100) 
-      : 0;
+    const totalInitial =
+      (material.stockExistant || 0) + (material.stockEntree || 0);
+    const consumptionPercentage =
+      totalInitial > 0
+        ? Math.round(((material.stockSortie || 0) / totalInitial) * 100)
+        : 0;
 
     // Vérifier si déjà noté par cet utilisateur
     const existingRating = await this.ratingModel.findOne({
@@ -234,7 +246,11 @@ export class SupplierRatingService {
     totalReclamations: number;
     averageNote: number;
     tauxSatisfactionGlobal: number;
-    topSuppliers: Array<{ supplierId: string; supplierName: string; note: number }>;
+    topSuppliers: Array<{
+      supplierId: string;
+      supplierName: string;
+      note: number;
+    }>;
   }> {
     const allRatings = await this.ratingModel.find().exec();
 
@@ -248,16 +264,19 @@ export class SupplierRatingService {
       };
     }
 
-    const totalReclamations = allRatings.filter(r => r.hasReclamation).length;
+    const totalReclamations = allRatings.filter((r) => r.hasReclamation).length;
     const totalNotes = allRatings.reduce((sum, r) => sum + r.note, 0);
     const averageNote = totalNotes / allRatings.length;
-    const positifs = allRatings.filter(r => r.avis === 'POSITIF').length;
+    const positifs = allRatings.filter((r) => r.avis === 'POSITIF').length;
     const tauxSatisfactionGlobal = (positifs / allRatings.length) * 100;
 
     // Calculer le top 5 des fournisseurs
-    const supplierMap = new Map<string, { name: string; notes: number[]; count: number }>();
-    
-    allRatings.forEach(rating => {
+    const supplierMap = new Map<
+      string,
+      { name: string; notes: number[]; count: number }
+    >();
+
+    allRatings.forEach((rating) => {
       const id = rating.supplierId.toString();
       if (!supplierMap.has(id)) {
         supplierMap.set(id, { name: rating.supplierName, notes: [], count: 0 });
@@ -271,7 +290,10 @@ export class SupplierRatingService {
       .map(([id, data]) => ({
         supplierId: id,
         supplierName: data.name,
-        note: Math.round((data.notes.reduce((a, b) => a + b, 0) / data.count) * 10) / 10,
+        note:
+          Math.round(
+            (data.notes.reduce((a, b) => a + b, 0) / data.count) * 10,
+          ) / 10,
       }))
       .sort((a, b) => b.note - a.note)
       .slice(0, 5);

@@ -15,12 +15,15 @@ import { Logger } from '@nestjs/common';
   },
   namespace: 'materials',
 })
-export class MaterialsGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class MaterialsGateway
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server: Server;
 
   private logger = new Logger(MaterialsGateway.name);
-  private connectedClients: Map<string, { socketId: string; userId: string }> = new Map();
+  private connectedClients: Map<string, { socketId: string; userId: string }> =
+    new Map();
 
   async handleConnection(client: Socket) {
     try {
@@ -28,10 +31,10 @@ export class MaterialsGateway implements OnGatewayConnection, OnGatewayDisconnec
         socketId: client.id,
         userId: 'anonymous',
       });
-      
+
       client.join('materials-room');
       this.logger.log(`Client connected: ${client.id}`);
-      
+
       client.emit('connected', { message: 'Connected to materials service' });
     } catch (error) {
       client.disconnect();
@@ -70,7 +73,7 @@ export class MaterialsGateway implements OnGatewayConnection, OnGatewayDisconnec
 
   emitAlert(alert: any) {
     this.server.to('materials-room').emit('stockAlert', alert);
-    
+
     if (alert.severity === 'high') {
       this.server.to('managers-room').emit('criticalAlert', alert);
     }

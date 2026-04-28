@@ -3,7 +3,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 export class QRGeneratorUtil {
-  static async generateAndSaveQRCode(data: any, code: string): Promise<{ filePath: string; url: string; dataURL: string }> {
+  static async generateAndSaveQRCode(
+    data: any,
+    code: string,
+  ): Promise<{ filePath: string; url: string; dataURL: string }> {
     try {
       const uploadDir = process.env.UPLOAD_PATH || './uploads/qrcodes';
       if (!fs.existsSync(uploadDir)) {
@@ -12,24 +15,24 @@ export class QRGeneratorUtil {
 
       const fileName = `qr-${code}-${Date.now()}.png`;
       const filePath = path.join(uploadDir, fileName);
-      
+
       const qrData = JSON.stringify({
         id: data.id || '',
         code: data.code,
         name: data.name,
-        type: 'material'
+        type: 'material',
       });
 
       const dataURL = await QRCode.toDataURL(qrData);
-      
+
       await QRCode.toFile(filePath, qrData, {
         type: 'png',
         width: 300,
         margin: 2,
         color: {
           dark: '#000000',
-          light: '#ffffff'
-        }
+          light: '#ffffff',
+        },
       });
 
       const url = `/uploads/qrcodes/${fileName}`;

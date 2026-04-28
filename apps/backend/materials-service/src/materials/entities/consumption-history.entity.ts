@@ -67,7 +67,12 @@ export class ConsumptionHistory extends Document {
   @Prop({ required: true, min: 0 })
   quantity: number;
 
-  @Prop({ type: String, enum: Object.values(FlowType), required: true, index: true })
+  @Prop({
+    type: String,
+    enum: Object.values(FlowType),
+    required: true,
+    index: true,
+  })
   flowType: FlowType;
 
   // Analyse d'anomalie
@@ -77,10 +82,19 @@ export class ConsumptionHistory extends Document {
   @Prop({ default: 0, min: 0, max: 100 })
   anomalyScore: number;
 
-  @Prop({ type: String, enum: Object.values(AnomalyType), default: AnomalyType.NONE, index: true })
+  @Prop({
+    type: String,
+    enum: Object.values(AnomalyType),
+    default: AnomalyType.NONE,
+    index: true,
+  })
   anomalyType: AnomalyType;
 
-  @Prop({ type: String, enum: Object.values(AnomalySeverity), default: AnomalySeverity.NONE })
+  @Prop({
+    type: String,
+    enum: Object.values(AnomalySeverity),
+    default: AnomalySeverity.NONE,
+  })
   anomalySeverity: AnomalySeverity;
 
   // Stock au moment de l'événement
@@ -111,7 +125,8 @@ export class ConsumptionHistory extends Document {
   projectId: string;
 }
 
-export const ConsumptionHistorySchema = SchemaFactory.createForClass(ConsumptionHistory);
+export const ConsumptionHistorySchema =
+  SchemaFactory.createForClass(ConsumptionHistory);
 
 // Index composés pour optimiser les requêtes
 ConsumptionHistorySchema.index({ materialId: 1, date: -1 });

@@ -21,36 +21,99 @@ export interface MessageAnalysisResult {
 // Mots d'agression directe (améliorés)
 const ANGER_WORDS = [
   // Anglais
-  'angry', 'anger', 'furious', 'rage', 'mad', 'outraged', 'pissed',
-  'shit', 'fuck', 'damn', 'hell', 'crap', 'ass', 'bastard', 'bitch',
-  'idiot', 'stupid', 'moron', 'hate', 'kill', 'destroy', 'die',
+  'angry',
+  'anger',
+  'furious',
+  'rage',
+  'mad',
+  'outraged',
+  'pissed',
+  'shit',
+  'fuck',
+  'damn',
+  'hell',
+  'crap',
+  'ass',
+  'bastard',
+  'bitch',
+  'idiot',
+  'stupid',
+  'moron',
+  'hate',
+  'kill',
+  'destroy',
+  'die',
   // Français
-  'merde', 'putain', 'con', 'connard', 'connasse', 'idiot', 'imbécile',
-  'nul', 'naze', 'crétin', 'abruti', 'salaud', 'enfoiré', 'salope',
-  'chier', 'foutre', 'bordel', 'crever', 'tuer'
+  'merde',
+  'putain',
+  'con',
+  'connard',
+  'connasse',
+  'idiot',
+  'imbécile',
+  'nul',
+  'naze',
+  'crétin',
+  'abruti',
+  'salaud',
+  'enfoiré',
+  'salope',
+  'chier',
+  'foutre',
+  'bordel',
+  'crever',
+  'tuer',
 ];
 
 // Expressions de frustration (améliorées)
 const FRUSTRATION_WORDS = [
   // Anglais
-  'bad', 'terrible', 'horrible', 'awful', 'worst', 'useless', 'pathetic',
-  'ridiculous', 'unacceptable', 'disgusting', 'disappointed', 'frustrated',
-  'annoyed', 'fed up', 'sick of', 'tired of', 'enough', 'stop',
+  'bad',
+  'terrible',
+  'horrible',
+  'awful',
+  'worst',
+  'useless',
+  'pathetic',
+  'ridiculous',
+  'unacceptable',
+  'disgusting',
+  'disappointed',
+  'frustrated',
+  'annoyed',
+  'fed up',
+  'sick of',
+  'tired of',
+  'enough',
+  'stop',
   // Français
-  'mauvais', 'nul', 'horrible', 'inacceptable', 'décevant', 'frustrant',
-  'agaçant', 'énervant', 'catastrophique', 'lamentable', 'pitoyable',
-  'marre', 'assez', 'stop', 'arrête', 'arrêtez'
+  'mauvais',
+  'nul',
+  'horrible',
+  'inacceptable',
+  'décevant',
+  'frustrant',
+  'agaçant',
+  'énervant',
+  'catastrophique',
+  'lamentable',
+  'pitoyable',
+  'marre',
+  'assez',
+  'stop',
+  'arrête',
+  'arrêtez',
 ];
 
 // Patterns de ponctuation agressive (améliorés)
 const AGGRESSIVE_PATTERNS = [
-  /!{2,}/,        // !! ou !!!
-  /\?{2,}/,       // ?? ou ???
-  /[A-Z]{4,}/,    // TOUT EN MAJUSCULES (4+ lettres)
-  /:\(/,          // :(
-  />:\(/,         // >:(
+  /!{2,}/, // !! ou !!!
+  /\?{2,}/, // ?? ou ???
+  /[A-Z]{4,}/, // TOUT EN MAJUSCULES (4+ lettres)
+  /:\(/, // :(
+  />:\(/, // >:(
   /\b[A-Z]+\s+[A-Z]+\b/, // MOTS EN MAJUSCULES
-  /\.{3,}/,       // ... (frustration)
+  /\.{3,}/, // ... (frustration)
 ];
 
 @Injectable()
@@ -61,26 +124,37 @@ export class AiMessageAnalyzerService {
   constructor(private configService: ConfigService) {
     const apiKey = this.configService.get<string>('OPENAI_API_KEY');
     if (!apiKey) {
-      this.logger.warn('⚠️ OpenAI API key not configured. AI message analysis will be disabled.');
+      this.logger.warn(
+        '⚠️ OpenAI API key not configured. AI message analysis will be disabled.',
+      );
     } else {
       this.openai = new OpenAI({ apiKey });
       this.logger.log('✅ AI Message Analyzer initialized');
     }
   }
 
-  async analyzeMessage(message: string, senderRole: string): Promise<MessageAnalysisResult> {
-    this.logger.log(`🔍 Analyzing message: "${message.substring(0, 50)}..." (role: ${senderRole})`);
-    
+  async analyzeMessage(
+    message: string,
+    senderRole: string,
+  ): Promise<MessageAnalysisResult> {
+    this.logger.log(
+      `🔍 Analyzing message: "${message.substring(0, 50)}..." (role: ${senderRole})`,
+    );
+
     if (!this.openai) {
-      this.logger.warn('⚠️ OpenAI not available, using enhanced local analysis');
+      this.logger.warn(
+        '⚠️ OpenAI not available, using enhanced local analysis',
+      );
       return this.getEnhancedLocalAnalysis(message);
     }
 
     // 🔥 ÉTAPE 1: Détection de mots négatifs (PRIORITAIRE)
     const wordDetection = this.detectNegativeWords(message);
     if (wordDetection.detected) {
-      this.logger.log(`✅ Negative words detected: ${wordDetection.emotion} (confidence: ${wordDetection.confidence}%)`);
-      
+      this.logger.log(
+        `✅ Negative words detected: ${wordDetection.emotion} (confidence: ${wordDetection.confidence}%)`,
+      );
+
       if (wordDetection.emotion === 'angry') {
         const improvedMessage = await this.generateImprovedMessage(message);
         return {
@@ -123,7 +197,9 @@ export class AiMessageAnalyzerService {
     // 🔥 ÉTAPE 2: Détection d'émojis (améliorée)
     const emojiDetection = this.detectEmojiEmotion(message);
     if (emojiDetection) {
-      this.logger.log(`✅ Emoji detected: ${emojiDetection.emotion} (confidence: ${emojiDetection.confidence}%)`);
+      this.logger.log(
+        `✅ Emoji detected: ${emojiDetection.emotion} (confidence: ${emojiDetection.confidence}%)`,
+      );
       const improvedMessage = await this.generateImprovedMessage(message);
       return {
         status: emojiDetection.emotion === 'angry' ? 'CONFLICT' : 'WARNING',
@@ -136,9 +212,10 @@ export class AiMessageAnalyzerService {
         allow_send: emojiDetection.emotion !== 'angry',
         show_suggestion: true,
         improved_message: improvedMessage,
-        ui_message: emojiDetection.emotion === 'angry' 
-          ? 'Émotion de colère détectée. Veuillez reformuler votre message de manière professionnelle.'
-          : 'Frustration détectée. Voulez-vous envoyer une version plus calme ?',
+        ui_message:
+          emojiDetection.emotion === 'angry'
+            ? 'Émotion de colère détectée. Veuillez reformuler votre message de manière professionnelle.'
+            : 'Frustration détectée. Voulez-vous envoyer une version plus calme ?',
         confidence: emojiDetection.confidence,
         explanation: `Emoji de ${emojiDetection.emotion === 'angry' ? 'colère' : 'frustration'} détecté dans le message`,
       };
@@ -171,45 +248,58 @@ export class AiMessageAnalyzerService {
   /**
    * 🔥 AMÉLIORATION: Détection de mots négatifs plus précise
    */
-  private detectNegativeWords(content: string): { 
-    detected: boolean; 
-    emotion: 'angry' | 'frustrated' | null; 
-    matchedWords: string[]; 
-    confidence: number 
+  private detectNegativeWords(content: string): {
+    detected: boolean;
+    emotion: 'angry' | 'frustrated' | null;
+    matchedWords: string[];
+    confidence: number;
   } {
     const lowerMessage = content.toLowerCase();
     const words = lowerMessage.split(/\s+/);
 
     // Vérifier mots de colère (priorité haute) - recherche exacte uniquement
-    const angerMatches = ANGER_WORDS.filter(word => {
+    const angerMatches = ANGER_WORDS.filter((word) => {
       // Recherche exacte dans les mots ou dans le message complet
-      return words.some(w => {
-        const cleanWord = w.replace(/[^a-zàâäéèêëïîôöùûüÿç]/g, '');
-        return cleanWord === word;
-      }) || lowerMessage.includes(` ${word} `) || lowerMessage.startsWith(`${word} `) || lowerMessage.endsWith(` ${word}`);
+      return (
+        words.some((w) => {
+          const cleanWord = w.replace(/[^a-zàâäéèêëïîôöùûüÿç]/g, '');
+          return cleanWord === word;
+        }) ||
+        lowerMessage.includes(` ${word} `) ||
+        lowerMessage.startsWith(`${word} `) ||
+        lowerMessage.endsWith(` ${word}`)
+      );
     });
 
     // Vérifier mots de frustration - recherche exacte uniquement
-    const frustrationMatches = FRUSTRATION_WORDS.filter(word => {
-      return words.some(w => {
-        const cleanWord = w.replace(/[^a-zàâäéèêëïîôöùûüÿç]/g, '');
-        return cleanWord === word;
-      }) || lowerMessage.includes(` ${word} `) || lowerMessage.startsWith(`${word} `) || lowerMessage.endsWith(` ${word}`);
+    const frustrationMatches = FRUSTRATION_WORDS.filter((word) => {
+      return (
+        words.some((w) => {
+          const cleanWord = w.replace(/[^a-zàâäéèêëïîôöùûüÿç]/g, '');
+          return cleanWord === word;
+        }) ||
+        lowerMessage.includes(` ${word} `) ||
+        lowerMessage.startsWith(`${word} `) ||
+        lowerMessage.endsWith(` ${word}`)
+      );
     });
 
     // Vérifier patterns agressifs
-    const patternMatches = AGGRESSIVE_PATTERNS.filter(pattern => pattern.test(content));
+    const patternMatches = AGGRESSIVE_PATTERNS.filter((pattern) =>
+      pattern.test(content),
+    );
 
     // Calculer le score de colère
-    const angerScore = angerMatches.length * 20 + (patternMatches.length * 10);
-    const frustrationScore = frustrationMatches.length * 15 + (patternMatches.length * 5);
+    const angerScore = angerMatches.length * 20 + patternMatches.length * 10;
+    const frustrationScore =
+      frustrationMatches.length * 15 + patternMatches.length * 5;
 
     if (angerMatches.length > 0) {
       return {
         detected: true,
         emotion: 'angry',
         matchedWords: angerMatches,
-        confidence: Math.min(95, 70 + angerScore)
+        confidence: Math.min(95, 70 + angerScore),
       };
     }
 
@@ -217,8 +307,11 @@ export class AiMessageAnalyzerService {
       return {
         detected: true,
         emotion: 'frustrated',
-        matchedWords: [...frustrationMatches, ...patternMatches.map(p => 'pattern')],
-        confidence: Math.min(90, 60 + frustrationScore)
+        matchedWords: [
+          ...frustrationMatches,
+          ...patternMatches.map((p) => 'pattern'),
+        ],
+        confidence: Math.min(90, 60 + frustrationScore),
       };
     }
 
@@ -228,7 +321,9 @@ export class AiMessageAnalyzerService {
   /**
    * 🔥 NOUVELLE FONCTION: Génération de message amélioré
    */
-  private async generateImprovedMessage(originalMessage: string): Promise<string> {
+  private async generateImprovedMessage(
+    originalMessage: string,
+  ): Promise<string> {
     if (!this.openai) {
       return 'Veuillez reformuler votre message de manière professionnelle.';
     }
@@ -237,15 +332,22 @@ export class AiMessageAnalyzerService {
       const response = await this.openai.chat.completions.create({
         model: 'gpt-4o-mini',
         max_tokens: 100,
-        messages: [{
-          role: 'user',
-          content: `Reformule ce message de manière professionnelle et neutre pour un contexte professionnel de gestion de chantier: "${originalMessage}". Réponds uniquement avec le message reformulé, sans explication.`
-        }]
+        messages: [
+          {
+            role: 'user',
+            content: `Reformule ce message de manière professionnelle et neutre pour un contexte professionnel de gestion de chantier: "${originalMessage}". Réponds uniquement avec le message reformulé, sans explication.`,
+          },
+        ],
       });
 
-      return response.choices[0].message.content?.trim() || 'Veuillez reformuler votre message de manière professionnelle.';
+      return (
+        response.choices[0].message.content?.trim() ||
+        'Veuillez reformuler votre message de manière professionnelle.'
+      );
     } catch (error) {
-      this.logger.error(`❌ Failed to generate improved message: ${error.message}`);
+      this.logger.error(
+        `❌ Failed to generate improved message: ${error.message}`,
+      );
       return 'Veuillez reformuler votre message de manière professionnelle.';
     }
   }
@@ -253,12 +355,41 @@ export class AiMessageAnalyzerService {
   /**
    * 🔥 AMÉLIORATION: Détection d'émojis de colère et frustration plus précise
    */
-  private detectEmojiEmotion(content: string): { emotion: 'angry' | 'frustrated'; confidence: number } | null {
+  private detectEmojiEmotion(
+    content: string,
+  ): { emotion: 'angry' | 'frustrated'; confidence: number } | null {
     // Émojis de COLÈRE (émotion forte) - élargi
-    const angerEmojis = ['😠', '🤬', '👿', '😤', '😡', '💢', '🗯️', '🔴', '🤯', '👺', '😾', '🙅‍♂️', '🙅‍♀️'];
-    
+    const angerEmojis = [
+      '😠',
+      '🤬',
+      '👿',
+      '😤',
+      '😡',
+      '💢',
+      '🗯️',
+      '🔴',
+      '🤯',
+      '👺',
+      '😾',
+      '🙅‍♂️',
+      '🙅‍♀️',
+    ];
+
     // Émojis de FRUSTRATION (émotion modérée) - élargi
-    const frustrationEmojis = ['😩', '😫', '😒', '🙄', '😑', '🤦', '🤦‍♂️', '🤦‍♀️', '😮‍💨', '😤', '🤷‍♂️', '🤷‍♀️'];
+    const frustrationEmojis = [
+      '😩',
+      '😫',
+      '😒',
+      '🙄',
+      '😑',
+      '🤦',
+      '🤦‍♂️',
+      '🤦‍♀️',
+      '😮‍💨',
+      '😤',
+      '🤷‍♂️',
+      '🤷‍♀️',
+    ];
 
     // Compter les occurrences pour plus de précision
     let angerCount = 0;
@@ -276,17 +407,17 @@ export class AiMessageAnalyzerService {
 
     // Prioriser la colère si détectée
     if (angerCount > 0) {
-      return { 
-        emotion: 'angry', 
-        confidence: Math.min(98, 85 + (angerCount * 5)) 
+      return {
+        emotion: 'angry',
+        confidence: Math.min(98, 85 + angerCount * 5),
       };
     }
 
     // Ensuite la frustration
     if (frustrationCount > 0) {
-      return { 
-        emotion: 'frustrated', 
-        confidence: Math.min(95, 80 + (frustrationCount * 5)) 
+      return {
+        emotion: 'frustrated',
+        confidence: Math.min(95, 80 + frustrationCount * 5),
       };
     }
 
@@ -427,7 +558,8 @@ Analyze this message and return the JSON response.`;
         escalation_risk: 'high',
         allow_send: false,
         show_suggestion: true,
-        improved_message: 'Veuillez reformuler votre message de manière professionnelle.',
+        improved_message:
+          'Veuillez reformuler votre message de manière professionnelle.',
         ui_message: 'Message inapproprié détecté. Veuillez reformuler.',
         confidence: wordDetection.confidence,
         explanation: `Analyse locale - Mots inappropriés: ${wordDetection.matchedWords.join(', ')}`,
@@ -445,7 +577,8 @@ Analyze this message and return the JSON response.`;
         escalation_risk: 'medium',
         allow_send: true,
         show_suggestion: true,
-        improved_message: 'Votre message pourrait être reformulé plus positivement.',
+        improved_message:
+          'Votre message pourrait être reformulé plus positivement.',
         ui_message: 'Tension détectée. Voulez-vous améliorer votre message ?',
         confidence: wordDetection.confidence,
         explanation: `Analyse locale - Expressions négatives: ${wordDetection.matchedWords.join(', ')}`,
@@ -463,10 +596,14 @@ Analyze this message and return the JSON response.`;
         escalation_risk: emojiDetection.emotion === 'angry' ? 'high' : 'medium',
         allow_send: emojiDetection.emotion !== 'angry',
         show_suggestion: true,
-        improved_message: message.replace(/[😠🤬👿😤😡💢🗯️🔴🤯👺😾🙅‍♂️🙅‍♀️😩😫😒🙄😑🤦🤦‍♂️🤦‍♀️😮‍💨🤷‍♂️🤷‍♀️]/g, ''),
-        ui_message: emojiDetection.emotion === 'angry' 
-          ? 'Émotion de colère détectée. Veuillez reformuler votre message de manière professionnelle.'
-          : 'Frustration détectée. Voulez-vous envoyer une version plus calme ?',
+        improved_message: message.replace(
+          /[😠🤬👿😤😡💢🗯️🔴🤯👺😾🙅‍♂️🙅‍♀️😩😫😒🙄😑🤦🤦‍♂️🤦‍♀️😮‍💨🤷‍♂️🤷‍♀️]/g,
+          '',
+        ),
+        ui_message:
+          emojiDetection.emotion === 'angry'
+            ? 'Émotion de colère détectée. Veuillez reformuler votre message de manière professionnelle.'
+            : 'Frustration détectée. Voulez-vous envoyer une version plus calme ?',
         confidence: emojiDetection.confidence,
         explanation: `Analyse locale - Emoji de ${emojiDetection.emotion === 'angry' ? 'colère' : 'frustration'} détecté`,
       };
@@ -495,20 +632,22 @@ Analyze this message and return the JSON response.`;
   async testEmotionDetection(): Promise<void> {
     const testMessages = [
       'Bonjour, comment allez-vous ?', // Normal
-      'C\'est vraiment nul ce service !', // Frustration
+      "C'est vraiment nul ce service !", // Frustration
       'Je suis très déçu de cette livraison', // Frustration
-      'Putain, c\'est de la merde !', // Colère
+      "Putain, c'est de la merde !", // Colère
       'Tu es vraiment con !', // Colère
       'Ça me saoule vraiment 😤', // Frustration avec emoji
       'Je suis furieux 😠🤬', // Colère avec emoji
-      'ARRÊTEZ DE FAIRE N\'IMPORTE QUOI !!!', // Colère (majuscules + ponctuation)
+      "ARRÊTEZ DE FAIRE N'IMPORTE QUOI !!!", // Colère (majuscules + ponctuation)
     ];
 
-    this.logger.log('🧪 Test de détection d\'émotions:');
-    
+    this.logger.log("🧪 Test de détection d'émotions:");
+
     for (const message of testMessages) {
       const result = await this.analyzeMessage(message, 'test');
-      this.logger.log(`📝 "${message}" → ${result.status} (${result.emotion}, ${result.confidence}%)`);
+      this.logger.log(
+        `📝 "${message}" → ${result.status} (${result.emotion}, ${result.confidence}%)`,
+      );
     }
   }
 }

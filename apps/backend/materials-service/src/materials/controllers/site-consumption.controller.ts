@@ -12,7 +12,10 @@ import {
   Logger,
 } from '@nestjs/common';
 import { SiteConsumptionService } from '../services/site-consumption.service';
-import { CreateMaterialRequirementDto, UpdateConsumptionDto } from '../dto/material-requirement.dto';
+import {
+  CreateMaterialRequirementDto,
+  UpdateConsumptionDto,
+} from '../dto/material-requirement.dto';
 
 @Controller('site-consumption')
 export class SiteConsumptionController {
@@ -23,7 +26,9 @@ export class SiteConsumptionController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async createRequirement(@Body() createDto: CreateMaterialRequirementDto) {
-    this.logger.log(`POST /site-consumption - creation pour site=${createDto.siteId}, material=${createDto.materialId}`);
+    this.logger.log(
+      `POST /site-consumption - creation pour site=${createDto.siteId}, material=${createDto.materialId}`,
+    );
     return this.consumptionService.createRequirement(createDto, null);
   }
 
@@ -34,8 +39,14 @@ export class SiteConsumptionController {
     @Param('materialId') materialId: string,
     @Body() updateDto: UpdateConsumptionDto,
   ) {
-    this.logger.log(`PUT /site-consumption/${siteId}/${materialId} - consommation=${updateDto.consumedQuantity}`);
-    return this.consumptionService.updateConsumption(siteId, materialId, updateDto);
+    this.logger.log(
+      `PUT /site-consumption/${siteId}/${materialId} - consommation=${updateDto.consumedQuantity}`,
+    );
+    return this.consumptionService.updateConsumption(
+      siteId,
+      materialId,
+      updateDto,
+    );
   }
 
   @Post(':siteId/:materialId/add')
@@ -45,8 +56,15 @@ export class SiteConsumptionController {
     @Param('materialId') materialId: string,
     @Body() body: { quantity: number; notes?: string },
   ) {
-    this.logger.log(`POST /site-consumption/${siteId}/${materialId}/add - +${body.quantity}`);
-    return this.consumptionService.addConsumption(siteId, materialId, body.quantity, body.notes);
+    this.logger.log(
+      `POST /site-consumption/${siteId}/${materialId}/add - +${body.quantity}`,
+    );
+    return this.consumptionService.addConsumption(
+      siteId,
+      materialId,
+      body.quantity,
+      body.notes,
+    );
   }
 
   @Get('site/:siteId')

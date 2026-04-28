@@ -1,7 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { ConsumptionHistory, FlowType, AnomalyType } from '../entities/consumption-history.entity';
+import {
+  ConsumptionHistory,
+  FlowType,
+  AnomalyType,
+} from '../entities/consumption-history.entity';
 import { Material } from '../entities/material.entity';
 
 export interface ConsumptionAnalysisReport {
@@ -27,7 +31,12 @@ export interface ConsumptionAnalysisReport {
 }
 
 export interface ConsumptionAlert {
-  type: 'NORMAL' | 'GASPILLAGE' | 'VOL_POSSIBLE' | 'OVER_CONSUMPTION' | 'ANOMALIE';
+  type:
+    | 'NORMAL'
+    | 'GASPILLAGE'
+    | 'VOL_POSSIBLE'
+    | 'OVER_CONSUMPTION'
+    | 'ANOMALIE';
   severity: 'INFO' | 'WARNING' | 'DANGER' | 'CRITICAL';
   message: string;
   date: Date;
@@ -41,7 +50,8 @@ export class ConsumptionAIAnalyzerService {
   private readonly logger = new Logger(ConsumptionAIAnalyzerService.name);
 
   constructor(
-    @InjectModel(ConsumptionHistory.name) private historyModel: Model<ConsumptionHistory>,
+    @InjectModel(ConsumptionHistory.name)
+    private historyModel: Model<ConsumptionHistory>,
     @InjectModel(Material.name) private materialModel: Model<Material>,
   ) {}
 
@@ -53,7 +63,9 @@ export class ConsumptionAIAnalyzerService {
     siteId: string,
     days: number = 30,
   ): Promise<ConsumptionAnalysisReport> {
-    this.logger.log(`🤖 Génération du rapport IA pour material=${materialId}, site=${siteId}, days=${days}`);
+    this.logger.log(
+      `🤖 Génération du rapport IA pour material=${materialId}, site=${siteId}, days=${days}`,
+    );
 
     const endDate = new Date();
     const startDate = new Date();
@@ -71,7 +83,9 @@ export class ConsumptionAIAnalyzerService {
       .exec();
 
     if (history.length === 0) {
-      throw new Error('Aucune donnée de consommation trouvée pour cette période');
+      throw new Error(
+        'Aucune donnée de consommation trouvée pour cette période',
+      );
     }
 
     // 2. Récupérer les infos du matériau
@@ -81,17 +95,25 @@ export class ConsumptionAIAnalyzerService {
     }
 
     // 3. Calculer les statistiques
-    const totalConsumption = history.reduce((sum, entry) => sum + entry.quantity, 0);
+    const totalConsumption = history.reduce(
+      (sum, entry) => sum + entry.quantity,
+      0,
+    );
     const averageDailyConsumption = totalConsumption / days;
 
     // 4. Calculer la consommation attendue (basée sur la moyenne historique)
-    const expectedConsumption = this.calculateExpectedConsumption(history, days);
-    const deviationPercentage = expectedConsumption > 0
-      ? ((totalConsumption - expectedConsumption) / expectedConsumption) * 100
-      : 0;
+    const expectedConsumption = this.calculateExpectedConsumption(
+      history,
+      days,
+    );
+    const deviationPercentage =
+      expectedConsumption > 0
+        ? ((totalConsumption - expectedConsumption) / expectedConsumption) * 100
+        : 0;
 
     // 5. Déterminer le statut de consommation
-    let consumptionStatus: 'NORMAL' | 'OVER_CONSUMPTION' | 'UNDER_CONSUMPTION' = 'NORMAL';
+    let consumptionStatus: 'NORMAL' | 'OVER_CONSUMPTION' | 'UNDER_CONSUMPTION' =
+      'NORMAL';
     if (deviationPercentage > 20) {
       consumptionStatus = 'OVER_CONSUMPTION';
     } else if (deviationPercentage < -20) {
@@ -110,10 +132,18 @@ export class ConsumptionAIAnalyzerService {
     );
 
     // 8. Évaluer le niveau de risque
-    const riskLevel = this.calculateRiskLevel(consumptionStatus, alerts, deviationPercentage);
+    const riskLevel = this.calculateRiskLevel(
+      consumptionStatus,
+      alerts,
+      deviationPercentage,
+    );
 
     // 9. Identifier les problèmes possibles
-    const possibleIssues = this.identifyPossibleIssues(alerts, deviationPercentage, history);
+    const possibleIssues = this.identifyPossibleIssues(
+      alerts,
+      deviationPercentage,
+      history,
+    );
 
     const report: ConsumptionAnalysisReport = {
       materialId,
@@ -137,20 +167,25 @@ export class ConsumptionAIAnalyzerService {
       possibleIssues,
     };
 
-    this.logger.log(`✅ Rapport généré: ${consumptionStatus}, risque=${riskLevel}, alertes=${alerts.length}`);
+    this.logger.log(
+      `✅ Rapport généré: ${consumptionStatus}, risque=${riskLevel}, alertes=${alerts.length}`,
+    );
     return report;
   }
 
   /**
    * Calcule la consommation attendue basée sur l'historique
    */
-  private calculateExpectedConsumption(history: ConsumptionHistory[], days: number): number {
+  private calculateExpectedConsumption(
+    history: ConsumptionHistory[],
+    days: number,
+  ): number {
     if (history.length === 0) return 0;
 
     // Utiliser la médiane pour éviter les valeurs aberrantes
-    const quantities = history.map(h => h.quantity).sort((a, b) => a - b);
+    const quantities = history.map((h) => h.quantity).sort((a, b) => a - b);
     const median = quantities[Math.floor(quantities.length / 2)];
-    
+
     return median * days;
   }
 
@@ -165,7 +200,9 @@ export class ConsumptionAIAnalyzerService {
     const threshold = averageDailyConsumption * 2; // Seuil: 2x la moyenne
 
     for (const entry of history) {
-      const deviation = ((entry.quantity - averageDailyConsumption) / averageDailyConsumption) * 100;
+      const deviation =
+        ((entry.quantity - averageDailyConsumption) / averageDailyConsumption) *
+        100;
 
       // Consommation excessive (>200% de la moyenne)
       if (entry.quantity > threshold) {
@@ -184,7 +221,11 @@ export class ConsumptionAIAnalyzerService {
         alerts.push({
           type: alertType,
           severity,
-          message: this.getAlertMessage(alertType, entry.quantity, averageDailyConsumption),
+          message: this.getAlertMessage(
+            alertType,
+            entry.quantity,
+            averageDailyConsumption,
+          ),
           date: entry.date,
           quantity: entry.quantity,
           expectedQuantity: averageDailyConsumption,
@@ -246,30 +287,52 @@ export class ConsumptionAIAnalyzerService {
     const recommendations: string[] = [];
 
     if (status === 'OVER_CONSUMPTION') {
-      recommendations.push('🔍 Effectuer un audit de consommation sur le chantier');
-      recommendations.push('📋 Vérifier les bons de sortie et les justificatifs');
-      recommendations.push('👥 Former le personnel aux bonnes pratiques de gestion des matériaux');
-      
-      const criticalAlerts = alerts.filter(a => a.severity === 'CRITICAL');
+      recommendations.push(
+        '🔍 Effectuer un audit de consommation sur le chantier',
+      );
+      recommendations.push(
+        '📋 Vérifier les bons de sortie et les justificatifs',
+      );
+      recommendations.push(
+        '👥 Former le personnel aux bonnes pratiques de gestion des matériaux',
+      );
+
+      const criticalAlerts = alerts.filter((a) => a.severity === 'CRITICAL');
       if (criticalAlerts.length > 0) {
-        recommendations.push('🚨 URGENT: Enquête immédiate recommandée pour vol possible');
-        recommendations.push('📹 Vérifier les caméras de surveillance si disponibles');
+        recommendations.push(
+          '🚨 URGENT: Enquête immédiate recommandée pour vol possible',
+        );
+        recommendations.push(
+          '📹 Vérifier les caméras de surveillance si disponibles',
+        );
       }
 
-      const wasteAlerts = alerts.filter(a => a.type === 'GASPILLAGE');
+      const wasteAlerts = alerts.filter((a) => a.type === 'GASPILLAGE');
       if (wasteAlerts.length > 0) {
-        recommendations.push('♻️ Mettre en place un système de récupération des chutes');
-        recommendations.push('📊 Optimiser les quantités commandées pour réduire le gaspillage');
+        recommendations.push(
+          '♻️ Mettre en place un système de récupération des chutes',
+        );
+        recommendations.push(
+          '📊 Optimiser les quantités commandées pour réduire le gaspillage',
+        );
       }
     } else if (status === 'NORMAL') {
-      recommendations.push('✅ Consommation dans les normes, continuer le suivi régulier');
-      recommendations.push(`📈 Consommation moyenne: ${averageDaily.toFixed(2)} unités/jour`);
+      recommendations.push(
+        '✅ Consommation dans les normes, continuer le suivi régulier',
+      );
+      recommendations.push(
+        `📈 Consommation moyenne: ${averageDaily.toFixed(2)} unités/jour`,
+      );
     } else {
-      recommendations.push('📉 Sous-consommation détectée, vérifier l\'avancement du projet');
+      recommendations.push(
+        "📉 Sous-consommation détectée, vérifier l'avancement du projet",
+      );
     }
 
     // Recommandations générales
-    recommendations.push('📱 Activer les alertes en temps réel pour les anomalies');
+    recommendations.push(
+      '📱 Activer les alertes en temps réel pour les anomalies',
+    );
     recommendations.push('📊 Consulter le tableau de bord hebdomadaire');
 
     return recommendations;
@@ -283,8 +346,10 @@ export class ConsumptionAIAnalyzerService {
     alerts: ConsumptionAlert[],
     deviation: number,
   ): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    const criticalAlerts = alerts.filter(a => a.severity === 'CRITICAL').length;
-    const dangerAlerts = alerts.filter(a => a.severity === 'DANGER').length;
+    const criticalAlerts = alerts.filter(
+      (a) => a.severity === 'CRITICAL',
+    ).length;
+    const dangerAlerts = alerts.filter((a) => a.severity === 'DANGER').length;
 
     if (criticalAlerts > 0 || deviation > 100) {
       return 'CRITICAL';
@@ -308,12 +373,12 @@ export class ConsumptionAIAnalyzerService {
   ): string[] {
     const issues: string[] = [];
 
-    const volAlerts = alerts.filter(a => a.type === 'VOL_POSSIBLE');
+    const volAlerts = alerts.filter((a) => a.type === 'VOL_POSSIBLE');
     if (volAlerts.length > 0) {
       issues.push('🚨 Vol de matériaux possible');
     }
 
-    const wasteAlerts = alerts.filter(a => a.type === 'GASPILLAGE');
+    const wasteAlerts = alerts.filter((a) => a.type === 'GASPILLAGE');
     if (wasteAlerts.length > 2) {
       issues.push('♻️ Gaspillage récurrent détecté');
     }
@@ -323,7 +388,7 @@ export class ConsumptionAIAnalyzerService {
     }
 
     // Vérifier les pics de consommation
-    const quantities = history.map(h => h.quantity);
+    const quantities = history.map((h) => h.quantity);
     const max = Math.max(...quantities);
     const avg = quantities.reduce((a, b) => a + b, 0) / quantities.length;
     if (max > avg * 3) {

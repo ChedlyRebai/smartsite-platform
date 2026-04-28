@@ -21,7 +21,11 @@ export class DailyConsumptionLog extends Document {
   @Prop({ min: 0, max: 100, default: 0 })
   anomalyScore: number;
 
-  @Prop({ type: String, enum: ['vol', 'probleme', 'normal'], default: 'normal' })
+  @Prop({
+    type: String,
+    enum: ['vol', 'probleme', 'normal'],
+    default: 'normal',
+  })
   anomalyType: string;
 
   @Prop({ type: String })
@@ -37,8 +41,12 @@ export class DailyConsumptionLog extends Document {
   recordedBy: Types.ObjectId;
 }
 
-export const DailyConsumptionLogSchema = SchemaFactory.createForClass(DailyConsumptionLog);
+export const DailyConsumptionLogSchema =
+  SchemaFactory.createForClass(DailyConsumptionLog);
 
-DailyConsumptionLogSchema.index({ materialId: 1, siteId: 1, date: 1 }, { unique: true });
+DailyConsumptionLogSchema.index(
+  { materialId: 1, siteId: 1, date: 1 },
+  { unique: true },
+);
 DailyConsumptionLogSchema.index({ date: -1 });
 DailyConsumptionLogSchema.index({ anomalyType: 1 });

@@ -1,13 +1,20 @@
-import { Injectable, NotFoundException, BadRequestException, Logger, Inject, forwardRef } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Logger,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { MaterialOrder, OrderStatus } from '../entities/material-order.entity';
 import { CreateMaterialOrderDto, UpdateOrderStatusDto } from '../dto/order.dto';
-import { 
-  GetAllOrdersTrackingDto, 
-  OrderTrackingOverviewDto, 
-  GlobalTrackingStatsDto, 
-  GlobalTrackingResponseDto 
+import {
+  GetAllOrdersTrackingDto,
+  OrderTrackingOverviewDto,
+  GlobalTrackingStatsDto,
+  GlobalTrackingResponseDto,
 } from '../dto/orders-tracking.dto';
 import { HttpService } from '@nestjs/axios';
 import { MaterialsGateway } from '../materials.gateway';
@@ -27,25 +34,44 @@ export class OrdersService {
     private readonly paymentService: PaymentService,
   ) {}
 
-  async createOrder(createOrderDto: CreateMaterialOrderDto, userId: string | null): Promise<MaterialOrder> {
+  async createOrder(
+    createOrderDto: CreateMaterialOrderDto,
+    userId: string | null,
+  ): Promise<MaterialOrder> {
     this.logger.log('=== DEBUT createOrder ===');
     this.logger.log('Input:', JSON.stringify(createOrderDto));
-    
+
     const orderNumber = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-    
+
     const createObjectId = (id: string, fieldName: string): Types.ObjectId => {
-      if (!id || typeof id !== 'string' || id.length !== 24 || !/^[0-9a-fA-F]{24}$/.test(id)) {
-        throw new Error(`Invalid ${fieldName}: "${id}" (length: ${id?.length})`);
+      if (
+        !id ||
+        typeof id !== 'string' ||
+        id.length !== 24 ||
+        !/^[0-9a-fA-F]{24}$/.test(id)
+      ) {
+        throw new Error(
+          `Invalid ${fieldName}: "${id}" (length: ${id?.length})`,
+        );
       }
       return new Types.ObjectId(id);
     };
-    
-    const materialIdObj = createObjectId(createOrderDto.materialId, 'materialId');
-    const siteIdObj = createObjectId(createOrderDto.destinationSiteId, 'destinationSiteId');
-    const supplierIdObj = createObjectId(createOrderDto.supplierId, 'supplierId');
-    
+
+    const materialIdObj = createObjectId(
+      createOrderDto.materialId,
+      'materialId',
+    );
+    const siteIdObj = createObjectId(
+      createOrderDto.destinationSiteId,
+      'destinationSiteId',
+    );
+    const supplierIdObj = createObjectId(
+      createOrderDto.supplierId,
+      'supplierId',
+    );
+
     this.logger.log('IDs validated, fetching external data...');
-    
+
     // Récupérer les données du matériau pour validation
     let materialData: any;
     try {
@@ -58,49 +84,66 @@ export class OrdersService {
     // Récupérer la prédiction IA pour valider la quantité
     try {
       const predictionResponse = await this.httpService.axiosRef.get(
-        `http://localhost:3002/api/materials/${createOrderDto.materialId}/prediction`
+        `http://localhost:3002/api/materials/${createOrderDto.materialId}/prediction`,
       );
-      
+
       if (predictionResponse.data?.recommendedOrderQuantity) {
         const recommendedQty = predictionResponse.data.recommendedOrderQuantity;
-        
+
         if (createOrderDto.quantity < recommendedQty) {
-          this.logger.warn(`⚠️ Quantité insuffisante: ${createOrderDto.quantity} < ${recommendedQty}`);
+          this.logger.warn(
+            `⚠️ Quantité insuffisante: ${createOrderDto.quantity} < ${recommendedQty}`,
+          );
           throw new BadRequestException(
-            `Quantité insuffisante! Minimum recommandé par l'IA: ${recommendedQty} unités. Vous avez commandé: ${createOrderDto.quantity} unités.`
+            `Quantité insuffisante! Minimum recommandé par l'IA: ${recommendedQty} unités. Vous avez commandé: ${createOrderDto.quantity} unités.`,
           );
         }
-        
-        this.logger.log(`✅ Quantité validée: ${createOrderDto.quantity} >= ${recommendedQty} (recommandé)`);
+
+        this.logger.log(
+          `✅ Quantité validée: ${createOrderDto.quantity} >= ${recommendedQty} (recommandé)`,
+        );
       }
     } catch (error: any) {
       if (error instanceof BadRequestException) {
         throw error;
       }
-      this.logger.warn('⚠️ Impossible de valider la quantité avec la prédiction IA:', error.message);
+      this.logger.warn(
+        '⚠️ Impossible de valider la quantité avec la prédiction IA:',
+        error.message,
+      );
       // Continue sans validation si la prédiction n'est pas disponible
     }
-    
+
     let siteData: any;
     try {
       siteData = await this.getSiteData(createOrderDto.destinationSiteId);
     } catch (e: any) {
       this.logger.error('Failed to get site data:', e.message);
-      siteData = { nom: 'Chantier', adresse: 'Adresse inconnue', coordinates: { lat: 0, lng: 0 } };
+      siteData = {
+        nom: 'Chantier',
+        adresse: 'Adresse inconnue',
+        coordinates: { lat: 0, lng: 0 },
+      };
     }
-    
+
     let supplierData: any;
     try {
       supplierData = await this.getSupplierData(createOrderDto.supplierId);
     } catch (e: any) {
       this.logger.error('Failed to get supplier data:', e.message);
-      supplierData = { nom: 'Fournisseur', adresse: 'Adresse inconnue', coordinates: { lat: 0, lng: 0 } };
+      supplierData = {
+        nom: 'Fournisseur',
+        adresse: 'Adresse inconnue',
+        coordinates: { lat: 0, lng: 0 },
+      };
     }
 
     const now = new Date();
     const scheduledDeparture = now;
-    const scheduledArrival = new Date(now.getTime() + createOrderDto.estimatedDurationMinutes * 60 * 1000);
-    
+    const scheduledArrival = new Date(
+      now.getTime() + createOrderDto.estimatedDurationMinutes * 60 * 1000,
+    );
+
     const order = new this.orderModel({
       orderNumber,
       materialId: materialIdObj,
@@ -127,25 +170,35 @@ export class OrdersService {
 
     const savedOrder = await order.save();
     this.logger.log('Order saved successfully:', savedOrder._id);
-    
+
     this.materialsGateway.emitOrderUpdate('orderCreated', savedOrder);
-    
+
     this.webSocketService.emitDeliveryProgress(
       savedOrder._id.toString(),
       0,
-      savedOrder.currentPosition || { lat: 0, lng: 0 }
+      savedOrder.currentPosition || { lat: 0, lng: 0 },
     );
-    
+
     return savedOrder;
   }
 
-  async getAllOrders(filters?: { status?: string; siteId?: string; supplierId?: string }): Promise<MaterialOrder[]> {
+  async getAllOrders(filters?: {
+    status?: string;
+    siteId?: string;
+    supplierId?: string;
+  }): Promise<MaterialOrder[]> {
     try {
       const filter: any = {};
       if (filters?.status) filter.status = filters.status;
-      if (filters?.siteId) filter.destinationSiteId = new Types.ObjectId(filters.siteId);
-      if (filters?.supplierId) filter.supplierId = new Types.ObjectId(filters.supplierId);
-      return await this.orderModel.find(filter).sort({ createdAt: -1 }).lean().exec();
+      if (filters?.siteId)
+        filter.destinationSiteId = new Types.ObjectId(filters.siteId);
+      if (filters?.supplierId)
+        filter.supplierId = new Types.ObjectId(filters.supplierId);
+      return await this.orderModel
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .lean()
+        .exec();
     } catch (error) {
       this.logger.error(`❌ Erreur récupération commandes: ${error.message}`);
       throw error;
@@ -153,7 +206,9 @@ export class OrdersService {
   }
 
   /*** Récupérer toutes les commandes avec informations de suivi pour le tableau de bord global */
-  async getAllOrdersWithTracking(filters?: GetAllOrdersTrackingDto): Promise<GlobalTrackingResponseDto> {
+  async getAllOrdersWithTracking(
+    filters?: GetAllOrdersTrackingDto,
+  ): Promise<GlobalTrackingResponseDto> {
     return this.getGlobalOrdersTracking(filters);
   }
 
@@ -177,25 +232,38 @@ export class OrdersService {
   }
 
   async getActiveOrders(): Promise<MaterialOrder[]> {
-    return await this.orderModel.find({
-      status: { $in: [OrderStatus.PENDING, OrderStatus.IN_TRANSIT, OrderStatus.DELAYED] }
-    }).sort({ scheduledArrival: 1 }).lean().exec();
+    return await this.orderModel
+      .find({
+        status: {
+          $in: [
+            OrderStatus.PENDING,
+            OrderStatus.IN_TRANSIT,
+            OrderStatus.DELAYED,
+          ],
+        },
+      })
+      .sort({ scheduledArrival: 1 })
+      .lean()
+      .exec();
   }
 
-  async updateOrderStatus(orderId: string, updateDto: UpdateOrderStatusDto): Promise<MaterialOrder> {
+  async updateOrderStatus(
+    orderId: string,
+    updateDto: UpdateOrderStatusDto,
+  ): Promise<MaterialOrder> {
     const order = await this.getOrderDocument(orderId);
     order.status = updateDto.status as OrderStatus;
-    
+
     if (updateDto.currentPosition) {
       order.currentPosition = updateDto.currentPosition;
       order.progress = this.calculateProgress(
         order.supplierCoordinates,
         order.destinationCoordinates,
-        updateDto.currentPosition
+        updateDto.currentPosition,
       );
       order.remainingTimeMinutes = this.calculateRemainingTime(
         order.estimatedDurationMinutes,
-        order.progress
+        order.progress,
       );
     }
 
@@ -207,7 +275,7 @@ export class OrdersService {
       order.actualArrival = new Date();
       order.progress = 100;
       order.remainingTimeMinutes = 0;
-      
+
       this.logger.log(`✅ Commande livrée: ${order.orderNumber}`);
       this.materialsGateway.emitNotification({
         type: 'delivery_complete',
@@ -216,29 +284,39 @@ export class OrdersService {
         orderId: order._id.toString(),
         timestamp: new Date(),
       });
-      
-      this.webSocketService.emitArrival(order._id.toString(), order.supplierName);
+
+      this.webSocketService.emitArrival(
+        order._id.toString(),
+        order.supplierName,
+      );
     }
 
     const updatedOrder = await order.save();
     this.materialsGateway.emitOrderUpdate('orderStatusUpdated', updatedOrder);
-    this.webSocketService.emitDeliveryProgress(orderId, updatedOrder.progress, updatedOrder.currentPosition);
-    
+    this.webSocketService.emitDeliveryProgress(
+      orderId,
+      updatedOrder.progress,
+      updatedOrder.currentPosition,
+    );
+
     return updatedOrder;
   }
 
-  async updateOrderProgress(orderId: string, currentPosition: { lat: number; lng: number }): Promise<MaterialOrder> {
+  async updateOrderProgress(
+    orderId: string,
+    currentPosition: { lat: number; lng: number },
+  ): Promise<MaterialOrder> {
     const order = await this.getOrderDocument(orderId);
 
     order.currentPosition = currentPosition;
     order.progress = this.calculateProgress(
       order.supplierCoordinates,
       order.destinationCoordinates,
-      currentPosition
+      currentPosition,
     );
     order.remainingTimeMinutes = this.calculateRemainingTime(
       order.estimatedDurationMinutes,
-      order.progress
+      order.progress,
     );
 
     let wasPending = false;
@@ -256,20 +334,28 @@ export class OrdersService {
     }
 
     const updatedOrder = await order.save();
-    
+
     this.materialsGateway.emitOrderProgressUpdate(orderId, {
       progress: updatedOrder.progress,
       remainingTimeMinutes: updatedOrder.remainingTimeMinutes,
       currentPosition: updatedOrder.currentPosition,
     });
-    
-    this.webSocketService.emitDeliveryProgress(orderId, updatedOrder.progress, updatedOrder.currentPosition);
-    this.webSocketService.emitLocationUpdate(orderId, updatedOrder.currentPosition, 'System');
-    
+
+    this.webSocketService.emitDeliveryProgress(
+      orderId,
+      updatedOrder.progress,
+      updatedOrder.currentPosition,
+    );
+    this.webSocketService.emitLocationUpdate(
+      orderId,
+      updatedOrder.currentPosition,
+      'System',
+    );
+
     if (wasPending) {
       this.webSocketService.emitDeliveryProgress(orderId, 5, currentPosition);
     }
-    
+
     if (updatedOrder.progress >= 100) {
       this.webSocketService.emitArrival(orderId, updatedOrder.supplierName);
     }
@@ -302,7 +388,7 @@ export class OrdersService {
 
     for (let i = 0; i < steps; i++) {
       await simulateStep();
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
     }
 
     return await this.updateOrderStatus(orderId, {
@@ -314,18 +400,20 @@ export class OrdersService {
   // ========== NOUVELLES MÉTHODES POUR LE SUIVI GLOBAL ==========
 
   /*** Récupérer le tableau de bord global de suivi des commandes*/
-  async getGlobalOrdersTracking(filters?: GetAllOrdersTrackingDto): Promise<GlobalTrackingResponseDto> {
+  async getGlobalOrdersTracking(
+    filters?: GetAllOrdersTrackingDto,
+  ): Promise<GlobalTrackingResponseDto> {
     // Construire la requête avec filtres
     const query: any = {};
-    
+
     if (filters?.status) {
       query.status = filters.status;
     }
-    
+
     if (filters?.siteId) {
       query.destinationSiteId = new Types.ObjectId(filters.siteId);
     }
-    
+
     if (filters?.supplierId) {
       query.supplierId = new Types.ObjectId(filters.supplierId);
     }
@@ -341,7 +429,7 @@ export class OrdersService {
     const stats = await this.calculateGlobalStats(orders);
 
     // Transformer les commandes en format de suivi
-    const trackingOrders: OrderTrackingOverviewDto[] = orders.map(order => {
+    const trackingOrders: OrderTrackingOverviewDto[] = orders.map((order) => {
       // Calculer l'ETA
       const eta = new Date();
       eta.setMinutes(eta.getMinutes() + (order.remainingTimeMinutes || 0));
@@ -354,7 +442,8 @@ export class OrdersService {
         quantity: order.quantity,
         status: order.status,
         progress: order.progress || 0,
-        currentPosition: order.currentPosition || order.supplierCoordinates || { lat: 0, lng: 0 },
+        currentPosition: order.currentPosition ||
+          order.supplierCoordinates || { lat: 0, lng: 0 },
         startLocation: {
           lat: order.supplierCoordinates?.lat || 0,
           lng: order.supplierCoordinates?.lng || 0,
@@ -372,7 +461,7 @@ export class OrdersService {
         route: {
           distance: this.calculateDistance(
             order.supplierCoordinates || { lat: 0, lng: 0 },
-            order.destinationCoordinates || { lat: 0, lng: 0 }
+            order.destinationCoordinates || { lat: 0, lng: 0 },
           ),
           duration: order.estimatedDurationMinutes || 0,
           polyline: '', // Sera calculé côté frontend si nécessaire
@@ -387,7 +476,7 @@ export class OrdersService {
     const sitesMap = new Map();
     const suppliersMap = new Map();
 
-    orders.forEach(order => {
+    orders.forEach((order) => {
       // Sites
       if (order.destinationSiteId && order.destinationCoordinates) {
         const siteId = order.destinationSiteId.toString();
@@ -426,20 +515,33 @@ export class OrdersService {
   }
 
   /*** Calculer les statistiques globales*/
-  private async calculateGlobalStats(orders: MaterialOrder[]): Promise<GlobalTrackingStatsDto> {
+  private async calculateGlobalStats(
+    orders: MaterialOrder[],
+  ): Promise<GlobalTrackingStatsDto> {
     const now = new Date();
-    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfDay = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+    );
 
     const totalOrders = orders.length;
-    const pendingOrders = orders.filter(o => o.status === OrderStatus.PENDING).length;
-    const inTransitOrders = orders.filter(o => o.status === OrderStatus.IN_TRANSIT).length;
-    const delayedOrders = orders.filter(o => o.status === OrderStatus.DELAYED).length;
-    
+    const pendingOrders = orders.filter(
+      (o) => o.status === OrderStatus.PENDING,
+    ).length;
+    const inTransitOrders = orders.filter(
+      (o) => o.status === OrderStatus.IN_TRANSIT,
+    ).length;
+    const delayedOrders = orders.filter(
+      (o) => o.status === OrderStatus.DELAYED,
+    ).length;
+
     // Commandes livrées aujourd'hui
-    const deliveredToday = orders.filter(o => 
-      o.status === OrderStatus.DELIVERED && 
-      o.actualArrival && 
-      new Date(o.actualArrival) >= startOfDay
+    const deliveredToday = orders.filter(
+      (o) =>
+        o.status === OrderStatus.DELIVERED &&
+        o.actualArrival &&
+        new Date(o.actualArrival) >= startOfDay,
     ).length;
 
     // Camions actifs (commandes en transit)
@@ -447,28 +549,38 @@ export class OrdersService {
 
     // Distance totale des commandes actives
     const totalDistance = orders
-      .filter(o => o.status === OrderStatus.IN_TRANSIT && o.supplierCoordinates && o.destinationCoordinates)
+      .filter(
+        (o) =>
+          o.status === OrderStatus.IN_TRANSIT &&
+          o.supplierCoordinates &&
+          o.destinationCoordinates,
+      )
       .reduce((sum, order) => {
         const distance = this.calculateDistance(
           order.supplierCoordinates,
-          order.destinationCoordinates
+          order.destinationCoordinates,
         );
         return sum + distance;
       }, 0);
 
     // Temps de livraison moyen (en minutes)
-    const deliveredOrders = orders.filter(o => 
-      o.status === OrderStatus.DELIVERED && 
-      o.actualDeparture && 
-      o.actualArrival
+    const deliveredOrders = orders.filter(
+      (o) =>
+        o.status === OrderStatus.DELIVERED &&
+        o.actualDeparture &&
+        o.actualArrival,
     );
-    
-    const averageDeliveryTime = deliveredOrders.length > 0
-      ? deliveredOrders.reduce((sum, order) => {
-          const duration = (new Date(order.actualArrival).getTime() - new Date(order.actualDeparture).getTime()) / (1000 * 60);
-          return sum + duration;
-        }, 0) / deliveredOrders.length
-      : 0;
+
+    const averageDeliveryTime =
+      deliveredOrders.length > 0
+        ? deliveredOrders.reduce((sum, order) => {
+            const duration =
+              (new Date(order.actualArrival).getTime() -
+                new Date(order.actualDeparture).getTime()) /
+              (1000 * 60);
+            return sum + duration;
+          }, 0) / deliveredOrders.length
+        : 0;
 
     return {
       totalOrders,
@@ -489,15 +601,19 @@ export class OrdersService {
     paymentMethod: 'cash' | 'card',
   ): Promise<{ success: boolean; payment: any; message: string }> {
     try {
-      this.logger.log(`💳 Traitement paiement commande ${orderId}, méthode: ${paymentMethod}`);
-      
+      this.logger.log(
+        `💳 Traitement paiement commande ${orderId}, méthode: ${paymentMethod}`,
+      );
+
       const order = await this.orderModel.findById(orderId).lean().exec();
       if (!order) {
         throw new NotFoundException(`Commande ${orderId} non trouvée`);
       }
-      
+
       if (order.status !== OrderStatus.DELIVERED) {
-        throw new BadRequestException('Le paiement est autorisé uniquement après arrivée du camion');
+        throw new BadRequestException(
+          'Le paiement est autorisé uniquement après arrivée du camion',
+        );
       }
 
       if (order.paymentId && order.paymentStatus === 'completed') {
@@ -527,8 +643,8 @@ export class OrdersService {
         };
       } else {
         // Card payment: wrap Stripe call with timeout
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Payment timeout')), 8000)
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Payment timeout')), 8000),
         );
 
         const stripePaymentPromise = this.paymentService.createPayment(
@@ -538,7 +654,10 @@ export class OrdersService {
           description,
         );
 
-        paymentResult = await Promise.race([stripePaymentPromise, timeoutPromise]);
+        paymentResult = await Promise.race([
+          stripePaymentPromise,
+          timeoutPromise,
+        ]);
 
         // Update DB after successful Stripe call
         await this.orderModel.findByIdAndUpdate(orderId, {
@@ -549,7 +668,9 @@ export class OrdersService {
         });
       }
 
-      this.logger.log(`✅ Paiement créé pour commande ${orderId}: ${paymentResult.paymentId}`);
+      this.logger.log(
+        `✅ Paiement créé pour commande ${orderId}: ${paymentResult.paymentId}`,
+      );
 
       return {
         success: true,
@@ -567,24 +688,33 @@ export class OrdersService {
     stripePaymentIntentId: string,
   ): Promise<{ success: boolean; payment: any; message: string }> {
     try {
-      this.logger.log(`✅ Confirmation paiement Stripe pour commande ${orderId}`);
-      
+      this.logger.log(
+        `✅ Confirmation paiement Stripe pour commande ${orderId}`,
+      );
+
       const order = await this.orderModel.findById(orderId).lean().exec();
       if (!order) {
         throw new NotFoundException(`Commande ${orderId} non trouvée`);
       }
-      
+
       if (!order.paymentId) {
-        throw new BadRequestException('Aucun paiement trouvé pour cette commande');
+        throw new BadRequestException(
+          'Aucun paiement trouvé pour cette commande',
+        );
       }
 
       if (order.paymentMethod !== 'card') {
-        throw new BadRequestException('Le paiement à confirmer doit être un paiement par carte');
+        throw new BadRequestException(
+          'Le paiement à confirmer doit être un paiement par carte',
+        );
       }
 
       // Wrap Stripe confirmation with timeout
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Payment confirmation timeout')), 8000)
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(
+          () => reject(new Error('Payment confirmation timeout')),
+          8000,
+        ),
       );
 
       const stripeConfirmPromise = this.paymentService.confirmCardPayment(
@@ -592,11 +722,14 @@ export class OrdersService {
         stripePaymentIntentId,
       );
 
-      const confirmationResult = await Promise.race([stripeConfirmPromise, timeoutPromise]);
+      const confirmationResult = await Promise.race([
+        stripeConfirmPromise,
+        timeoutPromise,
+      ]);
 
       // Update DB after successful confirmation
       await this.orderModel.findByIdAndUpdate(orderId, {
-        paymentStatus: 'completed'
+        paymentStatus: 'completed',
       });
 
       this.logger.log(`🎉 Paiement confirmé pour commande ${orderId}`);
@@ -615,13 +748,15 @@ export class OrdersService {
   async getPaymentStatus(orderId: string): Promise<any> {
     try {
       const order = await this.getOrderById(orderId);
-      
+
       if (!order.paymentId) {
         return { hasPayment: false, status: null };
       }
 
-      const paymentStatus = await this.paymentService.getPaymentStatus(order.paymentId);
-      
+      const paymentStatus = await this.paymentService.getPaymentStatus(
+        order.paymentId,
+      );
+
       return {
         hasPayment: true,
         paymentId: order.paymentId,
@@ -630,25 +765,37 @@ export class OrdersService {
         status: paymentStatus?.status || order.paymentStatus,
       };
     } catch (error: any) {
-      this.logger.error(`❌ Erreur récupération statut paiement: ${error.message}`);
+      this.logger.error(
+        `❌ Erreur récupération statut paiement: ${error.message}`,
+      );
       return { hasPayment: false, error: error.message };
     }
   }
 
   // ========== MÉTHODE FACTURE ==========
 
-  async generateInvoiceForOrder(orderId: string, siteNom: string): Promise<any> {
+  async generateInvoiceForOrder(
+    orderId: string,
+    siteNom: string,
+  ): Promise<any> {
     try {
       const order = await this.getOrderById(orderId);
-      
+
       if (!order.paymentId) {
-        throw new BadRequestException('Aucun paiement trouvé pour cette commande');
+        throw new BadRequestException(
+          'Aucun paiement trouvé pour cette commande',
+        );
       }
 
-      const invoice = await this.paymentService.generateInvoice(order.paymentId, siteNom);
-      
-      this.logger.log(`📄 Facture générée pour commande ${orderId}: ${invoice?.numeroFacture}`);
-      
+      const invoice = await this.paymentService.generateInvoice(
+        order.paymentId,
+        siteNom,
+      );
+
+      this.logger.log(
+        `📄 Facture générée pour commande ${orderId}: ${invoice?.numeroFacture}`,
+      );
+
       return invoice;
     } catch (error: any) {
       this.logger.error(`❌ Erreur génération facture: ${error.message}`);
@@ -658,7 +805,9 @@ export class OrdersService {
 
   private async calculateOrderAmount(order: MaterialOrder): Promise<number> {
     try {
-      const unitPrice = await this.getMaterialUnitPrice(order.materialId.toString());
+      const unitPrice = await this.getMaterialUnitPrice(
+        order.materialId.toString(),
+      );
       const amount = unitPrice * order.quantity;
       return Math.round(amount * 100) / 100;
     } catch (error) {
@@ -670,7 +819,7 @@ export class OrdersService {
   private async getMaterialUnitPrice(materialId: string): Promise<number> {
     try {
       const response = await this.httpService.axiosRef.get(
-        `http://localhost:3002/api/materials/${materialId}`
+        `http://localhost:3002/api/materials/${materialId}`,
       );
       return response.data?.unitPrice || response.data?.price || 100;
     } catch (error) {
@@ -690,9 +839,12 @@ export class OrdersService {
     const R = 6371;
     const dLat = this.toRad(point2.lat - point1.lat);
     const dLng = this.toRad(point2.lng - point1.lng);
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(this.toRad(point1.lat)) * Math.cos(this.toRad(point2.lat)) *
-      Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.toRad(point1.lat)) *
+        Math.cos(this.toRad(point2.lat)) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }
@@ -701,13 +853,18 @@ export class OrdersService {
     return deg * (Math.PI / 180);
   }
 
-  private calculateRemainingTime(totalMinutes: number, progress: number): number {
+  private calculateRemainingTime(
+    totalMinutes: number,
+    progress: number,
+  ): number {
     return Math.max(0, totalMinutes * (1 - progress / 100));
   }
 
   private async getSiteData(siteId: string): Promise<any> {
     try {
-      const response = await this.httpService.axiosRef.get(`http://localhost:3001/api/gestion-sites/${siteId}`);
+      const response = await this.httpService.axiosRef.get(
+        `http://localhost:3001/api/gestion-sites/${siteId}`,
+      );
       return response.data;
     } catch (error) {
       this.logger.error(`❌ Erreur récupération site: ${error.message}`);
@@ -717,7 +874,9 @@ export class OrdersService {
 
   private async getSupplierData(supplierId: string): Promise<any> {
     try {
-      const response = await this.httpService.axiosRef.get(`http://localhost:3005/fournisseurs/${supplierId}`);
+      const response = await this.httpService.axiosRef.get(
+        `http://localhost:3005/fournisseurs/${supplierId}`,
+      );
       return response.data;
     } catch (error) {
       this.logger.error(`❌ Erreur récupération fournisseur: ${error.message}`);
@@ -727,7 +886,9 @@ export class OrdersService {
 
   private async getMaterialData(materialId: string): Promise<any> {
     try {
-      const response = await this.httpService.axiosRef.get(`http://localhost:3002/api/materials/${materialId}`);
+      const response = await this.httpService.axiosRef.get(
+        `http://localhost:3002/api/materials/${materialId}`,
+      );
       return response.data;
     } catch (error) {
       this.logger.error(`❌ Erreur récupération matériau: ${error.message}`);

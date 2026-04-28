@@ -1,6 +1,20 @@
-import { IsString, IsNumber, IsDate, IsEnum, IsOptional, IsMongoId, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsDate,
+  IsEnum,
+  IsOptional,
+  IsMongoId,
+  Min,
+  Max,
+} from 'class-validator';
 import { Type } from 'class-transformer';
-import { FlowType, AnomalyType, AnomalySeverity, SourceCollection } from '../entities/consumption-history.entity';
+import {
+  FlowType,
+  AnomalyType,
+  AnomalySeverity,
+  SourceCollection,
+} from '../entities/consumption-history.entity';
 
 export class CreateConsumptionHistoryDto {
   @IsMongoId()

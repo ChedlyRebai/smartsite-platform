@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Put, Param, Body, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Param,
+  Body,
+  Logger,
+} from '@nestjs/common';
 import { OrdersTrackingService } from '../services/orders-tracking.service';
 
 @Controller('orders-tracking')
@@ -40,18 +48,19 @@ export class OrdersTrackingController {
   @Put('progress/:orderId')
   async updateOrderProgress(
     @Param('orderId') orderId: string,
-    @Body() body: {
+    @Body()
+    body: {
       progress: number;
       currentPosition?: { lat: number; lng: number };
       remainingTimeMinutes?: number;
-    }
+    },
   ) {
     this.logger.log(`📍 Updating progress for order: ${orderId}`);
     return this.ordersTrackingService.updateOrderProgress(
       orderId,
       body.progress,
       body.currentPosition,
-      body.remainingTimeMinutes
+      body.remainingTimeMinutes,
     );
   }
 

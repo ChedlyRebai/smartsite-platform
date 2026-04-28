@@ -50,7 +50,7 @@ export class OrdersTrackingService {
         .sort({ createdAt: -1 })
         .exec();
 
-      const trackingInfos: OrderTrackingInfo[] = orders.map(order => {
+      const trackingInfos: OrderTrackingInfo[] = orders.map((order) => {
         const trackingInfo: OrderTrackingInfo = {
           _id: order._id.toString(),
           orderNumber: order.orderNumber,
@@ -75,7 +75,9 @@ export class OrdersTrackingService {
         return trackingInfo;
       });
 
-      this.logger.log(`✅ Retrieved ${trackingInfos.length} orders with tracking`);
+      this.logger.log(
+        `✅ Retrieved ${trackingInfos.length} orders with tracking`,
+      );
       return trackingInfos;
     } catch (error) {
       this.logger.error(`❌ Error getting orders tracking: ${error.message}`);
@@ -91,13 +93,13 @@ export class OrdersTrackingService {
 
     try {
       const activeOrders = await this.orderModel
-        .find({ 
-          status: { $in: [OrderStatus.PENDING, OrderStatus.IN_TRANSIT] }
+        .find({
+          status: { $in: [OrderStatus.PENDING, OrderStatus.IN_TRANSIT] },
         })
         .sort({ createdAt: -1 })
         .exec();
 
-      const trackingInfos: OrderTrackingInfo[] = activeOrders.map(order => ({
+      const trackingInfos: OrderTrackingInfo[] = activeOrders.map((order) => ({
         _id: order._id.toString(),
         orderNumber: order.orderNumber,
         materialName: order.materialName,
@@ -147,7 +149,9 @@ export class OrdersTrackingService {
 
       // Mettre à jour le statut et démarrer le suivi
       const now = new Date();
-      const estimatedArrival = new Date(now.getTime() + (order.estimatedDurationMinutes || 60) * 60 * 1000);
+      const estimatedArrival = new Date(
+        now.getTime() + (order.estimatedDurationMinutes || 60) * 60 * 1000,
+      );
 
       order.status = OrderStatus.IN_TRANSIT;
       order.startedAt = now;
@@ -206,12 +210,14 @@ export class OrdersTrackingService {
    * 📍 Mettre à jour la position et le progrès d'une commande
    */
   async updateOrderProgress(
-    orderId: string, 
-    progress: number, 
+    orderId: string,
+    progress: number,
     currentPosition?: { lat: number; lng: number },
-    remainingTimeMinutes?: number
+    remainingTimeMinutes?: number,
   ): Promise<OrderTrackingInfo> {
-    this.logger.log(`📍 Updating progress for order: ${orderId}, progress: ${progress}%`);
+    this.logger.log(
+      `📍 Updating progress for order: ${orderId}, progress: ${progress}%`,
+    );
 
     try {
       const order = await this.orderModel.findById(orderId);
@@ -221,7 +227,7 @@ export class OrdersTrackingService {
 
       // Mettre à jour le progrès
       order.progress = Math.min(100, Math.max(0, progress));
-      
+
       if (currentPosition) {
         order.currentPosition = currentPosition;
       }
@@ -248,7 +254,7 @@ export class OrdersTrackingService {
         order.status = OrderStatus.DELIVERED;
         order.actualArrival = new Date();
         order.remainingTimeMinutes = 0;
-        
+
         order.trackingHistory.push({
           timestamp: new Date(),
           status: OrderStatus.DELIVERED,
@@ -281,7 +287,9 @@ export class OrdersTrackingService {
         trackingHistory: order.trackingHistory,
       };
 
-      this.logger.log(`✅ Order progress updated: ${order.orderNumber} - ${order.progress}%`);
+      this.logger.log(
+        `✅ Order progress updated: ${order.orderNumber} - ${order.progress}%`,
+      );
       return trackingInfo;
     } catch (error) {
       this.logger.error(`❌ Error updating order progress: ${error.message}`);
@@ -309,14 +317,18 @@ export class OrdersTrackingService {
         inTransitOrders,
         deliveredOrders,
         delayedOrders,
-        allOrders
+        allOrders,
       ] = await Promise.all([
         this.orderModel.countDocuments(),
         this.orderModel.countDocuments({ status: OrderStatus.PENDING }),
         this.orderModel.countDocuments({ status: OrderStatus.IN_TRANSIT }),
         this.orderModel.countDocuments({ status: OrderStatus.DELIVERED }),
         this.orderModel.countDocuments({ status: OrderStatus.DELAYED }),
-        this.orderModel.find({ status: OrderStatus.DELIVERED, startedAt: { $exists: true }, actualArrival: { $exists: true } })
+        this.orderModel.find({
+          status: OrderStatus.DELIVERED,
+          startedAt: { $exists: true },
+          actualArrival: { $exists: true },
+        }),
       ]);
 
       // Calculer le temps de livraison moyen
@@ -324,11 +336,15 @@ export class OrdersTrackingService {
       if (allOrders.length > 0) {
         const totalDeliveryTime = allOrders.reduce((sum, order) => {
           if (order.startedAt && order.actualArrival) {
-            return sum + (order.actualArrival.getTime() - order.startedAt.getTime());
+            return (
+              sum + (order.actualArrival.getTime() - order.startedAt.getTime())
+            );
           }
           return sum;
         }, 0);
-        averageDeliveryTime = Math.round(totalDeliveryTime / allOrders.length / (1000 * 60)); // en minutes
+        averageDeliveryTime = Math.round(
+          totalDeliveryTime / allOrders.length / (1000 * 60),
+        ); // en minutes
       }
 
       const stats = {

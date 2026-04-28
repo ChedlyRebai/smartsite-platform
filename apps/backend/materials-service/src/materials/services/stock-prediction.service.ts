@@ -36,19 +36,19 @@ export class StockPredictionService {
 
   /**
    * AI Model Initialization - Linear Regression
-   * 
+   *
    * WHY LINEAR REGRESSION:
    * - Stock consumption typically follows a linear pattern over time
    * - Simple, interpretable, and fast to train
    * - Works well for short-term predictions (hours/days)
    * - Requires minimal computational resources
-   * 
+   *
    * LIMITATIONS:
    * - Assumes constant consumption rate (real world may have variations)
    * - Cannot capture seasonal patterns or trends
    * - Less accurate for long-term predictions
    * - No consideration of external factors (weather, project delays, etc.)
-   * 
+   *
    * DIFFERENCE FROM REAL DATA:
    * - This model uses SIMULATED data based on fixed consumption rate
    * - Real-world data would require historical consumption records
@@ -58,23 +58,23 @@ export class StockPredictionService {
     try {
       this.model = tf.sequential({
         layers: [
-          tf.layers.dense({ 
-            inputShape: [1], 
-            units: 32, 
+          tf.layers.dense({
+            inputShape: [1],
+            units: 32,
             activation: 'relu',
-            kernelInitializer: 'glorotNormal'
+            kernelInitializer: 'glorotNormal',
           }),
-          tf.layers.dense({ 
-            units: 16, 
-            activation: 'relu'
+          tf.layers.dense({
+            units: 16,
+            activation: 'relu',
           }),
-          tf.layers.dense({ 
-            units: 8, 
-            activation: 'relu'
+          tf.layers.dense({
+            units: 8,
+            activation: 'relu',
           }),
-          tf.layers.dense({ 
-            units: 1, 
-            activation: 'linear'
+          tf.layers.dense({
+            units: 1,
+            activation: 'linear',
           }),
         ],
       });
@@ -84,7 +84,9 @@ export class StockPredictionService {
         loss: 'meanSquaredError',
       });
 
-      this.logger.log('✅ TensorFlow.js Linear Regression Model initialized for Stock Prediction');
+      this.logger.log(
+        '✅ TensorFlow.js Linear Regression Model initialized for Stock Prediction',
+      );
     } catch (error) {
       this.logger.error('❌ Failed to initialize TensorFlow model:', error);
     }
@@ -92,7 +94,7 @@ export class StockPredictionService {
 
   /**
    * Generate synthetic training data based on consumption rate
-   * 
+   *
    * SIMULATED DATA APPROACH:
    * - Creates training pairs (hour, stock_quantity)
    * - Assumes linear decrease: stock = initial - (rate * hour)
@@ -102,14 +104,14 @@ export class StockPredictionService {
   private generateTrainingData(
     currentStock: number,
     consumptionRate: number,
-    maxHours: number = 168
+    maxHours: number = 168,
   ): { xs: number[]; ys: number[] } {
     const xs: number[] = [];
     const ys: number[] = [];
 
     // Generate data points for each hour
     for (let hour = 0; hour <= maxHours; hour++) {
-      const stockAtHour = Math.max(0, currentStock - (consumptionRate * hour));
+      const stockAtHour = Math.max(0, currentStock - consumptionRate * hour);
       xs.push(hour);
       ys.push(stockAtHour);
     }
@@ -122,11 +124,14 @@ export class StockPredictionService {
    */
   private async trainModel(
     currentStock: number,
-    consumptionRate: number
+    consumptionRate: number,
   ): Promise<tf.LayersModel> {
     const { xs, ys } = this.generateTrainingData(currentStock, consumptionRate);
 
-    const xsTensor = tf.tensor2d(xs.map(x => [x]), [xs.length, 1]);
+    const xsTensor = tf.tensor2d(
+      xs.map((x) => [x]),
+      [xs.length, 1],
+    );
     const ysTensor = tf.tensor2d(ys, [ys.length, 1]);
 
     await this.model?.fit(xsTensor, ysTensor, {
@@ -145,7 +150,10 @@ export class StockPredictionService {
   /**
    * Predict stock at a specific hour using the ML model
    */
-  private async predictStockAtHour(model: tf.LayersModel, hour: number): Promise<number> {
+  private async predictStockAtHour(
+    model: tf.LayersModel,
+    hour: number,
+  ): Promise<number> {
     const inputTensor = tf.tensor2d([[hour]]);
     const prediction = model.predict(inputTensor) as tf.Tensor;
     const predictedValue = (await prediction.data())[0];
@@ -161,7 +169,7 @@ export class StockPredictionService {
    */
   private async calculateRealConsumptionRate(
     materialId: string,
-    siteId?: string
+    siteId?: string,
   ): Promise<number> {
     try {
       const thirtyDaysAgo = new Date();
@@ -173,7 +181,7 @@ export class StockPredictionService {
         type: 'OUT',
         timestamp: { $gte: thirtyDaysAgo },
       };
-      
+
       if (siteId) {
         matchQuery.siteId = new Types.ObjectId(siteId);
       }
@@ -190,7 +198,9 @@ export class StockPredictionService {
       ]);
 
       if (outMovements.length === 0 || outMovements[0].totalOut === 0) {
-        this.logger.log(`📊 Pas d'historique de consommation pour ${materialId}, utilisation taux par défaut`);
+        this.logger.log(
+          `📊 Pas d'historique de consommation pour ${materialId}, utilisation taux par défaut`,
+        );
         return 2; // 2 unités par heure par défaut
       }
 
@@ -199,8 +209,10 @@ export class StockPredictionService {
       const hoursIn30Days = 30 * 24; // 720 heures
       const hourlyRate = totalOut / hoursIn30Days;
 
-      this.logger.log(`📊 Taux calculé depuis historique: ${hourlyRate.toFixed(2)} unités/h (${totalOut} unités sur 30 jours)`);
-      
+      this.logger.log(
+        `📊 Taux calculé depuis historique: ${hourlyRate.toFixed(2)} unités/h (${totalOut} unités sur 30 jours)`,
+      );
+
       return Math.max(0.5, hourlyRate); // Minimum 0.5 unités/heure
     } catch (error) {
       this.logger.error(`❌ Erreur calcul taux consommation: ${error.message}`);
@@ -213,12 +225,12 @@ export class StockPredictionService {
    */
   private getWeatherMultiplier(condition: string): number {
     const multipliers: Record<string, number> = {
-      'sunny': 1.0,    // Conditions normales
-      'cloudy': 1.05,  // Légère augmentation
-      'rainy': 1.3,    // Pluie = travail plus lent = plus de consommation
-      'stormy': 1.5,   // Orage = conditions difficiles
-      'snowy': 1.4,    // Neige = conditions difficiles
-      'windy': 1.1,    // Vent = légère augmentation
+      sunny: 1.0, // Conditions normales
+      cloudy: 1.05, // Légère augmentation
+      rainy: 1.3, // Pluie = travail plus lent = plus de consommation
+      stormy: 1.5, // Orage = conditions difficiles
+      snowy: 1.4, // Neige = conditions difficiles
+      windy: 1.1, // Vent = légère augmentation
     };
     return multipliers[condition] || 1.0;
   }
@@ -229,7 +241,7 @@ export class StockPredictionService {
   private calculateHoursToLevel(
     currentStock: number,
     targetLevel: number,
-    consumptionRate: number
+    consumptionRate: number,
   ): number {
     if (consumptionRate <= 0) return 999;
     const hours = (currentStock - targetLevel) / consumptionRate;
@@ -239,10 +251,12 @@ export class StockPredictionService {
   /**
    * Determine status based on hours to out of stock
    */
-  private determineStatus(hoursToOutOfStock: number): 'safe' | 'warning' | 'critical' {
-    if (hoursToOutOfStock >= 72) return 'safe';        // >= 3 days
-    if (hoursToOutOfStock >= 24) return 'warning';     // >= 24 hours
-    return 'critical';                                 // < 24 hours
+  private determineStatus(
+    hoursToOutOfStock: number,
+  ): 'safe' | 'warning' | 'critical' {
+    if (hoursToOutOfStock >= 72) return 'safe'; // >= 3 days
+    if (hoursToOutOfStock >= 24) return 'warning'; // >= 24 hours
+    return 'critical'; // < 24 hours
   }
 
   /**
@@ -252,13 +266,13 @@ export class StockPredictionService {
   private calculateRecommendedQuantity(
     consumptionRate: number,
     maximumStock: number,
-    currentStock: number
+    currentStock: number,
   ): number {
     const dailyConsumption = consumptionRate * 24;
     const daysSupply = 14; // 2 weeks
     const targetStock = dailyConsumption * daysSupply;
     const recommended = targetStock - currentStock;
-    
+
     // Ensure we don't exceed maximum stock
     return Math.min(recommended, maximumStock - currentStock);
   }
@@ -276,36 +290,50 @@ export class StockPredictionService {
     reorderPoint: number,
     consumptionRate: number,
     siteId?: string,
-    weatherCondition?: 'sunny' | 'rainy' | 'stormy' | 'cloudy' | 'snowy' | 'windy'
+    weatherCondition?:
+      | 'sunny'
+      | 'rainy'
+      | 'stormy'
+      | 'cloudy'
+      | 'snowy'
+      | 'windy',
   ): Promise<StockPredictionResult> {
     try {
       // Calculer le vrai taux de consommation depuis l'historique
-      let effectiveRate = await this.calculateRealConsumptionRate(materialId, siteId);
-      
+      let effectiveRate = await this.calculateRealConsumptionRate(
+        materialId,
+        siteId,
+      );
+
       // Si un taux est fourni et > 0, l'utiliser
       if (consumptionRate > 0) {
         effectiveRate = consumptionRate;
       }
-      
+
       // Ajuster selon la météo
       let weatherMultiplier = 1.0;
       if (weatherCondition) {
         weatherMultiplier = this.getWeatherMultiplier(weatherCondition);
         effectiveRate = effectiveRate * weatherMultiplier;
-        this.logger.log(`🌤️ Ajustement météo (${weatherCondition}): x${weatherMultiplier} → ${effectiveRate.toFixed(2)} unités/h`);
+        this.logger.log(
+          `🌤️ Ajustement météo (${weatherCondition}): x${weatherMultiplier} → ${effectiveRate.toFixed(2)} unités/h`,
+        );
       }
-      
-      this.logger.log(`📊 Taux de consommation effectif: ${effectiveRate.toFixed(2)} unités/h`);
-      
+
+      this.logger.log(
+        `📊 Taux de consommation effectif: ${effectiveRate.toFixed(2)} unités/h`,
+      );
+
       // Ensure consumption rate is at least 0.5 (minimum 0.5 unit/hour)
       effectiveRate = Math.max(0.5, effectiveRate);
-      
+
       // Generate simulation data for visualization
       const simulationData: { hour: number; stock: number }[] = [];
-      for (let hour = 0; hour <= 168; hour++) { // 7 days
+      for (let hour = 0; hour <= 168; hour++) {
+        // 7 days
         simulationData.push({
           hour,
-          stock: Math.max(0, currentStock - (effectiveRate * hour))
+          stock: Math.max(0, currentStock - effectiveRate * hour),
         });
       }
 
@@ -313,13 +341,13 @@ export class StockPredictionService {
       const hoursToLowStock = this.calculateHoursToLevel(
         currentStock,
         reorderPoint,
-        effectiveRate
+        effectiveRate,
       );
-      
+
       const hoursToOutOfStock = this.calculateHoursToLevel(
         currentStock,
         0,
-        effectiveRate
+        effectiveRate,
       );
 
       // Try ML model prediction as validation
@@ -330,30 +358,39 @@ export class StockPredictionService {
       if (this.model && effectiveRate > 0) {
         try {
           await this.trainModel(currentStock, effectiveRate);
-          
+
           // Predict at key hours
-          const predictedAtLowStock = await this.predictStockAtHour(this.model, Math.floor(hoursToLowStock));
-          const predictedAtOutOfStock = await this.predictStockAtHour(this.model, Math.floor(hoursToOutOfStock));
-          
+          const predictedAtLowStock = await this.predictStockAtHour(
+            this.model,
+            Math.floor(hoursToLowStock),
+          );
+          const predictedAtOutOfStock = await this.predictStockAtHour(
+            this.model,
+            Math.floor(hoursToOutOfStock),
+          );
+
           mlPredictedStock = predictedAtOutOfStock;
           modelUsed = true;
-          
+
           // Calculate confidence based on prediction accuracy
-          const accuracy = 1 - (Math.abs(predictedAtOutOfStock - 0) / (currentStock + 1));
+          const accuracy =
+            1 - Math.abs(predictedAtOutOfStock - 0) / (currentStock + 1);
           confidence = Math.max(0.3, Math.min(0.9, accuracy));
         } catch (error) {
-          this.logger.warn('ML prediction failed, using mathematical calculation');
+          this.logger.warn(
+            'ML prediction failed, using mathematical calculation',
+          );
         }
       }
 
       // Determine status
       const status = this.determineStatus(hoursToOutOfStock);
-      
+
       // Calculate recommended order quantity
       const recommendedOrderQuantity = this.calculateRecommendedQuantity(
         effectiveRate,
         maximumStock,
-        currentStock
+        currentStock,
       );
 
       // Generate message
@@ -374,7 +411,7 @@ export class StockPredictionService {
         materialId,
         materialName,
         currentStock,
-        predictedStock: Math.max(0, currentStock - (effectiveRate * 24)),
+        predictedStock: Math.max(0, currentStock - effectiveRate * 24),
         consumptionRate: effectiveRate,
         minimumStock,
         reorderPoint,
@@ -382,21 +419,30 @@ export class StockPredictionService {
         hoursToLowStock: Math.floor(hoursToLowStock),
         hoursToOutOfStock: Math.floor(hoursToOutOfStock),
         status,
-        recommendedOrderQuantity: Math.max(0, Math.ceil(recommendedOrderQuantity)),
+        recommendedOrderQuantity: Math.max(
+          0,
+          Math.ceil(recommendedOrderQuantity),
+        ),
         predictionModelUsed: modelUsed,
         confidence: Math.round(confidence * 100) / 100,
         simulationData: simulationData.filter((_, i) => i % 24 === 0), // Keep daily points
         message,
       };
     } catch (error) {
-      this.logger.error(`❌ Prediction error for material ${materialId}:`, error);
-      
+      this.logger.error(
+        `❌ Prediction error for material ${materialId}:`,
+        error,
+      );
+
       // Return fallback prediction
       return {
         materialId,
         materialName,
         currentStock,
-        predictedStock: Math.max(0, currentStock - (Math.max(1, consumptionRate) * 24)),
+        predictedStock: Math.max(
+          0,
+          currentStock - Math.max(1, consumptionRate) * 24,
+        ),
         consumptionRate: Math.max(1, consumptionRate),
         minimumStock,
         reorderPoint,

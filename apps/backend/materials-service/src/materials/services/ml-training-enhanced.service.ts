@@ -36,15 +36,20 @@ export class MLTrainingEnhancedService {
 
   constructor(
     @InjectModel(Material.name) private materialModel: Model<Material>,
-    @InjectModel(MaterialFlowLog.name) private flowLogModel: Model<MaterialFlowLog>,
+    @InjectModel(MaterialFlowLog.name)
+    private flowLogModel: Model<MaterialFlowLog>,
     private anomalyEmailService: AnomalyEmailService,
   ) {}
 
   /**
    * 🤖 ENTRAÎNEMENT AUTOMATIQUE - Stock Prediction
    */
-  async trainStockPredictionModel(materialId: string): Promise<StockPredictionResult> {
-    this.logger.log(`🤖 Training stock prediction model for material: ${materialId}`);
+  async trainStockPredictionModel(
+    materialId: string,
+  ): Promise<StockPredictionResult> {
+    this.logger.log(
+      `🤖 Training stock prediction model for material: ${materialId}`,
+    );
 
     try {
       // 1. Récupérer le matériau
@@ -62,7 +67,7 @@ export class MLTrainingEnhancedService {
 
       // 3. Calculer les métriques de consommation
       const consumptionData = this.calculateConsumptionMetrics(flowHistory);
-      
+
       // 4. Prédire le stock futur
       const prediction = this.predictStockLevels(material, consumptionData);
 
@@ -84,9 +89,10 @@ export class MLTrainingEnhancedService {
         weatherImpact,
       };
 
-      this.logger.log(`✅ Stock prediction completed: ${result.status} (${result.confidence}% confidence)`);
+      this.logger.log(
+        `✅ Stock prediction completed: ${result.status} (${result.confidence}% confidence)`,
+      );
       return result;
-
     } catch (error) {
       this.logger.error(`❌ Stock prediction failed: ${error.message}`);
       throw error;
@@ -96,16 +102,21 @@ export class MLTrainingEnhancedService {
   /**
    * 🚨 DÉTECTION D'ANOMALIES - Consommation
    */
-  async detectConsumptionAnomaly(materialId: string, newConsumption: number): Promise<AnomalyDetectionResult> {
-    this.logger.log(`🚨 Detecting consumption anomaly for material: ${materialId}, consumption: ${newConsumption}`);
+  async detectConsumptionAnomaly(
+    materialId: string,
+    newConsumption: number,
+  ): Promise<AnomalyDetectionResult> {
+    this.logger.log(
+      `🚨 Detecting consumption anomaly for material: ${materialId}, consumption: ${newConsumption}`,
+    );
 
     try {
       // 1. Récupérer l'historique récent
       const recentFlows = await this.flowLogModel
-        .find({ 
+        .find({
           materialId,
           type: 'OUT',
-          createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } // 30 derniers jours
+          createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }, // 30 derniers jours
         })
         .sort({ createdAt: -1 })
         .exec();
@@ -114,16 +125,20 @@ export class MLTrainingEnhancedService {
       const normalStats = this.calculateNormalConsumptionStats(recentFlows);
 
       // 3. Détecter l'anomalie
-      const anomalyResult = this.analyzeAnomalyPattern(newConsumption, normalStats);
+      const anomalyResult = this.analyzeAnomalyPattern(
+        newConsumption,
+        normalStats,
+      );
 
       // 4. Envoyer alerte si nécessaire
       if (anomalyResult.shouldSendAlert) {
         await this.sendAnomalyAlert(materialId, anomalyResult);
       }
 
-      this.logger.log(`✅ Anomaly detection completed: ${anomalyResult.anomalyType} (${anomalyResult.riskLevel})`);
+      this.logger.log(
+        `✅ Anomaly detection completed: ${anomalyResult.anomalyType} (${anomalyResult.riskLevel})`,
+      );
       return anomalyResult;
-
     } catch (error) {
       this.logger.error(`❌ Anomaly detection failed: ${error.message}`);
       throw error;
@@ -143,24 +158,38 @@ export class MLTrainingEnhancedService {
     }
 
     // Calculer la consommation totale (sorties)
-    const outFlows = flowHistory.filter(f => f.type === 'OUT');
-    const totalConsumption = outFlows.reduce((sum, flow) => sum + (flow.quantity || 0), 0);
+    const outFlows = flowHistory.filter((f) => f.type === 'OUT');
+    const totalConsumption = outFlows.reduce(
+      (sum, flow) => sum + (flow.quantity || 0),
+      0,
+    );
 
     // Calculer la période en heures
     const oldestFlow = flowHistory[flowHistory.length - 1];
     const newestFlow = flowHistory[0];
-    const periodHours = Math.max(1, (new Date(newestFlow.createdAt).getTime() - new Date(oldestFlow.createdAt).getTime()) / (1000 * 60 * 60));
+    const periodHours = Math.max(
+      1,
+      (new Date(newestFlow.createdAt).getTime() -
+        new Date(oldestFlow.createdAt).getTime()) /
+        (1000 * 60 * 60),
+    );
 
     // Consommation moyenne par heure
     const averageConsumptionPerHour = totalConsumption / periodHours;
 
     // Tendance (simplifié)
-    const recentConsumption = outFlows.slice(0, 10).reduce((sum, flow) => sum + (flow.quantity || 0), 0);
-    const olderConsumption = outFlows.slice(-10).reduce((sum, flow) => sum + (flow.quantity || 0), 0);
-    
+    const recentConsumption = outFlows
+      .slice(0, 10)
+      .reduce((sum, flow) => sum + (flow.quantity || 0), 0);
+    const olderConsumption = outFlows
+      .slice(-10)
+      .reduce((sum, flow) => sum + (flow.quantity || 0), 0);
+
     let consumptionTrend: 'increasing' | 'decreasing' | 'stable' = 'stable';
-    if (recentConsumption > olderConsumption * 1.2) consumptionTrend = 'increasing';
-    else if (recentConsumption < olderConsumption * 0.8) consumptionTrend = 'decreasing';
+    if (recentConsumption > olderConsumption * 1.2)
+      consumptionTrend = 'increasing';
+    else if (recentConsumption < olderConsumption * 0.8)
+      consumptionTrend = 'decreasing';
 
     return {
       averageConsumptionPerHour,
@@ -189,7 +218,10 @@ export class MLTrainingEnhancedService {
     }
 
     // Calculs de prédiction
-    const hoursToLowStock = Math.max(0, (currentStock - reorderPoint) / consumptionRate);
+    const hoursToLowStock = Math.max(
+      0,
+      (currentStock - reorderPoint) / consumptionRate,
+    );
     const hoursToOutOfStock = Math.max(0, currentStock / consumptionRate);
 
     // Déterminer le statut
@@ -210,7 +242,10 @@ export class MLTrainingEnhancedService {
     }
 
     // Confiance basée sur la quantité de données
-    const confidence = Math.min(95, 60 + (consumptionData.totalConsumption > 0 ? 30 : 0));
+    const confidence = Math.min(
+      95,
+      60 + (consumptionData.totalConsumption > 0 ? 30 : 0),
+    );
 
     return {
       hoursToLowStock,
@@ -232,7 +267,9 @@ export class MLTrainingEnhancedService {
       'Temps sec - consommation normale',
       'Vent fort - retards possibles',
     ];
-    return weatherConditions[Math.floor(Math.random() * weatherConditions.length)];
+    return weatherConditions[
+      Math.floor(Math.random() * weatherConditions.length)
+    ];
   }
 
   /**
@@ -243,12 +280,15 @@ export class MLTrainingEnhancedService {
       return { average: 0, standardDeviation: 0, maximum: 0 };
     }
 
-    const quantities = flows.map(f => f.quantity || 0);
-    const average = quantities.reduce((sum, q) => sum + q, 0) / quantities.length;
-    
-    const variance = quantities.reduce((sum, q) => sum + Math.pow(q - average, 2), 0) / quantities.length;
+    const quantities = flows.map((f) => f.quantity || 0);
+    const average =
+      quantities.reduce((sum, q) => sum + q, 0) / quantities.length;
+
+    const variance =
+      quantities.reduce((sum, q) => sum + Math.pow(q - average, 2), 0) /
+      quantities.length;
     const standardDeviation = Math.sqrt(variance);
-    
+
     const maximum = Math.max(...quantities);
 
     return { average, standardDeviation, maximum };
@@ -257,15 +297,19 @@ export class MLTrainingEnhancedService {
   /**
    * 🔍 Analyser les patterns d'anomalie
    */
-  private analyzeAnomalyPattern(newConsumption: number, normalStats: any): AnomalyDetectionResult {
+  private analyzeAnomalyPattern(
+    newConsumption: number,
+    normalStats: any,
+  ): AnomalyDetectionResult {
     const { average, standardDeviation, maximum } = normalStats;
 
     // Seuils d'anomalie
-    const moderateThreshold = average + (2 * standardDeviation);
-    const severeThreshold = average + (3 * standardDeviation);
+    const moderateThreshold = average + 2 * standardDeviation;
+    const severeThreshold = average + 3 * standardDeviation;
 
     let isAnomaly = false;
-    let anomalyType: 'EXCESSIVE_OUT' | 'SUSPICIOUS_PATTERN' | 'NORMAL' = 'NORMAL';
+    let anomalyType: 'EXCESSIVE_OUT' | 'SUSPICIOUS_PATTERN' | 'NORMAL' =
+      'NORMAL';
     let riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' = 'LOW';
     let message = 'Consommation normale';
     let deviationPercentage = 0;
@@ -274,13 +318,16 @@ export class MLTrainingEnhancedService {
 
     if (newConsumption > moderateThreshold) {
       isAnomaly = true;
-      deviationPercentage = Math.round(((newConsumption - average) / average) * 100);
+      deviationPercentage = Math.round(
+        ((newConsumption - average) / average) * 100,
+      );
 
       if (newConsumption > severeThreshold) {
         anomalyType = 'EXCESSIVE_OUT';
         riskLevel = 'HIGH';
         message = `🚨 Consommation excessive détectée! ${deviationPercentage}% au-dessus de la normale`;
-        recommendedAction = 'Vérifier immédiatement - Risque de vol ou gaspillage';
+        recommendedAction =
+          'Vérifier immédiatement - Risque de vol ou gaspillage';
         shouldSendAlert = true;
       } else {
         anomalyType = 'SUSPICIOUS_PATTERN';
@@ -305,7 +352,10 @@ export class MLTrainingEnhancedService {
   /**
    * 📧 Envoyer alerte d'anomalie
    */
-  private async sendAnomalyAlert(materialId: string, anomalyResult: AnomalyDetectionResult) {
+  private async sendAnomalyAlert(
+    materialId: string,
+    anomalyResult: AnomalyDetectionResult,
+  ) {
     try {
       const material = await this.materialModel.findById(materialId);
       if (!material) return;
@@ -331,7 +381,7 @@ export class MLTrainingEnhancedService {
 
       // Envoyer email d'alerte
       await this.anomalyEmailService.sendStockAnomalyAlert(alertData);
-      
+
       this.logger.log(`📧 Anomaly alert sent for material: ${material.name}`);
     } catch (error) {
       this.logger.error(`❌ Failed to send anomaly alert: ${error.message}`);
