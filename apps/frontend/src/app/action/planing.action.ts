@@ -1,8 +1,8 @@
 import axios from "axios";
 import { CreateTaskPayload, Milestone, UpdateTaskPayload } from "../types";
+import { PLANNING_API_URL } from "@/lib/planning-api-url";
 
-
-const baseUrl = process.env.PLANNING_URL || 'http://localhost:3002';
+const baseUrl = PLANNING_API_URL;
 
 export const getMilestonesByProjectId = async (projectId:string) =>{
     try {

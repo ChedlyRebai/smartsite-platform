@@ -172,9 +172,77 @@ export interface ProjectWithSites {
 
 export const getProjectsWithSites = async (): Promise<ProjectWithSites[]> => {
   try {
-    const response = await gestionProjectsApi.get("/projects/with-sites");
-    const data = response.data;
-    return Array.isArray(data) ? data : [];
+    // Fetch projects and sites in parallel from their respective services
+    const [projectsResponse, sitesResponse] = await Promise.allSettled([
+      gestionProjectsApi.get("/projects?limit=100&page=1"),
+      sitesApi.get("/gestion-sites?limit=200"),
+    ]);
+
+    const projectsData =
+      projectsResponse.status === "fulfilled"
+        ? projectsResponse.value.data?.projects ?? projectsResponse.value.data ?? []
+        : [];
+
+    const sitesRaw =
+      sitesResponse.status === "fulfilled"
+        ? sitesResponse.value.data?.data ?? sitesResponse.value.data ?? []
+        : [];
+
+    // Normalize sites
+    const allSites: Array<{
+      id: string;
+      name: string;
+      address: string;
+      localisation: string;
+      budget: number;
+      status: string;
+      progress: number;
+      teams: any[];
+      teamIds: any[];
+      projectId?: string;
+      clientName?: string;
+    }> = sitesRaw.map((site: any) => ({
+      id: site._id || site.id,
+      name: site.nom || site.name || "",
+      address: site.adresse || site.address || "",
+      localisation: site.localisation || site.adresse || site.address || "",
+      budget: site.budget || 0,
+      status: site.status || "planning",
+      progress: site.progress || 0,
+      teams: site.teams || [],
+      teamIds: site.teamIds || [],
+      projectId: site.projectId ? String(site.projectId) : undefined,
+      clientName: site.clientName || null,
+    }));
+
+    // Build a map: projectId → sites[]
+    const sitesByProject: Record<string, typeof allSites> = {};
+    allSites.forEach((site) => {
+      if (!site.projectId) return;
+      if (!sitesByProject[site.projectId]) sitesByProject[site.projectId] = [];
+      sitesByProject[site.projectId].push(site);
+    });
+
+    return projectsData.map((project: any) => {
+      const pid = String(project._id || project.id);
+      const projectSites = sitesByProject[pid] || [];
+      return {
+        id: pid,
+        name: project.name,
+        description: project.description,
+        location: project.location,
+        status: project.status,
+        priority: project.priority,
+        budget: project.budget || 0,
+        actualCost: project.actualCost,
+        startDate: project.startDate,
+        endDate: project.endDate,
+        progress: project.progress || 0,
+        clientName: project.clientName,
+        sites: projectSites,
+        totalSitesBudget: projectSites.reduce((sum, s) => sum + (s.budget || 0), 0),
+      };
+    });
   } catch (error) {
     console.error("Error fetching projects with sites:", error);
     return [];

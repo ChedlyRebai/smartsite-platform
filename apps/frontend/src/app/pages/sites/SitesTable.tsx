@@ -15,7 +15,6 @@ import {
   TableRow,
 } from '../../components/ui/table';
 import { getProjectsWithSites, type ProjectWithSites, gestionProjectsApi } from '../../action/synced-project.action';
-import { getAllSitesWithTeams } from '../../action/site.action';
 
 interface SiteData {
   id: string;
@@ -29,11 +28,6 @@ interface SiteData {
   teamIds: any[];
   projectId?: string;
   clientName?: string;
-}
-
-interface ExpandedProject {
-  id: string;
-  name: string;
 }
 
 export default function SitesTable() {
@@ -56,24 +50,25 @@ export default function SitesTable() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [projectsData, sitesData] = await Promise.all([
-        getProjectsWithSites(),
-        getAllSitesWithTeams(),
-      ]);
+      const projectsData = await getProjectsWithSites();
       setProjectsWithSites(projectsData);
 
-      const activeProjects = projectsData.filter((p: ProjectWithSites) => p.status !== 'completed' && p.status !== 'archived');
-      const activeProjectIds = new Set(activeProjects.map((p: ProjectWithSites) => p.id));
+      // Compute stats from the unified projectsData (already contains sites)
+      const activeProjects = projectsData.filter(
+        (p: ProjectWithSites) => p.status !== 'completed' && p.status !== 'archived'
+      );
 
-      const activeSitesData = (sitesData as SiteData[]).filter((site: SiteData) => {
-        const siteProjectId = site.projectId;
-        return siteProjectId && activeProjectIds.has(String(siteProjectId));
-      });
+      const projectsBudget = activeProjects.reduce(
+        (sum: number, p: ProjectWithSites) => sum + (p.budget || 0),
+        0
+      );
+      const sitesBudget = activeProjects.reduce(
+        (sum: number, p: ProjectWithSites) => sum + (p.totalSitesBudget || 0),
+        0
+      );
 
-      const sitesBudget = activeSitesData.reduce((sum: number, site: SiteData) => sum + (site.budget || 0), 0);
-      const projectsBudget = activeProjects.reduce((sum: number, p: ProjectWithSites) => sum + (p.budget || 0), 0);
-      setTotalSitesBudget(sitesBudget);
       setTotalProjectsBudget(projectsBudget);
+      setTotalSitesBudget(sitesBudget);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -148,12 +143,31 @@ export default function SitesTable() {
     return matchesSearch && !isArchived;
   });
 
+  // Reset to page 1 when search or archive filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, showArchived]);
+
   // Pagination logic
-  const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(filteredProjects.length / itemsPerPage));
   const paginatedProjects = filteredProjects.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  // Page numbers to show (max 5 around current)
+  const getPageNumbers = () => {
+    if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
+    const pages: (number | '...')[] = [];
+    pages.push(1);
+    if (currentPage > 3) pages.push('...');
+    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+      pages.push(i);
+    }
+    if (currentPage < totalPages - 2) pages.push('...');
+    pages.push(totalPages);
+    return pages;
+  };
 
   if (loading) {
     return (
@@ -168,46 +182,55 @@ export default function SitesTable() {
 
   return (
     <div className="space-y-6">
-      {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">Total Projects</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{projectsWithSites.length}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">Total Sites</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">
-              {projectsWithSites.reduce((sum, p) => sum + p.sites.length, 0)}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">Projects Budget</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-green-600">
-              {formatBudget(totalProjectsBudget)}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">Sites Budget</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-blue-600">
-              {formatBudget(totalSitesBudget)}
-            </p>
-          </CardContent>
-        </Card>
+      {/* ── Header banner ── */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 text-white shadow-xl px-6 py-5">
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.22em] text-blue-200">Sites BI</p>
+            <h2 className="text-2xl font-bold">Welcome to Smart Site — Sites Overview</h2>
+            <p className="text-blue-100 text-sm mt-1">Real-time analytics across all projects and sites.</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── KPI cards ── */}
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {[
+          {
+            title: "Active Projects",
+            value: projectsWithSites.filter(p => p.status !== 'completed' && p.status !== 'archived').length,
+            sub: `${projectsWithSites.length} total incl. archived`,
+            tone: "from-blue-600 to-cyan-500",
+            icon: Building2,
+          },
+          {
+            title: "Total Sites",
+            value: projectsWithSites
+              .filter(p => p.status !== 'completed' && p.status !== 'archived')
+              .reduce((sum, p) => sum + p.sites.length, 0),
+            sub: `${projectsWithSites.reduce((sum, p) => sum + p.sites.length, 0)} total incl. archived`,
+            tone: "from-violet-600 to-fuchsia-500",
+            icon: MapPin,
+          },
+        ].map((card) => (
+          <div
+            key={card.title}
+            className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${card.tone} p-5 shadow-lg hover:shadow-xl transition-shadow duration-300`}
+          >
+            <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-white/10" />
+            <div className="absolute -right-1 -bottom-6 h-16 w-16 rounded-full bg-white/10" />
+            <div className="relative flex items-start justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-white/70">{card.title}</p>
+                <p className="mt-2 text-3xl font-extrabold text-white leading-none">{card.value}</p>
+                <p className="text-xs text-white/60 mt-1">{card.sub}</p>
+              </div>
+              <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
+                <card.icon className="h-6 w-6 text-white" />
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Search */}
@@ -276,7 +299,12 @@ export default function SitesTable() {
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
                           <Building2 className="h-5 w-5 text-blue-600" />
-                          <span className="font-semibold text-lg">{project.name}</span>
+                          <button
+                            onClick={() => toggleProject(project.id)}
+                            className="font-semibold text-lg text-blue-700 hover:underline hover:text-blue-900 cursor-pointer bg-transparent border-none p-0 text-left"
+                          >
+                            {project.name}
+                          </button>
                           {project.status === 'completed' && (
                             <Badge variant="secondary" className="ml-2">Archived</Badge>
                           )}
@@ -305,9 +333,32 @@ export default function SitesTable() {
                         {formatBudget(project.totalSitesBudget || 0)}
                       </TableCell>
                       <TableCell>
-                        {project.clientName ||
-                          (project.sites as SiteData[]).find(s => s.clientName)?.clientName ||
-                          '-'}
+                        {(() => {
+                          const clients = Array.from(
+                            new Set(
+                              [
+                                project.clientName,
+                                ...(project.sites as SiteData[]).map(s => s.clientName),
+                              ]
+                                .filter(Boolean)
+                                .map(c => c!.trim())
+                                .filter(c => c.length > 0)
+                            )
+                          );
+                          if (clients.length === 0) return '-';
+                          return (
+                            <div className="flex flex-wrap gap-1">
+                              {clients.map((client, i) => (
+                                <span
+                                  key={i}
+                                  className="inline-block bg-gray-100 text-gray-700 text-xs px-2 py-0.5 rounded-full"
+                                >
+                                  {client}
+                                </span>
+                              ))}
+                            </div>
+                          );
+                        })()}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
@@ -345,6 +396,15 @@ export default function SitesTable() {
                     </TableRow>
 
                     {/* Expanded Sites Details */}
+                    {isExpanded && projectSites.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={9} className="p-0 bg-gray-50">
+                          <div className="p-6 text-center text-gray-500 text-sm">
+                            No sites assigned to this project yet.
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
                     {isExpanded && projectSites.length > 0 && (
                       <TableRow>
                         <TableCell colSpan={9} className="p-0 bg-gray-50">
@@ -417,44 +477,70 @@ export default function SitesTable() {
           </Table>
 
           {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-4 pt-4 border-t">
-              <div className="text-sm text-gray-500">
-                Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredProjects.length)} of {filteredProjects.length} projects
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <Button
-                      key={page}
-                      variant={currentPage === page ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setCurrentPage(page)}
-                      className="w-8 h-8 p-0"
-                    >
-                      {page}
-                    </Button>
-                  ))}
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
+          <div className="flex items-center justify-between mt-4 pt-4 border-t">
+            <div className="text-sm text-gray-500">
+              {filteredProjects.length === 0
+                ? 'No projects'
+                : `Showing ${(currentPage - 1) * itemsPerPage + 1}–${Math.min(currentPage * itemsPerPage, filteredProjects.length)} of ${filteredProjects.length} project${filteredProjects.length !== 1 ? 's' : ''}`}
             </div>
-          )}
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(1)}
+                disabled={currentPage === 1}
+                className="h-8 w-8 p-0"
+                title="First page"
+              >
+                «
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="h-8 w-8 p-0"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+
+              {getPageNumbers().map((page, i) =>
+                page === '...' ? (
+                  <span key={`ellipsis-${i}`} className="px-1 text-gray-400 text-sm select-none">…</span>
+                ) : (
+                  <Button
+                    key={page}
+                    variant={currentPage === page ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setCurrentPage(page as number)}
+                    className="h-8 w-8 p-0"
+                  >
+                    {page}
+                  </Button>
+                )
+              )}
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="h-8 w-8 p-0"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(totalPages)}
+                disabled={currentPage === totalPages}
+                className="h-8 w-8 p-0"
+                title="Last page"
+              >
+                »
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

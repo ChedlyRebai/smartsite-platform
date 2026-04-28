@@ -566,7 +566,7 @@ const materialService = {
     }
   },
   // ========== SMART SCORE ==========
-  async calculateMultipleSitesScores(sites: Array<{ id: string; name: string; progress: number }>): Promise<any[]> {
+ /* async calculateMultipleSitesScores(sites: Array<{ id: string; name: string; progress: number }>): Promise<any[]> {
     try {
       const response = await apiClient.post('/smart-score/sites', { sites });
       return response.data;
@@ -585,9 +585,9 @@ const materialService = {
       throw error;
     }
   },
-
+*/
   // ✅ Nouvelle méthode pour récupérer toutes les prédictions IA
-  async getAllPredictions(): Promise<any[]> {
+  /*async getAllPredictions(): Promise<any[]> {
     try {
       const response = await apiClient.get('/predictions');
       return response.data;
@@ -595,7 +595,7 @@ const materialService = {
       console.error('Erreur getAllPredictions:', error);
       throw error;
     }
-  },
+  },*/
 
 };
 

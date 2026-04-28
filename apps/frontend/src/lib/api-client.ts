@@ -1,6 +1,7 @@
 import { useAuthStore } from "@/app/store/authStore";
 import axios from "axios";
 import { AUTH_API_URL } from "@/lib/auth-api-url";
+import { API_GATEWAY_URL } from "@/lib/api-gateway-url";
 import { PAYMENT_API_URL } from "@/lib/payment-api-url";
 
 export const FACTURE_API_URL = import.meta.env.VITE_PAYMENT_URL 
@@ -8,8 +9,7 @@ export const FACTURE_API_URL = import.meta.env.VITE_PAYMENT_URL
   : "http://localhost:3007/api/factures";
 
 export const planingApi = axios.create({
-  baseURL:
-    process.env.VITE_PLANNING_URL || "http://localhost:3002",
+  baseURL: `${API_GATEWAY_URL}/planning`,
   headers: {
     "Content-Type": "application/json",
   },
@@ -21,9 +21,7 @@ export const userApi = axios.create({
 });
 
 export const NotificationApi = axios.create({
-  baseURL:
-    process.env.VITE_NOTIFICATION_URL ||
-    "http://localhost:3004/notification",
+  baseURL: `${API_GATEWAY_URL}/notification/notification`,
   headers: {
     "Content-Type": "application/json",
   },

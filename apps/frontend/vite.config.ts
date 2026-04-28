@@ -5,21 +5,17 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [
-    // The React and Tailwind plugins are both required for Make, even if
-    // Tailwind is not being actively used – do not remove them
     react(),
     tailwindcss(),
   ],
   resolve: {
     alias: {
-      // Alias @ to the src directory
       "@": path.resolve(__dirname, "./src"),
     },
   },
   define: {
     "process.env": {},
   },
-  // Dev : optionnel — si vous appelez des URLs relatives `/api/...`, elles sont proxifiées vers l’API locale (même port que VITE_AUTH_API_URL / PORT Nest).
   server: {
     host: "0.0.0.0",
     port: 5173,
@@ -85,8 +81,10 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
-  },
 
-  // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
+  },
   assetsInclude: ["**/*.svg", "**/*.csv"],
+  optimizeDeps: {
+    exclude: ['web-ifc'],
+  },
 });

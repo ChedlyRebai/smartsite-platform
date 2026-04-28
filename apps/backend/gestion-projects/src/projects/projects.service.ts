@@ -16,7 +16,7 @@ export class ProjectsService {
     private readonly projectModel: Model<ProjectDocument>,
   ) {}
 
-  async findAll(filter: ProjectFilterDto): Promise<{ projects: Project[]; total: number; page: number; limit: number }> {
+  async findAll(filter: ProjectFilterDto): Promise<{ projects: Project[]; total: number; page: number; limit: number; totalPages: number }> {
     const query: any = {};
 
     if (filter.search) {
@@ -84,8 +84,9 @@ export class ProjectsService {
       .exec();
 
     const total = await this.projectModel.countDocuments(query);
+    const totalPages = Math.ceil(total / limit);
 
-    return { projects, total, page, limit };
+    return { projects, total, page, limit, totalPages };
   }
 
   async findOne(id: string): Promise<Project> {

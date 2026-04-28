@@ -47,6 +47,7 @@ import { trackAuditEvent } from "../../action/audit.action";
 import { incidentMatchesSearch } from "../../utils/incidentSearchFilter";
 import { incidentEvents } from "../../components/IncidentBadge";
 import { NotificationPanel } from "../../components/NotificationPanel";
+import { IncidentBiDashboard } from "../../components/IncidentBiDashboard";
 
 // API pour rechercher des utilisateurs
 const api = axios.create({
@@ -60,9 +61,9 @@ const incidentsApi = axios.create({
   timeout: 10000,
 });
 
-// API pour les projets (port 3007)
+// API pour les projets (port 3010)
 const projectsApi = axios.create({
-  baseURL: "http://localhost:3007",
+  baseURL: "https://smartsite-gestion-projects-latest.onrender.com",
   timeout: 10000,
 });
 
@@ -367,7 +368,7 @@ export default function Incidents() {
             allUsers.length,
           );
         }, 500);
-      } catch (error) {
+      } catch (error:any) {
         console.error(
           "❌ Frontend: Erreur lors du chargement des utilisateurs:",
           error,
@@ -415,7 +416,7 @@ export default function Incidents() {
             hasAssignment: !!(incident.assignedTo || incident.assignedUserRole),
           });
         });
-      } catch (error) {
+      } catch (error:any) {
         console.error(
           "❌ Frontend: Erreur lors du chargement des incidents:",
           error,
@@ -474,7 +475,7 @@ export default function Incidents() {
         setProjects(projectsData);
         console.log("✅ Frontend: Projets chargés:", projectsData.length);
         console.log("🔍 Premier projet:", projectsData[0]);
-      } catch (error) {
+      } catch (error:any) {
         console.error("❌ Frontend: Erreur chargement projets:", error);
         console.error("   URL:", error.config?.url);
         console.error("   Status:", error.response?.status);
@@ -505,7 +506,7 @@ export default function Incidents() {
         setSites(sitesData);
         console.log("✅ Frontend: Sites chargés:", sitesData.length);
         console.log("🔍 Premier site:", sitesData[0]);
-      } catch (error) {
+      } catch (error:any) {
         console.error("❌ Frontend: Erreur chargement sites:", error);
         console.error("   URL:", error.config?.url);
         setSites([]);
@@ -594,7 +595,7 @@ export default function Incidents() {
       });
 
       toast.success("Incident enregistré avec succès dans la base de données");
-    } catch (error) {
+    } catch (error:any) {
       console.error(
         "❌ Frontend: Erreur lors de la sauvegarde de l'incident:",
         error,
@@ -876,14 +877,15 @@ Pour toute question, veuillez contacter l'administrateur système.
                   Report Incident
                 </Button>
               </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
+              <DialogContent className="sm:max-w-2xl max-h-[90vh] p-0 flex flex-col">
+                <DialogHeader className="px-6 pt-6 pb-4 border-b bg-background">
                   <DialogTitle>Report New Incident</DialogTitle>
                   <DialogDescription>
                     Document a safety or quality incident
                   </DialogDescription>
                 </DialogHeader>
-                <div className="space-y-4">
+                <div className="flex-1 overflow-y-auto px-6 py-4">
+                  <div className="space-y-4 pb-2">
                   <div className="space-y-2">
                     <Label htmlFor="incident-type">Incident Type</Label>
                     <Select
@@ -1234,6 +1236,7 @@ Pour toute question, veuillez contacter l'administrateur système.
                   >
                     Report Incident
                   </Button>
+                  </div>
                 </div>
               </DialogContent>
             </Dialog>
@@ -1244,12 +1247,20 @@ Pour toute question, veuillez contacter l'administrateur système.
           )}
         </div>
       </div>
-      <Card>
-        <CardHeader>
+
+      <IncidentBiDashboard userCin={user?.cin} />
+
+      <Card className="border-none shadow-lg">
+        <CardHeader className="bg-gradient-to-r from-slate-50 to-blue-50 border-b">
           <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5" />
-              All Incidents
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500 to-red-500">
+                <AlertTriangle className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-slate-500">Incidents</p>
+                <h2 className="text-lg font-bold text-slate-900">All Incidents List</h2>
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <div className="relative">
@@ -1264,101 +1275,89 @@ Pour toute question, veuillez contacter l'administrateur système.
             </div>
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
+        <CardContent className="pt-6">
+          <div className="space-y-4">
             {currentIncidents.length === 0 ? (
-              <p className="text-center py-8 text-gray-500">
-                {searchTerm
-                  ? "Aucun incident trouvé pour cette recherche"
-                  : "No incidents reported"}
-              </p>
+              <div className="text-center py-12">
+                <AlertTriangle className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-500">
+                  {searchTerm
+                    ? "Aucun incident trouvé pour cette recherche"
+                    : "No incidents reported"}
+                </p>
+              </div>
             ) : (
               currentIncidents.map((incident) => (
                 <div
                   key={incident.id}
-                  className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                  className="p-5 border border-slate-200 rounded-xl hover:shadow-md hover:border-blue-300 cursor-pointer transition-all duration-200 bg-white hover:bg-slate-50"
                   onClick={() => handleShowIncidentDetails(incident)}
                 >
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 dark:text-white">
-                        {(incident as any).title?.toUpperCase() ||
-                          (incident as any).incidentName?.toUpperCase() ||
-                          incident.type.toUpperCase()}
-                      </h3>
-                      <p className="text-sm text-gray-600 mt-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="font-bold text-slate-900 text-base">
+                          {(incident as any).title?.toUpperCase() ||
+                            (incident as any).incidentName?.toUpperCase() ||
+                            incident.type.toUpperCase()}
+                        </h3>
+                      </div>
+                      <p className="text-sm text-slate-600 mb-3">
                         {incident.description}
                       </p>
-                      <div className="text-xs text-gray-400 mt-2 space-y-1">
-                        <p>Reported by: {incident.reportedBy}</p>
-                        <p>{new Date(incident.createdAt).toLocaleString()}</p>
-                        {/* Debug: Afficher les champs d'assignation */}
-                        {process.env.NODE_ENV === "development" && (
-                          <div className="text-xs bg-yellow-50 p-1 rounded mt-1">
-                            <div>
-                              Debug assignedTo: "{(incident as any).assignedTo}"
-                            </div>
-                            <div>
-                              Debug assignedUserRole: "
-                              {(incident as any).assignedUserRole}"
-                            </div>
-                            <div>
-                              Debug hasAssignment:{" "}
-                              {
-                                !!(
-                                  (incident as any).assignedTo ||
-                                  (incident as any).assignedUserRole
-                                )
-                              }
-                            </div>
-                          </div>
-                        )}
-                        {(incident as any).assignedTo && (
-                          <div className="flex items-center gap-1 text-blue-600">
-                            <User className="h-3 w-3" />
-                            <span>
-                              Assigné à: {(incident as any).assignedTo}
-                            </span>
-                            {(incident as any).assignedUserRole && (
-                              <Badge variant="outline" className="text-xs ml-1">
-                                {(incident as any).assignedUserRole}
-                              </Badge>
-                            )}
-                          </div>
-                        )}
+                      <div className="flex flex-wrap gap-4 text-xs text-slate-500">
+                        <span>Reported by: <span className="font-medium text-slate-700">{incident.reportedBy}</span></span>
+                        <span>{new Date(incident.createdAt).toLocaleString()}</span>
                       </div>
+                      {(incident as any).assignedTo && (
+                        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100">
+                          <User className="h-4 w-4 text-blue-600" />
+                          <span className="text-sm font-medium text-blue-600">
+                            Assigné à: {(incident as any).assignedTo}
+                          </span>
+                          {(incident as any).assignedUserRole && (
+                            <Badge className="ml-2 bg-blue-100 text-blue-800 hover:bg-blue-200">
+                              {(incident as any).assignedUserRole}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
                     </div>
-                    <div className="flex items-center gap-2 ml-4">
+                    <div className="flex flex-col items-end gap-2 ml-4">
                       <Badge
-                        variant={
-                          incident.severity === "critical" ||
-                            incident.severity === "high"
-                            ? "destructive"
-                            : incident.severity === "medium"
-                              ? "default"
-                              : "secondary"
-                        }
+                        className={`font-semibold ${
+                          incident.severity === "critical"
+                            ? "bg-red-600 text-white hover:bg-red-700"
+                            : incident.severity === "high"
+                              ? "bg-orange-500 text-white hover:bg-orange-600"
+                              : incident.severity === "medium"
+                                ? "bg-amber-500 text-white hover:bg-amber-600"
+                                : "bg-green-600 text-white hover:bg-green-700"
+                        }`}
                       >
                         {incident.severity}
                       </Badge>
                       <Badge
-                        variant={
-                          incident.status === "resolved" ||
-                            incident.status === "closed"
-                            ? "secondary"
-                            : "destructive"
-                        }
+                        className={`font-semibold ${
+                          incident.status === "resolved"
+                            ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                            : incident.status === "closed"
+                              ? "bg-slate-600 text-white hover:bg-slate-700"
+                              : incident.status === "investigating"
+                                ? "bg-blue-600 text-white hover:bg-blue-700"
+                                : "bg-red-600 text-white hover:bg-red-700"
+                        }`}
                       >
                         {incident.status}
                       </Badge>
                     </div>
                   </div>
-                  <div className="flex gap-2 mt-3">
+                  <div className="flex gap-2 pt-3 border-t border-slate-100">
                     {incident.status !== "resolved" &&
                       incident.status !== "closed" && (
                         <Button
                           size="sm"
-                          variant="outline"
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleResolveIncident(String(incident.id));
@@ -1369,7 +1368,7 @@ Pour toute question, veuillez contacter l'administrateur système.
                       )}
                     <Button
                       size="sm"
-                      variant="outline"
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleExportPDF(incident);

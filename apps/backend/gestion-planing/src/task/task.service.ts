@@ -25,7 +25,12 @@ export class TaskService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    await this.notificationClient.connect();
+    try {
+      await this.notificationClient.connect();
+      this.logger.log('Kafka connected successfully');
+    } catch (error) {
+      this.logger.warn('Kafka not available — notifications disabled. Start Kafka to enable.');
+    }
   }
 
   private normalizeAssignedTeams(assignedTeams: unknown): string[] {

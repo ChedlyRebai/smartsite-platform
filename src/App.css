@@ -1,3 +1,51 @@
+@layer stream, stream-overrides;
+@import "stream-chat-react/dist/css/index.css";
+
+@layer stream-overrides {
+  .str-chat {
+    /* Accent color — used by mentions, read receipts, attachment actions, focus states, etc. */
+    --accent-primary: #0d47a1;
+
+    /* Message bubble colors */
+    --chat-bg-outgoing: #1e3a8a;
+    --chat-bg-attachment-outgoing: #0d47a1;
+    --chat-bg-incoming: #dbeafe;
+    --chat-text-outgoing: #ffffff;
+    --chat-reply-indicator-outgoing: #93c5fd;
+
+    /* Link colors (inside bubbles and elsewhere) */
+    --text-link: #1e40af;
+    --chat-text-link: #93c5fd;
+
+    /* Panel backgrounds */
+    --background-core-elevation-1: #dbeafe; /* channel list and surrounding panels */
+    --background-core-app: #c7dafc; /* message list background */
+
+    /* Focus ring */
+    --border-utility-focused: #1e40af;
+
+    /* Radii — the SDK uses --radius-max / --button-radius-full for pill shapes */
+    --radius-max: 8px;
+    --button-radius-full: 6px;
+  }
+}
+
+
+
+.str-chat__container {
+  height: 100vh;
+  width: 100%;
+}
+
+.str-chat ,.messaging , .str-chat__channel {
+  width: 100%;
+
+}
+
+#str-chat__channel{
+  width: 100%;
+  margin: 0 auto;
+}
 :root {
   --bg: #0f172a;
   --bg-soft: #1e293b;

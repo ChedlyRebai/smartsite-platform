@@ -14,7 +14,6 @@ import {
   Menu,
   X,
   Bell,
-  User,
   ChevronDown,
   Type,
   Plus,
@@ -28,14 +27,6 @@ import {
 import { Slider } from "../components/ui/slider";
 import { useAuthStore } from "../store/authStore";
 import { Button } from "../components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../components/ui/dropdown-menu";
 import { Badge } from "../components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { getMynavigationAccess } from "../action/permission.action";
@@ -47,7 +38,6 @@ import { getCurrentUser } from "../action/auth.action";
 
 import { ThemeButton } from "../components/ThemeButton";
 import { LanguageSelector } from "../components/LanguageSelector";
-import { NavbarAccessibilityButton } from "../components/NavbarAccessibilityButton";
 import { useTranslation } from "../hooks/useTranslation";
 import SiteInfoPanel from "../components/SiteInfoPanel";
 import {
@@ -63,9 +53,7 @@ export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [logoAvailable, setLogoAvailable] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [expandedModules, setExpandedModules] = useState<Set<string>>(
-    () => new Set(["materials"]),
-  );
+  const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
   const [fontSize, setFontSize] = useState(() => parseInt(localStorage.getItem('fontSize') || '100'));
 
   const toggleModuleExpanded = (moduleKey: string) => {
@@ -133,6 +121,8 @@ export default function DashboardLayout() {
     queryFn: () => getMynavigationAccess(),
   });
 
+  console.log(navigationItems, "navigationItems in DashboardLayout");
+
   // Utiliser useEffect pour la redirection
   useEffect(() => {
     if (!user) {
@@ -182,6 +172,7 @@ export default function DashboardLayout() {
   // }
 
 
+  console.log(currentUser, "currentUser in DashboardLayout");
   //const unreadNotifications = mockNotifications.filter((n) => !n.read).length;
 
   const { data: unredDataLength, isError: UnreadError } = useQuery({
@@ -287,9 +278,8 @@ export default function DashboardLayout() {
               </span>
             </div>
 
-            {/* Accessibility, Theme & Language Selectors */}
-            <NavbarAccessibilityButton />
-            
+            {/* Theme & Language Selectors */}
+
             {/* Font Size Control */}
             <Popover>
               <PopoverTrigger asChild>
@@ -367,57 +357,6 @@ export default function DashboardLayout() {
                 </Badge>
               )}
             </Button>
-
-
-            {/* User Menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="gap-2">
-                  {/* <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-gradient-to-br from-blue-600 to-green-600 text-white">
-                      {getInitials(user?.firstName || "", user?.lastName || "")}
-                    </AvatarFallback>
-                  </Avatar> */}
-                  <div className="hidden md:flex flex-col items-start">
-                    <span className="text-sm font-semibold">
-                      {user?.firstName} {user?.lastName}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {/* {roleLabels[user.role]} */}
-                    </span>
-                  </div>
-                  <ChevronDown
-                    aria-hidden="true"
-                    className="h-4 w-4 hidden md:block"
-                  />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>
-                  <div className="flex flex-col">
-                    <span>
-                      {user.firstName} {user.lastName}
-                    </span>
-                    <span className="text-xs font-normal text-muted-foreground">
-                      {user.cin}
-                    </span>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate("/profile")}>
-                  <User className="mr-2 h-4 w-4" />
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={handleLogout}
-                  className="text-red-600"
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
       </header>
@@ -428,32 +367,31 @@ export default function DashboardLayout() {
           id="primary-sidebar"
           aria-label="Sidebar navigation"
           className={cn(
-            "fixed lg:sticky top-0 left-0 z-30 h-screen w-[13.5rem] sm:w-56 flex flex-col shrink-0",
-            "bg-sidebar/95 text-sidebar-foreground border-r border-sidebar-border/80 backdrop-blur-sm",
+            "fixed lg:sticky top-0 left-0 z-30 h-screen w-72 xl:w-80 flex flex-col",
+            "bg-sidebar text-sidebar-foreground border-r border-sidebar-border",
             "transition-transform duration-300 ease-out lg:translate-x-0",
-            "pt-14 lg:pt-4 shadow-sm",
+            "pt-16 lg:pt-7 shadow-sm",
             sidebarOpen ? "translate-x-0" : "-translate-x-full",
           )}
         >
-          <nav className="px-1.5 py-1 space-y-0.5 overflow-y-auto flex-1 min-h-0">
+          <nav className="px-5 py-5 space-y-4 overflow-y-auto flex-1 lg:px-6 lg:py-6">
             {!isLoading &&
               groupedNavigationItems.map((section: PermissionModuleGroup) => {
                 const isExpanded = expandedModules.has(section.key);
                 return (
                   <div key={section.key} className="group">
                     <button
-                      type="button"
                       onClick={() => toggleModuleExpanded(section.key)}
-                      className="w-full flex items-center justify-between gap-1 px-2 py-1 rounded-md transition-colors text-left hover:bg-sidebar-accent/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring/40"
+                      className="w-full flex items-center justify-between px-4 py-3.5 rounded-xl transition-all duration-200 ease-out text-left group-hover:bg-accent/30 focus:outline-none"
                       aria-expanded={isExpanded}
                       aria-controls={`module-${section.key}`}
                     >
-                      <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground/85 leading-tight line-clamp-2">
+                      <p className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground/75 group-hover:text-muted-foreground transition-colors duration-200 leading-5">
                         {t(`sidebar.modules.${section.key}`, section.label)}
                       </p>
                       <ChevronDown
                         aria-hidden="true"
-                        className={`h-3.5 w-3.5 text-muted-foreground/55 transition-transform duration-200 shrink-0 ${
+                        className={`h-4 w-4 text-muted-foreground/50 transition-all duration-300 ease-out shrink-0 ${
                           isExpanded ? "rotate-180" : ""
                         }`}
                       />
@@ -462,7 +400,7 @@ export default function DashboardLayout() {
                     {isExpanded && (
                       <div
                         id={`module-${section.key}`}
-                        className="mt-0.5 space-y-px pl-1 border-l border-sidebar-border/50 ml-2"
+                        className="mt-2.5 space-y-2 pl-2.5 overflow-hidden animate-in fade-in duration-200"
                       >
                         {section.items.map((item: Permission, idx: number) => {
                           const isActive =
@@ -476,19 +414,24 @@ export default function DashboardLayout() {
                               onClick={() => setSidebarOpen(false)}
                               style={{
                                 animation: isExpanded
-                                  ? `fadeInSlide 260ms ease-out ${idx * 24}ms forwards`
+                                  ? `fadeInSlide 300ms ease-out ${idx * 30}ms forwards`
                                   : "none",
                                 opacity: isExpanded ? 1 : 0,
-                                transform: isExpanded ? "translateY(0)" : "translateY(-6px)",
+                                transform: isExpanded ? "translateY(0)" : "translateY(-8px)",
                               }}
-                              className={cn(
-                                "group/link flex items-center gap-1.5 pl-2 pr-1.5 py-1 rounded-r-md text-[11px] leading-snug transition-colors border-l-2 -ml-px",
+                              className={`
+                              flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
+                              ${
                                 isActive
-                                  ? "border-primary bg-primary/10 text-primary font-medium"
-                                  : "border-transparent text-muted-foreground hover:bg-sidebar-accent/20 hover:text-sidebar-foreground",
-                              )}
+                                  ? "bg-linear-to-r from-blue-500/90 to-green-500/90 text-white shadow-sm hover:shadow-md"
+                                  : "text-muted-foreground hover:text-foreground hover:bg-muted/60 active:bg-muted"
+                              }
+                            `}
                             >
-                              <span className="truncate min-w-0">{getSidebarLabel(item)}</span>
+                              <div className={`h-1.5 w-1.5 rounded-full shrink-0 ${
+                                isActive ? "bg-white/70" : "bg-muted-foreground/40 group-hover/link:bg-muted-foreground/60"
+                              }`} />
+                              <span className="font-medium text-sm leading-6 truncate">{getSidebarLabel(item)}</span>
                             </Link>
                           );
                         })}
@@ -511,14 +454,13 @@ export default function DashboardLayout() {
               }
             }
           `}</style>
-          <div className="p-2 mt-auto border-t border-sidebar-border/80 bg-sidebar/90">
+          <div className="px-5 py-5 mt-auto border-t border-sidebar-border bg-sidebar/95 backdrop-blur-sm lg:px-6">
             <Button
               variant="outline"
-              size="sm"
               onClick={handleLogout}
-              className="w-full h-8 text-[11px] justify-center gap-1.5 border-destructive/25 text-destructive hover:bg-destructive/10 hover:text-destructive"
+              className="w-full justify-center gap-2 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
             >
-              <LogOut className="h-3.5 w-3.5" />
+              <LogOut className="h-4 w-4" />
               {t("userMenu.logout", "Logout")}
             </Button>
           </div>
@@ -542,9 +484,11 @@ export default function DashboardLayout() {
           id="main-content"
           data-app-content
           tabIndex={-1}
-          className="flex-1 p-6 lg:p-8 outline-none"
+          className="flex-1 px-4 py-6 sm:px-6 lg:px-10 lg:py-8 xl:px-14 outline-none"
         >
-          <Outlet />
+          <div className="mx-auto w-full max-w-[1440px] space-y-6 lg:space-y-8">
+            <Outlet />
+          </div>
         </main>
       </div>
 

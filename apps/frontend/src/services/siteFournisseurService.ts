@@ -1,5 +1,6 @@
 // frontend/src/services/siteFournisseurService.ts
 import axios from 'axios';
+import { any } from 'zod';
 
 // Use relative paths that will be proxied to the correct backend ports
 const SITE_API_URL = '/api/gestion-sites';
@@ -130,7 +131,7 @@ export const siteService = {
       }
       
       console.log('🔍 Sites extracted:', sites);
-      console.log('🔍 Sample site with coordinates:', sites.find(s => s.coordinates));
+      console.log('🔍 Sample site with coordinates:', sites.find((s: any) => s.coordinates));
       return sites.map(transformSite);
     } catch (error: any) {
       console.error('❌ Erreur getSites:', error.message, error.response?.data);
@@ -191,7 +192,7 @@ export const fournisseurService = {
         fournisseurs = response.data.data;
       }
       console.log('🔍 Fournisseurs extracted:', fournisseurs);
-      console.log('🔍 Sample fournisseur with coordinates:', fournisseurs.find(f => f.coordinates));
+      console.log('🔍 Sample fournisseur with coordinates:', fournisseurs.find((f: any) => f.coordinates));
       return fournisseurs.map(transformFournisseur);
     } catch (error: any) {
       console.error('❌ Erreur getFournisseurs:', error.message, error.response?.data);

@@ -15,7 +15,6 @@ import Planning from "./pages/planning/MyTask";
 import Team from "./pages/team/Team";
 import MyTeamMembers from "./pages/team/MyTeamMembers";
 import Clients from "./pages/clients/Clients";
-import Materials from "./pages/materials/Materials";
 import Finance from "./pages/finance/Finance";
 import Payments from "./pages/payments/Payments";
 import QHSE from "./pages/qhse/QHSE";
@@ -76,6 +75,7 @@ import ResourceOptimizationDashboard from "@/features/resource-optimization/page
 import AccountBanned from "./pages/AccountBanned";
 import { useAuthStore } from "./store/authStore";
 import RoutePermissionGuard from "./components/shared/RoutePermissionGuard";
+import Materials from "./pages/materials/Materials";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -124,9 +124,9 @@ export const router = createBrowserRouter([
     path: "/",
     element: (
       <ProtectedRoute>
-        <RoutePermissionGuard>
+        
           <DashboardLayout />
-        </RoutePermissionGuard>
+        
       </ProtectedRoute>
     ),
     children: [
@@ -199,14 +199,7 @@ export const router = createBrowserRouter([
         path: "projects",
         element: <Projects />,
       },
-      {
-        path: "projects",
-        element: <Projects />,
-      },
-      {
-        path: "projects",
-        element: <Projects />,
-      },
+      
       {
         path: "projects/:projectId/sites",
         element: <Sites />,
@@ -381,6 +374,10 @@ export const router = createBrowserRouter([
       },
       {
         path: "resource-optimization/:siteId",
+        element: <ResourceOptimizationDashboard />,
+      },
+      {
+        path: "power-bi/:siteId",
         element: <ResourceOptimizationDashboard />,
       },
     ],

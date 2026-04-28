@@ -3,6 +3,7 @@ import { GESTION_SITE_API_URL } from "../../lib/gestion-site-api-url";
 import { PLANNING_API_URL } from "../../lib/planning-api-url";
 import { INCIDENT_API_URL } from "../../lib/incident-api-url";
 import { AUTH_API_URL } from "../../lib/auth-api-url";
+import { GESTION_PROJECTS_API_URL } from "../../lib/gestion-projects-api-url";
 
 const sitesApi = axios.create({
   baseURL: GESTION_SITE_API_URL,
@@ -10,6 +11,10 @@ const sitesApi = axios.create({
 
 const projectsApi = axios.create({
   baseURL: PLANNING_API_URL,
+});
+
+const gestionProjectsApi = axios.create({
+  baseURL: GESTION_PROJECTS_API_URL,
 });
 
 const incidentsApi = axios.create({
@@ -29,7 +34,7 @@ function getAuthToken(): string | null {
   }
 }
 
-[sitesApi, projectsApi, incidentsApi].forEach((api) => {
+[sitesApi, projectsApi, incidentsApi, gestionProjectsApi].forEach((api) => {
   api.interceptors.request.use((config) => {
     const token = getAuthToken();
     if (token) {
@@ -44,6 +49,7 @@ export interface Site {
   name: string;
   localisation: string;
   status: string;
+  progress?: number;
   budget: number;
   createdAt: string;
   updatedAt: string;
@@ -109,6 +115,7 @@ function normalizeSite(raw: Record<string, unknown>): Site {
       raw.localisation ?? raw.adresse ?? raw.address ?? "",
     ),
     status: String(raw.status ?? (raw.isActif ? "in_progress" : "planning")),
+    progress: Number(raw.progress ?? 0),
     budget: Number(raw.budget ?? 0),
     createdAt: String(raw.createdAt ?? new Date().toISOString()),
     updatedAt: String(raw.updatedAt ?? new Date().toISOString()),
@@ -154,6 +161,68 @@ function normalizeUser(raw: Record<string, unknown>): TeamMember {
   };
 }
 
+function extractRows(data: unknown): Record<string, unknown>[] {
+  if (Array.isArray(data)) return data as Record<string, unknown>[];
+
+  const payload = data as
+    | {
+        data?: unknown;
+        items?: unknown;
+        value?: unknown;
+        projects?: unknown;
+      }
+    | undefined;
+
+  if (!payload) return [];
+  if (Array.isArray(payload.data)) return payload.data as Record<string, unknown>[];
+  if (Array.isArray(payload.items)) return payload.items as Record<string, unknown>[];
+  if (Array.isArray(payload.value)) return payload.value as Record<string, unknown>[];
+  if (Array.isArray(payload.projects)) {
+    return payload.projects as Record<string, unknown>[];
+  }
+  return [];
+}
+
+function logRequestIssue(context: string, error: unknown): void {
+  if (axios.isAxiosError(error)) {
+    const status = error.response?.status;
+    const code = error.code;
+
+    if (code === "ERR_NETWORK" || code === "ECONNREFUSED") {
+      console.warn(`${context}: service unreachable`);
+      return;
+    }
+
+    if (status != null) {
+      console.warn(`${context}: HTTP ${status}`);
+      return;
+    }
+  }
+
+  console.error(context, error);
+}
+
+function normalizeProject(raw: Record<string, unknown>): Project {
+  const id = raw._id ?? raw.id;
+  return {
+    _id: String(id ?? ""),
+    name: String(raw.name ?? raw.nom ?? "Project"),
+    description: String(raw.description ?? ""),
+    status: String(raw.status ?? "planning"),
+    progress: Number(raw.progress ?? 0),
+    priority: String(raw.priority ?? "medium"),
+    deadline: String(raw.deadline ?? raw.endDate ?? new Date().toISOString()),
+    assignedTo: String(raw.assignedTo ?? ""),
+    assignedToName: String(raw.assignedToName ?? raw.projectManagerName ?? ""),
+    assignedToRole: String(raw.assignedToRole ?? "project_manager"),
+    tasks: Array.isArray(raw.tasks) ? raw.tasks : [],
+    createdAt: String(raw.createdAt ?? new Date().toISOString()),
+    updatedAt: String(raw.updatedAt ?? new Date().toISOString()),
+    projectManagerName: String(raw.projectManagerName ?? raw.assignedToName ?? ""),
+    budget: Number(raw.budget ?? 0),
+  };
+}
+
 export const getSites = async (): Promise<Site[]> => {
   try {
     const response = await sitesApi.get("/gestion-sites?limit=100");
@@ -169,12 +238,21 @@ export const getSites = async (): Promise<Site[]> => {
 export const getProjects = async (): Promise<Project[]> => {
   try {
     const response = await projectsApi.get("/projects/all");
-    const data = response.data;
-    return Array.isArray(data) ? data : [];
+    const rows = extractRows(response.data);
+    if (rows.length > 0) return rows.map(normalizeProject);
   } catch (error) {
-    console.error("Error fetching projects:", error);
-    return [];
+    logRequestIssue("Error fetching projects from planning API", error);
   }
+
+  try {
+    const response = await gestionProjectsApi.get("/projects");
+    const rows = extractRows(response.data);
+    if (rows.length > 0) return rows.map(normalizeProject);
+  } catch (error) {
+    logRequestIssue("Error fetching projects from gestion-projects API", error);
+  }
+
+  return [];
 };
 
 export const getUrgentTasks = async (): Promise<Task[]> => {
@@ -183,7 +261,7 @@ export const getUrgentTasks = async (): Promise<Task[]> => {
     const data = response.data;
     return Array.isArray(data) ? data : [];
   } catch (error) {
-    console.error("Error fetching urgent tasks:", error);
+    logRequestIssue("Error fetching urgent tasks", error);
     return [];
   }
 };

@@ -1,7 +1,8 @@
 /**
- * Base URL de l’API **gestion-site** (Nest), avec préfixe `/api`.
- * Défaut backend : PORT=3001 → http://localhost:3001/api
- * (Le port 3002 est utilisé par le service *planning*, pas les chantiers.)
+ * Base URL de l'API **gestion-site**.
+ * - Via API Gateway : http://localhost:9001/sites  (gateway ajoute /api en interne)
+ * - Direct          : http://localhost:3001/api
  */
 export const GESTION_SITE_API_URL =
-  import.meta.env.VITE_GESTION_SITE_URL ?? "http://localhost:3001/api";
+  (import.meta.env.VITE_GESTION_SITE_URL as string | undefined)?.trim() ??
+  'http://localhost:9001/sites';
