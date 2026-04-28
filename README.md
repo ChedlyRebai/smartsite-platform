@@ -52,7 +52,7 @@ Monorepo structure:
 
 ## Contributors
 - PIDEV Student Team – SmartSite
-- Add team member names and roles here:
+- team member:
   - Chedly Rebai
   - Asma Mhamdi
   - Ghada Bannouri
