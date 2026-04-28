@@ -14,6 +14,7 @@ import {
 } from '@nestjs/common';
 import { OrdersService } from './services/orders.service';
 import { CreateMaterialOrderDto, UpdateOrderStatusDto } from './dto/order.dto';
+import { GetAllOrdersTrackingDto } from './dto/orders-tracking.dto';
 
 @Controller('orders')
 export class OrdersController {
@@ -32,7 +33,6 @@ export class OrdersController {
     console.log('📥 materialId raw:', createOrderDto.materialId);
     console.log('📥 materialId JSON:', JSON.stringify(createOrderDto.materialId));
     
-    // Check if the DTO has the correct properties
     const dtoAsAny = createOrderDto as any;
     console.log('📥 Via any - materialId:', dtoAsAny.materialId);
     console.log('📥 Via any - destinationSiteId:', dtoAsAny.destinationSiteId);
@@ -58,6 +58,23 @@ export class OrdersController {
     return this.ordersService.getAllOrders({ status, siteId, supplierId });
   }
 
+  // ========== NOUVEAU ENDPOINT POUR LE SUIVI GLOBAL ==========
+
+  @Get('tracking/global')
+  async getGlobalOrdersTracking(
+    @Query('status') status?: string,
+    @Query('siteId') siteId?: string,
+    @Query('supplierId') supplierId?: string,
+  ) {
+    this.logger.log(`🗺️ Récupération du suivi global des commandes`);
+    const filters: GetAllOrdersTrackingDto = {};
+    if (status) filters.status = status;
+    if (siteId) filters.siteId = siteId;
+    if (supplierId) filters.supplierId = supplierId;
+    
+    return this.ordersService.getGlobalOrdersTracking(filters);
+  }
+
   @Get('active')
   async getActiveOrders() {
     return this.ordersService.getActiveOrders();
@@ -81,7 +98,7 @@ export class OrdersController {
   @HttpCode(HttpStatus.OK)
   async updateProgress(
     @Param('id') id: string,
-    @Body() body: { currentPosition: { lat: number; lng: number } },
+    @Body() body: { currentPosition: { lat: number; lng: number; progress?: number; remainingTime?: number } },
   ) {
     return this.ordersService.updateOrderProgress(id, body.currentPosition);
   }
@@ -90,5 +107,46 @@ export class OrdersController {
   @HttpCode(HttpStatus.OK)
   async simulateDelivery(@Param('id') id: string) {
     return this.ordersService.simulateDelivery(id);
+  }
+
+  // ========== ENDPOINTS PAIEMENT ==========
+
+  @Post(':id/payment')
+  @HttpCode(HttpStatus.OK)
+  async processPayment(
+    @Param('id') id: string,
+    @Body() body: { paymentMethod: 'cash' | 'card' },
+  ) {
+    this.logger.log(`💳 Payment request for order ${id}, method: ${body.paymentMethod}`);
+    return this.ordersService.processArrivalPayment(id, body.paymentMethod);
+  }
+
+  @Post(':id/payment/confirm')
+  @HttpCode(HttpStatus.OK)
+  async confirmPayment(
+    @Param('id') id: string,
+    @Body() body: { paymentIntentId: string },
+  ) {
+    this.logger.log(`✅ Confirm payment for order ${id}`);
+    return this.ordersService.confirmCardPayment(id, body.paymentIntentId);
+  }
+
+  @Get(':id/payment/status')
+  @HttpCode(HttpStatus.OK)
+  async getPaymentStatus(@Param('id') id: string) {
+    this.logger.log(`📊 Get payment status for order ${id}`);
+    return this.ordersService.getPaymentStatus(id);
+  }
+
+  // ========== ENDPOINT FACTURE ==========
+
+  @Post(':id/invoice')
+  @HttpCode(HttpStatus.OK)
+  async generateInvoice(
+    @Param('id') id: string,
+    @Body() body: { siteNom: string },
+  ) {
+    this.logger.log(`📄 Generate invoice for order ${id}`);
+    return this.ordersService.generateInvoiceForOrder(id, body.siteNom);
   }
 }

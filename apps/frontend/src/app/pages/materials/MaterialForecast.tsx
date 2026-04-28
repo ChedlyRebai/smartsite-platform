@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
+import { Button } from '../../../components/ui/button';
 import { TrendingUp, Calendar, Package, RefreshCw } from 'lucide-react';
 import materialService, { Material } from '../../../services/materialService';
 import {
@@ -90,7 +90,6 @@ export default function MaterialForecast({ materials }: MaterialForecastProps) {
 
           {forecast && !loading && (
             <div className="space-y-4">
-              {/* Statistiques */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <Card>
                   <CardContent className="pt-6">
@@ -118,7 +117,6 @@ export default function MaterialForecast({ materials }: MaterialForecastProps) {
                 </Card>
               </div>
 
-              {/* Date de commande */}
               <Card>
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
@@ -133,7 +131,6 @@ export default function MaterialForecast({ materials }: MaterialForecastProps) {
                 </CardContent>
               </Card>
 
-              {/* Graphique */}
               {chartData.length > 0 && (
                 <Card>
                   <CardHeader>
@@ -160,7 +157,6 @@ export default function MaterialForecast({ materials }: MaterialForecastProps) {
                 </Card>
               )}
 
-              {/* Boutons d'action */}
               <div className="flex gap-2">
                 <Button 
                   className="flex-1 bg-green-600 hover:bg-green-700"

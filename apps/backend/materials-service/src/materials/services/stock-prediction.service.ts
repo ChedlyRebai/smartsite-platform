@@ -1,5 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
 import * as tf from '@tensorflow/tfjs';
+import { MaterialFlowLog } from '../entities/material-flow-log.entity';
 
 export interface StockPredictionResult {
   materialId: string;
@@ -25,7 +28,9 @@ export class StockPredictionService {
   private readonly logger = new Logger(StockPredictionService.name);
   private model: tf.LayersModel | null = null;
 
-  constructor() {
+  constructor(
+    @InjectModel(MaterialFlowLog.name) private flowLogModel: Model<any>,
+  ) {
     this.initializeModel();
   }
 
@@ -152,6 +157,73 @@ export class StockPredictionService {
   }
 
   /**
+   * Calculer le taux de consommation réel depuis l'historique MaterialFlowLog
+   */
+  private async calculateRealConsumptionRate(
+    materialId: string,
+    siteId?: string
+  ): Promise<number> {
+    try {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      // Récupérer les sorties des 30 derniers jours
+      const matchQuery: any = {
+        materialId: new Types.ObjectId(materialId),
+        type: 'OUT',
+        timestamp: { $gte: thirtyDaysAgo },
+      };
+      
+      if (siteId) {
+        matchQuery.siteId = new Types.ObjectId(siteId);
+      }
+
+      const outMovements = await this.flowLogModel.aggregate([
+        { $match: matchQuery },
+        {
+          $group: {
+            _id: null,
+            totalOut: { $sum: '$quantity' },
+            count: { $sum: 1 },
+          },
+        },
+      ]);
+
+      if (outMovements.length === 0 || outMovements[0].totalOut === 0) {
+        this.logger.log(`📊 Pas d'historique de consommation pour ${materialId}, utilisation taux par défaut`);
+        return 2; // 2 unités par heure par défaut
+      }
+
+      // Calculer le taux horaire
+      const totalOut = outMovements[0].totalOut;
+      const hoursIn30Days = 30 * 24; // 720 heures
+      const hourlyRate = totalOut / hoursIn30Days;
+
+      this.logger.log(`📊 Taux calculé depuis historique: ${hourlyRate.toFixed(2)} unités/h (${totalOut} unités sur 30 jours)`);
+      
+      return Math.max(0.5, hourlyRate); // Minimum 0.5 unités/heure
+    } catch (error) {
+      this.logger.error(`❌ Erreur calcul taux consommation: ${error.message}`);
+      return 2; // Fallback
+    }
+  }
+
+  /**
+   * Obtenir le multiplicateur de consommation selon la météo
+   */
+  private getWeatherMultiplier(condition: string): number {
+    const multipliers: Record<string, number> = {
+      'sunny': 1.0,    // Conditions normales
+      'cloudy': 1.05,  // Légère augmentation
+      'rainy': 1.3,    // Pluie = travail plus lent = plus de consommation
+      'stormy': 1.5,   // Orage = conditions difficiles
+      'snowy': 1.4,    // Neige = conditions difficiles
+      'windy': 1.1,    // Vent = légère augmentation
+    };
+    return multipliers[condition] || 1.0;
+  }
+
+  /**
    * Calculate hours until stock reaches a specific level (mathematical calculation)
    */
   private calculateHoursToLevel(
@@ -202,11 +274,31 @@ export class StockPredictionService {
     minimumStock: number,
     maximumStock: number,
     reorderPoint: number,
-    consumptionRate: number
+    consumptionRate: number,
+    siteId?: string,
+    weatherCondition?: 'sunny' | 'rainy' | 'stormy' | 'cloudy' | 'snowy' | 'windy'
   ): Promise<StockPredictionResult> {
     try {
-      // Ensure consumption rate is at least 1 (minimum 1 unit/hour)
-      const effectiveRate = Math.max(1, consumptionRate);
+      // Calculer le vrai taux de consommation depuis l'historique
+      let effectiveRate = await this.calculateRealConsumptionRate(materialId, siteId);
+      
+      // Si un taux est fourni et > 0, l'utiliser
+      if (consumptionRate > 0) {
+        effectiveRate = consumptionRate;
+      }
+      
+      // Ajuster selon la météo
+      let weatherMultiplier = 1.0;
+      if (weatherCondition) {
+        weatherMultiplier = this.getWeatherMultiplier(weatherCondition);
+        effectiveRate = effectiveRate * weatherMultiplier;
+        this.logger.log(`🌤️ Ajustement météo (${weatherCondition}): x${weatherMultiplier} → ${effectiveRate.toFixed(2)} unités/h`);
+      }
+      
+      this.logger.log(`📊 Taux de consommation effectif: ${effectiveRate.toFixed(2)} unités/h`);
+      
+      // Ensure consumption rate is at least 0.5 (minimum 0.5 unit/hour)
+      effectiveRate = Math.max(0.5, effectiveRate);
       
       // Generate simulation data for visualization
       const simulationData: { hour: number; stock: number }[] = [];

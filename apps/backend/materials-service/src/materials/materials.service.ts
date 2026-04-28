@@ -4,6 +4,7 @@ import {
   BadRequestException,
   Logger,
   Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -21,6 +22,8 @@ import { QRGeneratorUtil } from '../common/utils/qr-generator.util';
 import * as path from 'path';
 import * as fs from 'fs';
 import { ImportExportService } from './services/import-export.service';
+import { MaterialFlowService } from './services/material-flow.service';
+import { MLTrainingEnhancedService } from './services/ml-training-enhanced.service';
 
 @Injectable()
 export class MaterialsService {
@@ -33,6 +36,9 @@ export class MaterialsService {
     private readonly httpService: HttpService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly materialsGateway: MaterialsGateway,
+    @Inject(forwardRef(() => MaterialFlowService))
+    private readonly materialFlowService: MaterialFlowService,
+    private readonly mlTrainingService: MLTrainingEnhancedService,
   ) {}
 
   async create(createMaterialDto: CreateMaterialDto, userId: string | null): Promise<Material> {
@@ -87,6 +93,13 @@ export class MaterialsService {
       await this.cacheManager.del('materials_dashboard');
       await this.cacheManager.del('materials_alerts');
 
+      // Enregistrer les mouvements dans material-flow-log si présents
+      await this.recordFlowFromMaterialData(
+        savedMaterial._id.toString(),
+        createMaterialDto as any,
+        userId || 'system'
+      );
+
       return savedMaterial;
     } catch (error) {
       this.logger.error(`❌ Erreur création: ${error.message}`);
@@ -127,7 +140,7 @@ export class MaterialsService {
       }
 
       if (lowStock !== undefined) {
-        filter.$expr = { $lte: ['$quantity', '$reorderPoint'] };
+        filter.$expr = { $lte: ['$quantity', '$stockMinimum'] };
       }
 
       const skip = (page - 1) * limit;
@@ -151,12 +164,26 @@ export class MaterialsService {
         if (siteIdStr) {
           try {
             const siteResponse = await this.httpService.axiosRef.get(
-              `http://localhost:3001/api/sites/${siteIdStr}`
+              `http://localhost:3001/api/gestion-sites/${siteIdStr}`
             );
             siteData = siteResponse.data;
+            
+            this.logger.log(`📍 Site ${siteIdStr}: ${siteData?.nom}, Coords: ${JSON.stringify(siteData?.coordinates)}`);
           } catch (e) {
-            console.log(`Could not fetch site ${siteIdStr}:`, e.message);
+            this.logger.warn(`Could not fetch site ${siteIdStr}:`, e.message);
           }
+        }
+        
+        // Extraire les coordonnées correctement (le champ s'appelle "coordinates" dans l'entité Site)
+        let siteCoordinates: { lat: number; lng: number } | null = null;
+        if (siteData?.coordinates?.lat && siteData?.coordinates?.lng) {
+          siteCoordinates = {
+            lat: siteData.coordinates.lat,
+            lng: siteData.coordinates.lng
+          };
+          this.logger.log(`✅ Coordonnées extraites: lat=${siteCoordinates.lat}, lng=${siteCoordinates.lng}`);
+        } else {
+          this.logger.warn(`⚠️ Aucune coordonnée trouvée pour le site ${siteIdStr}`);
         }
         
         return {
@@ -164,7 +191,9 @@ export class MaterialsService {
           siteId: siteIdStr || '',
           siteName: siteData?.nom || siteData?.name || (siteIdStr ? 'Site assigné' : 'Non assigné'),
           siteAddress: siteData?.adresse || siteData?.address || '',
-          siteCoordinates: siteData?.coordinates || null,
+          siteCoordinates: siteCoordinates,
+          stockMinimum: material.stockMinimum,
+          needsReorder: material.quantity <= material.stockMinimum,
         };
       }));
 
@@ -212,10 +241,90 @@ export class MaterialsService {
       this.materialsGateway.emitMaterialUpdate('materialUpdated', updated);
       await this.cacheManager.del('materials_dashboard');
       
+      // Enregistrer les mouvements dans material-flow-log si présents
+      await this.recordFlowFromMaterialData(
+        id,
+        updateMaterialDto as any,
+        userId || 'system'
+      );
+      
       return updated;
     } catch (error) {
       this.logger.error(`❌ Erreur mise à jour: ${error.message}`);
       throw error;
+    }
+  }
+
+  /**
+   * Enregistrer les mouvements d'entrée/sortie dans material-flow-log avec détection d'anomalies
+   */
+  private async recordFlowFromMaterialData(
+    materialId: string,
+    data: any,
+    userId: string
+  ): Promise<void> {
+    try {
+      const material = await this.findOne(materialId);
+      const siteId = data.siteId || material.siteId?.toString();
+      
+      if (!siteId) {
+        this.logger.warn(`⚠️ Pas de siteId pour enregistrer les mouvements du matériau ${materialId}`);
+        return;
+      }
+
+      if (!this.materialFlowService) {
+        this.logger.warn(`⚠️ MaterialFlowService non disponible`);
+        return;
+      }
+
+      // Enregistrer l'entrée si présente
+      if (data.stockEntree && data.stockEntree > 0) {
+        await this.materialFlowService.recordMovement({
+          materialId,
+          siteId,
+          type: 'IN' as any,
+          quantity: data.stockEntree,
+          reason: data.reason || 'Ajout de stock via formulaire',
+          reference: data.reference,
+        }, userId);
+        this.logger.log(`✅ Entrée enregistrée: ${data.stockEntree} unités`);
+      }
+
+      // Enregistrer la sortie si présente ET détecter les anomalies
+      if (data.stockSortie && data.stockSortie > 0) {
+        await this.materialFlowService.recordMovement({
+          materialId,
+          siteId,
+          type: 'OUT' as any,
+          quantity: data.stockSortie,
+          reason: data.reason || 'Sortie de stock via formulaire',
+          reference: data.reference,
+        }, userId);
+        this.logger.log(`✅ Sortie enregistrée: ${data.stockSortie} unités`);
+
+        // 🚨 DÉTECTION D'ANOMALIES AUTOMATIQUE pour les sorties
+        try {
+          const anomalyResult = await this.mlTrainingService.detectConsumptionAnomaly(materialId, data.stockSortie);
+          
+          if (anomalyResult.isAnomaly) {
+            this.logger.warn(`🚨 ANOMALIE DÉTECTÉE: ${anomalyResult.message}`);
+            
+            // Émettre une alerte via WebSocket
+            this.materialsGateway.emitMaterialUpdate('anomalyDetected', {
+              materialId,
+              materialName: material.name,
+              anomalyResult,
+              timestamp: new Date(),
+            });
+          }
+        } catch (mlError) {
+          this.logger.error(`❌ Erreur détection anomalie: ${mlError.message}`);
+          // Ne pas faire échouer l'opération principale
+        }
+      }
+    } catch (error) {
+      this.logger.error(`❌ Erreur enregistrement mouvements: ${error.message}`);
+      // Ne pas faire échouer l'opération principale
     }
   }
 
@@ -339,19 +448,21 @@ export class MaterialsService {
   async getLowStockMaterials(): Promise<Material[]> {
     return this.materialModel
       .find({
-        $expr: { $lte: ['$quantity', '$reorderPoint'] },
+        $expr: { $lte: ['$quantity', '$stockMinimum'] },
       })
       .exec();
   }
 
-  async getExpiringMaterials(): Promise<Material[]> {
-    const thirtyDaysFromNow = new Date();
-    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+  async getExpiringMaterials(days: number = 30): Promise<Material[]> {
+    const targetDate = new Date();
+    targetDate.setDate(targetDate.getDate() + days);
 
     return this.materialModel
       .find({
-        expiryDate: { $lte: thirtyDaysFromNow, $gte: new Date() },
+        expiryDate: { $lte: targetDate, $gte: new Date() },
+        status: 'active',
       })
+      .sort({ expiryDate: 1 })
       .exec();
   }
 
@@ -367,9 +478,23 @@ export class MaterialsService {
           const axios = require('axios');
           const siteResponse = await axios.get(`http://localhost:3001/api/gestion-sites/${siteIdStr}`);
           siteData = siteResponse.data;
+          
+          this.logger.log(`📍 Site ${siteIdStr}: ${siteData?.nom}, Coords: ${JSON.stringify(siteData?.coordinates)}`);
         } catch (e) {
-          console.log(`Could not fetch site ${siteIdStr}:`, e.message);
+          this.logger.warn(`Could not fetch site ${siteIdStr}:`, e.message);
         }
+      }
+      
+      // Extraire les coordonnées correctement (le champ s'appelle "coordinates" dans l'entité Site)
+      let siteCoordinates: { lat: number; lng: number } | null = null;
+      if (siteData?.coordinates?.lat && siteData?.coordinates?.lng) {
+        siteCoordinates = {
+          lat: siteData.coordinates.lat,
+          lng: siteData.coordinates.lng
+        };
+        this.logger.log(`✅ Coordonnées extraites: lat=${siteCoordinates.lat}, lng=${siteCoordinates.lng}`);
+      } else {
+        this.logger.warn(`⚠️ Aucune coordonnée trouvée pour le site ${siteIdStr}`);
       }
       
       return {
@@ -379,19 +504,18 @@ export class MaterialsService {
         category: material.category,
         quantity: material.quantity,
         unit: material.unit,
-        reorderPoint: material.reorderPoint,
+        reorderPoint: material.stockMinimum,
         minimumStock: material.minimumStock,
         maximumStock: material.maximumStock,
+        stockMinimum: material.stockMinimum,
         status: material.status,
-        location: material.location,
         barcode: material.barcode,
         qrCode: material.qrCode,
-        manufacturer: material.manufacturer,
         siteId: siteIdStr,
         siteName: siteData?.nom || (siteIdStr ? 'Site assigné' : 'Non assigné'),
         siteAddress: siteData?.adresse || '',
-        siteCoordinates: siteData?.coordinates || null,
-        needsReorder: material.quantity <= material.reorderPoint,
+        siteCoordinates: siteCoordinates,
+        needsReorder: material.quantity <= material.stockMinimum,
       };
     }));
 
@@ -504,7 +628,7 @@ export class MaterialsService {
         categoryStats,
       ] = await Promise.all([
         this.materialModel.countDocuments(),
-        this.materialModel.countDocuments({ $expr: { $lte: ['$quantity', '$reorderPoint'] } }),
+        this.materialModel.countDocuments({ $expr: { $lte: ['$quantity', '$stockMinimum'] } }),
         this.materialModel.countDocuments({ quantity: 0 }),
         this.materialModel.aggregate([
           { $group: { _id: '$category', count: { $sum: 1 }, totalQuantity: { $sum: '$quantity' } } },
@@ -544,17 +668,17 @@ export class MaterialsService {
       const alerts: StockAlert[] = [];
 
       for (const material of materials) {
-        if (material.quantity <= material.reorderPoint) {
+        if (material.quantity <= material.stockMinimum) {
           alerts.push({
             materialId: material._id.toString(),
             materialName: material.name,
             currentQuantity: material.quantity,
-            threshold: material.reorderPoint,
+            threshold: material.stockMinimum,
             type: material.quantity === 0 ? 'out_of_stock' : 'low_stock',
             severity: material.quantity === 0 ? 'high' : 'medium',
             message: material.quantity === 0 
               ? `${material.name} est en rupture !` 
-              : `${material.name} est en dessous du seuil (${material.quantity}/${material.reorderPoint})`,
+              : `${material.name} est en dessous du seuil (${material.quantity}/${material.stockMinimum})`,
             date: new Date(),
           });
         }
@@ -703,10 +827,10 @@ export class MaterialsService {
           materialId: material._id.toString(),
           materialName: material.name,
           currentQuantity: material.quantity,
-          threshold: material.reorderPoint,
+          threshold: material.stockMinimum,
           type: 'low_stock',
           severity: material.quantity === 0 ? 'high' : 'medium',
-          message: `${material.name} nécessite une commande (${material.quantity}/${material.reorderPoint})`,
+          message: `${material.name} nécessite une commande (${material.quantity}/${material.stockMinimum})`,
           date: new Date(),
         };
 
@@ -735,7 +859,7 @@ export class MaterialsService {
     if (data.minimumStock >= data.maximumStock) {
       throw new BadRequestException('Le stock minimum doit être inférieur au stock maximum');
     }
-    if (data.reorderPoint < data.minimumStock || data.reorderPoint > data.maximumStock) {
+    if (data.stockMinimum && (data.stockMinimum < data.minimumStock || data.stockMinimum > data.maximumStock)) {
       throw new BadRequestException('Le point de commande doit être entre le stock minimum et maximum');
     }
   }
@@ -770,6 +894,25 @@ export class MaterialsService {
     } catch (error) {
       this.logger.error(`❌ Erreur export PDF: ${error.message}`);
       throw new BadRequestException(`Erreur lors de l'export PDF: ${error.message}`);
+    }
+  }
+
+  async getConsumptionHistory(query: any): Promise<any[]> {
+    try {
+      // Récupérer depuis ConsumptionHistory
+      const ConsumptionHistory = this.materialModel.db.model('ConsumptionHistory');
+      
+      const entries = await ConsumptionHistory.find(query)
+        .sort({ timestamp: -1, createdAt: -1 })
+        .limit(1000)
+        .lean()
+        .exec();
+
+      this.logger.log(`✅ Found ${entries.length} consumption history entries`);
+      return entries;
+    } catch (error) {
+      this.logger.error(`❌ Error fetching consumption history: ${error.message}`);
+      return [];
     }
   }
 }

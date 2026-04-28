@@ -63,7 +63,7 @@ export class SiteMaterialsService {
     const siteMaterials = await this.getMaterialsBySite(siteId);
     
     return siteMaterials.filter(material => {
-      return material.quantity <= material.reorderPoint;
+      return material.quantity <= material.stockMinimum;
     });
   }
 
@@ -77,11 +77,31 @@ export class SiteMaterialsService {
         throw new BadRequestException('ID de site invalide');
       }
       
+      // Gérer les nouveaux champs V2 avec valeurs par défaut
+      const stockExistant = createMaterialDto.stockExistant ?? 0;
+      const stockEntree = createMaterialDto.stockEntree ?? 0;
+      const stockSortie = createMaterialDto.stockSortie ?? 0;
+      const stockMinimum = createMaterialDto.stockMinimum ?? createMaterialDto.minimumStock ?? 10;
+      const stockActuel = createMaterialDto.stockActuel ?? (stockExistant + stockEntree - stockSortie);
+      
       const materialData: any = {
         ...createMaterialDto,
-        siteId: new Types.ObjectId(siteId),  // Set the primary site
+        siteId: new Types.ObjectId(siteId),
         assignedSites: [new Types.ObjectId(siteId)],
         status: 'active',
+        
+        // Nouveaux champs V2
+        stockExistant,
+        stockEntree,
+        stockSortie,
+        stockMinimum,
+        stockActuel,
+        needsReorder: stockActuel < stockMinimum,
+        
+        // Garder quantity synchronisé pour compatibilité
+        quantity: stockActuel,
+        minimumStock: stockMinimum,
+        maximumStock: createMaterialDto.maximumStock ?? stockMinimum * 2,
       };
 
       if (userId && Types.ObjectId.isValid(userId)) {
@@ -90,10 +110,10 @@ export class SiteMaterialsService {
 
       const material = new this.materialModel(materialData);
       const saved = await material.save();
-      this.logger.log(`✅ Material created with site ${siteId}: ${saved._id}`);
+      this.logger.log(`✅ Material created with site ${siteId}: ${saved._id} (stock: ${stockActuel})`);
       return saved;
     } catch (error) {
-      this.logger.error(`❌ Error creating material with site: ${error.message}`);
+      this.logger.error(`❌ Error creating material with site: ${error.message}`, error.stack);
       throw error;
     }
   }
@@ -118,8 +138,8 @@ export class SiteMaterialsService {
       material,
       isAvailable,
       currentStock: material.quantity,
-      reorderPoint: material.reorderPoint,
-      needsReorder: material.quantity <= material.reorderPoint,
+      reorderPoint: material.stockMinimum,
+      needsReorder: material.quantity <= material.stockMinimum,
     };
   }
 
@@ -135,9 +155,23 @@ export class SiteMaterialsService {
           const axios = require('axios');
           const siteResponse = await axios.get(`http://localhost:3001/api/gestion-sites/${siteIdStr}`);
           siteData = siteResponse.data;
+          
+          this.logger.log(`📍 Site ${siteIdStr}: ${siteData?.nom}, Coords: ${JSON.stringify(siteData?.coordinates)}`);
         } catch (e) {
-          console.log(`Could not fetch site ${siteIdStr}:`, e.message);
+          this.logger.warn(`Could not fetch site ${siteIdStr}:`, e.message);
         }
+      }
+      
+      // Extraire les coordonnées correctement (le champ s'appelle "coordinates" dans l'entité Site)
+      let siteCoordinates: { lat: number; lng: number } | null = null;
+      if (siteData?.coordinates?.lat && siteData?.coordinates?.lng) {
+        siteCoordinates = {
+          lat: siteData.coordinates.lat,
+          lng: siteData.coordinates.lng
+        };
+        this.logger.log(`✅ Coordonnées extraites: lat=${siteCoordinates.lat}, lng=${siteCoordinates.lng}`);
+      } else {
+        this.logger.warn(`⚠️ Aucune coordonnée trouvée pour le site ${siteIdStr}`);
       }
       
       return {
@@ -147,18 +181,19 @@ export class SiteMaterialsService {
         category: material.category,
         quantity: material.quantity,
         unit: material.unit,
-        reorderPoint: material.reorderPoint,
+        reorderPoint: material.stockMinimum,
         minimumStock: material.minimumStock,
         maximumStock: material.maximumStock,
+        stockMinimum: material.stockMinimum,
         status: material.status,
         siteId: siteIdStr,
         siteName: siteData?.nom || siteData?.name || (siteIdStr ? 'Site assigné' : 'Non assigné'),
         siteAddress: siteData?.adresse || '',
-        siteCoordinates: siteData?.coordinates || null,
+        siteCoordinates: siteCoordinates,
         assignedSites: material.assignedSites?.map((id: Types.ObjectId) => ({
           id: id.toString(),
         })) || [],
-        needsReorder: material.quantity <= material.reorderPoint,
+        needsReorder: material.quantity <= material.stockMinimum,
       };
     }));
     
@@ -201,7 +236,7 @@ export class SiteMaterialsService {
 
   async getLowStockMaterialsBySite(siteId: string): Promise<Material[]> {
     const materials = await this.getMaterialsBySite(siteId);
-    return materials.filter(m => m.quantity <= m.reorderPoint);
+    return materials.filter(m => m.quantity <= m.stockMinimum);
   }
 
   async getOutOfStockMaterialsBySite(siteId: string): Promise<Material[]> {

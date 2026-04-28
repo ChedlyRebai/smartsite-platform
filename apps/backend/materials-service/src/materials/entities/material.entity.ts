@@ -33,7 +33,7 @@ export class Material extends Document {
   @Prop({ required: true })
   name: string;
 
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true, unique: true, index: true })
   code: string;
 
   @Prop({ required: true })
@@ -51,14 +51,29 @@ export class Material extends Document {
   @Prop({ required: true, min: 0 })
   maximumStock: number;
 
-  @Prop({ required: true, min: 0 })
-  reorderPoint: number;
+  // ========== NOUVEAU SYSTÈME DE STOCK V2 ==========
+  @Prop({ type: Number, default: 0, min: 0 })
+  stockEntree: number; // Quantité entrée dans le chantier
+
+  @Prop({ type: Number, default: 0, min: 0 })
+  stockSortie: number; // Quantité sortie du chantier
+
+  @Prop({ type: Number, default: 0, min: 0 })
+  stockExistant: number; // Quantité déjà présente
+
+  @Prop({ type: Number, default: 0, min: 0 })
+  stockMinimum: number; // Stock minimum requis
+
+  // Stock actuel calculé: stockExistant + stockEntree - stockSortie
+  @Prop({ type: Number, default: 0, min: 0 })
+  stockActuel: number;
+
+  // Besoin de commander ?
+  @Prop({ type: Boolean, default: false })
+  needsReorder: boolean;
 
   @Prop({ type: Number, min: 0, max: 1 })
   qualityGrade: number;
-
-  @Prop({ type: String })
-  location: string;
 
   @Prop({ type: String })
   barcode: string;
@@ -74,9 +89,6 @@ export class Material extends Document {
 
   @Prop({ type: Object })
   priceHistory?: Record<string, number>;
-
-  @Prop({ type: String })
-  manufacturer: string;
 
   @Prop({ type: Date })
   expiryDate: Date;
@@ -99,7 +111,7 @@ export class Material extends Document {
   @Prop({ type: Object })
   specifications: Record<string, any>;
 
-  @Prop({ type: Types.ObjectId, ref: 'Site', required: false })
+  @Prop({ type: Types.ObjectId, ref: 'Site', required: false, index: true })
   siteId: Types.ObjectId;
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Project' }] })
@@ -122,6 +134,32 @@ export class Material extends Document {
 
   @Prop({ type: [String] })
   images?: string[];
+
+  @Prop({ type: String })
+  projectType?: string; // 'residential', 'commercial', 'infrastructure', 'industrial'
+
+  // ========== MOUVEMENTS RÉCENTS ==========
+  @Prop({ type: Date })
+  lastMovementDate?: Date;
+
+  @Prop({ type: String })
+  lastMovementType?: 'IN' | 'OUT';
+
+  // ========== SMART SCORE FIELDS ==========
+  @Prop({ type: Number, default: 0, min: 0, max: 100 })
+  consumptionScore?: number;
+
+  @Prop({ type: Number, default: 0, min: 0, max: 100 })
+  stockHealthScore?: number;
+
+  @Prop({ type: Number, default: 0, min: 0, max: 100 })
+  anomaliesScore?: number;
+
+  @Prop({ type: Number, default: 0, min: 0, max: 100 })
+  siteHealthScore?: number;
+
+  @Prop({ type: Date })
+  lastScoreUpdate?: Date;
 }
 
 export const MaterialSchema = SchemaFactory.createForClass(Material);
@@ -130,3 +168,4 @@ MaterialSchema.index({ category: 1 });
 MaterialSchema.index({ status: 1 });
 MaterialSchema.index({ assignedSites: 1 });
 MaterialSchema.index({ siteId: 1 });
+MaterialSchema.index({ siteHealthScore: -1 });

@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional, IsEnum, Min, Max, IsArray, IsObject, IsDate } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsEnum, Min, Max, IsArray, IsObject, IsDate, IsBoolean } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateMaterialDto {
@@ -14,22 +14,58 @@ export class CreateMaterialDto {
   @IsString()
   unit: string;
 
+  // ========== ANCIENS CHAMPS (optionnels pour compatibilité) ==========
+  @IsOptional()
   @IsNumber()
   @Min(0)
-  quantity: number;
+  quantity?: number;
 
+  @IsOptional()
   @IsNumber()
   @Min(0)
-  minimumStock: number;
+  minimumStock?: number;
 
+  @IsOptional()
   @IsNumber()
   @Min(0)
-  maximumStock: number;
+  maximumStock?: number;
 
+  @IsOptional()
   @IsNumber()
   @Min(0)
-  reorderPoint: number;
+  reorderPoint?: number;
 
+  // ========== NOUVEAUX CHAMPS V2 ==========
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  stockExistant?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  stockEntree?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  stockSortie?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  stockMinimum?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  stockActuel?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  needsReorder?: boolean;
+
+  // ========== AUTRES CHAMPS ==========
   @IsOptional()
   @IsNumber()
   @Min(0)

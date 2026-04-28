@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -18,9 +18,10 @@ import { toast } from "sonner";
 import orderService, { MaterialOrder } from "../../../services/orderService";
 import materialService, { Material } from "../../../services/materialService";
 import { siteService, fournisseurService, Site, Fournisseur } from "../../../services/siteFournisseurService";
-import { Button } from "../../components/ui/button";
-import { Badge } from "../../components/ui/badge";
-import { AlertTriangle, Package, Truck, MapPin, Navigation, Clock, Mic, Send, X } from "lucide-react";
+import { Button } from "../../../components/ui/button";
+import { Badge } from "../../../components/ui/badge";
+import { AlertTriangle, Package, Truck, MapPin, Navigation, Clock, Mic, Send, X, CheckCircle } from "lucide-react";
+import PaymentDialog from "./PaymentDialog";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 
@@ -46,12 +47,6 @@ const supplierIcon = L.icon({
   iconUrl: "/warehouse.png",
   iconSize: [45, 45],
   iconAnchor: [22, 45],
-});
-
-const destinationIcon = L.icon({
-  iconUrl: "/destination.png",
-  iconSize: [40, 40],
-  iconAnchor: [20, 40],
 });
 
 interface LowStockMaterial {
@@ -82,68 +77,153 @@ interface OrderMapProps {
   onOrderConfirmed?: () => void;
 }
 
+// Fonction pour générer des points intermédiaires
+function generateIntermediatePoints(
+  start: [number, number],
+  end: [number, number],
+  steps: number
+): [number, number][] {
+  const points: [number, number][] = [];
+  for (let i = 0; i <= steps; i++) {
+    const lat = start[0] + (end[0] - start[0]) * (i / steps);
+    const lng = start[1] + (end[1] - start[1]) * (i / steps);
+    points.push([lat, lng]);
+  }
+  return points;
+}
+
+// Composant RoutingControl avec intervalle pour respecter le temps réel
 function RoutingControl({
   start,
   end,
+  totalDurationMinutes, // Renommé pour être plus clair - cette valeur ne change pas
   onProgress,
   onArrival,
+  onTimeUpdate,
 }: {
   start: [number, number];
   end: [number, number];
+  totalDurationMinutes: number; // Durée totale fixe en minutes
   onProgress?: (progress: number) => void;
   onArrival?: () => void;
+  onTimeUpdate?: (remainingMinutes: number) => void;
 }) {
   const map = useMap();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const truckRef = useRef<L.Marker | null>(null);
+  const polylineRef = useRef<L.Polyline | null>(null);
+  const startTimeRef = useRef<number>(0);
+  const stepsRef = useRef<[number, number][]>([]);
+  const totalDurationMsRef = useRef<number>(0);
+  const isAnimatingRef = useRef<boolean>(false);
+  const onProgressRef = useRef(onProgress);
+  const onArrivalRef = useRef(onArrival);
+  const onTimeUpdateRef = useRef(onTimeUpdate);
 
   useEffect(() => {
-    if (!map) return;
+    onProgressRef.current = onProgress;
+    onArrivalRef.current = onArrival;
+    onTimeUpdateRef.current = onTimeUpdate;
+  }, [onProgress, onArrival, onTimeUpdate]);
 
-    const truck = L.marker(start, { icon: truckIcon }).addTo(map);
-    truckRef.current = truck;
+  useEffect(() => {
+    if (!map || !start || !end || totalDurationMinutes <= 0) return;
 
-    const routing = L.Routing.control({
-      waypoints: [L.latLng(...start), L.latLng(...end)],
-      addWaypoints: false,
-      draggableWaypoints: false,
-      routeWhileDragging: false,
-      showAlternatives: false,
-      lineOptions: {
-        styles: [{ color: "#2563eb", weight: 5 }],
-      },
-    }).addTo(map);
+    // Nettoyer l'animation précédente
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
 
-    routing.on("routesfound", (e: any) => {
-      const coords = e.routes[0].coordinates;
-      let i = 0;
-      const totalSteps = coords.length;
-      const speedMs = 200;
+    if (truckRef.current) map.removeLayer(truckRef.current);
+    if (polylineRef.current) map.removeLayer(polylineRef.current);
 
-      intervalRef.current = setInterval(() => {
-        if (!truckRef.current) return;
-
-        if (i < coords.length) {
-          truckRef.current.setLatLng([coords[i].lat, coords[i].lng]);
-          const progress = Math.round((i / totalSteps) * 100);
-          onProgress?.(progress);
-          i++;
-        } else {
-          clearInterval(intervalRef.current!);
-          onArrival?.();
-        }
-      }, speedMs);
-    });
-
+    // Créer les points intermédiaires
+    stepsRef.current = generateIntermediatePoints(start, end, 200);
+    
+    // Ajouter le camion
+    truckRef.current = L.marker(start, { icon: truckIcon }).addTo(map);
+    
+    // Ajuster la vue
     const bounds = L.latLngBounds([start, end]);
     map.fitBounds(bounds, { padding: [50, 50] });
 
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      map.removeControl(routing);
-      if (truckRef.current) map.removeLayer(truckRef.current);
+    // Dessiner la ligne du trajet
+    polylineRef.current = L.polyline([start, end], {
+      color: "#2563eb",
+      weight: 4,
+      opacity: 0.7,
+      dashArray: "10, 10"
+    }).addTo(map);
+
+    // Démarrer l'animation
+    startTimeRef.current = Date.now();
+    isAnimatingRef.current = true;
+    totalDurationMsRef.current = totalDurationMinutes * 60 * 1000;
+    const totalSteps = stepsRef.current.length - 1;
+
+    console.log(`🎬 Animation démarrée - Durée totale FIXE: ${totalDurationMinutes} minutes (${totalDurationMsRef.current} ms = ${totalDurationMsRef.current / 1000} secondes)`);
+    console.log(`📍 Départ: [${start[0]}, ${start[1]}]`);
+    console.log(`📍 Arrivée: [${end[0]}, ${end[1]}]`);
+
+    // Fonction de mise à jour
+    const updatePosition = () => {
+      if (!isAnimatingRef.current) return;
+      
+      const elapsed = Date.now() - startTimeRef.current;
+      let progressRatio = elapsed / totalDurationMsRef.current;
+      
+      // S'assurer que progressRatio ne dépasse pas 1
+      if (progressRatio > 1) progressRatio = 1;
+      
+      const targetStep = Math.floor(progressRatio * totalSteps);
+      
+      // Calculer le temps restant en minutes
+      const remainingMs = Math.max(0, totalDurationMsRef.current - elapsed);
+      const remainingMinutes = remainingMs / (60 * 1000);
+      
+      // Mettre à jour l'affichage du temps restant
+      onTimeUpdateRef.current?.(remainingMinutes);
+      
+      // Mettre à jour la position du camion
+      if (targetStep >= 0 && targetStep <= totalSteps && truckRef.current) {
+        const position = stepsRef.current[targetStep];
+        truckRef.current.setLatLng(position);
+        const progressPercent = (targetStep / totalSteps) * 100;
+        onProgressRef.current?.(progressPercent);
+      }
+      
+      // Vérifier si l'animation est terminée
+      if (progressRatio >= 1) {
+        console.log("🏁 Animation terminée!");
+        isAnimatingRef.current = false;
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+        truckRef.current?.setLatLng(end);
+        onProgressRef.current?.(100);
+        onTimeUpdateRef.current?.(0);
+        onArrivalRef.current?.();
+      }
     };
-  }, [map, start, end]);
+
+    // Mettre à jour toutes les secondes
+    intervalRef.current = setInterval(updatePosition, 1000);
+    
+    // Exécuter immédiatement la première mise à jour
+    updatePosition();
+
+    return () => {
+      isAnimatingRef.current = false;
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      if (truckRef.current) map.removeLayer(truckRef.current);
+      if (polylineRef.current) map.removeLayer(polylineRef.current);
+    };
+  }, [map, start, end, totalDurationMinutes]);
 
   return null;
 }
@@ -165,9 +245,11 @@ const formatDistance = (km: number): string => {
 };
 
 const formatTime = (minutes: number): string => {
-  if (minutes < 60) return `${Math.round(minutes)} min`;
+  if (minutes < 0) return "0 min";
+  if (minutes < 1) return `${Math.ceil(minutes * 60)} sec`;
+  if (minutes < 60) return `${Math.ceil(minutes)} min`;
   const hours = Math.floor(minutes / 60);
-  const mins = Math.round(minutes % 60);
+  const mins = Math.ceil(minutes % 60);
   return `${hours}h ${mins}min`;
 };
 
@@ -184,15 +266,19 @@ export default function OrderMap({ open, onClose, orderId, materialName, siteLoc
   const [isArrived, setIsArrived] = useState(false);
   const [progress, setProgress] = useState(0);
   const [remainingTime, setRemainingTime] = useState(0);
-  const [countdownTime, setCountdownTime] = useState(0);
   const [totalDistance, setTotalDistance] = useState(0);
+  const [totalDuration, setTotalDuration] = useState(0); // Durée totale fixe en minutes
   const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState<'orders' | 'stock'>('orders');
   const [messages, setMessages] = useState<{ id: string; sender: string; text: string; type: string }[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [truckPosition, setTruckPosition] = useState<[number, number] | null>(null);
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [paymentOrderData, setPaymentOrderData] = useState<any>(null);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const routingKeyRef = useRef<number>(0);
+  const animationDurationRef = useRef<number>(0); // Stocke la durée pour l'animation
 
   useEffect(() => {
     if (open) {
@@ -200,13 +286,10 @@ export default function OrderMap({ open, onClose, orderId, materialName, siteLoc
       startPolling();
     }
     return () => {
-      if (pollingRef.current) {
-        clearInterval(pollingRef.current);
-      }
+      if (pollingRef.current) clearInterval(pollingRef.current);
     };
   }, [open]);
 
-  // Polling for real-time updates
   const startPolling = () => {
     if (pollingRef.current) clearInterval(pollingRef.current);
     pollingRef.current = setInterval(() => {
@@ -219,14 +302,19 @@ export default function OrderMap({ open, onClose, orderId, materialName, siteLoc
       const order = orders.find((o) => o._id === orderId);
       if (order) {
         setSelectedOrder(order);
+        // Récupérer la durée estimée depuis la commande
+        if (order.estimatedDurationMinutes && order.estimatedDurationMinutes > 0) {
+          const duration = order.estimatedDurationMinutes;
+          setTotalDuration(duration);
+          setRemainingTime(duration);
+          console.log(`📋 Durée estimée depuis la commande: ${duration} minutes`);
+        }
       }
     }
   }, [orderId, orders]);
 
-  // Auto-select site and supplier when order changes
   useEffect(() => {
     if (selectedOrder) {
-      // Helper to convert ID to string
       const toIdString = (id: string | { toString(): string } | undefined): string => {
         if (!id) return '';
         return typeof id === 'string' ? id : id.toString();
@@ -235,51 +323,76 @@ export default function OrderMap({ open, onClose, orderId, materialName, siteLoc
       const orderDestSiteId = toIdString(selectedOrder.destinationSiteId as any);
       const orderSupplierId = toIdString(selectedOrder.supplierId as any);
       
-      // Find the site
       const site = sites.find(s => toIdString(s._id) === orderDestSiteId);
       if (site) {
         setSelectedSite(site);
       }
       
-      // Find the supplier
       const supplier = fournisseurs.find(f => toIdString(f._id) === orderSupplierId);
       if (supplier) {
         setSelectedFournisseur(supplier);
+        if (site?.coordinates && supplier.coordinates) {
+          const dist = calculateHaversineDistance(
+            site.coordinates.lat,
+            site.coordinates.lng,
+            supplier.coordinates.lat,
+            supplier.coordinates.lng
+          );
+          setTotalDistance(dist);
+          
+          // Utiliser la durée estimée de la commande
+          if (selectedOrder.estimatedDurationMinutes && selectedOrder.estimatedDurationMinutes > 0) {
+            setTotalDuration(selectedOrder.estimatedDurationMinutes);
+            if (selectedOrder.status !== 'in_transit') {
+              setRemainingTime(selectedOrder.estimatedDurationMinutes);
+            }
+            console.log(`📏 Distance: ${dist.toFixed(2)} km, Durée commande: ${selectedOrder.estimatedDurationMinutes} minutes`);
+          }
+        }
       }
       
-      // Update truck position and delivery status
       if (selectedOrder.status === 'in_transit' && selectedOrder.currentPosition) {
         setTruckPosition([selectedOrder.currentPosition.lat, selectedOrder.currentPosition.lng]);
         setIsDelivering(true);
         setProgress(selectedOrder.progress || 0);
+        if (selectedOrder.remainingTimeMinutes) {
+          setRemainingTime(selectedOrder.remainingTimeMinutes);
+        }
       } else if (selectedOrder.status === 'delivered') {
         if (!isArrived) {
-          // Just arrived - show notification
           setIsArrived(true);
           setIsDelivering(false);
-          toast.success(`🚚 Commande ${selectedOrder.orderNumber} livrée à ${selectedOrder.destinationSiteName}!`);
+          toast.success(`🚚 Commande ${selectedOrder.orderNumber} livrée!`);
         }
         if (selectedOrder.destinationCoordinates) {
           setTruckPosition([selectedOrder.destinationCoordinates.lat, selectedOrder.destinationCoordinates.lng]);
         }
       } else if (selectedOrder.status === 'pending') {
-        // Reset state for pending orders
         setIsDelivering(false);
         setIsArrived(false);
         setTruckPosition(null);
+        setProgress(0);
+        if (totalDuration > 0) {
+          setRemainingTime(totalDuration);
+        }
       }
     }
-  }, [selectedOrder, sites, fournisseurs]);
+  }, [selectedOrder, sites, fournisseurs, totalDuration]);
 
   const loadData = async () => {
     try {
       setLoading(true);
+      console.log('🔄 Chargement des données Order Map...');
       await Promise.all([
         loadOrders(),
         loadLowStock(),
         loadSites(),
         loadFournisseurs()
       ]);
+      console.log('✅ Données chargées - Orders:', orders.length, 'Sites:', sites.length, 'Fournisseurs:', fournisseurs.length);
+    } catch (error) {
+      console.error('❌ Erreur chargement données Order Map:', error);
+      toast.error('Erreur lors du chargement des données');
     } finally {
       setLoading(false);
     }
@@ -288,12 +401,15 @@ export default function OrderMap({ open, onClose, orderId, materialName, siteLoc
   const loadOrders = async () => {
     try {
       const data = await orderService.getActiveOrders();
-      console.log('📦 Loaded orders:', data.length, data.map(o => ({ id: o._id, status: o.status, progress: o.progress, position: o.currentPosition })));
+      console.log('📦 Commandes actives chargées:', data.length);
+      if (data.length === 0) {
+        console.log('⚠️ Aucune commande active trouvée');
+      }
       setOrders(data);
       if (data.length > 0 && !selectedOrder) {
         setSelectedOrder(data[0]);
+        console.log('✅ Commande sélectionnée:', data[0].orderNumber);
       } else if (selectedOrder && data.length > 0) {
-        // Update existing selected order with fresh data
         const updatedSelected = data.find(o => o._id === selectedOrder._id);
         if (updatedSelected) {
           setSelectedOrder(updatedSelected);
@@ -318,30 +434,34 @@ export default function OrderMap({ open, onClose, orderId, materialName, siteLoc
         siteName: m.siteName,
         siteCoordinates: m.siteCoordinates
       }));
+      console.log('📦 Matériaux en rupture/low stock:', lowStock.length);
       setLowStockMaterials(lowStock);
     } catch (error) {
-      console.error("Erreur chargement low stock:", error);
+      console.error("❌ Erreur chargement low stock:", error);
     }
   };
 
   const loadSites = async () => {
     try {
       const data = await siteService.getActiveSites();
+      console.log('🏗️ Sites actifs chargés:', data.length);
       setSites(data);
       if (data.length > 0 && !selectedSite) {
         setSelectedSite(data[0]);
+        console.log('✅ Site sélectionné:', data[0].nom);
       }
     } catch (error) {
-      console.error("Erreur chargement sites:", error);
+      console.error("❌ Erreur chargement sites:", error);
     }
   };
 
   const loadFournisseurs = async () => {
     try {
       const data = await fournisseurService.getFournisseurs();
+      console.log('🏭 Fournisseurs chargés:', data.length);
       setFournisseurs(data);
     } catch (error) {
-      console.error("Erreur chargement fournisseurs:", error);
+      console.error("❌ Erreur chargement fournisseurs:", error);
     }
   };
 
@@ -364,12 +484,12 @@ export default function OrderMap({ open, onClose, orderId, materialName, siteLoc
           f.coordinates!.lat,
           f.coordinates!.lng
         ),
-        estimatedTime: Math.round(calculateHaversineDistance(
+        estimatedTime: Math.max(1, Math.round(calculateHaversineDistance(
           selectedSite.coordinates!.lat,
           selectedSite.coordinates!.lng,
           f.coordinates!.lat,
           f.coordinates!.lng
-        ) * 2)
+        ) * 2))
       }))
       .sort((a, b) => a.distance - b.distance);
     
@@ -395,69 +515,43 @@ export default function OrderMap({ open, onClose, orderId, materialName, siteLoc
     setSelectedFournisseur(route.supplier);
     setTotalDistance(route.distance);
     setRemainingTime(route.estimatedTime);
+    setTotalDuration(route.estimatedTime);
   };
 
   const handleStartDelivery = async () => {
-    if (!selectedFournisseur || !selectedSite?.coordinates) return;
+    if (!selectedSite || !selectedFournisseur?.coordinates) {
+      toast.error("Coordonnées manquantes");
+      return;
+    }
+
+    // Utiliser la durée totale depuis la commande
+    const duration = totalDuration;
+    
+    if (duration <= 0) {
+      toast.error("Durée invalide");
+      return;
+    }
+
+    console.log(`🚚 DÉMARRAGE LIVRAISON - Durée réelle: ${duration} minutes (${duration * 60} secondes)`);
+    console.log(`📍 Départ (Site): ${selectedSite.coordinates.lat}, ${selectedSite.coordinates.lng}`);
+    console.log(`📍 Arrivée (Fournisseur): ${selectedFournisseur.coordinates.lat}, ${selectedFournisseur.coordinates.lng}`);
+    console.log(`⏱️ La livraison prendra EXACTEMENT ${duration} minutes (${duration * 60} secondes)`);
 
     try {
+      await orderService.updateOrderStatus(orderId!, { status: 'in_transit' });
       setIsDelivering(true);
       setIsArrived(false);
       setProgress(0);
-      setCountdownTime(remainingTime);
+      setRemainingTime(duration);
       
-      const totalSeconds = remainingTime * 60;
-      const intervalMs = 1000;
-      const decrementPerSecond = remainingTime / totalSeconds;
+      // Stocker la durée pour l'animation
+      animationDurationRef.current = duration;
       
-      const countdownInterval = setInterval(() => {
-        setCountdownTime(prev => {
-          if (prev <= 1) {
-            clearInterval(countdownInterval);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, intervalMs);
+      // Incrémenter la clé pour forcer le remontage du RoutingControl
+      routingKeyRef.current += 1;
       
-      const progressInterval = setInterval(() => {
-        setProgress(prev => {
-          if (prev >= 100) {
-            clearInterval(progressInterval);
-            clearInterval(countdownInterval);
-            setIsDelivering(false);
-            setIsArrived(true);
-            toast.success(`🚚 Le camion est arrivé au chantier ${selectedSite.nom}!`);
-            
-            if (typeof window !== 'undefined' && 'Notification' in window) {
-              if (Notification.permission === 'granted') {
-                new Notification('Camion Arrivé', {
-                  body: `Le camion est arrivé au chantier ${selectedSite.nom}`,
-                  icon: '/truck.png'
-                });
-              } else if (Notification.permission !== 'denied') {
-                Notification.requestPermission().then(permission => {
-                  if (permission === 'granted') {
-                    new Notification('Camion Arrivé', {
-                      body: `Le camion est arrivé au chantier ${selectedSite.nom}`,
-                      icon: '/truck.png'
-                    });
-                  }
-                });
-              }
-            }
-            
-            setMessages([...messages, {
-              id: Date.now().toString(),
-              sender: 'System',
-              text: `🚚 Arrivé: Le camion est arrivé au chantier ${selectedSite.nom}`,
-              type: 'arrival'
-            }]);
-            return 100;
-          }
-          return Math.min(100, prev + (100 / totalSeconds));
-        });
-      }, intervalMs);
+      toast.success(`🚚 Livraison démarrée! Durée: ${formatTime(duration)}`);
+      
     } catch (error) {
       console.error("Erreur livraison:", error);
       toast.error("Erreur lors de la simulation de livraison");
@@ -489,17 +583,6 @@ export default function OrderMap({ open, onClose, orderId, materialName, siteLoc
     }
   };
 
-  const handleConfirmArrival = () => {
-    setMessages([...messages, {
-      id: Date.now().toString(),
-      sender: 'System',
-      text: `✅ Confirme: Le truck est arrivée chez ${selectedFournisseur?.nom} et commence le chargement`,
-      type: 'arrival'
-    }]);
-    toast.success("Confirmation d'arrivée envoyée!");
-    onOrderConfirmed?.();
-  };
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending": return "bg-yellow-500";
@@ -520,33 +603,82 @@ export default function OrderMap({ open, onClose, orderId, materialName, siteLoc
     }
   };
 
+  const handleProgressUpdate = (newProgress: number) => {
+    setProgress(newProgress);
+  };
+
+  const handleTimeUpdate = (remainingMinutes: number) => {
+    setRemainingTime(remainingMinutes);
+  };
+
+  const handleArrival = async () => {
+    console.log("🏁 ARRIVÉE DESTINATION");
+    setIsArrived(true);
+    setIsDelivering(false);
+    setProgress(100);
+    setRemainingTime(0);
+    
+    await orderService.updateOrderStatus(orderId!, { status: 'delivered' });
+    toast.success(`✅ Le camion est arrivé chez ${selectedFournisseur?.nom}!`);
+    
+    setMessages(prev => [...prev, {
+      id: Date.now().toString(),
+      sender: 'System',
+      text: `✅ Livraison terminée! Le camion est arrivé chez ${selectedFournisseur?.nom}`,
+      type: 'arrival'
+    }]);
+    
+    // 💰 OUVRIR LE DIALOG DE PAIEMENT AUTOMATIQUEMENT
+    if (selectedOrder) {
+      const amount = selectedOrder.quantity * 100; // Prix unitaire * quantité
+      setPaymentOrderData({
+        orderId: selectedOrder._id,
+        orderNumber: selectedOrder.orderNumber,
+        materialName: selectedOrder.materialName,
+        supplierName: selectedOrder.supplierName,
+        siteName: selectedOrder.destinationSiteName,
+        amount,
+      });
+      setShowPaymentDialog(true);
+      
+      // Message dans le chat
+      setMessages(prev => [...prev, {
+        id: (Date.now() + 1).toString(),
+        sender: 'System',
+        text: `💰 Dialog de paiement ouvert - Montant: ${amount}€`,
+        type: 'payment'
+      }]);
+    }
+    
+    onOrderConfirmed?.();
+  };
+
   if (!open) return null;
 
-  const defaultCenter: [number, number] = selectedSite?.coordinates 
-    ? [selectedSite.coordinates.lat, selectedSite.coordinates.lng] 
+  const startPos = selectedSite?.coordinates
+    ? [selectedSite.coordinates.lat, selectedSite.coordinates.lng] as [number, number]
     : [36.8065, 10.1815];
   
-  const supplierPos = selectedFournisseur?.coordinates
+  const endPos = selectedFournisseur?.coordinates
     ? [selectedFournisseur.coordinates.lat, selectedFournisseur.coordinates.lng] as [number, number]
-    : defaultCenter;
-
-  const originPos = selectedFournisseur?.coordinates
-    ? [selectedFournisseur.coordinates.lat, selectedFournisseur.coordinates.lng] as [number, number]
-    : defaultCenter;
-
-  const destinationPos = selectedSite?.coordinates
-    ? [selectedSite.coordinates.lat, selectedSite.coordinates.lng] as [number, number]
-    : defaultCenter;
+    : startPos;
+  
+  const centerMap = truckPosition || [
+    (startPos[0] + endPos[0]) / 2,
+    (startPos[1] + endPos[1]) / 2
+  ];
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 overflow-hidden">
       <div className="bg-white w-[98%] h-[95%] rounded-xl flex flex-col">
 
-        {/* HEADER */}
         <div className="p-4 flex justify-between items-center border-b bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-xl">
-            <div>
-            <h2 className="font-bold text-lg">🚚 Order Tracking</h2>
-            <p className="text-sm text-blue-100">Chantier (départ) → Fournisseur (arrivée)</p>
+          <div>
+            <h2 className="font-bold text-lg">🚚 Suivi de livraison</h2>
+            <p className="text-sm text-blue-100">🏗️ Chantier (DÉPART) → 🏭 Fournisseur (ARRIVÉE)</p>
+            {totalDuration > 0 && !isDelivering && (
+              <p className="text-xs text-blue-200 mt-1">⏱️ Durée estimée: {formatTime(totalDuration)}</p>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <Button size="sm" variant="outline" className="bg-white/20 text-white border-white/30 hover:bg-white/30" onClick={() => setViewMode(viewMode === 'orders' ? 'stock' : 'orders')}>
@@ -558,12 +690,9 @@ export default function OrderMap({ open, onClose, orderId, materialName, siteLoc
           </div>
         </div>
 
-        {/* BODY */}
         <div className="flex flex-1 overflow-hidden">
 
-          {/* SIDEBAR */}
           <div className="w-96 border-r flex flex-col bg-gray-50">
-            {/* Tabs */}
             <div className="p-2 border-b bg-white flex gap-1">
               <Button variant={viewMode === 'stock' ? 'default' : 'ghost'} size="sm" onClick={() => setViewMode('stock')} className="flex-1">
                 <AlertTriangle className="w-4 h-4 mr-1" />
@@ -580,53 +709,88 @@ export default function OrderMap({ open, onClose, orderId, materialName, siteLoc
                 <div className="text-center py-8 text-gray-500">Chargement...</div>
               ) : viewMode === 'stock' ? (
                 <>
-                  {/* Low Stock Materials */}
-                  <div className="text-sm font-semibold text-gray-600 px-2 py-1 bg-yellow-50 rounded">
-                    📦 Matériaux en rupture/low stock ({lowStockMaterials.length})
-                  </div>
-                  {lowStockMaterials.map((mat) => (
-                    <div key={mat._id} onClick={() => handleSelectMaterial(mat)} className="p-3 rounded-lg border-2 cursor-pointer hover:border-yellow-400 bg-yellow-50">
-                      <div className="flex justify-between">
-                        <span className="font-semibold">{mat.name}</span>
-                        <Badge variant={mat.quantity === 0 ? 'destructive' : 'secondary'}>
-                          {mat.quantity === 0 ? 'Rupture' : 'Low stock'}
-                        </Badge>
+                  {lowStockMaterials.length === 0 && sites.length === 0 && supplierRoutes.length === 0 ? (
+                    <div className="text-center py-8 px-4">
+                      <Package className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                      <p className="text-gray-500 text-sm mb-2">Aucune donnée disponible</p>
+                      <p className="text-xs text-gray-400">Créez des sites et fournisseurs pour commencer</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="text-sm font-semibold text-gray-600 px-2 py-1 bg-yellow-50 rounded">
+                        📦 Matériaux en rupture/low stock ({lowStockMaterials.length})
                       </div>
-                      <div className="text-xs text-gray-500">{mat.code} • Stock: {mat.quantity}/{mat.reorderPoint}</div>
-                    </div>
-                  ))}
+                      {lowStockMaterials.length === 0 ? (
+                        <div className="text-center py-4 text-xs text-gray-400">
+                          Aucun matériau en rupture
+                        </div>
+                      ) : (
+                        lowStockMaterials.map((mat) => (
+                          <div key={mat._id} onClick={() => handleSelectMaterial(mat)} className="p-3 rounded-lg border-2 cursor-pointer hover:border-yellow-400 bg-yellow-50">
+                            <div className="flex justify-between">
+                              <span className="font-semibold">{mat.name}</span>
+                              <Badge variant={mat.quantity === 0 ? 'destructive' : 'secondary'}>
+                                {mat.quantity === 0 ? 'Rupture' : 'Low stock'}
+                              </Badge>
+                            </div>
+                            <div className="text-xs text-gray-500">{mat.code} • Stock: {mat.quantity}/{mat.reorderPoint}</div>
+                          </div>
+                        ))
+                      )}
 
-                  {/* Sites */}
-                  <div className="text-sm font-semibold text-gray-600 px-2 py-1 bg-blue-50 rounded mt-4">
-                    🏗️ Chantiers ({sites.length})
-                  </div>
-                  {sites.filter(s => s.coordinates).slice(0, 5).map((site) => (
-                    <div key={site._id} onClick={() => setSelectedSite(site)} className={`p-2 rounded border cursor-pointer ${selectedSite?._id === site._id ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}>
-                      <div className="font-medium">{site.nom}</div>
-                      <div className="text-xs text-gray-500">{site.adresse}</div>
-                    </div>
-                  ))}
-
-                  {/* Suppliers with routes */}
-                  <div className="text-sm font-semibold text-gray-600 px-2 py-1 bg-green-50 rounded mt-4">
-                    🏭 Fournisseurs ({supplierRoutes.length})
-                  </div>
-                  {supplierRoutes.map((route) => (
-                    <div key={route.supplier._id} onClick={() => handleSelectSupplier(route)} className={`p-3 rounded border cursor-pointer ${selectedFournisseur?._id === route.supplier._id ? 'border-green-500 bg-green-50' : 'border-gray-200'}`}>
-                      <div className="flex justify-between">
-                        <span className="font-semibold">{route.supplier.nom}</span>
-                        <span className="text-sm font-medium text-blue-600">{formatDistance(route.distance)}</span>
+                      <div className="text-sm font-semibold text-gray-600 px-2 py-1 bg-blue-50 rounded mt-4">
+                        🏗️ Chantiers ({sites.length})
                       </div>
-                      <div className="text-xs text-gray-500">{route.supplier.adresse}, {route.supplier.ville}</div>
-                      <div className="text-xs text-green-600">⏱️ ~{formatTime(route.estimatedTime)}</div>
-                    </div>
-                  ))}
+                      {sites.length === 0 ? (
+                        <div className="text-center py-4 text-xs text-gray-400">
+                          Aucun chantier disponible
+                        </div>
+                      ) : (
+                        sites.filter(s => s.coordinates).slice(0, 5).map((site) => (
+                          <div key={site._id} onClick={() => setSelectedSite(site)} className={`p-2 rounded border cursor-pointer ${selectedSite?._id === site._id ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}>
+                            <div className="font-medium">{site.nom}</div>
+                            <div className="text-xs text-gray-500">{site.adresse}</div>
+                          </div>
+                        ))
+                      )}
+
+                      <div className="text-sm font-semibold text-gray-600 px-2 py-1 bg-green-50 rounded mt-4">
+                        🏭 Fournisseurs ({supplierRoutes.length})
+                      </div>
+                      {supplierRoutes.length === 0 ? (
+                        <div className="text-center py-4 text-xs text-gray-400">
+                          {fournisseurs.length === 0 ? 'Aucun fournisseur disponible' : 'Sélectionnez un chantier pour voir les fournisseurs'}
+                        </div>
+                      ) : (
+                        supplierRoutes.map((route) => (
+                          <div key={route.supplier._id} onClick={() => handleSelectSupplier(route)} className={`p-3 rounded border cursor-pointer ${selectedFournisseur?._id === route.supplier._id ? 'border-green-500 bg-green-50' : 'border-gray-200'}`}>
+                            <div className="flex justify-between">
+                              <span className="font-semibold">{route.supplier.nom}</span>
+                              <span className="text-sm font-medium text-blue-600">{formatDistance(route.distance)}</span>
+                            </div>
+                            <div className="text-xs text-gray-500">{route.supplier.adresse}, {route.supplier.ville}</div>
+                            <div className="text-xs text-green-600">⏱️ ~{formatTime(route.estimatedTime)}</div>
+                          </div>
+                        ))
+                      )}
+                    </>
+                  )}
                 </>
               ) : (
                 <>
-                  {/* Orders */}
                   {orders.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">Aucune commande active</div>
+                    <div className="text-center py-8 px-4">
+                      <Truck className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                      <p className="text-gray-500 text-sm mb-2">Aucune commande active</p>
+                      <p className="text-xs text-gray-400 mb-4">Créez une commande depuis la page Materials</p>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => setViewMode('stock')}
+                      >
+                        📦 Voir les stocks faibles
+                      </Button>
+                    </div>
                   ) : (
                     orders.map((order) => (
                       <div key={order._id} onClick={() => setSelectedOrder(order)} className={`p-3 rounded-lg border-2 cursor-pointer ${selectedOrder?._id === order._id ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}>
@@ -634,8 +798,8 @@ export default function OrderMap({ open, onClose, orderId, materialName, siteLoc
                           <span className="font-semibold">{order.materialName}</span>
                           <Badge className={getStatusColor(order.status)}>{getStatusLabel(order.status)}</Badge>
                         </div>
-                        <div className="text-xs text-gray-500">🏭 {order.supplierName} → 🏗️ {order.destinationSiteName}</div>
-                        <div className="text-xs">⏱️ {formatTime(order.estimatedDurationMinutes)}</div>
+                        <div className="text-xs text-gray-500">🏗️ {order.destinationSiteName} → 🏭 {order.supplierName}</div>
+                        <div className="text-xs font-medium text-blue-600">⏱️ Durée: {formatTime(order.estimatedDurationMinutes)}</div>
                       </div>
                     ))
                   )}
@@ -643,7 +807,6 @@ export default function OrderMap({ open, onClose, orderId, materialName, siteLoc
               )}
             </div>
 
-            {/* Chat Panel */}
             <div className="border-t p-2 bg-white">
               <div className="text-xs font-semibold text-gray-600 mb-2">💬 Messages</div>
               <div className="h-24 overflow-y-auto bg-gray-50 rounded p-2 mb-2 space-y-1">
@@ -665,105 +828,142 @@ export default function OrderMap({ open, onClose, orderId, materialName, siteLoc
             </div>
           </div>
 
-          {/* MAP */}
           <div className="flex-1 flex flex-col">
             <div className="flex-1 relative">
-              <MapContainer center={defaultCenter} zoom={10} style={{ height: "100%" }}>
+              <MapContainer key={routingKeyRef.current} center={centerMap} zoom={10} style={{ height: "100%", width: "100%" }}>
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 
-                {/* Supplier marker (destination - where truck picks up materials) */}
-                {selectedFournisseur?.coordinates && (
-                  <Marker position={originPos} icon={supplierIcon}>
-                    <Popup><div className="text-center"><strong>🏭 Fournisseur (Arrivée)</strong><br/>{selectedFournisseur.nom}<br/>{selectedFournisseur.adresse}</div></Popup>
+                {selectedSite?.coordinates && (
+                  <Marker position={startPos} icon={siteIcon}>
+                    <Popup>
+                      <div className="text-center">
+                        <strong>🏗️ DÉPART: Chantier</strong><br/>
+                        {selectedSite.nom}
+                      </div>
+                    </Popup>
                   </Marker>
                 )}
                 
-                {/* Site marker (origin - where truck starts) */}
-                {selectedSite?.coordinates && (
-                  <Marker position={destinationPos} icon={siteIcon}>
-                    <Popup><div className="text-center"><strong>🏗️ Chantier (Départ)</strong><br/>{selectedSite.nom}</div></Popup>
+                {selectedFournisseur?.coordinates && (
+                  <Marker position={endPos} icon={supplierIcon}>
+                    <Popup>
+                      <div className="text-center">
+                        <strong>🏭 ARRIVÉE: Fournisseur</strong><br/>
+                        {selectedFournisseur.nom}<br/>
+                        {selectedFournisseur.adresse}
+                      </div>
+                    </Popup>
                   </Marker>
                 )}
 
-                {/* Route animation - from site to supplier (to pick up materials) */}
-                {isDelivering && selectedFournisseur?.coordinates && (
-                  <RoutingControl start={destinationPos} end={originPos} onProgress={(p) => setProgress(p)} onArrival={() => { setIsArrived(true); setIsDelivering(false); toast.success(`🚚 Le camion est arrivé chez ${selectedFournisseur.nom}!`); }} />
+                {isDelivering && selectedFournisseur?.coordinates && totalDuration > 0 && (
+                  <RoutingControl 
+                    key={`routing-${orderId}-${routingKeyRef.current}`}
+                    start={startPos} 
+                    end={endPos} 
+                    totalDurationMinutes={totalDuration}
+                    onProgress={handleProgressUpdate} 
+                    onArrival={handleArrival}
+                    onTimeUpdate={handleTimeUpdate}
+                  />
                 )}
                 
-                {/* Real truck marker from order data */}
-                {truckPosition && (
+                {truckPosition && !isDelivering && (
                   <Marker position={truckPosition} icon={truckIcon}>
                     <Popup>
                       <div className="text-center">
-                        <strong>🚚 En livraison</strong><br/>
-                        {selectedOrder?.materialName}<br/>
-                        🏗️ Chantier → 🏭 Fournisseur<br/>
-                        Progression: {progress}%
+                        <strong>🚚 Camion</strong><br/>
+                        {materialName || selectedOrder?.materialName}<br/>
+                        🏗️ {selectedSite?.nom} → 🏭 {selectedFournisseur?.nom}
                       </div>
                     </Popup>
                   </Marker>
                 )}
               </MapContainer>
 
-              {/* Route Info Overlay */}
-              {selectedOrder && (
-                <div className="absolute top-4 left-4 right-4 bg-white/95 backdrop-blur rounded-lg p-3 shadow-lg z-[1000]">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <span className="font-bold">{selectedOrder.materialName}</span>
-                      <span className="text-sm text-gray-500 ml-2">{selectedOrder.supplierName} → {selectedOrder.destinationSiteName}</span>
-                    </div>
-                    <div className="text-right">
-                      <Badge className={getStatusColor(selectedOrder.status)}>{getStatusLabel(selectedOrder.status)}</Badge>
-                    </div>
+              <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur rounded-lg p-3 shadow-lg border border-gray-200 z-[1000]">
+                <div className="flex justify-between items-center mb-2">
+                  <div className="flex items-center gap-2">
+                    <Navigation className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm font-medium">Trajet: 🏗️ Chantier → 🏭 Fournisseur</span>
                   </div>
-                  {selectedOrder.status === 'in_transit' && (
-                    <div className="mt-2">
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-blue-600 h-2 rounded-full transition-all" style={{ width: `${selectedOrder.progress || 0}%` }} />
-                      </div>
-                      <div className="text-center text-sm mt-1">
-                        🚚 {selectedOrder.progress || 0}% - Temps restant: {formatTime(selectedOrder.remainingTimeMinutes || remainingTime)}
-                      </div>
-                    </div>
-                  )}
-                  {isDelivering && (
-                    <div className="mt-2">
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-green-600 h-2 rounded-full transition-all" style={{ width: `${progress}%` }} />
-                      </div>
-                      <div className="text-center text-sm mt-1">
-                        🚚 En livraison: {progress.toFixed(0)}% - Temps restant: {formatTime(countdownTime)}
-                      </div>
-                    </div>
-                  )}
+                  <span className="text-sm font-bold text-blue-600">{Math.round(progress)}%</span>
                 </div>
-              )}
-            </div>
-
-            {/* Action Bar */}
-            <div className="p-3 border-t bg-gray-50 flex justify-between items-center">
-              <div className="text-sm">
-                {selectedFournisseur && <span>🏭 {selectedFournisseur.nom}</span>}
-                {selectedSite && <span className="mx-2">→</span>}
-                {selectedSite && <span>🏗️ {selectedSite.nom}</span>}
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={loadData}>🔄</Button>
-                {!isArrived && selectedFournisseur && (
-                  <Button onClick={handleStartDelivery} disabled={isDelivering} className="bg-blue-600">
-                    {isDelivering ? `🚚 ${progress.toFixed(0)}% (${formatTime(countdownTime)})` : '🚚 Démarrer'}
+                
+                <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
+                  <div 
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-1000"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+                
+                <div className="flex justify-between text-xs text-gray-600 mb-3">
+                  <div className="flex items-center gap-1">
+                    <span>🏗️ {selectedSite?.nom?.substring(0, 15) || "Chantier"}</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-blue-600">
+                    <Truck className="h-3 w-3" />
+                    <span>{Math.round(totalDistance * progress / 100)}/{Math.round(totalDistance)} km</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span>🏭 {selectedFournisseur?.nom?.substring(0, 15) || "Fournisseur"}</span>
+                  </div>
+                </div>
+                
+                <div className="flex justify-between items-center text-sm mb-3">
+                  <span className="text-gray-500">⏱️ Temps restant:</span>
+                  <span className={`font-semibold ${remainingTime < 5 && remainingTime > 0 ? 'text-red-600 animate-pulse' : 'text-gray-700'}`}>
+                    {formatTime(remainingTime)}
+                  </span>
+                </div>
+                
+                {!isDelivering && !isArrived && selectedFournisseur && selectedOrder?.status === 'pending' && totalDuration > 0 && (
+                  <Button 
+                    onClick={handleStartDelivery}
+                    className="w-full bg-green-600 hover:bg-green-700"
+                  >
+                    <Truck className="h-4 w-4 mr-2" />
+                    Démarrer la livraison ({formatTime(totalDuration)})
                   </Button>
                 )}
+                
+                {isDelivering && !isArrived && (
+                  <div className="flex items-center justify-center gap-3 text-blue-600">
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent" />
+                    <span className="text-sm">Livraison en cours...</span>
+                    <span className="text-sm font-medium">{Math.round(progress)}%</span>
+                  </div>
+                )}
+                
                 {isArrived && (
-                  <Button onClick={handleConfirmArrival} className="bg-green-600">
-                    ✅ Confirmer Arrivée
-                  </Button>
+                  <div className="flex items-center justify-center gap-2 text-green-600">
+                    <CheckCircle className="h-5 w-5" />
+                    <span className="text-sm font-medium">✅ Livraison terminée !</span>
+                  </div>
                 )}
               </div>
             </div>
           </div>
         </div>
+
+        {/* Dialog de Paiement */}
+        {showPaymentDialog && paymentOrderData && (
+          <PaymentDialog
+            open={showPaymentDialog}
+            onClose={() => setShowPaymentDialog(false)}
+            onSuccess={() => {
+              setShowPaymentDialog(false);
+              toast.success('💰 Paiement effectué avec succès!');
+              setMessages(prev => [...prev, {
+                id: Date.now().toString(),
+                sender: 'System',
+                text: `✅ Paiement confirmé pour ${paymentOrderData.amount}€`,
+                type: 'payment_success'
+              }]);
+            }}
+            {...paymentOrderData}
+          />
+        )}
       </div>
     </div>
   );

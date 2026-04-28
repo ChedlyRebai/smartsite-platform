@@ -26,23 +26,15 @@ export class BulkImportMaterialDto {
   @Min(0)
   maximumStock: number;
 
+  @IsOptional()
   @IsNumber()
   @Min(0)
-  reorderPoint: number;
+  stockMinimum?: number;
 
   @IsOptional()
   @IsNumber()
   @Min(0)
-  @Max(1)
   qualityGrade?: number;
-
-  @IsOptional()
-  @IsString()
-  location?: string;
-
-  @IsOptional()
-  @IsString()
-  manufacturer?: string;
 
   @IsOptional()
   @IsDateString()

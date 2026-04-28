@@ -34,6 +34,16 @@ import Home2 from "./pages/Home/Home2";
 import Pricing from "./pages/pricing/Pricing";
 import ClientsNew from "./pages/clients/ClientsNew";
 import UserGuide from "./pages/guide/UserGuide";
+import {
+  AnomaliesAlertsPage,
+  AutoOrdersPage,
+  FlowLogPage,
+  MLTrainingPage,
+  OrderTrackingMapPage,
+  SiteConsumptionPage,
+  StockPredictionsPage,
+} from "./pages/materials/MaterialsFeaturePages";
+import ExpiringMaterials from "../components/ExpiringMaterials";
 
 import AddSupplierNew from "./pages/suppliers-new/AddSupplier";
 import SuppliersListNew from "./pages/suppliers-new/SuppliersList";
@@ -272,6 +282,38 @@ export const router = createBrowserRouter([
       {
         path: "materials",
         element: <Materials />,
+      },
+      {
+        path: "materials/expiring",
+        element: <ExpiringMaterials />,
+      },
+      {
+        path: "stock-predictions",
+        element: <StockPredictionsPage />,
+      },
+      {
+        path: "anomalies-alerts",
+        element: <AnomaliesAlertsPage />,
+      },
+      {
+        path: "auto-orders",
+        element: <AutoOrdersPage />,
+      },
+      {
+        path: "order-tracking-map",
+        element: <OrderTrackingMapPage />,
+      },
+      {
+        path: "site-consumption",
+        element: <SiteConsumptionPage />,
+      },
+      {
+        path: "flow-log",
+        element: <FlowLogPage />,
+      },
+      {
+        path: "ml-training",
+        element: <MLTrainingPage />,
       },
       {
         path: "finance",

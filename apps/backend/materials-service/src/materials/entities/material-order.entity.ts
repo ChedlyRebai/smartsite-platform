@@ -77,11 +77,50 @@ export class MaterialOrder extends Document {
   @Prop({ type: Date })
   actualArrival: Date;
 
+  // ========== CHAMPS TRACKING AJOUTÉS ==========
+  @Prop({ type: Date })
+  startedAt?: Date;
+
+  @Prop({ type: Date })
+  estimatedArrival?: Date;
+
+  @Prop({ type: Number })
+  totalDistance?: number;
+
+  @Prop({ type: Array, default: [] })
+  trackingHistory?: Array<{
+    timestamp: Date;
+    status: string;
+    position?: { lat: number; lng: number };
+    progress: number;
+    message: string;
+  }>;
+
   @Prop({ type: Types.ObjectId, ref: 'User' })
   createdBy: Types.ObjectId;
 
   @Prop({ type: String })
   notes: string;
+
+  // ========== TIMESTAMPS (auto-générés par timestamps: true) ==========
+  @Prop({ type: Date })
+  createdAt?: Date;
+
+  @Prop({ type: Date })
+  updatedAt?: Date;
+
+  // ========== CHAMPS PAIEMENT (AJOUTER) ==========
+  @Prop({ type: String })
+  paymentId?: string;
+
+  @Prop({ type: Number })
+  paymentAmount?: number;
+
+  @Prop({ type: String })
+  paymentMethod?: string;
+
+  @Prop({ type: String })
+  paymentStatus?: string;
 }
 
 export const MaterialOrderSchema = SchemaFactory.createForClass(MaterialOrder);

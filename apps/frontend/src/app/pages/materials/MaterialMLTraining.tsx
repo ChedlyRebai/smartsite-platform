@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '../../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
-import { Badge } from '../../components/ui/badge';
+import { Badge } from '../../../components/ui/badge';
 import { toast } from 'sonner';
 import { 
   Upload, 
@@ -107,7 +107,8 @@ export default function MaterialMLTraining({
   const handlePredict = async (hours: number = 24) => {
     setPredicting(true);
     try {
-      const result = await materialService.predictStock(materialId, hours);
+      // Use the same endpoint as MaterialDetails for consistent results
+      const result = await materialService.getStockPrediction(materialId);
       setPrediction(result);
       if (result.status === 'critical') {
         toast.error(result.message);

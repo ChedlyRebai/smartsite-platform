@@ -21,7 +21,7 @@ async function bootstrap() {
     },
   }));
 
-  const port = process.env.PORT || 3007;
+  const port = process.env.PORT || 3008;
   await app.listen(port);
   console.log(`Payment microservice running on port ${port}`);
 }

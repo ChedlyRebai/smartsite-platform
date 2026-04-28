@@ -113,9 +113,7 @@ export class ImportExportService {
     const quantity = getValue(['quantite', 'quantity', 'qte', 'stock']) || row.quantity;
     const minimumStock = getValue(['stockminimum', 'minimumstock', 'stockmin', 'minstock']) || row.minimumStock;
     const maximumStock = getValue(['stockmaximum', 'maximumstock', 'stockmax', 'maxstock']) || row.maximumStock;
-    const reorderPoint = getValue(['pointdecommande', 'reorderpoint', 'seuil', 'reorder']) || row.reorderPoint;
-    const location = getValue(['emplacement', 'location', 'lieu', 'position']) || row.location;
-    const manufacturer = getValue(['fabricant', 'manufacturer', 'fabriquant']) || row.manufacturer;
+    const stockMinimum = getValue(['pointdecommande', 'reorderpoint', 'seuil', 'reorder', 'stockminimum']) || row.stockMinimum;
     const expiryDate = getValue(['dateexpiration', 'expirydate', 'expiration', 'peremption']) || row.expiryDate;
     const qualityGrade = getValue(['qualite', 'qualitygrade', 'quality']) || row.qualityGrade;
 
@@ -127,13 +125,13 @@ export class ImportExportService {
     const quantityNum = Number(quantity) || 0;
     const minimumStockNum = Number(minimumStock) || 0;
     const maximumStockNum = Number(maximumStock) || 0;
-    const reorderPointNum = Number(reorderPoint) || 0;
+    const stockMinimumNum = Number(stockMinimum) || minimumStockNum;
     
     if (minimumStockNum >= maximumStockNum && maximumStockNum > 0) {
       throw new Error('Stock minimum doit être inférieur au stock maximum');
     }
     
-    if (reorderPointNum < minimumStockNum || reorderPointNum > maximumStockNum) {
+    if (stockMinimumNum < minimumStockNum || stockMinimumNum > maximumStockNum) {
       if (minimumStockNum > 0 && maximumStockNum > 0) {
         throw new Error('Point de commande doit être entre stock min et max');
       }
@@ -173,10 +171,8 @@ export class ImportExportService {
       quantity: quantityNum,
       minimumStock: minimumStockNum,
       maximumStock: maximumStockNum,
-      reorderPoint: reorderPointNum,
+      stockMinimum: stockMinimumNum,
       qualityGrade: qualityGradeNum,
-      location: location ? String(location) : undefined,
-      manufacturer: manufacturer ? String(manufacturer) : undefined,
       expiryDate: expiryDateStr,
       specifications: row.specifications ? JSON.parse(row.specifications) : undefined,
     };
@@ -243,10 +239,8 @@ export class ImportExportService {
         Quantité: m.quantity,
         'Stock Minimum': m.minimumStock,
         'Stock Maximum': m.maximumStock,
-        'Point de commande': m.reorderPoint,
+        'Stock Minimum Requis': m.stockMinimum,
         Qualité: m.qualityGrade || '',
-        Emplacement: m.location || '',
-        Fabricant: m.manufacturer || '',
         'Date expiration': m.expiryDate ? new Date(m.expiryDate).toLocaleDateString('fr-FR') : '',
         Statut: m.status,
         'Quantité réservée': m.reservedQuantity || 0,
@@ -370,7 +364,7 @@ export class ImportExportService {
           if (material.quantity === 0) {
             status = 'Rupture';
             statusColor = '#dc3545';
-          } else if (material.quantity <= material.reorderPoint) {
+          } else if (material.quantity <= material.stockMinimum) {
             status = 'Stock bas';
             statusColor = '#ffc107';
           } else if (material.expiryDate && new Date(material.expiryDate) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)) {
@@ -385,8 +379,6 @@ export class ImportExportService {
           
           doc.fillColor(statusColor).text(status, 420, y);
           doc.fillColor('black');
-          
-          doc.text(material.location || '-', 480, y);
           
           y += itemHeight;
         }

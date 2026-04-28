@@ -24,11 +24,11 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 5173,
     proxy: {
-      "/api": {
-        target: "http://192.168.39.69:3000",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, "")},
       '/api/materials': {
+        target: 'http://localhost:3002',
+        changeOrigin: true,
+      },
+      '/api/chat': {
         target: 'http://localhost:3002',
         changeOrigin: true,
       },
@@ -40,13 +40,37 @@ export default defineConfig({
         target: 'http://localhost:3002',
         changeOrigin: true,
       },
-      '/api/fournisseurs': {
-        target: 'http://localhost:3005',
+      '/api/flows': {
+        target: 'http://localhost:3002',
+        changeOrigin: true,
+      },
+      '/api/material-flow': {
+        target: 'http://localhost:3002',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/material-flow/, '/api/flows'),
+      },
+      '/api/consumption': {
+        target: 'http://localhost:3002',
+        changeOrigin: true,
+      },
+      '/api/site-consumption': {
+        target: 'http://localhost:3002',
         changeOrigin: true,
       },
       '/fournisseurs': {
-        target: 'http://localhost:3005',
+        target: 'http://localhost:3002',
         changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/fournisseurs/, '/api/materials/suppliers')
+      },
+      '/api/fournisseurs': {
+        target: 'http://localhost:3002',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/fournisseurs/, '/api/materials/suppliers')
+      },
+      '/api/sites': {
+        target: 'http://localhost:3002',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/sites/, '/api/materials/sites')
       },
       '/gestion-sites': {
         target: 'http://localhost:3001',
@@ -56,10 +80,15 @@ export default defineConfig({
         target: 'http://localhost:3001',
         changeOrigin: true,
       },
-       '/api': {
-         target: 'http://localhost:3007',
-         changeOrigin: true,
-       },
+      '/socket.io': {
+        target: 'http://localhost:3002',
+        changeOrigin: true,
+        ws: true,
+      },
+      '/api': {
+        target: 'http://localhost:3002',
+        changeOrigin: true,
+      },
     },
   },
 

@@ -6,14 +6,16 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../../components/ui/dialog';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Label } from '../../components/ui/label';
-import { Badge } from '../../components/ui/badge';
+} from '../../../components/ui/dialog';
+import { Button } from '../../../components/ui/button';
+import { Input } from '../../../components/ui/input';
+import { Label } from '../../../components/ui/label';
+import { Badge } from '../../../components/ui/badge';
 import { toast } from 'sonner';
 import { MapPin, Package, AlertTriangle, AlertCircle } from 'lucide-react';
 import materialService, { Material, CreateMaterialData } from '../../../services/materialService';
+import materialFlowService, { FlowType } from '../../../services/materialFlowService';
+import anomalyDetectionService from '../../../services/anomalyDetectionService';
 import { siteService, fournisseurService, Site, Fournisseur } from '../../../services/siteFournisseurService';
 
 interface FormErrors {
@@ -21,10 +23,10 @@ interface FormErrors {
   code?: string;
   category?: string;
   unit?: string;
-  quantity?: string;
-  minimumStock?: string;
-  maximumStock?: string;
-  reorderPoint?: string;
+  stockExistant?: string;
+  stockMinimum?: string;
+  stockEntree?: string;
+  stockSortie?: string;
   siteId?: string;
 }
 
@@ -49,6 +51,12 @@ export default function MaterialForm({ open, onClose, onSuccess, initialData }: 
     manufacturer: '',
     expiryDate: '',
   });
+
+  // Nouveaux champs V2
+  const [stockExistant, setStockExistant] = useState<number>(0);
+  const [stockMinimum, setStockMinimum] = useState<number>(10);
+  const [stockEntree, setStockEntree] = useState<number>(0);
+  const [stockSortie, setStockSortie] = useState<number>(0);
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -120,8 +128,10 @@ export default function MaterialForm({ open, onClose, onSuccess, initialData }: 
     const newErrors: FormErrors = {};
     let isValid = true;
 
-    // Validate all fields
-    Object.keys(formData).forEach(key => {
+    // Valider seulement les champs obligatoires du nouveau formulaire V2
+    const requiredFields = ['name', 'code', 'category', 'unit'];
+    
+    requiredFields.forEach(key => {
       const error = validateField(key, formData[key as keyof CreateMaterialData]);
       if (error) {
         newErrors[key as keyof FormErrors] = error;
@@ -183,6 +193,12 @@ export default function MaterialForm({ open, onClose, onSuccess, initialData }: 
         expiryDate: initialData.expiryDate ? initialData.expiryDate.split('T')[0] : '',
       });
       
+      // Initialiser les nouveaux champs V2
+      setStockExistant((initialData as any).stockExistant || initialData.quantity || 0);
+      setStockMinimum((initialData as any).stockMinimum || initialData.minimumStock || 10);
+      setStockEntree((initialData as any).stockEntree || 0);
+      setStockSortie((initialData as any).stockSortie || 0);
+      
       // Handle siteId - could be string or object
       const getSiteId = (sid: any): string => {
         if (!sid) return '';
@@ -216,6 +232,10 @@ export default function MaterialForm({ open, onClose, onSuccess, initialData }: 
         manufacturer: '',
         expiryDate: '',
       });
+      setStockExistant(0);
+      setStockMinimum(10);
+      setStockEntree(0);
+      setStockSortie(0);
       setSelectedSiteId('');
     }
   }, [initialData, sites]);
@@ -236,21 +256,37 @@ export default function MaterialForm({ open, onClose, onSuccess, initialData }: 
   };
 
   const getStockStatus = () => {
-    if (formData.quantity === 0) return 'out_of_stock';
-    if (formData.quantity <= formData.reorderPoint) return 'low_stock';
+    const stockActuel = stockExistant + stockEntree - stockSortie;
+    if (stockActuel === 0) return 'out_of_stock';
+    if (stockActuel < stockMinimum) return 'low_stock';
     return 'in_stock';
   };
 
   const getStockStatusLabel = () => {
     const status = getStockStatus();
+    const stockActuel = stockExistant + stockEntree - stockSortie;
     switch (status) {
       case 'out_of_stock':
         return <Badge className="bg-red-500">Rupture de stock</Badge>;
       case 'low_stock':
-        return <Badge className="bg-yellow-500">Stock bas</Badge>;
+        return <Badge className="bg-yellow-500">⚠️ Commander ({stockActuel} {'<'} {stockMinimum})</Badge>;
       default:
-        return <Badge className="bg-green-500">En stock</Badge>;
+        return <Badge className="bg-green-500">✅ En stock ({stockActuel} unités)</Badge>;
     }
+  };
+
+  const calculateStockActuel = () => {
+    return stockExistant + stockEntree - stockSortie;
+  };
+
+  const calculateQuantiteACommander = () => {
+    const stockActuel = calculateStockActuel();
+    if (stockActuel >= stockMinimum) return 0;
+    return Math.ceil((stockMinimum - stockActuel) * 1.2); // +20% de marge
+  };
+
+  const doitCommander = () => {
+    return calculateStockActuel() < stockMinimum;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -276,6 +312,56 @@ export default function MaterialForm({ open, onClose, onSuccess, initialData }: 
     setLoading(true);
 
     try {
+      // Calculer le stock actuel
+      const stockActuel = stockExistant + stockEntree - stockSortie;
+
+      // 🚨 DÉTECTION D'ANOMALIE - Si il y a une sortie de stock (consommation)
+      if (stockSortie > 0) {
+        try {
+          console.log('🚨 Detecting anomaly for consumption:', stockSortie, 'of material:', formData.name);
+          
+          // Utiliser le service d'anomalie pour détecter les patterns suspects
+          const anomalyResult = await anomalyDetectionService.processAnomalyDetection(
+            initialData?._id || 'new-material',
+            formData.name,
+            stockSortie,
+            false // Utiliser la simulation pour l'instant
+          );
+
+          console.log('🔍 Anomaly detection result:', anomalyResult);
+
+          // Si une anomalie est détectée, afficher l'alerte
+          if (anomalyResult.isAnomaly) {
+            // Émettre l'événement d'anomalie pour l'affichage
+            const anomalyEvent = new CustomEvent('anomalyDetected', {
+              detail: {
+                materialId: initialData?._id || 'new-material',
+                materialName: formData.name,
+                anomalyResult,
+                timestamp: new Date(),
+              }
+            });
+            window.dispatchEvent(anomalyEvent);
+
+            // Afficher un toast d'alerte
+            if (anomalyResult.riskLevel === 'HIGH') {
+              toast.error(`🚨 ${anomalyResult.message}`, {
+                duration: 10000,
+                description: anomalyResult.recommendedAction
+              });
+            } else if (anomalyResult.riskLevel === 'MEDIUM') {
+              toast.warning(`⚠️ ${anomalyResult.message}`, {
+                duration: 8000,
+                description: anomalyResult.recommendedAction
+              });
+            }
+          }
+        } catch (anomalyError) {
+          console.error('❌ Anomaly detection failed:', anomalyError);
+          // Ne pas bloquer la soumission si la détection d'anomalie échoue
+        }
+      }
+      
       if (initialData && initialData._id) {
         console.log('Updating material:', initialData._id, formData);
         
@@ -286,12 +372,16 @@ export default function MaterialForm({ open, onClose, onSuccess, initialData }: 
         if (formData.code) updateData.code = formData.code;
         if (formData.category) updateData.category = formData.category;
         if (formData.unit) updateData.unit = formData.unit;
-        if (formData.quantity !== undefined && formData.quantity !== null) updateData.quantity = formData.quantity;
-        if (formData.minimumStock !== undefined && formData.minimumStock !== null) updateData.minimumStock = formData.minimumStock;
-        if (formData.maximumStock !== undefined && formData.maximumStock !== null) updateData.maximumStock = formData.maximumStock;
-        if (formData.reorderPoint !== undefined && formData.reorderPoint !== null) updateData.reorderPoint = formData.reorderPoint;
-        if (formData.location) updateData.location = formData.location;
-        if (formData.manufacturer) updateData.manufacturer = formData.manufacturer;
+        
+        // Nouveaux champs V2
+        updateData.stockExistant = stockExistant;
+        updateData.stockMinimum = stockMinimum;
+        updateData.stockEntree = stockEntree;
+        updateData.stockSortie = stockSortie;
+        updateData.stockActuel = stockActuel;
+        updateData.quantity = stockActuel; // Garder quantity synchronisé
+        updateData.needsReorder = stockActuel < stockMinimum;
+        
         if (formData.expiryDate) updateData.expiryDate = formData.expiryDate;
         
         // Include siteId if changed - use assign endpoint
@@ -324,8 +414,21 @@ export default function MaterialForm({ open, onClose, onSuccess, initialData }: 
           setLoading(false);
           return;
         }
-        console.log('Creating material with site:', formData, selectedSiteId);
-        await materialService.createMaterialWithSite(formData, selectedSiteId);
+        
+        // Créer un nouveau matériau avec les nouveaux champs V2
+        const createData: any = {
+          ...formData,
+          stockExistant,
+          stockMinimum,
+          stockEntree,
+          stockSortie,
+          stockActuel,
+          quantity: stockActuel,
+          needsReorder: stockActuel < stockMinimum,
+        };
+        
+        console.log('Creating material with site:', createData, selectedSiteId);
+        await materialService.createMaterialWithSite(createData, selectedSiteId);
         toast.success('Matériau ajouté avec succès!');
       }
       onSuccess();
@@ -482,124 +585,114 @@ export default function MaterialForm({ open, onClose, onSuccess, initialData }: 
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="quantity">Quantité</Label>
-                <Input
-                  id="quantity"
-                  type="number"
-                  min="0"
-                  value={formData.quantity}
-                  onChange={(e) => handleChange('quantity', parseInt(e.target.value) || 0)}
-                  onBlur={() => handleBlur('quantity')}
-                  className={errors.quantity && touched.quantity ? 'border-red-500' : ''}
-                />
-                {errors.quantity && touched.quantity && (
-                  <p className="text-sm text-red-500 flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
-                    {errors.quantity}
-                  </p>
-                )}
-                {getStockStatusLabel()}
+            {/* ========== GESTION DU STOCK V2 ========== */}
+            <div className="p-4 bg-blue-50 border-2 border-blue-200 rounded-lg space-y-4">
+              <h3 className="font-semibold text-blue-900 flex items-center gap-2">
+                <Package className="h-5 w-5" />
+                Gestion du Stock
+              </h3>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="stockExistant">Stock Existant *</Label>
+                  <Input
+                    id="stockExistant"
+                    type="number"
+                    min="0"
+                    value={stockExistant}
+                    onChange={(e) => setStockExistant(parseInt(e.target.value) || 0)}
+                    placeholder="Quantité déjà présente"
+                  />
+                  <p className="text-xs text-gray-500">Quantité déjà sur le chantier</p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="stockMinimum">Stock Minimum *</Label>
+                  <Input
+                    id="stockMinimum"
+                    type="number"
+                    min="0"
+                    value={stockMinimum}
+                    onChange={(e) => setStockMinimum(parseInt(e.target.value) || 0)}
+                    placeholder="Seuil minimum"
+                  />
+                  <p className="text-xs text-gray-500">Seuil de réapprovisionnement</p>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="location">Emplacement</Label>
-                <Input
-                  id="location"
-                  placeholder="Entrepôt A, Étagère 1"
-                  value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                />
+
+              <div className="border-t pt-3">
+                <p className="text-sm text-gray-600 mb-2 font-medium">Mouvements (Optionnel)</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="stockEntree">Entrée</Label>
+                    <Input
+                      id="stockEntree"
+                      type="number"
+                      min="0"
+                      value={stockEntree}
+                      onChange={(e) => setStockEntree(parseInt(e.target.value) || 0)}
+                      placeholder="Quantité entrée"
+                    />
+                    <p className="text-xs text-gray-500">Quantité ajoutée au stock</p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="stockSortie">Sortie</Label>
+                    <Input
+                      id="stockSortie"
+                      type="number"
+                      min="0"
+                      value={stockSortie}
+                      onChange={(e) => setStockSortie(parseInt(e.target.value) || 0)}
+                      placeholder="Quantité sortie"
+                    />
+                    <p className="text-xs text-gray-500">Quantité consommée</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Calcul Automatique */}
+              <div className="p-3 bg-white border-2 border-blue-300 rounded-lg">
+                <h4 className="font-semibold text-blue-900 mb-2">📊 Calcul Automatique</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Stock Actuel:</span>
+                    <span className="font-bold text-blue-700">{calculateStockActuel()} {formData.unit || 'unités'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">État:</span>
+                    <span>{getStockStatusLabel()}</span>
+                  </div>
+                  {doitCommander() && (
+                    <div className="flex justify-between pt-2 border-t">
+                      <span className="text-gray-600">À commander:</span>
+                      <span className="font-bold text-orange-600">{calculateQuantiteACommander()} {formData.unit || 'unités'}</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="minimumStock">Stock minimum</Label>
-                <Input
-                  id="minimumStock"
-                  type="number"
-                  min="0"
-                  value={formData.minimumStock}
-                  onChange={(e) => handleChange('minimumStock', parseInt(e.target.value) || 0)}
-                  onBlur={() => handleBlur('minimumStock')}
-                  className={errors.minimumStock && touched.minimumStock ? 'border-red-500' : ''}
-                />
-                {errors.minimumStock && touched.minimumStock && (
-                  <p className="text-sm text-red-500 flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
-                    {errors.minimumStock}
-                  </p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="maximumStock">Stock maximum</Label>
-                <Input
-                  id="maximumStock"
-                  type="number"
-                  min="0"
-                  value={formData.maximumStock}
-                  onChange={(e) => handleChange('maximumStock', parseInt(e.target.value) || 0)}
-                  onBlur={() => handleBlur('maximumStock')}
-                  className={errors.maximumStock && touched.maximumStock ? 'border-red-500' : ''}
-                />
-                {errors.maximumStock && touched.maximumStock && (
-                  <p className="text-sm text-red-500 flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
-                    {errors.maximumStock}
-                  </p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="reorderPoint">Point de commande</Label>
-                <Input
-                  id="reorderPoint"
-                  type="number"
-                  min="0"
-                  value={formData.reorderPoint}
-                  onChange={(e) => handleChange('reorderPoint', parseInt(e.target.value) || 0)}
-                  onBlur={() => handleBlur('reorderPoint')}
-                  className={errors.reorderPoint && touched.reorderPoint ? 'border-red-500' : ''}
-                />
-                {errors.reorderPoint && touched.reorderPoint && (
-                  <p className="text-sm text-red-500 flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
-                    {errors.reorderPoint}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {formData.quantity <= formData.reorderPoint && (
+            {doitCommander() && (
               <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <div className="flex items-center gap-2 text-yellow-800">
                   <AlertTriangle className="h-4 w-4" />
                   <span className="font-semibold">Alerte stock</span>
                 </div>
                 <p className="text-sm text-yellow-700 mt-1">
-                  Ce matériau est en rupture de stock. Pensez à passer une commande.
+                  Ce matériau nécessite une commande de {calculateQuantiteACommander()} {formData.unit || 'unités'} (+20% de marge de sécurité).
                 </p>
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="manufacturer">Fabricant</Label>
-                <Input
-                  id="manufacturer"
-                  value={formData.manufacturer}
-                  onChange={(e) => setFormData({ ...formData, manufacturer: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="expiryDate">Date d'expiration</Label>
-                <Input
-                  id="expiryDate"
-                  type="date"
-                  value={formData.expiryDate}
-                  onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="expiryDate">Date d'expiration (optionnel)</Label>
+              <Input
+                id="expiryDate"
+                type="date"
+                value={formData.expiryDate}
+                onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
+              />
             </div>
           </div>
           <DialogFooter>

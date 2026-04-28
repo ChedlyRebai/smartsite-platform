@@ -63,7 +63,9 @@ export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [logoAvailable, setLogoAvailable] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
+  const [expandedModules, setExpandedModules] = useState<Set<string>>(
+    () => new Set(["materials"]),
+  );
   const [fontSize, setFontSize] = useState(() => parseInt(localStorage.getItem('fontSize') || '100'));
 
   const toggleModuleExpanded = (moduleKey: string) => {
@@ -131,8 +133,6 @@ export default function DashboardLayout() {
     queryFn: () => getMynavigationAccess(),
   });
 
-  console.log(navigationItems, "navigationItems in DashboardLayout");
-
   // Utiliser useEffect pour la redirection
   useEffect(() => {
     if (!user) {
@@ -182,7 +182,6 @@ export default function DashboardLayout() {
   // }
 
 
-  console.log(currentUser, "currentUser in DashboardLayout");
   //const unreadNotifications = mockNotifications.filter((n) => !n.read).length;
 
   const { data: unredDataLength, isError: UnreadError } = useQuery({
@@ -429,31 +428,32 @@ export default function DashboardLayout() {
           id="primary-sidebar"
           aria-label="Sidebar navigation"
           className={cn(
-            "fixed lg:sticky top-0 left-0 z-30 h-screen w-68 flex flex-col",
-            "bg-sidebar text-sidebar-foreground border-r border-sidebar-border",
+            "fixed lg:sticky top-0 left-0 z-30 h-screen w-[13.5rem] sm:w-56 flex flex-col shrink-0",
+            "bg-sidebar/95 text-sidebar-foreground border-r border-sidebar-border/80 backdrop-blur-sm",
             "transition-transform duration-300 ease-out lg:translate-x-0",
-            "pt-16 lg:pt-6 shadow-sm",
+            "pt-14 lg:pt-4 shadow-sm",
             sidebarOpen ? "translate-x-0" : "-translate-x-full",
           )}
         >
-          <nav className="p-3 space-y-2 overflow-y-auto flex-1">
+          <nav className="px-1.5 py-1 space-y-0.5 overflow-y-auto flex-1 min-h-0">
             {!isLoading &&
               groupedNavigationItems.map((section: PermissionModuleGroup) => {
                 const isExpanded = expandedModules.has(section.key);
                 return (
                   <div key={section.key} className="group">
                     <button
+                      type="button"
                       onClick={() => toggleModuleExpanded(section.key)}
-                      className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-md transition-all duration-200 ease-out text-left group-hover:bg-accent/30  focus:outline-none "
+                      className="w-full flex items-center justify-between gap-1 px-2 py-1 rounded-md transition-colors text-left hover:bg-sidebar-accent/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring/40"
                       aria-expanded={isExpanded}
                       aria-controls={`module-${section.key}`}
                     >
-                      <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70 group-hover:text-muted-foreground transition-colors duration-200">
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground/85 leading-tight line-clamp-2">
                         {t(`sidebar.modules.${section.key}`, section.label)}
                       </p>
                       <ChevronDown
                         aria-hidden="true"
-                        className={`h-4 w-4 text-muted-foreground/50 transition-all duration-300 ease-out shrink-0 ${
+                        className={`h-3.5 w-3.5 text-muted-foreground/55 transition-transform duration-200 shrink-0 ${
                           isExpanded ? "rotate-180" : ""
                         }`}
                       />
@@ -462,7 +462,7 @@ export default function DashboardLayout() {
                     {isExpanded && (
                       <div
                         id={`module-${section.key}`}
-                        className="mt-1.5 space-y-1 pl-2 overflow-hidden animate-in fade-in duration-200"
+                        className="mt-0.5 space-y-px pl-1 border-l border-sidebar-border/50 ml-2"
                       >
                         {section.items.map((item: Permission, idx: number) => {
                           const isActive =
@@ -476,24 +476,19 @@ export default function DashboardLayout() {
                               onClick={() => setSidebarOpen(false)}
                               style={{
                                 animation: isExpanded
-                                  ? `fadeInSlide 300ms ease-out ${idx * 30}ms forwards`
+                                  ? `fadeInSlide 260ms ease-out ${idx * 24}ms forwards`
                                   : "none",
                                 opacity: isExpanded ? 1 : 0,
-                                transform: isExpanded ? "translateY(0)" : "translateY(-8px)",
+                                transform: isExpanded ? "translateY(0)" : "translateY(-6px)",
                               }}
-                              className={`
-                              flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-200
-                              ${
+                              className={cn(
+                                "group/link flex items-center gap-1.5 pl-2 pr-1.5 py-1 rounded-r-md text-[11px] leading-snug transition-colors border-l-2 -ml-px",
                                 isActive
-                                  ? "bg-linear-to-r from-blue-500/90 to-green-500/90 text-white shadow-sm hover:shadow-md"
-                                  : "text-muted-foreground hover:text-foreground hover:bg-muted/60 active:bg-muted"
-                              }
-                            `}
+                                  ? "border-primary bg-primary/10 text-primary font-medium"
+                                  : "border-transparent text-muted-foreground hover:bg-sidebar-accent/20 hover:text-sidebar-foreground",
+                              )}
                             >
-                              <div className={`h-1.5 w-1.5 rounded-full shrink-0 ${
-                                isActive ? "bg-white/70" : "bg-muted-foreground/40 group-hover/link:bg-muted-foreground/60"
-                              }`} />
-                              <span className="font-medium text-sm truncate">{getSidebarLabel(item)}</span>
+                              <span className="truncate min-w-0">{getSidebarLabel(item)}</span>
                             </Link>
                           );
                         })}
@@ -516,13 +511,14 @@ export default function DashboardLayout() {
               }
             }
           `}</style>
-          <div className="p-3 mt-auto border-t border-sidebar-border bg-sidebar/95 backdrop-blur-sm">
+          <div className="p-2 mt-auto border-t border-sidebar-border/80 bg-sidebar/90">
             <Button
               variant="outline"
+              size="sm"
               onClick={handleLogout}
-              className="w-full justify-center gap-2 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+              className="w-full h-8 text-[11px] justify-center gap-1.5 border-destructive/25 text-destructive hover:bg-destructive/10 hover:text-destructive"
             >
-              <LogOut className="h-4 w-4" />
+              <LogOut className="h-3.5 w-3.5" />
               {t("userMenu.logout", "Logout")}
             </Button>
           </div>

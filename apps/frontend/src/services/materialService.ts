@@ -5,7 +5,7 @@ const SITE_API_URL = '/api/site-materials';
 
 const apiClient = axios.create({
   baseURL: API_URL,
-  timeout: 10000,
+  timeout: 30000, // 30 secondes pour les opérations ML
   headers: {
     'Content-Type': 'application/json',
   },
@@ -13,7 +13,7 @@ const apiClient = axios.create({
 
 const siteApiClient = axios.create({
   baseURL: SITE_API_URL,
-  timeout: 10000,
+  timeout: 30000, // 30 secondes pour les opérations ML
   headers: {
     'Content-Type': 'application/json',
   },
@@ -130,6 +130,16 @@ const materialService = {
     }
   },
 
+  async getMaterialById(id: string): Promise<Material> {
+    try {
+      const response = await apiClient.get(`/${id}`);
+      return response.data;
+    } catch (error: any) {
+      console.error('Erreur getMaterialById:', error.message);
+      throw error;
+    }
+  },
+
   async getMaterialsWithSites(): Promise<Material[]> {
     try {
       const response = await siteApiClient.get('/all-with-sites');
@@ -221,7 +231,7 @@ const materialService = {
 
   async getForecast(id: string): Promise<any> {
     try {
-      const response = await apiClient.get(`/materials/forecast/${id}`);
+      const response = await apiClient.get(`/forecast/${id}`);
       return response.data;
     } catch (error) {
       console.error('Erreur getForecast:', error);
@@ -231,7 +241,7 @@ const materialService = {
 
   async getMovements(id: string): Promise<any[]> {
     try {
-      const response = await apiClient.get(`/materials/movements/${id}`);
+      const response = await apiClient.get(`/movements/${id}`);
       return response.data;
     } catch (error) {
       console.error('Erreur getMovements:', error);
@@ -305,7 +315,7 @@ const materialService = {
 
   async getLowStockMaterials(): Promise<Material[]> {
     try {
-      const response = await apiClient.get('/materials/low-stock');
+      const response = await apiClient.get('/low-stock');
       return response.data;
     } catch (error) {
       console.error('Erreur getLowStockMaterials:', error);
@@ -313,9 +323,9 @@ const materialService = {
     }
   },
 
-  async getExpiringMaterials(): Promise<Material[]> {
+  async getExpiringMaterials(days: number = 30): Promise<Material[]> {
     try {
-      const response = await apiClient.get('/materials/expiring');
+      const response = await apiClient.get(`/expiring?days=${days}`);
       return response.data;
     } catch (error) {
       console.error('Erreur getExpiringMaterials:', error);
@@ -404,10 +414,44 @@ const materialService = {
     message: string;
   }> {
     try {
-      const response = await apiClient.get(`/${materialId}/prediction`);
+      // Utiliser un timeout plus long pour les prédictions ML (60 secondes)
+      const response = await apiClient.get(`/${materialId}/prediction`, {
+        timeout: 60000
+      });
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erreur getStockPrediction:', error);
+      
+      // Si timeout, retourner une prédiction par défaut
+      if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+        console.warn(`⚠️ Timeout pour la prédiction de ${materialId}, utilisation de valeurs par défaut`);
+        
+        // Récupérer les infos de base du matériau
+        try {
+          const material = await this.getMaterialById(materialId);
+          return {
+            materialId: material._id,
+            materialName: material.name,
+            currentStock: material.quantity,
+            predictedStock: material.quantity,
+            consumptionRate: 0,
+            minimumStock: material.minimumStock || 10,
+            reorderPoint: material.reorderPoint || material.stockMinimum || 20,
+            maximumStock: material.maximumStock || 100,
+            hoursToLowStock: 999,
+            hoursToOutOfStock: 999,
+            status: material.quantity > (material.stockMinimum || 20) ? 'safe' : 'warning',
+            recommendedOrderQuantity: 0,
+            predictionModelUsed: false,
+            confidence: 0,
+            simulationData: [],
+            message: 'Prédiction non disponible (timeout)',
+          };
+        } catch (fallbackError) {
+          throw error; // Si même le fallback échoue, propager l'erreur originale
+        }
+      }
+      
       throw error;
     }
   },
@@ -494,6 +538,54 @@ const materialService = {
       throw error;
     }
   },
+
+  // ========== ADVANCED PREDICTION ==========
+  async predictStockAdvanced(
+    materialId: string,
+    features: { hourOfDay: number; dayOfWeek: number; siteActivityLevel: number; weather: string; projectType: string }
+  ): Promise<{
+    materialId: string;
+    materialName: string;
+    currentStock: number;
+    predictedStock: number;
+    hoursToOutOfStock: number;
+    consumptionRate: number;
+    modelTrained: boolean;
+    confidence: number;
+    status: 'safe' | 'warning' | 'critical';
+    recommendedOrderQuantity: number;
+    estimatedRuptureDate: string;
+    message: string;
+  }> {
+    try {
+      const response = await apiClient.post(`/${materialId}/predict-advanced`, features);
+      return response.data;
+    } catch (error) {
+      console.error('Erreur predictStockAdvanced:', error);
+      throw error;
+    }
+  },
+  // ========== SMART SCORE ==========
+  async calculateMultipleSitesScores(sites: Array<{ id: string; name: string; progress: number }>): Promise<any[]> {
+    try {
+      const response = await apiClient.post('/smart-score/sites', { sites });
+      return response.data;
+    } catch (error) {
+      console.error('Erreur calculateMultipleSitesScores:', error);
+      throw error;
+    }
+  },
+
+  async calculateSiteSmartScore(siteId: string, siteName: string, progress: number): Promise<any> {
+    try {
+      const response = await apiClient.post('/smart-score/site', { siteId, siteName, progress });
+      return response.data;
+    } catch (error) {
+      console.error('Erreur calculateSiteSmartScore:', error);
+      throw error;
+    }
+  },
+
 };
 
 export default materialService;

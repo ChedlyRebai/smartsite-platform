@@ -17,6 +17,7 @@ function getCorsOrigins(): string[] {
     'http://localhost:5175',
     'http://localhost:3000',
     'http://localhost:3001',
+    'http://localhost:3002',
   ];
   const raw = process.env.CORS_ORIGIN;
   if (!raw?.trim()) {
@@ -32,10 +33,20 @@ function getCorsOrigins(): string[] {
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(MaterialsModule);
   
-  const uploadsDir = join(process.cwd(), 'uploads', 'qrcodes');
-  if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
-    console.log(`📁 Dossier créé: ${uploadsDir}`);
+  // Créer tous les dossiers nécessaires
+  const uploadsDirs = [
+    join(process.cwd(), 'uploads', 'qrcodes'),
+    join(process.cwd(), 'uploads', 'chat'),
+    join(process.cwd(), 'uploads', 'voice'),
+    join(process.cwd(), 'uploads', 'imports'),
+    join(process.cwd(), 'exports'),
+  ];
+  
+  for (const dir of uploadsDirs) {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+      console.log(`📁 Dossier créé: ${dir}`);
+    }
   }
   
   app.useStaticAssets(join(process.cwd(), 'uploads'), {
@@ -71,10 +82,9 @@ async function bootstrap() {
   console.log('\n🚀 Materials Service démarré avec succès !');
   console.log('===========================================');
   console.log(`✅ Service: http://localhost:${port}/api`);
+  console.log(`💬 Chat health: http://localhost:${port}/api/chat/health`);
   console.log(`📦 Matériaux: http://localhost:${port}/api/materials`);
-  console.log(`📸 QR codes accessibles: http://localhost:${port}/uploads/qrcodes/`);
   console.log(`🔓 CORS origins: ${corsOrigins.join(', ')}`);
-  console.log(`📁 Uploads: ${uploadsDir}`);
   console.log('===========================================\n');
 }
 

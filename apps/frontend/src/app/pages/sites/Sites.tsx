@@ -110,6 +110,21 @@ function MapPicker({ position, setPosition, onLocationSelect }: { position: { la
   return position ? <Marker position={[position.lat, position.lng]} /> : null;
 }
 
+// Map re-center component - forces map to fly to new position when it changes
+function MapReCenter({ position }: { position: { lat: number; lng: number } | null }) {
+  const map = useMapEvents({});
+  
+  useEffect(() => {
+    if (position) {
+      map.flyTo([position.lat, position.lng], 15, {
+        duration: 1.5
+      });
+    }
+  }, [position, map]);
+  
+  return null;
+}
+
 export default function Sites() {
   const user = useAuthStore((state) => state.user);
   const { projectId: projectIdFromUrl } = useParams<{ projectId?: string }>();
@@ -308,37 +323,37 @@ export default function Sites() {
   };
 
   const searchAddressOnMap = async (address: string) => {
-    if (!address.trim() || address.length < 5) {
-      toast.warning('Veuillez entrer une adresse plus complète');
+    if (!address.trim() || address.length < 3) {
+      toast.warning('Please enter at least 3 characters for the address');
       return;
     }
     
     setAddressSearchLoading(true);
     try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1&countrycodes=tn`
-      );
-      const data = await response.json();
+      // Use our backend geocoding endpoint
+      const response = await axios.get(`/gestion-sites/geocode/search`, {
+        params: { address }
+      });
       
-      if (data && data.length > 0) {
-        const result = data[0];
+      if (response.data.success && response.data.results.length > 0) {
+        const result = response.data.results[0];
         const newPosition = {
-          lat: parseFloat(result.lat),
-          lng: parseFloat(result.lon)
+          lat: result.lat,
+          lng: result.lng
         };
         setMapPosition(newPosition);
         setErrors(prev => ({ ...prev, address: undefined }));
-        toast.success(`Localisation trouvée!`);
+        toast.success(`Location found: ${result.displayName}`);
         
         // Search for nearby fournisseurs
         await searchNearbyFournisseurs(newPosition);
       } else {
-        toast.warning('Adresse non trouvée en Tunisie. Cliquez sur la carte pour sélectionner.');
+        toast.warning('Address not found. Click on the map to select a location.');
         setNearbyFournisseurs([]);
       }
     } catch (error) {
-      console.error('Erreur géocodage:', error);
-      toast.error('Erreur lors de la recherche');
+      console.error('Geocoding error:', error);
+      toast.error('Error searching address. Please try again.');
       setNearbyFournisseurs([]);
     } finally {
       setAddressSearchLoading(false);
@@ -1190,6 +1205,7 @@ export default function Sites() {
                           attribution="&copy; OpenStreetMap contributors"
                         />
                         <MapPicker position={mapPosition} setPosition={setMapPosition} onLocationSelect={(pos) => searchNearbyFournisseurs(pos)} />
+                        <MapReCenter position={mapPosition} />
                       </MapContainer>
                     </div>
                     {mapPosition ? (
@@ -1772,18 +1788,60 @@ export default function Sites() {
                 <Label htmlFor="edit-address" className="text-sm font-medium">
                   Address <span className="text-red-500">*</span>
                 </Label>
-                <Input
-                  id="edit-address"
-                  value={manageData.address}
-                  onChange={(e) => setManageData({ ...manageData, address: e.target.value })}
-                  className={errors.address ? 'border-red-500 focus:ring-red-500' : ''}
-                />
+                <div className="relative">
+                  <Input
+                    id="edit-address"
+                    value={manageData.address}
+                    onChange={(e) => setManageData({ ...manageData, address: e.target.value })}
+                    className={errors.address ? 'border-red-500 focus:ring-red-500 pr-10' : 'pr-10'}
+                    placeholder="Enter address (e.g., Avenue Bourguiba, Tunis)"
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-blue-50"
+                    onClick={async () => {
+                      if (!manageData.address || manageData.address.trim().length < 3) {
+                        toast.error('Please enter at least 3 characters for the address');
+                        return;
+                      }
+                      
+                      try {
+                        toast.loading('Searching address...', { id: 'geocode-search' });
+                        const response = await axios.get(`/gestion-sites/geocode/search`, {
+                          params: { address: manageData.address }
+                        });
+                        
+                        if (response.data.success && response.data.results.length > 0) {
+                          const firstResult = response.data.results[0];
+                          setEditMapPosition({
+                            lat: firstResult.lat,
+                            lng: firstResult.lng
+                          });
+                          toast.success(`Address found: ${firstResult.displayName}`, { id: 'geocode-search' });
+                        } else {
+                          toast.error('Address not found. Please check the address.', { id: 'geocode-search' });
+                        }
+                      } catch (error: any) {
+                        console.error('Geocoding error:', error);
+                        toast.error('Error searching address. Please try again.', { id: 'geocode-search' });
+                      }
+                    }}
+                    title="Search address on map"
+                  >
+                    <Search className="h-4 w-4 text-blue-600" />
+                  </Button>
+                </div>
                 {errors.address && (
                   <p className="text-red-500 text-sm flex items-center gap-1">
                     <AlertCircle className="h-3 w-3" />
                     {errors.address}
                   </p>
                 )}
+                <p className="text-xs text-gray-500">
+                  💡 Click the search icon to automatically find coordinates
+                </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1903,6 +1961,7 @@ export default function Sites() {
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
                     <MapPicker position={editMapPosition} setPosition={setEditMapPosition} />
+                    <MapReCenter position={editMapPosition} />
                   </MapContainer>
                 </div>
                 {editMapPosition && (

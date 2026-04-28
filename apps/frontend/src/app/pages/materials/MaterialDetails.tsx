@@ -3,27 +3,38 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '../../components/ui/dialog';
-import { Card, CardContent } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
-import { Badge } from '../../components/ui/badge';
-import { Package, Calendar, MapPin, Factory, Barcode, TrendingUp } from 'lucide-react';
+} from '../../../components/ui/dialog';
+import { Card, CardContent } from '../../../components/ui/card';
+import { Button } from '../../../components/ui/button';
+import { Badge } from '../../../components/ui/badge';
+import { Package, Calendar, MapPin, Factory, Barcode, TrendingUp, Cloud, CloudRain, CloudSnow, Sun, Wind, CloudDrizzle, Truck, AlertTriangle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import materialService, { Material } from '../../../services/materialService';
+import materialFlowService from '../../../services/materialFlowService';
+import weatherService from '../../../services/weatherService';
+import AIPredictionWidget from '../../components/materials/AIPredictionWidget';
+import MaterialWeatherWidget from '../../components/materials/MaterialWeatherWidget';
 import { toast } from 'sonner';
-
 interface MaterialDetailsProps {
   material: Material;
   onClose: () => void;
   onUpdate: () => void;
+  onOrder?: (materialId: string, materialName: string, materialCode: string, materialCategory: string, siteId?: string, siteName?: string, siteCoordinates?: { lat: number; lng: number }) => void;
 }
 
-export default function MaterialDetails({ material, onClose, onUpdate }: MaterialDetailsProps) {
+export default function MaterialDetails({ material, onClose, onUpdate, onOrder }: MaterialDetailsProps) {
   const [movements, setMovements] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [aggregateStats, setAggregateStats] = useState<{
+    totalEntries: number;
+    totalExits: number;
+    netFlow: number;
+    totalAnomalies: number;
+  } | null>(null);
 
   useEffect(() => {
     loadMovements();
+    loadAggregateStats();
   }, [material._id]);
 
   const loadMovements = async () => {
@@ -38,25 +49,45 @@ export default function MaterialDetails({ material, onClose, onUpdate }: Materia
     }
   };
 
-  const handleReorder = async () => {
+  const loadAggregateStats = async () => {
     try {
-      const result = await materialService.reorderMaterial(material._id);
-      if (result.success) {
-        toast.success(`Commande créée! Livraison prévue: ${new Date(result.expectedDelivery).toLocaleDateString()}`);
-      } else {
-        toast.warning(result.message || 'Commande initiée');
-      }
-      onUpdate();
+      const stats = await materialFlowService.getAggregateStats(material._id, material.siteId);
+      setAggregateStats(stats);
     } catch (error) {
-      toast.error('Échec de la commande');
+      console.error('Error loading aggregate stats:', error);
     }
   };
 
+  const handleReorder = () => {
+    if (onOrder) {
+      onOrder(
+        material._id,
+        material.name,
+        material.code,
+        material.category,
+        material.siteId,
+        material.siteName,
+        material.siteCoordinates
+      );
+      onClose();
+    } else {
+      toast.error('Fonction de commande non disponible');
+    }
+  };
+
+  const shouldShowOrderButton = () => {
+    // Utiliser stockMinimum en priorité, sinon reorderPoint
+    const threshold = material.stockMinimum || material.reorderPoint || material.minimumStock || 0;
+    return material.quantity === 0 || material.quantity <= threshold;
+  };
+
   const getStatusBadge = () => {
+    const threshold = material.stockMinimum || material.reorderPoint || material.minimumStock || 0;
+    
     if (material.quantity === 0) {
       return <Badge variant="destructive">Rupture</Badge>;
     }
-    if (material.quantity <= material.reorderPoint) {
+    if (material.quantity <= threshold) {
       return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">Stock bas</Badge>;
     }
     return <Badge variant="default" className="bg-green-100 text-green-800">En stock</Badge>;
@@ -73,7 +104,6 @@ export default function MaterialDetails({ material, onClose, onUpdate }: Materia
         </DialogHeader>
 
         <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
-          {/* Info Cards */}
           <div className="grid grid-cols-2 gap-4">
             <Card>
               <CardContent className="pt-6">
@@ -106,14 +136,48 @@ export default function MaterialDetails({ material, onClose, onUpdate }: Materia
               <CardContent className="pt-6">
                 <div className="flex items-center gap-2 mb-2 text-sm text-gray-500">
                   <MapPin className="h-4 w-4" />
-                  <span>Emplacement</span>
+                  <span>Chantier Assigné</span>
                 </div>
-                <p className="text-lg font-bold">{material.location || 'N/A'}</p>
+                <p className="text-lg font-bold">{material.siteName || 'Non assigné'}</p>
+                {material.siteCoordinates && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    📍 {material.siteCoordinates.lat.toFixed(4)}, {material.siteCoordinates.lng.toFixed(4)}
+                  </p>
+                )}
               </CardContent>
             </Card>
           </div>
 
-          {/* Stock Levels */}
+          {/* Météo du chantier - Nouveau MaterialWeatherWidget */}
+          {(material.siteCoordinates || material.siteAddress || material.siteName) && (
+            <MaterialWeatherWidget
+              siteCoordinates={material.siteCoordinates}
+              siteAddress={material.siteAddress}
+              siteName={material.siteName}
+              materialCategory={material.category}
+              onWeatherUpdate={(weather) => {
+                console.log('🌤️ Météo mise à jour:', weather);
+              }}
+            />
+          )}
+
+          {/* Prédiction IA - Nouveau AIPredictionWidget */}
+          <AIPredictionWidget
+            material={{
+              _id: material._id,
+              name: material.name,
+              quantity: material.quantity,
+              category: material.category,
+              siteId: material.siteId,
+              siteName: material.siteName,
+              siteCoordinates: material.siteCoordinates,
+              siteAddress: material.siteAddress
+            }}
+            onPredictionUpdate={(prediction) => {
+              console.log('🤖 Prédiction mise à jour:', prediction);
+            }}
+          />
+
           <Card>
             <CardContent className="pt-6">
               <h3 className="font-semibold mb-3 flex items-center gap-2">
@@ -154,15 +218,46 @@ export default function MaterialDetails({ material, onClose, onUpdate }: Materia
                     <span className="text-gray-600">Fabricant:</span>
                     <span>{material.manufacturer}</span>
                   </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                   )}
+                 </div>
+               </CardContent>
+             </Card>
 
-          {/* Recent Movements */}
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="font-semibold mb-3">Mouvements récents</h3>
+            {/* Aggregated Flow Stats */}
+            {aggregateStats && (
+              <Card className="bg-gradient-to-r from-blue-50 to-indigo-50">
+                <CardContent className="pt-6">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4" />
+                    <span>Synthèse des Mouvements</span>
+                  </h3>
+                  <div className="grid grid-cols-4 gap-4">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-green-600">{aggregateStats.totalEntries}</p>
+                      <p className="text-xs text-gray-500">Total Entrées</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-red-600">{aggregateStats.totalExits}</p>
+                      <p className="text-xs text-gray-500">Total Sorties</p>
+                    </div>
+                    <div className="text-center">
+                      <p className={`text-2xl font-bold ${aggregateStats.netFlow >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
+                        {aggregateStats.netFlow}
+                      </p>
+                      <p className="text-xs text-gray-500">Solde Net</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-purple-600">{aggregateStats.totalAnomalies}</p>
+                      <p className="text-xs text-gray-500">Anomalies</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            <Card>
+              <CardContent className="pt-6">
+                <h3 className="font-semibold mb-3">Mouvements récents</h3>
               {loading ? (
                 <p className="text-center py-4">Chargement...</p>
               ) : movements.length === 0 ? (
@@ -199,14 +294,30 @@ export default function MaterialDetails({ material, onClose, onUpdate }: Materia
             </CardContent>
           </Card>
 
-          {/* Actions */}
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={onClose}>
               Fermer
             </Button>
-            {material.quantity <= material.reorderPoint && (
-              <Button onClick={handleReorder} variant="secondary" className="bg-yellow-500 hover:bg-yellow-600 text-white">
-                Commander
+            {shouldShowOrderButton() && (
+              <Button 
+                onClick={handleReorder} 
+                className={`${
+                  material.quantity === 0 
+                    ? 'bg-red-500 hover:bg-red-600' 
+                    : 'bg-yellow-500 hover:bg-yellow-600'
+                } text-white flex items-center gap-2`}
+              >
+                {material.quantity === 0 ? (
+                  <>
+                    <AlertTriangle className="h-4 w-4" />
+                    Commander Urgent
+                  </>
+                ) : (
+                  <>
+                    <Truck className="h-4 w-4" />
+                    Commander
+                  </>
+                )}
               </Button>
             )}
           </div>
