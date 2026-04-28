@@ -8,15 +8,19 @@ export class AppController {
 
   // ── Service URLs ────────────────────────────────────────────────────────────
   private readonly services: Record<string, string> = {
-    planning:     process.env.GESTION_PLANING_URL      ?? 'http://localhost:3002',
-    planing:      process.env.GESTION_PLANING_URL      ?? 'http://localhost:3002',
-    notification: process.env.NOTIFICATION_SERVICE_URL ?? 'http://localhost:3004',
-    videocall:    process.env.VIDEOCALL_SERVICE_URL    ?? 'http://localhost:9000',
-    'video-call': process.env.VIDEOCALL_SERVICE_URL    ?? 'http://localhost:9000',
+    planning:     process.env.GESTION_PLANING_URL        ?? 'http://localhost:3002',
+    planing:      process.env.GESTION_PLANING_URL        ?? 'http://localhost:3002',
+    notification: process.env.NOTIFICATION_SERVICE_URL   ?? 'http://localhost:3004',
+    videocall:    process.env.VIDEOCALL_SERVICE_URL       ?? 'http://localhost:9000',
+    'video-call': process.env.VIDEOCALL_SERVICE_URL       ?? 'http://localhost:9000',
     // gestion-site uses /api global prefix → include it in base URL
-    sites:        (process.env.GESTION_SITE_URL        ?? 'http://localhost:3001') + '/api',
+    sites:        (process.env.GESTION_SITE_URL          ?? 'http://localhost:3001') + '/api',
     // gestion-projects has no global prefix
-    projects:     process.env.GESTION_PROJECTS_URL     ?? 'http://localhost:3010',
+    projects:     process.env.GESTION_PROJECTS_URL        ?? 'http://localhost:3010',
+    // resource-optimization uses /api global prefix
+    resources:    (process.env.RESOURCE_OPTIMIZATION_URL ?? 'http://localhost:3007') + '/api',
+    // incident-management has no global prefix
+    incidents:    process.env.INCIDENT_URL                ?? 'http://localhost:3003',
   };
 
   // ── Generic proxy ───────────────────────────────────────────────────────────
@@ -133,5 +137,17 @@ export class AppController {
   @All(['projects', 'projects/*path'])
   handleProjects(@Req() req: Request, @Res() res: Response) {
     return this.proxy(req, res, 'projects', 'projects');
+  }
+
+  // ── Resource Optimization ───────────────────────────────────────────────────
+  @All(['resources', 'resources/*path'])
+  handleResources(@Req() req: Request, @Res() res: Response) {
+    return this.proxy(req, res, 'resources', 'resources');
+  }
+
+  // ── Incident Management ─────────────────────────────────────────────────────
+  @All(['incidents', 'incidents/*path'])
+  handleIncidents(@Req() req: Request, @Res() res: Response) {
+    return this.proxy(req, res, 'incidents', 'incidents');
   }
 }
