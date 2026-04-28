@@ -272,10 +272,7 @@ export default function Sites() {
       if (!response || response.status !== 200 || !Array.isArray(response.data)) {
         console.error('Invalid response:', response);
         // Fallback to mock data
-        setAvailableTeams(mockTeamMembers.map(user => ({
-          _id: user._id,
-          name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email
-        })));
+        
         return;
       }
       // Load all teams from the database
@@ -288,10 +285,7 @@ export default function Sites() {
     } catch (err) {
       console.error('Error loading teams, using mock data:', err);
       // Fallback to mock data
-      setAvailableTeams(mockTeamMembers.map(user => ({
-        _id: user._id,
-        name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email
-      })));
+      
     }
   };
 

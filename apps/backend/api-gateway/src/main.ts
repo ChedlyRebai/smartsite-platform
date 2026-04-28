@@ -4,6 +4,7 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+
   // Enable CORS so the frontend can call the gateway directly
   app.enableCors({
     origin: '*',
