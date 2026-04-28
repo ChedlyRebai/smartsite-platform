@@ -85,30 +85,25 @@ export function TeamBiDashboard({ teams }: Props) {
       </Card>
 
       {/* ── KPI cards ── */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map((card) => (
-          <div
-            key={card.title}
-            className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${card.tone} p-5 shadow-lg hover:shadow-xl transition-shadow duration-300`}
-          >
-            {/* decorative circles */}
-            <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-white/10" />
-            <div className="absolute -right-1 -bottom-6 h-16 w-16 rounded-full bg-white/10" />
-
-            <div className="relative flex items-start justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-white/70">
-                  {card.title}
-                </p>
-                <p className="mt-2 text-4xl font-extrabold text-white leading-none">
-                  {card.value}
-                </p>
+          <Card key={card.title} className="border-slate-200 shadow-md">
+            <CardContent className="pt-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">
+                    {card.title}
+                  </p>
+                  <p className="text-3xl font-bold text-slate-900 mt-1">
+                    {card.value}
+                  </p>
+                </div>
+                <div className={`p-2 rounded-xl bg-gradient-to-br ${card.tone}`}>
+                  <card.icon className="h-5 w-5 text-white" />
+                </div>
               </div>
-              <div className="rounded-xl bg-white/20 p-2.5 backdrop-blur-sm">
-                <card.icon className="h-6 w-6 text-white" />
-              </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
     </div>

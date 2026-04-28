@@ -1184,113 +1184,166 @@ export default function Team() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
       ) : (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <>
+          {/* Search bar */}
+          <div className="flex flex-wrap gap-3 items-end bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+            <div className="flex-1 min-w-[200px]">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
                   placeholder="Search teams..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-9"
                 />
               </div>
             </div>
-          </CardHeader>
-          <CardContent>
-            {filteredTeams.length === 0 ? (
-              <div className="text-center py-12">
-                <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500">No teams found</p>
-              </div>
-            ) : (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {paginatedTeams.map((team) => (
-                  <Card
+          </div>
+
+          {filteredTeams.length === 0 ? (
+            <div className="text-center py-16">
+              <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500 font-medium">No teams found</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {paginatedTeams.map((team, idx) => {
+                const accents = [
+                  { bar: "from-blue-400 to-cyan-400",     icon: "from-blue-500 to-cyan-500",     bg: "bg-blue-50",    ring: "ring-blue-100",    iconBg: "bg-gradient-to-br from-blue-500 to-cyan-500" },
+                  { bar: "from-violet-400 to-purple-400", icon: "from-violet-500 to-purple-500", bg: "bg-violet-50",  ring: "ring-violet-100",  iconBg: "bg-gradient-to-br from-violet-500 to-purple-500" },
+                  { bar: "from-emerald-400 to-teal-400",  icon: "from-emerald-500 to-teal-500",  bg: "bg-emerald-50", ring: "ring-emerald-100", iconBg: "bg-gradient-to-br from-emerald-500 to-teal-500" },
+                  { bar: "from-amber-400 to-orange-400",  icon: "from-amber-500 to-orange-500",  bg: "bg-amber-50",   ring: "ring-amber-100",   iconBg: "bg-gradient-to-br from-amber-500 to-orange-500" },
+                  { bar: "from-rose-400 to-pink-400",     icon: "from-rose-500 to-pink-500",     bg: "bg-rose-50",    ring: "ring-rose-100",    iconBg: "bg-gradient-to-br from-rose-500 to-pink-500" },
+                  { bar: "from-sky-400 to-indigo-400",    icon: "from-sky-500 to-indigo-500",    bg: "bg-sky-50",     ring: "ring-sky-100",     iconBg: "bg-gradient-to-br from-sky-500 to-indigo-500" },
+                ];
+                const accent = accents[idx % accents.length];
+                const memberCount = team.members?.length || 0;
+
+                return (
+                  <div
                     key={team._id}
-                    className="hover:shadow-md transition-shadow cursor-pointer"
-                    onClick={() => handleViewTeam(team)}
+                    className={`group relative flex flex-col rounded-2xl shadow-md hover:shadow-xl ring-1 overflow-hidden transition-all duration-300 hover:-translate-y-1 ${accent.bg} ${accent.ring}`}
                   >
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-12 w-12">
-                            <AvatarFallback className="bg-gradient-to-br from-blue-600 to-green-600 text-white">
-                              {getInitials(team.name)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <h3 className="font-semibold text-gray-900 dark:text-white">
+                    {/* Top accent bar */}
+                    <div className={`h-1.5 w-full bg-gradient-to-r ${accent.bar}`} />
+
+                    <div className="flex flex-col flex-1 p-6 gap-5">
+
+                      {/* Header */}
+                      <div
+                        className="flex items-start justify-between gap-3 cursor-pointer"
+                        onClick={() => handleViewTeam(team)}
+                      >
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <div className={`shrink-0 p-3 rounded-xl shadow-md ${accent.iconBg}`}>
+                            <Users className="h-6 w-6 text-white" />
+                          </div>
+                          <div className="min-w-0">
+                            <h3 className="font-bold text-gray-900 dark:text-white text-lg leading-tight truncate">
                               {team.name}
                             </h3>
                             {team.teamCode && (
-                              <p className="text-xs text-gray-500">
-                                {team.teamCode}
-                              </p>
+                              <p className="text-xs text-gray-400 font-mono mt-0.5">{team.teamCode}</p>
                             )}
                           </div>
                         </div>
-                        <Badge
-                          variant={team.isActive ? "secondary" : "destructive"}
-                        >
+                        <span className={`shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full ${
+                          team.isActive
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-red-100 text-red-600"
+                        }`}>
                           {team.isActive ? "Active" : "Inactive"}
-                        </Badge>
+                        </span>
                       </div>
 
+                      {/* Description */}
                       {team.description && (
-                        <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                        <p className="text-sm text-gray-500 line-clamp-2 -mt-2">
                           {team.description}
                         </p>
                       )}
 
-                      <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
-                        <div className="flex items-center gap-1">
-                          <Users className="h-4 w-4" />
-                          <span>{team.members?.length || 0} membres</span>
+                      {/* Members avatars */}
+                      <div
+                        className="flex items-center gap-3 cursor-pointer"
+                        onClick={() => handleViewTeam(team)}
+                      >
+                        <div className="flex -space-x-2">
+                          {(team.members || []).slice(0, 4).map((m: any, i: number) => {
+                            const fn = m.firstName || m.firstname || "";
+                            const ln = m.lastName || m.lastname || "";
+                            const initials = `${fn.charAt(0)}${ln.charAt(0)}`.toUpperCase() || "?";
+                            const colors = ["from-blue-400 to-cyan-400", "from-violet-400 to-purple-400", "from-emerald-400 to-teal-400", "from-amber-400 to-orange-400"];
+                            return (
+                              <div
+                                key={m._id || i}
+                                className={`h-8 w-8 rounded-full bg-gradient-to-br ${colors[i % colors.length]} flex items-center justify-center text-white text-xs font-bold ring-2 ring-white`}
+                                title={`${fn} ${ln}`.trim()}
+                              >
+                                {initials}
+                              </div>
+                            );
+                          })}
+                          {memberCount > 4 && (
+                            <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-xs font-bold ring-2 ring-white">
+                              +{memberCount - 4}
+                            </div>
+                          )}
                         </div>
-                        {isTeamAssignedToSite(team._id) && (
-                          <div className="flex items-center gap-1">
-                            <Building className="h-4 w-4" />
-                            <span>
-                              Site: {teamSiteAssignments[team._id].siteName}
-                            </span>
-                          </div>
-                        )}
+                        <span className="text-sm text-gray-500 font-medium">
+                          {memberCount} member{memberCount !== 1 ? "s" : ""}
+                        </span>
                       </div>
 
+                      {/* Site assignment */}
+                      {isTeamAssignedToSite(team._id) && (
+                        <div className="flex items-center gap-2 text-xs text-gray-500 bg-white/60 rounded-lg px-3 py-2">
+                          <Building className="h-3.5 w-3.5 shrink-0" />
+                          <span className="truncate">Site: <strong>{teamSiteAssignments[team._id].siteName}</strong></span>
+                        </div>
+                      )}
+
+                      {/* Actions */}
                       <div
-                        className="flex gap-2 pt-4 border-t"
+                        className="flex gap-2 pt-4 border-t border-black/5 mt-auto"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <Button
                           variant="outline"
                           size="sm"
-                          className="flex-1"
+                          className="flex-1 bg-white/70 hover:bg-white border-gray-200 text-gray-700 font-medium"
+                          onClick={() => handleViewTeam(team)}
+                        >
+                          <Users className="h-3.5 w-3.5 mr-1.5" />
+                          View
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 bg-white/70 hover:bg-white border-gray-200 text-gray-700 font-medium"
                           onClick={() => handleEditTeam(team)}
                         >
-                          <Edit className="h-3 w-3 mr-1" />
-                          Modifier
+                          <Edit className="h-3.5 w-3.5 mr-1.5" />
+                          Edit
                         </Button>
                         {canManageTeam && (
                           <Button
                             variant="outline"
                             size="sm"
-                            className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            className="bg-white/70 hover:bg-red-50 border-gray-200 text-red-500 hover:text-red-600 hover:border-red-200 px-3"
                             onClick={() => handleDeleteTeam(team)}
                           >
-                            <Trash2 className="h-3 w-3 mr-1" />
-                            Delete
+                            <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         )}
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </>
       )}
 
       {/* Pagination */}
