@@ -6,207 +6,132 @@ import { AppService } from './app.service';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  private readonly planningServiceUrl =
-    process.env.GESTION_PLANING_URL ?? 'http://localhost:3002';
-  private readonly notificationServiceUrl =
-    process.env.NOTIFICATION_SERVICE_URL ?? 'http://localhost:3004';
-  private readonly videocallServiceUrl =
-    process.env.VIDEOCALL_SERVICE_URL ?? 'http://localhost:9000';
+  // ── Service URLs ────────────────────────────────────────────────────────────
+  private readonly services: Record<string, string> = {
+    planning:     process.env.GESTION_PLANING_URL      ?? 'http://localhost:3002',
+    planing:      process.env.GESTION_PLANING_URL      ?? 'http://localhost:3002',
+    notification: process.env.NOTIFICATION_SERVICE_URL ?? 'http://localhost:3004',
+    videocall:    process.env.VIDEOCALL_SERVICE_URL    ?? 'http://localhost:9000',
+    'video-call': process.env.VIDEOCALL_SERVICE_URL    ?? 'http://localhost:9000',
+    // gestion-site uses /api global prefix → include it in base URL
+    sites:        (process.env.GESTION_SITE_URL        ?? 'http://localhost:3001') + '/api',
+    // gestion-projects has no global prefix
+    projects:     process.env.GESTION_PROJECTS_URL     ?? 'http://localhost:3010',
+  };
 
-  private async proxyToPlanning(req: Request, res: Response): Promise<void> {
-    const pathAndQuery = req.originalUrl.replace(/^\/(planing|planning)/, '');
-    const targetUrl = new URL(pathAndQuery || '/', this.planningServiceUrl);
+  // ── Generic proxy ───────────────────────────────────────────────────────────
+  private async proxy(
+    req: Request,
+    res: Response,
+    serviceKey: string,
+    stripPrefix: string,
+  ): Promise<void> {
+    const baseUrl = this.services[serviceKey];
+    if (!baseUrl) {
+      res.status(502).json({ message: `Unknown service: ${serviceKey}` });
+      return;
+    }
 
+    const pathAndQuery = req.originalUrl.replace(
+      new RegExp(`^/${stripPrefix}`),
+      '',
+    );
+
+    // Build upstream URL — append path to base (don't use new URL() which drops base path)
+    const base = baseUrl.replace(/\/$/, '');
+    const path = pathAndQuery.startsWith('/') ? pathAndQuery : `/${pathAndQuery}`;
+    const upstreamUrl = `${base}${path || '/'}`;
+
+    let targetUrl: URL;
+    try {
+      targetUrl = new URL(upstreamUrl);
+    } catch {
+      res.status(400).json({ message: 'Invalid upstream URL' });
+      return;
+    }
+
+    // Forward headers (skip hop-by-hop)
     const forwardedHeaders = new Headers();
-
-    Object.entries(req.headers).forEach(([key, value]) => {
-      if (value === undefined) {
-        return;
-      }
-
-      const lowerKey = key.toLowerCase();
-
-      if (lowerKey === 'host' || lowerKey === 'content-length') {
-        return;
-      }
-
+    for (const [key, value] of Object.entries(req.headers)) {
+      if (value === undefined) continue;
+      const lower = key.toLowerCase();
+      if (lower === 'host' || lower === 'content-length') continue;
       if (Array.isArray(value)) {
-        value.forEach((item) => forwardedHeaders.append(key, item));
-        return;
+        value.forEach((v) => forwardedHeaders.append(key, v));
+      } else {
+        forwardedHeaders.set(key, value);
       }
+    }
 
-      forwardedHeaders.set(key, value);
-    });
-
+    // Build body
     const supportsBody = !['GET', 'HEAD'].includes(req.method.toUpperCase());
     let body: BodyInit | undefined;
-
-    if (supportsBody && req.body !== undefined && req.body !== null) {
+    if (supportsBody && req.body != null) {
       if (typeof req.body === 'string') {
         body = req.body;
-      } else if (Buffer.isBuffer(req.body)) {
-        body = new Uint8Array(req.body);
+      } else if (typeof Buffer !== 'undefined' && Buffer.isBuffer(req.body)) {
+        body = new Uint8Array(req.body as Buffer);
       } else {
         body = JSON.stringify(req.body);
       }
     }
 
-    const upstreamResponse = await fetch(targetUrl, {
-      method: req.method,
-      headers: forwardedHeaders,
-      body,
-    });
+    try {
+      const upstream = await fetch(targetUrl.toString(), {
+        method: req.method,
+        headers: forwardedHeaders,
+        body,
+      });
 
-    res.status(upstreamResponse.status);
+      res.status(upstream.status);
+      upstream.headers.forEach((value, key) => {
+        if (key.toLowerCase() === 'transfer-encoding') return;
+        res.setHeader(key, value);
+      });
 
-    upstreamResponse.headers.forEach((value, key) => {
-      if (key.toLowerCase() === 'transfer-encoding') {
-        return;
-      }
-      
-      res.setHeader(key, value);
-    });
-
-    const rawBody = await upstreamResponse.text();
-    res.send(rawBody);
+      res.send(await upstream.text());
+    } catch (err: any) {
+      res
+        .status(502)
+        .json({ message: 'Bad Gateway', detail: err?.message ?? 'upstream unreachable' });
+    }
   }
 
+  // ── Health check ────────────────────────────────────────────────────────────
   @Get()
   getHello(): string {
     return this.appService.getHello();
   }
 
+  // ── Planning ────────────────────────────────────────────────────────────────
   @All(['planing', 'planing/*path', 'planning', 'planning/*path'])
-  async handlePlanningProxy(
-    @Req() req: Request,
-    @Res() res: Response,
-  ): Promise<void> {
-    await this.proxyToPlanning(req, res);
+  handlePlanning(@Req() req: Request, @Res() res: Response) {
+    const prefix = req.originalUrl.startsWith('/planning') ? 'planning' : 'planing';
+    return this.proxy(req, res, prefix, prefix);
   }
 
+  // ── Notification ────────────────────────────────────────────────────────────
   @All(['notification', 'notification/*path'])
-  async handleNotificationProxy(
-    @Req() req: Request,
-    @Res() res: Response,
-  ): Promise<void> {
-    const pathAndQuery = req.originalUrl.replace(/^\/notification/, '');
-    const targetUrl = new URL(pathAndQuery || '/', this.notificationServiceUrl);
-
-    const forwardedHeaders = new Headers();
-
-    Object.entries(req.headers).forEach(([key, value]) => {
-      if (value === undefined) {
-        return;
-      }
-
-      const lowerKey = key.toLowerCase();
-
-      if (lowerKey === 'host' || lowerKey === 'content-length') {
-        return;
-      }
-
-      if (Array.isArray(value)) {
-        value.forEach((item) => forwardedHeaders.append(key, item));
-        return;
-      }
-
-      forwardedHeaders.set(key, value);
-    });
-
-    const supportsBody = !['GET', 'HEAD'].includes(req.method.toUpperCase());
-    let body: BodyInit | undefined;
-
-    if (supportsBody && req.body !== undefined && req.body !== null) {
-      if (typeof req.body === 'string') {
-        body = req.body;
-      } else if (Buffer.isBuffer(req.body)) {
-        body = new Uint8Array(req.body);
-      } else {
-        body = JSON.stringify(req.body);
-      }
-    }
-
-    const upstreamResponse = await fetch(targetUrl, {
-      method: req.method,
-      headers: forwardedHeaders,
-      body,
-    });
-
-    res.status(upstreamResponse.status);
-
-    upstreamResponse.headers.forEach((value, key) => {
-      if (key.toLowerCase() === 'transfer-encoding') {
-        return;
-      }
-
-      res.setHeader(key, value);
-    });
-
-    const rawBody = await upstreamResponse.text();
-    res.send(rawBody);
+  handleNotification(@Req() req: Request, @Res() res: Response) {
+    return this.proxy(req, res, 'notification', 'notification');
   }
 
+  // ── Video call ──────────────────────────────────────────────────────────────
   @All(['videocall', 'videocall/*path', 'video-call', 'video-call/*path'])
-  async handleVideocallProxy(
-    @Req() req: Request,
-    @Res() res: Response,
-  ): Promise<void> {
-    const pathAndQuery = req.originalUrl.replace(/^\/(videocall|video-call)/, '');
-    const targetUrl = new URL(pathAndQuery || '/', this.videocallServiceUrl);
-
-    const forwardedHeaders = new Headers();
-
-    Object.entries(req.headers).forEach(([key, value]) => {
-      if (value === undefined) {
-        return;
-      }
-
-      const lowerKey = key.toLowerCase();
-
-      if (lowerKey === 'host' || lowerKey === 'content-length') {
-        return;
-      }
-
-      if (Array.isArray(value)) {
-        value.forEach((item) => forwardedHeaders.append(key, item));
-        return;
-      }
-
-      forwardedHeaders.set(key, value);
-    });
-
-    const supportsBody = !['GET', 'HEAD'].includes(req.method.toUpperCase());
-    let body: BodyInit | undefined;
-
-    if (supportsBody && req.body !== undefined && req.body !== null) {
-      if (typeof req.body === 'string') {
-        body = req.body;
-      } else if (Buffer.isBuffer(req.body)) {
-        body = new Uint8Array(req.body);
-      } else {
-        body = JSON.stringify(req.body);
-      }
-    }
-
-    const upstreamResponse = await fetch(targetUrl, {
-      method: req.method,
-      headers: forwardedHeaders,
-      body,
-    });
-
-    res.status(upstreamResponse.status);
-
-    upstreamResponse.headers.forEach((value, key) => {
-      if (key.toLowerCase() === 'transfer-encoding') {
-        return;
-      }
-
-      res.setHeader(key, value);
-    });
-
-    const rawBody = await upstreamResponse.text();
-    res.send(rawBody);
+  handleVideocall(@Req() req: Request, @Res() res: Response) {
+    const prefix = req.originalUrl.startsWith('/video-call') ? 'video-call' : 'videocall';
+    return this.proxy(req, res, prefix, prefix);
   }
 
-  
+  // ── Gestion Sites ───────────────────────────────────────────────────────────
+  @All(['sites', 'sites/*path'])
+  handleSites(@Req() req: Request, @Res() res: Response) {
+    return this.proxy(req, res, 'sites', 'sites');
+  }
+
+  // ── Gestion Projects ────────────────────────────────────────────────────────
+  @All(['projects', 'projects/*path'])
+  handleProjects(@Req() req: Request, @Res() res: Response) {
+    return this.proxy(req, res, 'projects', 'projects');
+  }
 }
