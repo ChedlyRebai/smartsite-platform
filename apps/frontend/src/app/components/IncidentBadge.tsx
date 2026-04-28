@@ -131,11 +131,11 @@ incidentsApi.interceptors.request.use((config) => {
 });
 
 const statusFilters = [
-  { value: 'all', label: 'Tous', color: 'bg-gray-100 text-gray-800' },
-  { value: 'open', label: 'En cours', color: 'bg-red-100 text-red-800' },
-  { value: 'investigating', label: 'En investigation', color: 'bg-yellow-100 text-yellow-800' },
-  { value: 'resolved', label: 'Traités', color: 'bg-green-100 text-green-800' },
-  { value: 'closed', label: 'Fermés', color: 'bg-gray-100 text-gray-600' },
+  { value: 'all', label: 'All', color: 'bg-gray-100 text-gray-800' },
+  { value: 'open', label: 'Open', color: 'bg-red-100 text-red-800' },
+  { value: 'investigating', label: 'Investigating', color: 'bg-yellow-100 text-yellow-800' },
+  { value: 'resolved', label: 'Resolved', color: 'bg-green-100 text-green-800' },
+  { value: 'closed', label: 'Closed', color: 'bg-gray-100 text-gray-600' },
 ];
 
 export function IncidentBadge({ siteId, projectId, showCount = true, size = 'md' }: IncidentBadgeProps) {

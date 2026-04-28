@@ -473,9 +473,9 @@ export const ProfessionalPowerBiDashboard: React.FC = () => {
             </motion.div>
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Power BI Dashboard
+                Welcome to Smart Site
               </h1>
-              <p className="text-gray-500 mt-1">Real-time Analytics & Insights</p>
+              <p className="text-gray-500 mt-1">Manage your projects, sites, and resources efficiently in one place</p>
             </div>
           </div>
           <motion.button

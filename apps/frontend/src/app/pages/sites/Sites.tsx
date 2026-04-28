@@ -118,6 +118,7 @@ export default function Sites() {
   const currentProjectId = isProjectContext ? projectIdFromUrl : null;
 
   const [projectSiteLimit, setProjectSiteLimit] = useState<number | null>(null);
+  const [projectBudget, setProjectBudget] = useState<number | null>(null);
 
   useEffect(() => {
     if (isProjectContext && currentProjectId) {
@@ -126,12 +127,14 @@ export default function Sites() {
           if (res.data?.siteCount !== undefined) {
             setProjectSiteLimit(res.data.siteCount);
           }
+          if (res.data?.budget !== undefined) {
+            setProjectBudget(res.data.budget);
+          }
         })
         .catch(err => console.error('Error fetching project:', err));
     }
   }, [isProjectContext, currentProjectId]);
 
-  // Search and filter state
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedPriority, setSelectedPriority] = useState('all');
@@ -220,6 +223,21 @@ export default function Sites() {
   const [selectedUserId, setSelectedUserId] = useState('');
   const [loadingTeams, setLoadingTeams] = useState(false);
 
+  // Clients list state — only users with role "client"
+  const [clientsList, setClientsList] = useState<Array<{ _id: string; firstName?: string; lastName?: string; email?: string; name?: string }>>([]);
+
+  useEffect(() => {
+    const token = user?.access_token;
+    // Use /users/role/client which filters by role in DB (approved users only)
+    axios.get(`${import.meta.env.VITE_AUTH_API_URL || 'http://localhost:3000'}/users/role/client`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    }).then((res) => {
+      if (Array.isArray(res.data)) {
+        setClientsList(res.data);
+      }
+    }).catch(() => {});
+  }, []);
+
   // Auto-refresh for real-time updates
   useEffect(() => {
     if (autoRefresh) {
@@ -235,6 +253,11 @@ export default function Sites() {
     loadSites();
   }, [selectedStatus, selectedPriority]);
 
+  // Reset page when filters/search change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedStatus, selectedPriority, sortBy, sortOrder]);
+
   // Load available teams when add dialog opens
   useEffect(() => {
     if (addDialogOpen) {
@@ -249,10 +272,7 @@ export default function Sites() {
       if (!response || response.status !== 200 || !Array.isArray(response.data)) {
         console.error('Invalid response:', response);
         // Fallback to mock data
-        setAvailableTeams(mockTeamMembers.map(user => ({
-          _id: user._id,
-          name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email
-        })));
+        
         return;
       }
       // Load all teams from the database
@@ -265,10 +285,7 @@ export default function Sites() {
     } catch (err) {
       console.error('Error loading teams, using mock data:', err);
       // Fallback to mock data
-      setAvailableTeams(mockTeamMembers.map(user => ({
-        _id: user._id,
-        name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email
-      })));
+      
     }
   };
 
@@ -440,6 +457,16 @@ export default function Sites() {
       return sortOrder === 'asc' ? comparison : -comparison;
     });
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 3;
+
+  // Reset page when filters change
+  const paginatedSites = filteredAndSortedSites.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
+  const totalSitePages = Math.ceil(filteredAndSortedSites.length / PAGE_SIZE);
+
   // Format budget in Tunisian Dinar
   const formatBudget = (budget: number) => {
     return new Intl.NumberFormat('fr-TN', {
@@ -548,6 +575,16 @@ export default function Sites() {
       newErrors.budget = 'Budget is required';
     } else if (parseInt(newSite.budget) <= 0) {
       newErrors.budget = 'Budget must be greater than 0';
+    } else if (currentProjectId && projectBudget !== null) {
+      // Sum of existing sites budgets for this project
+      const existingSitesBudget = sites
+        .filter(s => s.projectId === currentProjectId)
+        .reduce((sum, s) => sum + (s.budget || 0), 0);
+      const newBudget = parseInt(newSite.budget);
+      if (existingSitesBudget + newBudget > projectBudget) {
+        const remaining = projectBudget - existingSitesBudget;
+        newErrors.budget = `Budget exceeds project limit. Remaining: ${new Intl.NumberFormat('fr-TN', { style: 'currency', currency: 'TND', minimumFractionDigits: 0 }).format(remaining > 0 ? remaining : 0)}`;
+      }
     }
 
     if (!mapPosition) {
@@ -847,9 +884,7 @@ export default function Sites() {
   // Handle PDF export - always fetch fresh data from MongoDB
   const handleExportPDF = async () => {
     try {
-      // Fetch fresh data directly from the API
       const sitesData = await getAllSitesWithTeams();
-
       if (sitesData && sitesData.length > 0) {
         exportSitesToPDF(sitesData as Site[], `smartsite-sites-${new Date().toISOString().split('T')[0]}.pdf`);
         toast.success('PDF exported successfully with ' + sitesData.length + ' sites!');
@@ -863,63 +898,151 @@ export default function Sites() {
   };
 
   // Handle export in different formats
-  const handleExport = async (format: 'pdf' | 'csv' | 'excel' | 'json') => {
+  const handleExport = async (format: 'pdf' | 'excel') => {
     try {
-      const sitesData = await getAllSitesWithTeams();
+      toast.info('Generating export...');
 
-      console.log('Sites data for export:', sitesData);
-      console.log('First site teams:', sitesData[0]?.teams);
+      // Fetch sites filtered by current project if in project context
+      const SITE_URL = (import.meta as any).env?.VITE_GESTION_SITE_URL ?? 'http://localhost:3001/api';
+      const params: any = { limit: 1000 };
+      if (currentProjectId) params.projectId = currentProjectId;
+      const res = await axios.get(`${SITE_URL}/gestion-sites`, { params });
+      const sitesData: any[] = res.data?.data || res.data || [];
 
       if (!sitesData || sitesData.length === 0) {
-        toast.error('No sites found in database');
+        toast.error('No sites found');
         return;
       }
 
       const dateStr = new Date().toISOString().split('T')[0];
-      const formatLabels = { pdf: 'PDF', csv: 'CSV', excel: 'Excel', json: 'JSON' };
-      let filename = '';
 
-      switch (format) {
-        case 'pdf':
-          filename = `smartsite-sites-${dateStr}.pdf`;
-          exportSitesToPDF(sitesData as Site[], filename);
-          toast.success('PDF exported with ' + sitesData.length + ' sites!');
-          break;
-        case 'csv':
-          filename = `smartsite-sites-${dateStr}.csv`;
-          exportSitesToCSV(sitesData as Site[], filename);
-          toast.success('CSV exported with ' + sitesData.length + ' sites!');
-          break;
-        case 'excel':
-          filename = `smartsite-sites-${dateStr}.xls`;
-          exportSitesToExcel(sitesData as Site[], filename);
-          toast.success('Excel exported with ' + sitesData.length + ' sites!');
-          break;
-        case 'json':
-          filename = `smartsite-sites-${dateStr}.json`;
-          exportSitesToJSON(sitesData as Site[], filename);
-          toast.success('JSON exported with ' + sitesData.length + ' sites!');
-          break;
+      if (format === 'excel') {
+        exportSitesToExcel(sitesData as Site[], `smartsite-sites-${dateStr}.xls`);
+        toast.success(`Excel exported with ${sitesData.length} sites!`);
+        return;
       }
 
-      // Record export in history
-      const exportRecord = {
-        id: Date.now().toString(),
-        format: formatLabels[format],
-        filename: filename,
-        siteCount: sitesData.length,
-        downloadedAt: new Date().toISOString(),
-        downloadedBy: user?.firstName || 'User'
+      // ── PDF with SmartSite design ──
+      const fmtBudget = (n: number) =>
+        Number(n).toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' DT';
+
+      const statusLabel2 = (s: string) => {
+        const map: Record<string, string> = {
+          planning: 'Planning', in_progress: 'In Progress',
+          on_hold: 'On Hold', completed: 'Completed',
+        };
+        return map[s] || s || '-';
       };
-      setExportHistory(prev => {
-        const newHistory = [exportRecord, ...prev];
-        localStorage.setItem('exportHistory', JSON.stringify(newHistory));
-        return newHistory;
+
+      const logoBase64 = await fetch('/logo.png')
+        .then(r => r.blob())
+        .then(blob => new Promise<string>(resolve => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(blob);
+        }))
+        .catch(() => null);
+
+      const { jsPDF } = await import('jspdf');
+      const autoTable = (await import('jspdf-autotable')).default;
+
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pageW = doc.internal.pageSize.getWidth();
+      const pageH = doc.internal.pageSize.getHeight();
+
+      // Header banner
+      doc.setFillColor(15, 23, 42);
+      doc.rect(0, 0, pageW, 36, 'F');
+      if (logoBase64) doc.addImage(logoBase64, 'PNG', 10, 5, 24, 24);
+      const textX = logoBase64 ? 40 : 14;
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('SmartSite - Sites Report', textX, 17);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(148, 163, 184);
+      const now = new Date();
+      doc.text(
+        `Generated: ${now.toLocaleDateString('fr-FR')} ${now.toLocaleTimeString('fr-FR')}   |   Total sites: ${sitesData.length}`,
+        textX, 26
+      );
+
+      let y = 44;
+
+      // Summary box
+      const totalBudget = sitesData.reduce((s: number, site: any) => s + (Number(site.budget) || 0), 0);
+      const completed = sitesData.filter((s: any) => s.status === 'completed').length;
+      const inProgress = sitesData.filter((s: any) => s.status === 'in_progress').length;
+
+      doc.setFillColor(241, 245, 249);
+      doc.roundedRect(10, y, pageW - 20, 20, 3, 3, 'F');
+      doc.setDrawColor(203, 213, 225);
+      doc.roundedRect(10, y, pageW - 20, 20, 3, 3, 'S');
+      doc.setTextColor(100, 116, 139);
+      doc.setFontSize(7);
+      doc.setFont('helvetica', 'bold');
+      doc.text('SUMMARY', 15, y + 6);
+      doc.setFontSize(9);
+      doc.setTextColor(15, 23, 42);
+      doc.text(`Total Budget: ${fmtBudget(totalBudget)}`, 15, y + 14);
+      doc.text(`Completed: ${completed}   |   In Progress: ${inProgress}   |   Total: ${sitesData.length}`, pageW / 2 + 5, y + 14);
+
+      y += 28;
+
+      // Sites table
+      autoTable(doc, {
+        startY: y,
+        head: [['Site Name', 'Location', 'Client', 'Budget (DT)', 'Status', 'Progress', 'Area (m2)']],
+        body: sitesData.map((s: any) => [
+          s.nom || s.name || '-',
+          s.localisation || s.adresse || s.address || '-',
+          s.clientName || '-',
+          fmtBudget(Number(s.budget) || 0),
+          statusLabel2(s.status || ''),
+          `${s.progress || 0}%`,
+          (s.area || 0).toLocaleString('de-DE'),
+        ]),
+        foot: [[
+          { content: `${sitesData.length} site(s)`, colSpan: 3, styles: { fontStyle: 'bold', fillColor: [226, 232, 240] } },
+          { content: `Total: ${fmtBudget(totalBudget)}`, colSpan: 4, styles: { fontStyle: 'bold', halign: 'right', fillColor: [226, 232, 240] } },
+        ]],
+        theme: 'grid',
+        headStyles: { fillColor: [30, 41, 59], textColor: 255, fontSize: 8, fontStyle: 'bold', cellPadding: 3 },
+        footStyles: { textColor: [15, 23, 42], fontSize: 8, cellPadding: 3 },
+        bodyStyles: { fontSize: 8, textColor: [30, 41, 59], cellPadding: 3 },
+        alternateRowStyles: { fillColor: [248, 250, 252] },
+        columnStyles: {
+          0: { cellWidth: 36 },
+          1: { cellWidth: 32 },
+          2: { cellWidth: 26 },
+          3: { cellWidth: 28, halign: 'right' },
+          4: { cellWidth: 22 },
+          5: { cellWidth: 16, halign: 'center' },
+          6: { cellWidth: 18, halign: 'right' },
+        },
+        margin: { left: 10, right: 10 },
       });
+
+      // Footer on every page
+      const totalPages = (doc as any).internal.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFillColor(15, 23, 42);
+        doc.rect(0, pageH - 10, pageW, 10, 'F');
+        doc.setTextColor(148, 163, 184);
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'normal');
+        doc.text('SmartSite Platform - Confidential', 10, pageH - 4);
+        doc.text(`Page ${i} / ${totalPages}`, pageW - 10, pageH - 4, { align: 'right' });
+      }
+
+      doc.save(`smartsite-sites-${dateStr}.pdf`);
+      toast.success(`PDF exported with ${sitesData.length} sites!`);
 
     } catch (error) {
       console.error('Error exporting:', error);
-      toast.error('Failed to export - please ensure backend is running');
+      toast.error('Failed to export');
     }
   };
 
@@ -951,59 +1074,28 @@ export default function Sites() {
                 {' • '}{currentSiteCount} / {projectSiteLimit} sites
               </span>
             )}
-            {siteIssues && Object.keys(siteIssues).length > 0 && (
-              <span className="ml-1 text-amber-600">
-                {' • '}{Object.values(siteIssues).flat().filter(i => !i.resolved).length} issues
-              </span>
-            )}
           </p>
         </div>
         {canManageSites && isProjectContext ? (
           <div className="flex gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="border-green-600 text-green-600 hover:bg-green-50"
-                >
-                  <FileDown className="h-4 w-4 mr-2" />
-                  Export
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => handleExport('pdf')}>
-                  <FileDown className="h-4 w-4 mr-2" />
-                  PDF
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleExport('excel')}>
-                  <FileDown className="h-4 w-4 mr-2" />
-                  Excel
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleExport('csv')}>
-                  <FileDown className="h-4 w-4 mr-2" />
-                  CSV
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleExport('json')}>
-                  <FileDown className="h-4 w-4 mr-2" />
-                  JSON
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Export History Button */}
+            {/* Export PDF */}
             <Button
               variant="outline"
-              onClick={() => setExportHistoryOpen(true)}
-              className="border-gray-200"
-              title="Export History"
+              className="border-gray-200 hover:bg-gray-50 font-semibold"
+              onClick={() => handleExport('pdf')}
             >
-              <Clock className="h-4 w-4 mr-2" />
-              History
-              {exportHistory.length > 0 && (
-                <Badge variant="secondary" className="ml-2 bg-blue-100 text-blue-700">
-                  {exportHistory.length}
-                </Badge>
-              )}
+              <FileDown className="h-4 w-4 mr-2" />
+              Export PDF
+            </Button>
+
+            {/* Export Excel */}
+            <Button
+              variant="outline"
+              className="border-gray-200 hover:bg-gray-50 font-semibold"
+              onClick={() => handleExport('excel')}
+            >
+              <FileDown className="h-4 w-4 mr-2" />
+              Export Excel
             </Button>
 
             <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
@@ -1133,6 +1225,23 @@ export default function Sites() {
                             {errors.budget}
                           </p>
                         )}
+                        {!errors.budget && currentProjectId && projectBudget !== null && (() => {
+                          const existingSitesBudget = sites
+                            .filter(s => s.projectId === currentProjectId)
+                            .reduce((sum, s) => sum + (s.budget || 0), 0);
+                          const remaining = projectBudget - existingSitesBudget;
+                          const entered = parseInt(newSite.budget) || 0;
+                          const afterNew = existingSitesBudget + entered;
+                          const isOver = afterNew > projectBudget;
+                          return (
+                            <p className={`text-xs flex items-center gap-1 ${isOver ? 'text-red-500' : 'text-gray-500'}`}>
+                              {isOver
+                                ? `⚠ Exceeds project budget by ${new Intl.NumberFormat('fr-TN', { style: 'currency', currency: 'TND', minimumFractionDigits: 0 }).format(afterNew - projectBudget)}`
+                                : `Remaining project budget: ${new Intl.NumberFormat('fr-TN', { style: 'currency', currency: 'TND', minimumFractionDigits: 0 }).format(remaining)}`
+                              }
+                            </p>
+                          );
+                        })()}
                       </div>
                     </div>
 
@@ -1140,12 +1249,22 @@ export default function Sites() {
                       <Label htmlFor="clientName" className="text-sm font-medium">
                         Client Name <span className="text-gray-500">(Optional)</span>
                       </Label>
-                      <Input
+                      <select
                         id="clientName"
-                        placeholder="e.g., ABC Corporation"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         value={newSite.clientName}
                         onChange={(e) => setNewSite({ ...newSite, clientName: e.target.value })}
-                      />
+                      >
+                        <option value="">-- Select a client --</option>
+                        {clientsList.map((c) => {
+                          const label = c.firstName && c.lastName
+                            ? `${c.firstName} ${c.lastName}`
+                            : c.name || c.email || c._id;
+                          return (
+                            <option key={c._id} value={label}>{label}</option>
+                          );
+                        })}
+                      </select>
                     </div>
 
                     <div className="space-y-2">
@@ -1329,28 +1448,6 @@ export default function Sites() {
               className="border-gray-200"
             >
               {sortOrder === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
-            </Button>
-
-            {/* Problems Filter Toggle */}
-            <Button
-              variant={showProblemsOnly ? "destructive" : "outline"}
-              size="sm"
-              onClick={() => setShowProblemsOnly(!showProblemsOnly)}
-              className="border-gray-200"
-            >
-              <AlertTriangle className="h-4 w-4 mr-2" />
-              Problems
-            </Button>
-
-            {/* Auto-refresh Toggle */}
-            <Button
-              variant={autoRefresh ? "default" : "outline"}
-              size="sm"
-              onClick={() => setAutoRefresh(!autoRefresh)}
-              className={autoRefresh ? "bg-green-600 hover:bg-green-700" : "border-gray-200"}
-            >
-              <RefreshCw className={`h-4 w-4 mr-2 ${autoRefresh ? 'animate-spin' : ''}`} />
-              {autoRefresh ? 'Live' : 'Static'}
             </Button>
 
             {/* Status/Priority Filter */}
@@ -1572,7 +1669,7 @@ export default function Sites() {
         </Card>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {filteredAndSortedSites.map((site) => {
+          {paginatedSites.map((site) => {
             const statusConfig = STATUS_CONFIG[site.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.planning;
             const StatusIcon = statusConfig.icon;
             const priorityConfig = PRIORITY_CONFIG[site.priority || 'medium'];
@@ -1614,13 +1711,7 @@ export default function Sites() {
                         <StatusIcon className="h-3 w-3" />
                         <span className="text-xs font-medium">{statusConfig.label}</span>
                       </Badge>
-                      {/* Problem Indicator */}
-                      {siteIssueCount > 0 && (
-                        <Badge variant="destructive" className="text-xs px-1.5 py-0.5">
-                          <AlertTriangle className="h-3 w-3 mr-1" />
-                          {siteIssueCount}
-                        </Badge>
-                      )}
+                      {/* Problem Indicator removed */}
                     </div>
                   </div>
                 </CardHeader>
@@ -1699,24 +1790,6 @@ export default function Sites() {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-blue-200 hover:border-blue-400 hover:bg-blue-50 transition-colors px-2"
-                      onClick={() => {
-                        setSelectedSite(site);
-                        setIssuesDialogOpen(true);
-                      }}
-                      title="Issues"
-                    >
-                      <AlertTriangle className="h-4 w-4" />
-                      {siteIssueCount > 0 && (
-                        <span className="ml-1 text-xs bg-red-100 text-red-700 rounded-full px-1">
-                          {siteIssueCount}
-                        </span>
-                      )}
-                    </Button>
-
-                    <Button
-                      size="sm"
-                      variant="outline"
                       className="border-blue-200 hover:border-blue-400 hover:bg-blue-50 transition-colors"
                       onClick={() => handleOpenTeamDialog(site)}
                     >
@@ -1736,6 +1809,44 @@ export default function Sites() {
               </Card>
             );
           })}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {!loading && filteredAndSortedSites.length > 0 && (
+        <div className="flex items-center justify-between pt-2">
+          <p className="text-sm text-gray-500">
+            Showing {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filteredAndSortedSites.length)} of {filteredAndSortedSites.length} sites
+          </p>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline" size="sm"
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="h-8 w-8 p-0"
+            >
+              <ChevronRight className="h-4 w-4 rotate-180" />
+            </Button>
+            {Array.from({ length: totalSitePages }, (_, i) => i + 1).map(page => (
+              <Button
+                key={page}
+                variant={page === currentPage ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setCurrentPage(page)}
+                className={`h-8 w-8 p-0 ${page === currentPage ? 'bg-blue-600 hover:bg-blue-700 text-white' : ''}`}
+              >
+                {page}
+              </Button>
+            ))}
+            <Button
+              variant="outline" size="sm"
+              onClick={() => setCurrentPage(p => Math.min(totalSitePages, p + 1))}
+              disabled={currentPage === totalSitePages}
+              className="h-8 w-8 p-0"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       )}
 
@@ -1867,12 +1978,22 @@ export default function Sites() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-client" className="text-sm font-medium">Client Name</Label>
-                  <Input
+                  <select
                     id="edit-client"
-                    placeholder="e.g., Client ABC"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     value={manageData.clientName}
                     onChange={(e) => setManageData({ ...manageData, clientName: e.target.value })}
-                  />
+                  >
+                    <option value="">-- Select a client --</option>
+                    {clientsList.map((c) => {
+                      const label = c.firstName && c.lastName
+                        ? `${c.firstName} ${c.lastName}`
+                        : c.name || c.email || c._id;
+                      return (
+                        <option key={c._id} value={label}>{label}</option>
+                      );
+                    })}
+                  </select>
                 </div>
 
                 <div className="space-y-2">

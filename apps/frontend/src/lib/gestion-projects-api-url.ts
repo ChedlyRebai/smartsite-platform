@@ -1,14 +1,19 @@
 /**
- * Base URL du microservice **gestion-projects** (Nest, sans préfixe global).
- * Défaut local : PORT 3010 → http://localhost:3010
+ * Base URL du microservice **gestion-projects**.
+ * - Via API Gateway : http://localhost:9001/projects
+ * - Direct          : http://localhost:3010
  */
+<<<<<<< HEAD
 const rawGestionProjectsApiUrl =
   (
     (import.meta as ImportMeta & { env?: Record<string, string | undefined> })
       .env?.VITE_GESTION_PROJECTS_URL || ""
   ).trim() || "http://localhost:3010";
+=======
+const raw =
+  (import.meta.env.VITE_GESTION_PROJECTS_URL as string | undefined)?.trim() ??
+  'http://localhost:9001/projects';
+>>>>>>> origin/main
 
-export const GESTION_PROJECTS_API_URL = rawGestionProjectsApiUrl.replace(
-  /\/api\/?$/,
-  "",
-);
+// Strip trailing /api if present (gateway doesn't need it)
+export const GESTION_PROJECTS_API_URL = raw.replace(/\/api\/?$/, '');

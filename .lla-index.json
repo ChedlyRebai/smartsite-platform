@@ -2646,8 +2646,7 @@
       "deleteNotificationById"
     ],
     "imports": [
-      "@/lib/api-client",
-      "axios"
+      "@/lib/api-client"
     ]
   },
   "apps\\frontend\\src\\app\\action\\permission.action.ts": {
@@ -2684,7 +2683,8 @@
       "deleteTask"
     ],
     "imports": [
-      "axios"
+      "axios",
+      "@/lib/planning-api-url"
     ]
   },
   "apps\\frontend\\src\\app\\action\\project.action.ts": {
@@ -5078,6 +5078,7 @@
     ],
     "imports": [
       "react",
+      "axios",
       "sonner"
     ]
   },
@@ -5942,6 +5943,7 @@
       "@/app/store/authStore",
       "axios",
       "@/lib/auth-api-url",
+      "@/lib/api-gateway-url",
       "@/lib/payment-api-url"
     ]
   },
@@ -6826,7 +6828,8 @@
       "SERVICES"
     ],
     "imports": [
-      "axios"
+      "axios",
+      "@/lib/api-gateway-url"
     ]
   },
   "apps\\frontend\\src\\app\\components\\shared\\RoutePermissionGuard.tsx": {
@@ -7062,7 +7065,9 @@
       "react",
       "@tanstack/react-query",
       "react-router",
-      "@/app/action/dashboard.action"
+      "@/app/action/dashboard.action",
+      "@/app/action/team.action",
+      "@/app/action/auth.action"
     ]
   },
   "apps\\frontend\\src\\app\\pages\\videoCall\\CallPage.tsx": {
@@ -7243,6 +7248,7 @@
     ],
     "imports": [
       "@/app/store/authStore",
+      "@/lib/api-gateway-url",
       "axios"
     ]
   },
@@ -7314,7 +7320,8 @@
       "AppModule"
     ],
     "imports": [
-      "@nestjs/common"
+      "@nestjs/common",
+      "@nestjs/config"
     ]
   },
   "apps\\backend\\api-gateway\\src\\app.service.ts": {
@@ -7613,6 +7620,32 @@
       "@/components/ui/button",
       "@/components/ui/tabs",
       "axios"
+    ]
+  },
+  "apps\\frontend\\src\\lib\\api-gateway-url.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "API_GATEWAY_URL"
+    ],
+    "imports": []
+  },
+  "apps\\frontend\\src\\app\\components\\ProjectBiDashboard.tsx": {
+    "purpose": "component",
+    "exports": [
+      "ProjectBiDashboard"
+    ],
+    "imports": [
+      "react",
+      "axios"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\TeamBiDashboard.tsx": {
+    "purpose": "component",
+    "exports": [
+      "TeamBiDashboard"
+    ],
+    "imports": [
+      "react"
     ]
   }
 }

@@ -21,13 +21,13 @@ import type {
 
 // ============ EXTERNAL MICROSERVICE CONFIG ============
 
-const GESTION_SITE_URL = import.meta.env.VITE_GESTION_SITE_URL || 'http://localhost:3001/api';
+const GESTION_SITE_URL = import.meta.env.VITE_GESTION_SITE_URL || 'http://localhost:9001/sites';
 const AUTH_API_URL = import.meta.env.VITE_AUTH_API_URL || 'http://localhost:3000';
-const API_GATEWAY_URL = import.meta.env.VITE_API_GATEWAY_URL || 'http://localhost:3000';
+const API_GATEWAY_URL = import.meta.env.VITE_API_GATEWAY_URL || 'http://localhost:9001';
 const PLANNING_URL = `${API_GATEWAY_URL}/planning`;
-/** Dev: '' → `/api` via proxy Vite → :3007 ; prod: URL absolue ex. https://api.example/resource-opt/api */
+/** Resource Optimization via API Gateway (/resources/*) */
 const RO_RAW = import.meta.env.VITE_RESOURCE_OPTIMIZATION_URL;
-const API_BASE_URL = (RO_RAW && String(RO_RAW).replace(/\/$/, '')) || '/api';
+const API_BASE_URL = (RO_RAW && String(RO_RAW).replace(/\/$/, '')) || 'http://localhost:9001/resources';
 
 // ============ SITES HOOKS (gestion-site:3001) ============
 
