@@ -1,6 +1,7 @@
+import { API_GATEWAY_URL } from "./api-gateway-url";
+
 /**
- * Base URL du microservice **gestion-planing** (Nest, sans préfixe global).
- * Défaut : PORT 3002 → http://localhost:3002
+ * Base URL planning exposee via API Gateway.
+ * Defaut gateway: http://localhost:3000/planning
  */
-export const PLANNING_API_URL =
-  import.meta.env.VITE_PLANNING_URL ?? "http://localhost:3002";
+export const PLANNING_API_URL = `${API_GATEWAY_URL}/planning`;

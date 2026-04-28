@@ -40,11 +40,26 @@ const PRIORITY_RANK: Record<string, number> = {
 function idString(id: unknown): string {
   if (id == null) return '';
   if (typeof id === 'string') return id;
-  if (typeof id === 'object' && id !== null && '_id' in (id as object)) {
-    return idString((id as { _id: unknown })._id);
-  }
-  if (typeof id === 'object' && id !== null && 'toString' in id) {
-    return String((id as { toString: () => string }).toString());
+  if (typeof id === 'object' && id !== null) {
+    const obj = id as {
+      _id?: unknown;
+      toString?: () => string;
+      toHexString?: () => string;
+    };
+
+    // Handle MongoDB ObjectId safely without recursion.
+    if (typeof obj.toHexString === 'function') {
+      return obj.toHexString();
+    }
+
+    // Some populated docs expose an _id field; avoid self-recursion.
+    if (obj._id != null && obj._id !== id) {
+      return idString(obj._id);
+    }
+
+    if (typeof obj.toString === 'function') {
+      return String(obj.toString());
+    }
   }
   return String(id);
 }

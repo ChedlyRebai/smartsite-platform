@@ -1,7 +1,5 @@
 import { AuthState } from "./../types/index";
 import { NotificationApi } from "@/lib/api-client";
-import axios from "axios";
-import { useAuthStore } from "../store/authStore";
 
 export const getMyNotifications = async (page = 1, limit = 10) => {
   const { data } = await NotificationApi.get("/mynotifications", {
@@ -22,16 +20,9 @@ export const getTeamNotifications = async (
 };
 
 export const getUnreadNotifications = async (page = 1, limit = 10) => {
-  const token = useAuthStore.getState().user.access_token;
-  const { data } = await axios.get(
-    "http://localhost:3004/notification/unread",
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      params: { page, limit },
-    },
-  );
+  const { data } = await NotificationApi.get("/unread", {
+    params: { page, limit },
+  });
   console.log("data unread================================", data);
   return data || ([] as Notification[]);
 };

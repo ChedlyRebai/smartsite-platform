@@ -4,7 +4,8 @@ const API_BASE_URL = (import.meta as any).env?.VITE_RESOURCE_OPTIMIZATION_URL ||
 // Other microservice URLs
 const GESTION_SITE_URL = (import.meta as any).env?.VITE_GESTION_SITE_URL || 'http://localhost:3001/api';
 const AUTH_API_URL = (import.meta as any).env?.VITE_AUTH_API_URL || 'http://localhost:3000';
-const PLANNING_URL = (import.meta as any).env?.VITE_PLANNING_URL || 'http://localhost:3002';
+const API_GATEWAY_URL = (import.meta as any).env?.VITE_API_GATEWAY_URL || 'http://localhost:3000';
+const PLANNING_URL = `${API_GATEWAY_URL}/planning`;
 
 // ============ UTILITY FUNCTIONS ============
 
@@ -15,7 +16,31 @@ export const getSiteId = (site: any): string => {
   return site?._id || site?.id || '';
 };
 
+export const getProjectId = (project: any): string => {
+  return project?._id || project?.id || '';
+};
+
 // ============ EXTERNAL API TYPES ============
+
+// Types from gestion-projects (port 3007)
+export interface Project {
+  _id: string;
+  id?: string;
+  name: string;
+  description?: string;
+  status: 'planning' | 'in_progress' | 'completed' | 'en_cours' | 'terminé' | 'en_retard';
+  priority?: 'low' | 'medium' | 'high' | 'urgent';
+  budget?: number;
+  actualCost?: number;
+  progress: number;
+  startDate?: Date;
+  endDate?: Date;
+  deadline?: string;
+  siteCount?: number;
+  teamSize?: number;
+  clientName?: string;
+  projectManagerName?: string;
+}
 
 // Types from gestion-site (port 3001)
 export interface Site {
@@ -79,6 +104,27 @@ export interface Milestone {
   updatedAt: Date;
 }
 
+// Types from incident-management
+export type IncidentType = 'safety' | 'quality' | 'delay' | 'other';
+export type IncidentSeverity = 'low' | 'medium' | 'high' | 'critical';
+export type IncidentStatus = 'open' | 'investigating' | 'resolved' | 'closed';
+
+export interface Incident {
+  _id: string;
+  type: IncidentType;
+  severity: IncidentSeverity;
+  title: string;
+  description?: string;
+  status: IncidentStatus;
+  siteId?: string;
+  projectId?: string;
+  reporterName?: string;
+  assignedToCin?: string;
+  assignedUserRole?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 // ============ INTERNAL TYPES ============
 
 // Resource Analysis Interfaces
@@ -135,12 +181,16 @@ export interface ResourceAnalysis {
 }
 
 // Recommendation Interfaces
-export type RecommendationType = 'energy' | 'workforce' | 'equipment' | 'scheduling' | 'environmental';
+export type RecommendationType =
+  | 'energy' | 'workforce' | 'equipment' | 'scheduling' | 'environmental'
+  | 'budget' | 'timeline' | 'task_distribution' | 'resource_allocation' | 'individual_task_management';
 export type RecommendationStatus = 'pending' | 'approved' | 'rejected' | 'implemented';
 
 export interface Recommendation {
   _id: string;
-  siteId: string;
+  siteId?: string;
+  projectId?: string;
+  scope?: 'project' | 'site';
   type: RecommendationType;
   title: string;
   description: string;
@@ -150,6 +200,9 @@ export interface Recommendation {
   estimatedCO2Reduction: number;
   confidenceScore: number;
   actionItems: string[];
+  targetMember?: string;
+  currentTasks?: string[];
+  suggestedDuration?: number;
   createdAt: Date;
   approvedAt?: Date;
   implementedAt?: Date;
@@ -160,6 +213,59 @@ export interface RecommendationsSummary {
   approvedSavings: string;
   realizedSavings: string;
   totalCO2Reduction: string;
+}
+
+// ============ POWER BI TYPES ============
+
+export interface PowerBiRealTimeMetrics {
+  activeRecommendations: number;
+  pendingApprovals: number;
+  activeAlerts: number;
+  criticalAlerts: number;
+  liveSavings: number;
+  liveCO2Reduction: number;
+}
+
+export interface PowerBiTrends {
+  recommendationsByDay: Array<{ date: string; count: number; savings: number }>;
+  alertsByHour: Array<{ hour: string; count: number; severity: string }>;
+  performanceByWeek: Array<{ week: string; savings: number; co2: number }>;
+}
+
+export interface PowerBiKPIs {
+  roi: number;
+  efficiencyScore: number;
+  sustainabilityIndex: number;
+  budgetVariance: number;
+}
+
+export interface PowerBiRecommendationsAnalysis {
+  byType: Record<string, number>;
+  byPriority: Record<string, number>;
+  byStatus: Record<string, number>;
+  topPerforming: Array<{ type: string; savings: number; impact: number }>;
+}
+
+export interface PowerBiAlertsAnalysis {
+  byType: Record<string, number>;
+  bySeverity: Record<string, number>;
+  responseTimes: Array<{ alertType: string; avgResponseTime: number }>;
+}
+
+export interface PowerBiPredictiveInsights {
+  nextWeekSavings: number;
+  riskAlerts: Array<{ type: string; probability: number; impact: string }>;
+  optimizationOpportunities: Array<{ area: string; potentialSavings: number }>;
+}
+
+export interface PowerBiDashboardData {
+  realTimeMetrics: PowerBiRealTimeMetrics;
+  trends: PowerBiTrends;
+  kpis: PowerBiKPIs;
+  recommendationsAnalysis: PowerBiRecommendationsAnalysis;
+  alertsAnalysis: PowerBiAlertsAnalysis;
+  predictiveInsights: PowerBiPredictiveInsights;
+  lastUpdated: string;
 }
 
 // Alert Interfaces

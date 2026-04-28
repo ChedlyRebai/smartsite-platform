@@ -2839,6 +2839,7 @@
       "getCurrentUserTask",
       "getTaskByTeamid",
       "getAllTaskStagesByMilestoneId",
+      "getTaskStageByteamIdandMilestoneId",
       "getTaskSTagesByMilestoneId",
       "getGanttTasksByMilestoneId",
       "getMyTAsks"
@@ -2933,8 +2934,7 @@
     ],
     "imports": [
       "react",
-      "@/components/ui/button",
-      "lucide-react"
+      "@/components/ui/button"
     ]
   },
   "apps\\frontend\\src\\app\\components\\branding\\SmartSiteLogo.tsx": {
@@ -4032,6 +4032,7 @@
     ],
     "imports": [
       "react",
+      "lucide-react",
       "react-hot-toast"
     ]
   },
@@ -4043,6 +4044,7 @@
     "imports": [
       "react",
       "axios",
+      "lucide-react",
       "react-hot-toast",
       "@/lib/auth-api-url",
       "@/app/hooks/useTranslation"
@@ -4340,7 +4342,10 @@
     "exports": [
       "default"
     ],
-    "imports": []
+    "imports": [
+      "react",
+      "lucide-react"
+    ]
   },
   "apps\\frontend\\src\\app\\pages\\dashboards\\DirectorDashboard.tsx": {
     "purpose": "component",
@@ -4510,7 +4515,7 @@
       "lucide-react",
       "@/app/components/LanguageSelector",
       "@/app/components/ThemeButton",
-      "@/app/components/NavbarAccessibilityButton",
+      "@/app/components/TextSizeButton",
       "@/app/components/DemoModal",
       "@/app/hooks/useTranslation"
     ]
@@ -4762,15 +4767,17 @@
       "react",
       "react-dom",
       "@/components/ui/button",
+      "@/app/components/ui/badge",
       "@/components/ui/input",
       "@/components/ui/skeleton",
       "@/hooks/use-js-loaded",
       "@/components/ui/card",
+      "@/components/ui/tabs",
       "@/app/types",
       "@tanstack/react-query",
-      "@/app/action/planing.action",
       "react-router",
       "@/app/hooks/use-task-modal",
+      "@/app/hooks/use-task-details-modal",
       "@/app/hooks/use-task-stage-modal",
       "@/app/action/taskStage.action",
       "react-hot-toast",
@@ -5086,6 +5093,7 @@
       "react-router",
       "react-hot-toast",
       "@/app/types",
+      "@/app/action/role.action",
       "@/app/action/user.action",
       "@/app/action/statiscs.action",
       "@/app/hooks/use-permission-Modal",
@@ -5713,7 +5721,16 @@
     "exports": [
       "EquipmentTable",
       "WorkersTable",
-      "EnergyConsumptionChart"
+      "EnergyConsumptionChart",
+      "DashboardCharts",
+      "RecommendationAnalytics",
+      "RecommendationsList",
+      "RecommendationCard",
+      "AlertsList",
+      "SiteRecommendationCard",
+      "BeforeAfterAnalyticsCharts",
+      "BudgetInfluenceApprovalChart",
+      "PowerBiDashboard"
     ],
     "imports": []
   },
@@ -5783,6 +5800,10 @@
       "useEnvironmentalReport",
       "useFinancialReport",
       "useDashboard",
+      "usePowerBiDashboard",
+      "usePowerBiRecommendationsStream",
+      "usePowerBiAlertsStream",
+      "usePowerBiPerformanceMetrics",
       "useResourceOptimization"
     ],
     "imports": [
@@ -5836,8 +5857,8 @@
       "react-router-dom",
       "@/components/ui/card",
       "@/components/ui/button",
-      "@/components/ui/tabs",
-      "lucide-react"
+      "@/components/ui/badge",
+      "@/components/ui/tabs"
     ]
   },
   "apps\\frontend\\src\\features\\resource-optimization\\pages\\reporting\\ReportingPage.tsx": {
@@ -5879,6 +5900,8 @@
     "imports": [
       "react",
       "react-router",
+      "@tanstack/react-query",
+      "axios",
       "@/components/ui/card",
       "@/components/ui/button",
       "@/components/ui/tabs",
@@ -5890,7 +5913,8 @@
   "apps\\frontend\\src\\features\\resource-optimization\\types\\index.ts": {
     "purpose": "types",
     "exports": [
-      "getSiteId"
+      "getSiteId",
+      "getProjectId"
     ],
     "imports": []
   },
@@ -7265,6 +7289,330 @@
     "imports": [
       "@nestjs/testing",
       "@nestjs/mongoose"
+    ]
+  },
+  "apps\\backend\\api-gateway\\src\\app.controller.spec.ts": {
+    "purpose": "service",
+    "exports": [],
+    "imports": [
+      "@nestjs/testing"
+    ]
+  },
+  "apps\\backend\\api-gateway\\src\\app.controller.ts": {
+    "purpose": "service",
+    "exports": [
+      "AppController"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "express"
+    ]
+  },
+  "apps\\backend\\api-gateway\\src\\app.module.ts": {
+    "purpose": "service",
+    "exports": [
+      "AppModule"
+    ],
+    "imports": [
+      "@nestjs/common"
+    ]
+  },
+  "apps\\backend\\api-gateway\\src\\app.service.ts": {
+    "purpose": "service",
+    "exports": [
+      "AppService"
+    ],
+    "imports": [
+      "@nestjs/common"
+    ]
+  },
+  "apps\\backend\\api-gateway\\src\\main.ts": {
+    "purpose": "service",
+    "exports": [],
+    "imports": [
+      "@nestjs/core"
+    ]
+  },
+  "apps\\backend\\api-gateway\\test\\app.e2e-spec.ts": {
+    "purpose": "service",
+    "exports": [],
+    "imports": [
+      "@nestjs/testing",
+      "@nestjs/common",
+      "supertest",
+      "supertest/types"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\AssignedIncidentFlash.tsx": {
+    "purpose": "component",
+    "exports": [
+      "AssignedIncidentFlash"
+    ],
+    "imports": [
+      "react",
+      "lucide-react",
+      "axios",
+      "sonner"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\IncidentBadge.tsx": {
+    "purpose": "component",
+    "exports": [
+      "incidentEvents",
+      "IncidentBadge",
+      "default"
+    ],
+    "imports": [
+      "react",
+      "lucide-react",
+      "sonner",
+      "axios"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\NotificationPanel.tsx": {
+    "purpose": "component",
+    "exports": [
+      "NotificationPanel",
+      "default"
+    ],
+    "imports": [
+      "react",
+      "lucide-react"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\admin\\PermissionsPage.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "lucide-react",
+      "react",
+      "react-router",
+      "react-hot-toast",
+      "@/app/types",
+      "@/app/action/statiscs.action",
+      "@/app/hooks/use-permission-Modal",
+      "@tanstack/react-query",
+      "@/app/hooks/permission.store",
+      "@/app/hooks/useTranslation"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\admin\\RolesPage.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "lucide-react",
+      "react",
+      "react-router",
+      "react-hot-toast",
+      "@/app/types",
+      "@/app/action/statiscs.action",
+      "@/app/hooks/use-role-Modal",
+      "@tanstack/react-query",
+      "@/app/hooks/permission.store",
+      "@/app/hooks/useTranslation"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\TextSizeButton.tsx": {
+    "purpose": "component",
+    "exports": [
+      "TextSizeButton"
+    ],
+    "imports": [
+      "react",
+      "lucide-react",
+      "@/components/ui/button",
+      "@/components/ui/popover"
+    ]
+  },
+  "apps\\backend\\incident-management\\src\\incidents\\incidents-events.service.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "IncidentEventsService"
+    ],
+    "imports": [
+      "@nestjs/common"
+    ]
+  },
+  "apps\\backend\\incident-management\\src\\incidents\\incidents.gateway.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "IncidentsGateway"
+    ],
+    "imports": [
+      "socket.io",
+      "@nestjs/common"
+    ]
+  },
+  "apps\\frontend\\src\\hooks\\useIncidentWebSocket.ts": {
+    "purpose": "hook",
+    "exports": [
+      "useIncidentWebSocket"
+    ],
+    "imports": [
+      "react",
+      "socket.io-client",
+      "sonner"
+    ]
+  },
+  "apps\\backend\\gestion-suppliers\\src\\app.module.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "AppModule"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/config"
+    ]
+  },
+  "apps\\backend\\gestion-suppliers\\src\\chat.controller.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ChatController"
+    ],
+    "imports": [
+      "@nestjs/common"
+    ]
+  },
+  "apps\\backend\\gestion-suppliers\\src\\chat.module.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ChatModule"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/config"
+    ]
+  },
+  "apps\\backend\\gestion-suppliers\\src\\chat.service.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ChatService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/config",
+      "openai"
+    ]
+  },
+  "apps\\backend\\gestion-suppliers\\src\\main.ts": {
+    "purpose": "unknown",
+    "exports": [],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/core"
+    ]
+  },
+  "apps\\backend\\resource-optimization\\src\\modules\\power-bi\\power-bi.controller.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "PowerBiController"
+    ],
+    "imports": [
+      "@nestjs/common"
+    ]
+  },
+  "apps\\backend\\resource-optimization\\src\\modules\\power-bi\\power-bi.module.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "PowerBiModule"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/mongoose"
+    ]
+  },
+  "apps\\backend\\resource-optimization\\src\\modules\\power-bi\\power-bi.service.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "PowerBiService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/mongoose",
+      "mongoose",
+      "@/schemas/recommendation.schema",
+      "@/schemas/alert.schema"
+    ]
+  },
+  "apps\\frontend\\src\\features\\resource-optimization\\components\\PowerBiDashboard.tsx": {
+    "purpose": "component",
+    "exports": [
+      "PowerBiDashboard"
+    ],
+    "imports": [
+      "react",
+      "@/components/ui/card",
+      "@/components/ui/badge",
+      "@/components/ui/button",
+      "@/components/ui/progress",
+      "@/components/ui/tabs",
+      "axios"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\IncidentBiDashboard.tsx": {
+    "purpose": "component",
+    "exports": [
+      "IncidentBiDashboard"
+    ],
+    "imports": [
+      "react",
+      "axios",
+      "socket.io-client"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\IntegratedPowerBiDashboard.tsx": {
+    "purpose": "component",
+    "exports": [
+      "IntegratedPowerBiDashboard",
+      "default"
+    ],
+    "imports": [
+      "react",
+      "motion/react",
+      "@/components/ui/card",
+      "@/components/ui/badge",
+      "@/components/ui/button",
+      "@/components/ui/tabs",
+      "@/components/ui/input",
+      "@/components/ui/progress"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\PowerBiAdvancedDashboard.tsx": {
+    "purpose": "component",
+    "exports": [
+      "PowerBiAdvancedDashboard",
+      "default"
+    ],
+    "imports": [
+      "react",
+      "motion/react",
+      "@/components/ui/card",
+      "@/components/ui/badge",
+      "@/components/ui/button",
+      "@/components/ui/tabs",
+      "@/components/ui/select",
+      "axios",
+      "@/features/resource-optimization/types"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\ProfessionalPowerBiDashboard.tsx": {
+    "purpose": "component",
+    "exports": [
+      "ProfessionalPowerBiDashboard",
+      "default"
+    ],
+    "imports": [
+      "react",
+      "motion/react",
+      "@/components/ui/card",
+      "@/components/ui/badge",
+      "@/components/ui/button",
+      "@/components/ui/tabs",
+      "axios"
     ]
   }
 }

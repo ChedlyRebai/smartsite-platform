@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuthStore } from "../../store/authStore";
 import { Button } from "../../components/ui/button";
+import { AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -23,6 +24,7 @@ import {
 import { Textarea } from "../../components/ui/textarea";
 import { Label } from "../../components/ui/label";
 import { Input } from "../../components/ui/input";
+import { Badge } from "../../components/ui/badge";
 import { toast } from "react-hot-toast";
 import { roleLabels } from "../../utils/roleConfig";
 import type { User } from "../../types";
@@ -245,106 +247,175 @@ Le motif doit être:
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>Users Pending Approval</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {/* Filtre par role */}
-          <div className="mb-4 flex items-center gap-4">
-            <Label htmlFor="role-filter">Filter by role:</Label>
-            <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="All roles" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All roles</SelectItem>
-                {uniqueRoles.map((role) => (
-                  <SelectItem key={role} value={role}>
-                    {getRoleLabel(role)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+    <div className="space-y-6">
+      {/* Header Section */}
+      <div className="bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 rounded-lg p-8 text-white">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Pending Users Approval</h1>
+            <p className="text-blue-100 mt-2">Manage and approve user registration requests</p>
           </div>
+          <div className="text-right">
+            <div className="text-4xl font-bold">{users.length}</div>
+            <p className="text-blue-100 text-sm">Total Pending</p>
+          </div>
+        </div>
+      </div>
 
+      {/* Filters Section */}
+      <Card className="border-none shadow-lg">
+        <CardHeader className="bg-gradient-to-r from-slate-50 to-blue-50 border-b">
+          <CardTitle className="text-lg">Filters</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-6">
+          <div className="flex items-end gap-4">
+            <div className="flex-1">
+              <Label htmlFor="role-filter" className="font-semibold text-slate-700 mb-2 block">Filter by Role</Label>
+              <Select value={roleFilter} onValueChange={setRoleFilter}>
+                <SelectTrigger className="border-slate-200">
+                  <SelectValue placeholder="All roles" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All roles</SelectItem>
+                  {uniqueRoles.map((role) => (
+                    <SelectItem key={role} value={role}>
+                      {getRoleLabel(role)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button 
+              variant="outline"
+              onClick={() => {
+                setRoleFilter("all");
+                setCurrentPage(1);
+              }}
+              className="border-slate-200"
+            >
+              Reset Filters
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Users List Section */}
+      <Card className="border-none shadow-lg">
+        <CardHeader className="bg-gradient-to-r from-slate-50 to-blue-50 border-b">
+          <CardTitle className="flex items-center justify-between">
+            <span>Pending Users ({filteredUsers.length})</span>
+            <span className="text-xs font-normal text-slate-500">
+              Page {currentPage} of {totalPages || 1}
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-6">
           {loading ? (
-            <div className="text-sm text-gray-500">Loading...</div>
+            <div className="flex justify-center items-center py-12">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-3"></div>
+                <p className="text-slate-600">Loading pending users...</p>
+              </div>
+            </div>
           ) : filteredUsers.length === 0 ? (
-            <div className="text-sm text-gray-500">
-              {users.length === 0
-                ? "No pending users"
-                : "No users found for this filter"}
+            <div className="flex justify-center items-center py-12">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <AlertTriangle className="h-8 w-8 text-blue-600" />
+                </div>
+                <p className="text-slate-600 font-medium">
+                  {users.length === 0
+                    ? "No pending users to approve"
+                    : "No users found for this filter"}
+                </p>
+              </div>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {currentUsers.map((u) => (
                 <div
                   key={u._id}
+                  className="p-6 border border-slate-200 rounded-lg hover:shadow-lg hover:border-blue-300 transition-all duration-200 bg-white cursor-pointer"
                   onClick={() => {
                     setSelectedUser(u);
                     setDetailsOpen(true);
                   }}
-                  className="flex items-center justify-between p-3 border rounded-md cursor-pointer hover:bg-gray-50 transition-colors"
                 >
-                  <div>
-                    <div className="font-semibold">
-                      {(u as any).firstName || (u as any).firstName}{" "}
-                      {(u as any).lastName || (u as any).lastName}
-                      {(u as any).firstName || (u as any).firstName}{" "}
-                      {(u as any).lastName || (u as any).lastName}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="font-bold text-slate-900 text-lg">
+                        {(u as any).firstName || (u as any).firstname}{" "}
+                        {(u as any).lastName || (u as any).lastname}
+                      </h3>
+                      <p className="text-sm text-slate-600 mt-1">
+                        {(u as any).cin || "N/A"} • {u.email || "N/A"}
+                      </p>
                     </div>
-                    <div className="text-sm text-gray-600 space-y-1">
-                      <div>
-                        <span className="font-medium">CIN:</span>{" "}
-                        {(u as any).cin || "N/A"}
-                      </div>
-                      <div>
-                        <span className="font-medium">Email:</span>{" "}
-                        {u.email || "N/A"}
-                      </div>
-                      <div>
-                        <span className="font-medium">Phone:</span>{" "}
-                        {(u as any).phoneNumber || (u as any).phone || "N/A"}
-                      </div>
-                      <div>
-                        <span className="font-medium">Address:</span>{" "}
-                        {(u as any).address || (u as any).adresse || "N/A"}
-                      </div>
-                      <div>
-                        <span className="font-medium">Role:</span>{" "}
+                    <div className="flex gap-2">
+                      <Badge className="bg-blue-100 text-blue-800">
                         {getRoleLabel(u.role)}
-                      </div>
-                      <div className="text-xs text-gray-400">
-                        <span className="font-medium">Status:</span>{" "}
+                      </Badge>
+                      <Badge className="bg-amber-100 text-amber-800">
                         {(u as any).status || "pending"}
-                      </div>
-                      <div className="text-xs text-gray-400">
-                        <span className="font-medium">Created:</span>{" "}
-                        {getUserCreatedAtLabel(u)}
-                      </div>
+                      </Badge>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      onClick={() => handleApprove(u._id)}
-                      disabled={actionLoading !== null}
-                    >
-                      {actionLoading === u._id ? "..." : "Approve"}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openRejectDialog(u);
-                      }}
-                      disabled={actionLoading !== null}
-                    >
-                      {actionLoading === u._id ? "..." : "Reject"}
-                    </Button>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 pb-4 border-b border-slate-100">
+                    <div>
+                      <p className="text-xs text-slate-500 font-medium">PHONE</p>
+                      <p className="text-sm text-slate-700">
+                        {(u as any).phoneNumber || (u as any).phone || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 font-medium">LOCATION</p>
+                      <p className="text-sm text-slate-700">
+                        {(u as any).city || (u as any).ville || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 font-medium">REQUESTED</p>
+                      <p className="text-sm text-slate-700">
+                        {new Date(u.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 font-medium">STATUS</p>
+                      <p className="text-sm font-medium text-slate-700">
+                        {(u as any).isActive ? "✓ Active" : "Inactive"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs text-slate-500">
+                      Click to view full details
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleApprove(u._id);
+                        }}
+                        disabled={actionLoading !== null}
+                      >
+                        {actionLoading === u._id ? "..." : "✓ Approve"}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openRejectDialog(u);
+                        }}
+                        disabled={actionLoading !== null}
+                      >
+                        {actionLoading === u._id ? "..." : "✗ Reject"}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -353,163 +424,52 @@ Le motif doit être:
         </CardContent>
       </Card>
 
-      {/* Pending user details */}
-      <Dialog
-        open={detailsOpen}
-        onOpenChange={(open) => {
-          setDetailsOpen(open);
-          if (!open) setSelectedUser(null);
-        }}
-      >
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Détails complets de l'utilisateur</DialogTitle>
-          </DialogHeader>
-          {selectedUser && (
-            <div className="space-y-4 text-sm">
-              {/* Informations personnelles */}
-              <div className="border-b pb-4">
-                <h3 className="font-semibold text-base mb-3">Informations personnelles</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <p>
-                    <span className="font-medium">Prénom:</span>{" "}
-                    {(selectedUser as any).firstName || (selectedUser as any).firstname || "N/A"}
-                  </p>
-                  <p>
-                    <span className="font-medium">Nom:</span>{" "}
-                    {(selectedUser as any).lastName || (selectedUser as any).lastname || "N/A"}
-                  </p>
-                  <p>
-                    <span className="font-medium">CIN:</span>{" "}
-                    {(selectedUser as any).cin || "N/A"}
-                  </p>
-                  <p>
-                    <span className="font-medium">Email:</span>{" "}
-                    {selectedUser.email || "N/A"}
-                  </p>
-                  <p>
-                    <span className="font-medium">Téléphone:</span>{" "}
-                    {(selectedUser as any).telephone || (selectedUser as any).phone || (selectedUser as any).phoneNumber || "N/A"}
-                  </p>
-                  <p>
-                    <span className="font-medium">Rôle demandé:</span>{" "}
-                    {getRoleLabel(selectedUser.role) || "Non défini"}
-                  </p>
-                </div>
-              </div>
-
-              {/* Adresse et localisation */}
-              <div className="border-b pb-4">
-                <h3 className="font-semibold text-base mb-3">Adresse et localisation</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <p className="col-span-2">
-                    <span className="font-medium">Adresse:</span>{" "}
-                    {(selectedUser as any).address || (selectedUser as any).adresse || (selectedUser as any).addressLine || "N/A"}
-                  </p>
-                  <p>
-                    <span className="font-medium">Ville:</span>{" "}
-                    {(selectedUser as any).city || (selectedUser as any).ville || "N/A"}
-                  </p>
-                  <p>
-                    <span className="font-medium">Code postal:</span>{" "}
-                    {(selectedUser as any).postalCode || (selectedUser as any).codePostal || "N/A"}
-                  </p>
-                  <p>
-                    <span className="font-medium">Pays:</span>{" "}
-                    {(selectedUser as any).country || (selectedUser as any).pays || "N/A"}
-                  </p>
-                </div>
-              </div>
-
-              {/* Informations du compte */}
-              <div className="border-b pb-4">
-                <h3 className="font-semibold text-base mb-3">Informations du compte</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <p>
-                    <span className="font-medium">Statut:</span>{" "}
-                    <span className="inline-block px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
-                      {(selectedUser as any).status || "pending"}
-                    </span>
-                  </p>
-                  <p>
-                    <span className="font-medium">Actif:</span>{" "}
-                    {(selectedUser as any).isActive ? "✓ Oui" : "✗ Non"}
-                  </p>
-                  <p>
-                    <span className="font-medium">Date d'inscription:</span>{" "}
-                    {getUserCreatedAtLabel(selectedUser)}
-                  </p>
-                  <p>
-                    <span className="font-medium">Dernière connexion:</span>{" "}
-                    {(selectedUser as any).lastLoginDate ? new Date((selectedUser as any).lastLoginDate).toLocaleString("fr-FR") : "Jamais"}
-                  </p>
-                  <p>
-                    <span className="font-medium">ID utilisateur:</span>{" "}
-                    <code className="bg-gray-100 px-2 py-1 rounded text-xs">{selectedUser._id}</code>
-                  </p>
-                </div>
-              </div>
-
-              {/* Informations supplémentaires */}
-              <div className="pb-4">
-                <h3 className="font-semibold text-base mb-3">Informations supplémentaires</h3>
-                <div className="space-y-2">
-                  {(selectedUser as any).department && (
-                    <p>
-                      <span className="font-medium">Département:</span> {(selectedUser as any).department}
-                    </p>
-                  )}
-                  {(selectedUser as any).position && (
-                    <p>
-                      <span className="font-medium">Position:</span> {(selectedUser as any).position}
-                    </p>
-                  )}
-                  {(selectedUser as any).companyName && (
-                    <p>
-                      <span className="font-medium">Entreprise:</span> {(selectedUser as any).companyName}
-                    </p>
-                  )}
-                  {(selectedUser as any).description && (
-                    <p>
-                      <span className="font-medium">Description:</span>
-                      <div className="bg-gray-50 p-2 rounded mt-1 text-xs">{(selectedUser as any).description}</div>
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex justify-end gap-2 pt-4 border-t">
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between bg-slate-50 p-4 rounded-lg border border-slate-200">
+          <p className="text-sm text-slate-600">
+            Showing <span className="font-bold">{indexOfFirstUser + 1}</span> to{" "}
+            <span className="font-bold">{Math.min(indexOfLastUser, filteredUsers.length)}</span> of{" "}
+            <span className="font-bold">{filteredUsers.length}</span> users
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={goToPreviousPage}
+              disabled={currentPage === 1}
+              className="border-slate-200"
+            >
+              Previous
+            </Button>
+            <div className="flex gap-1">
+              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                const startPage = Math.max(1, currentPage - 2);
+                return i + startPage;
+              }).map((pageNum) => (
                 <Button
-                  variant="outline"
-                  onClick={() => setDetailsOpen(false)}
+                  key={pageNum}
+                  variant={currentPage === pageNum ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => goToPage(pageNum)}
+                  className="w-8 h-8 p-0 border-slate-200"
                 >
-                  Fermer
+                  {pageNum}
                 </Button>
-                <Button
-                  onClick={() => {
-                    setDetailsOpen(false);
-                    handleApprove(selectedUser._id);
-                  }}
-                  disabled={actionLoading !== null}
-                >
-                  {actionLoading === selectedUser._id ? "..." : "Approuver"}
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={() => {
-                    setDetailsOpen(false);
-                    openRejectDialog(selectedUser);
-                  }}
-                  disabled={actionLoading !== null}
-                >
-                  Rejeter
-                </Button>
-              </div>
+              ))}
             </div>
-          )}
-        </DialogContent>
-      </Dialog>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={goToNextPage}
+              disabled={currentPage === totalPages}
+              className="border-slate-200"
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Rejection dialog */}
       <Dialog
@@ -522,44 +482,55 @@ Le motif doit être:
           }
         }}
       >
-        <DialogContent>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Reject User</DialogTitle>
+            <DialogTitle className="text-xl">Reject User Application</DialogTitle>
           </DialogHeader>
           {selectedUser && (
-            <div className="space-y-4">
-              <div className="text-sm">
-                <p>
-                  <span className="font-semibold">User:</span>{" "}
-                  {(selectedUser as any).firstname ||
-                    (selectedUser as any).firstName}{" "}
-                  {(selectedUser as any).lastname ||
-                    (selectedUser as any).lastName}
-                </p>
-                <p>
-                  <span className="font-semibold">Email:</span>{" "}
-                  {selectedUser.email || "N/A"}
-                </p>
-                <p>
-                  <span className="font-semibold">CIN:</span>{" "}
-                  {(selectedUser as any).cin || "N/A"}
-                </p>
+            <div className="space-y-6">
+              <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <h4 className="font-semibold text-slate-900 mb-3">User Information</h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-slate-500 font-medium">Name</p>
+                    <p className="text-slate-900">
+                      {(selectedUser as any).firstName || (selectedUser as any).firstname}{" "}
+                      {(selectedUser as any).lastName || (selectedUser as any).lastname}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-slate-500 font-medium">Email</p>
+                    <p className="text-slate-900">{selectedUser.email || "N/A"}</p>
+                  </div>
+                  <div>
+                    <p className="text-slate-500 font-medium">CIN</p>
+                    <p className="text-slate-900">
+                      {(selectedUser as any).cin || "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-slate-500 font-medium">Applied Role</p>
+                    <p className="text-slate-900">{getRoleLabel(selectedUser.role?.name)}</p>
+                  </div>
+                </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="reject-reason">Rejection Reason *</Label>
+                  <Label htmlFor="reject-reason" className="font-semibold text-slate-700">
+                    Rejection Reason *
+                  </Label>
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
                     onClick={generateRejectReason}
                     disabled={isGeneratingReason}
-                    className="text-xs"
+                    className="border-slate-200 text-xs"
                   >
                     {isGeneratingReason ? (
                       <>
-                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-gray-900 mr-2"></div>
+                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600 mr-2"></div>
                         Generating...
                       </>
                     ) : (
@@ -569,74 +540,40 @@ Le motif doit être:
                 </div>
                 <Textarea
                   id="reject-reason"
-                  placeholder="Please specify the rejection reason..."
+                  placeholder="Please provide a professional and courteous rejection reason..."
                   value={rejectReason}
                   onChange={(e) => setRejectReason(e.target.value)}
-                  rows={4}
+                  rows={5}
+                  className="border-slate-200 resize-none"
                 />
+                <p className="text-xs text-slate-500">
+                  This message will be sent to the user via email. Be professional and constructive.
+                </p>
               </div>
 
-              <div className="flex justify-end gap-2">
+              <div className="flex justify-end gap-2 pt-4 border-t">
                 <Button
                   variant="outline"
                   onClick={() => setRejectDialogOpen(false)}
                   disabled={actionLoading !== null}
+                  className="border-slate-200"
                 >
                   Cancel
                 </Button>
                 <Button
-                  variant="destructive"
+                  className="bg-red-600 hover:bg-red-700"
                   onClick={() => selectedUser && handleReject(selectedUser._id)}
                   disabled={actionLoading !== null || !rejectReason.trim()}
                 >
                   {actionLoading === selectedUser._id
                     ? "Rejecting..."
-                    : "Reject and send email"}
+                    : "✗ Reject & Send Email"}
                 </Button>
               </div>
             </div>
           )}
         </DialogContent>
       </Dialog>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-6">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={goToPreviousPage}
-            disabled={currentPage === 1}
-          >
-            Précédent
-          </Button>
-
-          <div className="flex gap-1">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-              (pageNum) => (
-                <Button
-                  key={pageNum}
-                  variant={currentPage === pageNum ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => goToPage(pageNum)}
-                  className="w-8 h-8 p-0"
-                >
-                  {pageNum}
-                </Button>
-              ),
-            )}
-          </div>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={goToNextPage}
-            disabled={currentPage === totalPages}
-          >
-            Suivant
-          </Button>
-        </div>
-      )}
     </div>
   );
 }

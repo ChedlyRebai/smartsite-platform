@@ -135,6 +135,12 @@ export default function SuperAdminDashboard() {
           trend={{ value: 8.2, isPositive: true }}
         />
         <StatCard
+          title={t("dashboard.totalSites")}
+          value={stats.activeSites}
+          icon={MapPin}
+          subtitle={`${stats.totalSites} ${t("dashboard.sitesTotal")}`}
+        />
+        <StatCard
           title={t("dashboard.teamMembers")}
           value={stats.totalTeamMembers}
           icon={Users}
