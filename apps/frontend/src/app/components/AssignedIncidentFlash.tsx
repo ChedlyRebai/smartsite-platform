@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { AlertTriangle, X, CheckCircle, Trash2, Eye, Bell } from 'lucide-react';
+import { AlertTriangle, X, CheckCircle, Trash2, Eye, Bell, Volume2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Badge } from './ui/badge';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { useIncidentWebSocket } from '../../hooks/useIncidentWebSocket';
 import { incidentEvents } from './IncidentBadge';
 
 // API pour les incidents
@@ -64,8 +65,12 @@ export function AssignedIncidentFlash({ userCin }: AssignedIncidentFlashProps) {
   const [loading, setLoading] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
+  const [soundEnabled, setSoundEnabled] = useState(true);
 
-  // Récupérer les incidents assignés au user
+  // Hook WebSocket pour les notifications temps réel
+  const { notifications, playNotificationSound } = useIncidentWebSocket(userCin);
+
+  // Charger les incidents initialement
   useEffect(() => {
     const fetchAssignedIncidents = async () => {
       if (!userCin) {
@@ -76,18 +81,11 @@ export function AssignedIncidentFlash({ userCin }: AssignedIncidentFlashProps) {
       console.log('🔍 AssignedIncidentFlash: Fetching incidents for userCin:', userCin);
 
       try {
-        // Vérifier si on a déjà affiché aujourd'hui
-        const lastShown = localStorage.getItem(`incident-flash-${userCin}`);
-        const today = new Date().toDateString();
-
-        console.log('📅 AssignedIncidentFlash: lastShown =', lastShown, '| today =', today);
-
         // Récupérer tous les incidents
         const response = await incidentsApi.get("/incidents");
         const allIncidents = response.data || [];
 
         console.log('📊 AssignedIncidentFlash: Total incidents:', allIncidents.length);
-        console.log('👤 AssignedIncidentFlash: Looking for assignedUserCin =', userCin);
 
         // Filtrer ceux assignés à ce user et non résolus
         const assigned = allIncidents.filter((inc: Incident) =>
@@ -96,20 +94,13 @@ export function AssignedIncidentFlash({ userCin }: AssignedIncidentFlashProps) {
         );
 
         console.log('✅ AssignedIncidentFlash: Found assigned incidents:', assigned.length);
-        console.log('📋 AssignedIncidentFlash: Assigned incidents:', assigned);
 
         if (assigned.length > 0) {
           setAssignedIncidents(assigned);
-
-          // Afficher seulement si pas déjà vu aujourd'hui
-          if (lastShown !== today) {
-            console.log('🚨 AssignedIncidentFlash: Showing notification!');
+          // Afficher la notification si des incidents non traités existent
+          if (assigned.length > 0) {
             setIsVisible(true);
-            localStorage.setItem(`incident-flash-${userCin}`, today);
-          } else {
-            console.log('⏭️ AssignedIncidentFlash: Already shown today, skipping');
-            // DEBUG: Always show for testing
-            // setIsVisible(true);
+            console.log('🚨 Showing notification for initial incidents');
           }
         }
       } catch (error) {
@@ -117,10 +108,57 @@ export function AssignedIncidentFlash({ userCin }: AssignedIncidentFlashProps) {
       }
     };
 
-    // Attendre 1 seconde après le chargement de la page
+    // Charger les incidents au démarrage
     const timer = setTimeout(fetchAssignedIncidents, 1000);
     return () => clearTimeout(timer);
   }, [userCin]);
+
+  // Écouter les nouvelles notifications WebSocket
+  useEffect(() => {
+    if (notifications.length === 0) return;
+
+    const latestNotification = notifications[notifications.length - 1];
+    console.log('📨 New notification received:', latestNotification);
+
+    if (latestNotification.event === 'incident:assigned') {
+      const newIncident: Incident = {
+        _id: latestNotification.incidentId,
+        incidentName: latestNotification.incidentName,
+        description: latestNotification.description,
+        priority: latestNotification.priority,
+        severity: latestNotification.severity,
+        type: latestNotification.incidentType,
+        assignedToCin: latestNotification.assignedToCin,
+        status: 'open',
+      };
+
+      console.log('🚨 Adding new incident from WebSocket:', newIncident);
+
+      // Ajouter le nouvel incident à la liste
+      setAssignedIncidents((prev) => [newIncident, ...prev]);
+
+      // Afficher le flash
+      setIsVisible(true);
+      setCurrentIndex(0);
+
+      // Jouer le son si activé
+      if (soundEnabled) {
+        playNotificationSound();
+      }
+
+      // Toast notification
+      toast.error(`⚠️ Nouvel incident: ${newIncident.incidentName}`, {
+        duration: 10000,
+        action: {
+          label: 'Voir',
+          onClick: () => {
+            setShowDetails(true);
+            setSelectedIncident(newIncident);
+          },
+        },
+      });
+    }
+  }, [notifications, soundEnabled, playNotificationSound]);
 
   // Force show for debugging (Ctrl+Shift+I)
   useEffect(() => {
@@ -138,39 +176,6 @@ export function AssignedIncidentFlash({ userCin }: AssignedIncidentFlashProps) {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [assignedIncidents]);
-
-  // Périodiquement vérifier les nouveaux incidents (toutes les 30 secondes)
-  useEffect(() => {
-    if (!userCin) return;
-
-    const interval = setInterval(async () => {
-      try {
-        const response = await incidentsApi.get("/incidents");
-        const allIncidents = response.data || [];
-        const assigned = allIncidents.filter((inc: Incident) =>
-          (inc.assignedToCin === userCin || inc.assignedUserCin === userCin) &&
-          inc.status !== 'resolved'
-        );
-
-        // Si nouveaux incidents non encore dans la liste
-        const currentIds = assignedIncidents.map(i => i._id || i.id);
-        const newIncidents = assigned.filter((inc: Incident) =>
-          !currentIds.includes(inc._id || inc.id)
-        );
-
-        if (newIncidents.length > 0) {
-          setAssignedIncidents(prev => [...newIncidents, ...prev]);
-          setIsVisible(true);
-          setCurrentIndex(0);
-          toast.info(`${newIncidents.length} nouvel incident${newIncidents.length > 1 ? 's' : ''} vous a été assigné !`);
-        }
-      } catch (error) {
-        console.error("Erreur polling incidents:", error);
-      }
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, [userCin, assignedIncidents]);
 
   const currentIncident = assignedIncidents[currentIndex];
 
@@ -280,15 +285,11 @@ export function AssignedIncidentFlash({ userCin }: AssignedIncidentFlashProps) {
             </div>
             <div className="flex items-center gap-2">
               <button
-                onClick={() => {
-                  localStorage.removeItem(`incident-flash-${userCin}`);
-                  console.log('🔄 Reset daily flag, will show on next reload');
-                  toast.success('Flag reset! Reload page to see notification');
-                }}
+                onClick={() => setSoundEnabled(!soundEnabled)}
                 className="text-xs text-red-200 hover:text-white"
-                title="Reset daily flag"
+                title={soundEnabled ? "Mute" : "Unmute"}
               >
-                Reset
+                <Volume2 className={`h-4 w-4 ${!soundEnabled ? 'opacity-30' : ''}`} />
               </button>
               <button
                 onClick={handleDismiss}

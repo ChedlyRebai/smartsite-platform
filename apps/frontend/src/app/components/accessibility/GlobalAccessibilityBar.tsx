@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { getMainContentElement, getSpeakablePlainText } from "./getMainContent";
-import { Volume2, Square } from "lucide-react";
 
 /**
  * App-wide: skip link, read-aloud (Web Speech API), status for screen readers.
@@ -91,47 +90,8 @@ export function GlobalAccessibilityBar() {
         Skip to main content
       </a>
 
-      <div
-        role="region"
-        aria-label="Accessibility tools"
-        className="fixed bottom-20 left-6 z-[56] flex flex-col gap-2 items-start"
-      >
-        <div
-          aria-live="polite"
-          aria-atomic="true"
-          className="sr-only"
-        >
-          {status}
-        </div>
-        <div className="flex flex-wrap justify-start gap-2 rounded-lg border border-border bg-card/95 p-3 shadow-lg backdrop-blur-sm">
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            className="gap-2 bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700 hover:text-blue-800 transition-all duration-200 focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
-            onClick={handleReadAloud}
-            disabled={speaking}
-            aria-pressed={speaking}
-            aria-label="Read page aloud using speech synthesis"
-          >
-            <Volume2 className="h-4 w-4" aria-hidden="true" />
-            <span className="hidden sm:inline">Read aloud</span>
-            <span className="sm:hidden">🔊</span>
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="gap-2 bg-red-50 hover:bg-red-100 border-red-200 text-red-700 hover:text-red-800 transition-all duration-200 focus:ring-2 focus:ring-red-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={handleStop}
-            disabled={!speaking}
-            aria-label="Stop speech"
-          >
-            <Square className="h-4 w-4" aria-hidden="true" />
-            <span className="hidden sm:inline">Stop</span>
-            <span className="sm:hidden">⏹️</span>
-          </Button>
-        </div>
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {status}
       </div>
     </>
   );

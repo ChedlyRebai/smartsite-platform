@@ -290,9 +290,12 @@ export class UsersService {
   }
 
   async getAllclients() {
-    return await this.userModel.find().populate({
-      path: 'role',
-      match: { name: 'client' },
+    // First find the role with name 'client'
+    const allUsers = await this.userModel.find().populate('role').exec();
+    // Filter users whose populated role has name 'client'
+    return allUsers.filter((u: any) => {
+      const roleName = u.role?.name;
+      return roleName === 'client';
     });
   }
 

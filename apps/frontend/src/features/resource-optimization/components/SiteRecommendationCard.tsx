@@ -15,12 +15,12 @@ import {
   Calendar,
   TrendingUp,
   AlertTriangle,
-  CheckCircle2,
-  Clock,
   Zap,
   DollarSign,
   BarChart3,
   UserCheck,
+  Eye,
+  ArrowRight,
 } from 'lucide-react';
 
 const RESOURCE_OPT_API =
@@ -72,10 +72,14 @@ export const SiteRecommendationCard: React.FC<SiteRecommendationCardProps> = ({
           const data = await response.json();
           setRecommendations(Array.isArray(data) ? data : []);
         } else {
-          setError('Erreur lors du chargement des recommandations');
+          // Graceful fallback: don't show error for 500, just empty state
+          console.warn(`Recommendations API returned ${response.status} for site ${siteId}`);
+          setRecommendations([]);
         }
       } catch (err) {
-        setError('Erreur de connexion au serveur');
+        // Service likely down - fail silently
+        console.warn('Recommendations service unavailable:', err);
+        setRecommendations([]);
       } finally {
         setLoading(false);
       }
@@ -102,10 +106,10 @@ export const SiteRecommendationCard: React.FC<SiteRecommendationCardProps> = ({
           setRecommendations(Array.isArray(data) ? data : []);
         }
       } else {
-        setError('Erreur lors de la génération des recommandations');
+        setError('Failed to generate recommendations');
       }
     } catch (err) {
-      setError('Erreur lors de la génération des recommandations');
+      setError('Failed to generate recommendations');
     } finally {
       setLoading(false);
     }
@@ -134,29 +138,29 @@ export const SiteRecommendationCard: React.FC<SiteRecommendationCardProps> = ({
   };
 
   const statusConfig = {
-    pending: { color: 'bg-yellow-100 text-yellow-800', label: '⏳ En attente' },
-    approved: { color: 'bg-blue-100 text-blue-800', label: '✅ Approuvée' },
-    rejected: { color: 'bg-gray-100 text-gray-800', label: '❌ Rejetée' },
-    implemented: { color: 'bg-green-100 text-green-800', label: '🎉 Mise en place' },
+    pending: { color: 'bg-yellow-100 text-yellow-800', label: 'Pending' },
+    approved: { color: 'bg-blue-100 text-blue-800', label: 'Approved' },
+    rejected: { color: 'bg-gray-100 text-gray-800', label: 'Rejected' },
+    implemented: { color: 'bg-green-100 text-green-800', label: 'Implemented' },
   };
 
   return (
-    <Card className="hover:shadow-lg transition-shadow">
+    <Card className="border border-slate-200 bg-white hover:shadow-md transition-all duration-300">
       <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start justify-between gap-4 flex-wrap">
           <div className="flex-1">
             <div className="flex items-center gap-3">
               <CardTitle className="text-xl">{site.nom}</CardTitle>
               <Badge className={
-                site.status === 'in_progress' ? 'bg-green-100 text-green-800' :
-                site.status === 'planning' ? 'bg-blue-100 text-blue-800' :
-                'bg-gray-100 text-gray-800'
+                site.status === 'in_progress' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' :
+                  site.status === 'planning' ? 'bg-sky-100 text-sky-800 border border-sky-200' :
+                    'bg-slate-100 text-slate-700 border border-slate-200'
               }>
                 {site.status}
               </Badge>
             </div>
             <CardDescription className="mt-1">
-              📍 {site.localisation} • 💰 {site.budget || 0} TND
+              {site.localisation} • Budget: {(site.budget || 0).toLocaleString()} TND
             </CardDescription>
           </div>
           <div className="flex gap-2">
@@ -164,14 +168,18 @@ export const SiteRecommendationCard: React.FC<SiteRecommendationCardProps> = ({
               variant="outline"
               size="sm"
               onClick={() => setShowDetails(!showDetails)}
+              className="gap-1.5"
             >
-              {showDetails ? 'Masquer' : 'Détails'}
+              <Eye className="h-4 w-4" />
+              {showDetails ? 'Hide details' : 'View details'}
             </Button>
             <Button
               size="sm"
               onClick={onSelect}
+              className="gap-1.5 bg-slate-900 hover:bg-slate-800"
             >
-              Voir tout
+              Open dashboard
+              <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -180,21 +188,21 @@ export const SiteRecommendationCard: React.FC<SiteRecommendationCardProps> = ({
       <CardContent className="space-y-4">
         {/* Site Statistics */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="text-center">
-            <div className="text-lg font-semibold text-blue-600">{siteStats.totalRecommendations}</div>
-            <div className="text-xs text-gray-600">Recommandations</div>
+          <div className="text-center rounded-lg border border-slate-200 bg-slate-50 py-2 px-1">
+            <div className="text-lg font-semibold text-slate-900">{siteStats.totalRecommendations}</div>
+            <div className="text-xs text-slate-600">Recommendations</div>
           </div>
-          <div className="text-center">
-            <div className="text-lg font-semibold text-red-600">{siteStats.urgentRecommendations}</div>
-            <div className="text-xs text-gray-600">Urgentes</div>
+          <div className="text-center rounded-lg border border-slate-200 bg-slate-50 py-2 px-1">
+            <div className="text-lg font-semibold text-rose-700">{siteStats.urgentRecommendations}</div>
+            <div className="text-xs text-slate-600">Urgent</div>
           </div>
-          <div className="text-center">
-            <div className="text-lg font-semibold text-green-600">{siteStats.implementedRecommendations}</div>
-            <div className="text-xs text-gray-600">Implémentées</div>
+          <div className="text-center rounded-lg border border-slate-200 bg-slate-50 py-2 px-1">
+            <div className="text-lg font-semibold text-emerald-700">{siteStats.implementedRecommendations}</div>
+            <div className="text-xs text-slate-600">Implemented</div>
           </div>
-          <div className="text-center">
-            <div className="text-lg font-semibold text-purple-600">{siteStats.individualRecommendations}</div>
-            <div className="text-xs text-gray-600">Individuelles</div>
+          <div className="text-center rounded-lg border border-slate-200 bg-slate-50 py-2 px-1">
+            <div className="text-lg font-semibold text-indigo-700">{siteStats.individualRecommendations}</div>
+            <div className="text-xs text-slate-600">Individual</div>
           </div>
         </div>
 
@@ -202,14 +210,14 @@ export const SiteRecommendationCard: React.FC<SiteRecommendationCardProps> = ({
         {siteStats.totalRecommendations > 0 && (
           <div>
             <div className="flex items-center justify-between mb-1">
-              <small className="text-gray-600">Progression</small>
+              <small className="text-gray-600">Progress</small>
               <small className="font-semibold">
                 {Math.round((siteStats.implementedRecommendations / siteStats.totalRecommendations) * 100)}%
               </small>
             </div>
-            <Progress 
-              value={(siteStats.implementedRecommendations / siteStats.totalRecommendations) * 100} 
-              className="h-2" 
+            <Progress
+              value={(siteStats.implementedRecommendations / siteStats.totalRecommendations) * 100}
+              className="h-2"
             />
           </div>
         )}
@@ -222,7 +230,7 @@ export const SiteRecommendationCard: React.FC<SiteRecommendationCardProps> = ({
               disabled={loading}
               className="flex-1"
             >
-              {loading ? 'Génération...' : '🚀 Générer les recommandations IA'}
+              {loading ? 'Generating...' : 'Generate AI recommendations'}
             </Button>
           )}
           {error && (
@@ -235,28 +243,28 @@ export const SiteRecommendationCard: React.FC<SiteRecommendationCardProps> = ({
         {/* Detailed Recommendations */}
         {showDetails && recommendations.length > 0 && (
           <div className="space-y-3 border-t pt-4">
-            <h4 className="font-semibold text-sm">Recommandations récentes</h4>
+            <h4 className="font-semibold text-sm">Recent recommendations</h4>
             <div className="space-y-2">
               {recommendations.slice(0, 3).map((rec) => (
-                <div key={rec._id} className="bg-gray-50 p-3 rounded-lg">
+                <div key={rec._id} className="bg-slate-50 p-3 rounded-lg border border-slate-200">
                   <div className="flex items-start gap-2">
                     {typeIcons[rec.type] || <AlertTriangle className="h-4 w-4" />}
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <span className="font-medium text-sm">{rec.title}</span>
-                        <Badge className={statusConfig[rec.status]?.color || statusConfig.pending.color}>
+                        <Badge className={`${statusConfig[rec.status]?.color || statusConfig.pending.color} border`}>
                           {statusConfig[rec.status]?.label || statusConfig.pending.label}
                         </Badge>
                       </div>
                       {rec.targetMember && (
                         <div className="text-xs text-blue-600 mt-1">
-                          👤 {rec.targetMember}
+                          Member: {rec.targetMember}
                         </div>
                       )}
                       <p className="text-xs text-gray-600 mt-1 line-clamp-2">{rec.description}</p>
                       {rec.estimatedSavings && (
                         <div className="text-xs text-green-600 mt-1">
-                          💰 Économies: {rec.estimatedSavings} TND
+                          Savings: {rec.estimatedSavings} TND
                         </div>
                       )}
                     </div>
@@ -265,7 +273,7 @@ export const SiteRecommendationCard: React.FC<SiteRecommendationCardProps> = ({
               ))}
               {recommendations.length > 3 && (
                 <div className="text-center text-sm text-gray-500">
-                  ...et {recommendations.length - 3} autres recommandations
+                  ...and {recommendations.length - 3} more recommendations
                 </div>
               )}
             </div>

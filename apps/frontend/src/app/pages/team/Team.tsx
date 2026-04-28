@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import axios from "axios";
 import {
   Plus,
   Search,
@@ -7,6 +8,8 @@ import {
   Trash2,
   User,
   Building,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import {
   Card,
@@ -36,6 +39,7 @@ import {
 } from "../../components/ui/select";
 import { mockTeamMembers } from "../../utils/mockData";
 import { toast } from "sonner";
+import { TeamBiDashboard } from "../../components/TeamBiDashboard";
 import {
   getAllTeams,
   createTeam,
@@ -65,6 +69,7 @@ interface UserData {
   firstName: string;
   lastName: string;
   email: string;
+  role?: { name: string };
 }
 
 export default function Team() {
@@ -167,35 +172,105 @@ export default function Team() {
     }
   };
 
+  // busyMemberIds: set of user IDs who are in a team assigned to a site
+  // whose project is NOT completed/terminé
+  const [busyMemberIds, setBusyMemberIds] = useState<Set<string>>(new Set());
+
   // Load available users when member dialog opens
   useEffect(() => {
     if (memberDialogOpen) {
       loadAvailableUsers();
+      loadBusyMembers();
     }
   }, [memberDialogOpen]);
 
+  // Also load when edit dialog opens
+  useEffect(() => {
+    if (editDialogOpen) {
+      loadAvailableUsers();
+      loadBusyMembers();
+    }
+  }, [editDialogOpen]);
+
   const loadAvailableUsers = async () => {
     try {
+      setUserLoadingError(false);
       const response = await getAllUsers();
-      if (response?.status === 200 && Array.isArray(response.data)) {
+      if (response?.status === 200 && Array.isArray(response.data) && response.data.length > 0) {
         const normalizedUsers = response.data.map((user: any) => ({
           _id: String(user._id ?? user.id ?? ""),
           firstName: user.firstName || user.firstname || user.nom || "",
           lastName: user.lastName || user.lastname || user.prenom || "",
           email: user.email || "",
+          role: user.role || null,
         }));
         setAvailableUsers(normalizedUsers);
         setUserLoadingError(false);
-        return;
+      } else {
+        setUserLoadingError(true);
       }
-      // API response not valid, use mock data
-      
-      setUserLoadingError(true);
     } catch (err) {
       console.error("Error loading users:", err);
-      // Use mock data when API fails
-     
       setUserLoadingError(true);
+    }
+  };
+
+  // Build the set of "busy" member IDs:
+  // A member is busy if they belong to a team assigned to a site
+  // whose linked project is NOT completed/terminé
+  const loadBusyMembers = async () => {
+    try {
+      const SITE_URL = (import.meta as any).env?.VITE_GESTION_SITE_URL ?? "http://localhost:3001/api";
+      const PROJ_URL = (import.meta as any).env?.VITE_GESTION_PROJECTS_URL ?? "http://localhost:3010/api";
+
+      // 1. Fetch all sites (with projectId + teamIds)
+      const sitesRes = await axios.get(`${SITE_URL}/gestion-sites`, { params: { limit: 1000 } });
+      const allSites: any[] = sitesRes.data?.data || sitesRes.data || [];
+
+      // 2. Collect unique projectIds from sites that have teams assigned
+      const projectIds = [...new Set(
+        allSites
+          .filter((s: any) => s.teamIds?.length > 0 || s.teams?.length > 0)
+          .map((s: any) => s.projectId)
+          .filter(Boolean)
+      )];
+
+      // 3. Fetch those projects to get their status
+      const projectStatusMap: Record<string, string> = {};
+      await Promise.all(
+        projectIds.map(async (pid: string) => {
+          try {
+            const pRes = await axios.get(`${PROJ_URL}/projects/${pid}`);
+            projectStatusMap[pid] = pRes.data?.status || "";
+          } catch { /* ignore */ }
+        })
+      );
+
+      const DONE_STATUSES = ["completed", "terminé", "cancelled"];
+
+      // 4. For each site whose project is NOT done, collect all member IDs of assigned teams
+      const busy = new Set<string>();
+      allSites.forEach((site: any) => {
+        const projStatus = projectStatusMap[site.projectId] || "";
+        if (DONE_STATUSES.includes(projStatus)) return; // project done → members are free
+
+        const teamIdsOnSite: string[] = [
+          ...(site.teamIds || []).map((t: any) => String(t._id || t)),
+          ...(site.teams || []).map((t: any) => String(t._id || t)),
+        ];
+
+        teamIdsOnSite.forEach((tid) => {
+          const team = teams.find((t) => t._id === tid);
+          team?.members?.forEach((m: any) => {
+            if (m._id) busy.add(String(m._id));
+          });
+        });
+      });
+
+      setBusyMemberIds(busy);
+    } catch (err) {
+      console.error("loadBusyMembers error:", err);
+      setBusyMemberIds(new Set());
     }
   };
 
@@ -205,6 +280,19 @@ export default function Team() {
       team.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       team.teamCode?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
+
+  const TEAM_PAGE_SIZE = 6;
+  const [teamPage, setTeamPage] = useState(1);
+  const teamTotalPages = Math.ceil(filteredTeams.length / TEAM_PAGE_SIZE);
+  const paginatedTeams = filteredTeams.slice(
+    (teamPage - 1) * TEAM_PAGE_SIZE,
+    teamPage * TEAM_PAGE_SIZE
+  );
+
+  // Reset page when search changes
+  useEffect(() => {
+    setTeamPage(1);
+  }, [searchTerm]);
 
   // Helper function to check if a team is assigned to a site
   const isTeamAssignedToSite = (teamId: string) => {
@@ -533,64 +621,8 @@ export default function Team() {
 
   return (
     <div className="space-y-6">
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-blue-100 text-sm">Total Teams</p>
-                <p className="text-2xl font-bold">{totalTeams}</p>
-              </div>
-              <div className="bg-white/20 rounded-full p-2">
-                <Users className="h-6 w-6" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-green-100 text-sm">Active Teams</p>
-                <p className="text-2xl font-bold">{activeTeams}</p>
-              </div>
-              <div className="bg-white/20 rounded-full p-2">
-                <Building className="h-6 w-6" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-orange-100 text-sm">Inactive Teams</p>
-                <p className="text-2xl font-bold">{inactiveTeams}</p>
-              </div>
-              <div className="bg-white/20 rounded-full p-2">
-                <Users className="h-6 w-6" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-purple-100 text-sm">Total Members</p>
-                <p className="text-2xl font-bold">{totalMembers}</p>
-              </div>
-              <div className="bg-white/20 rounded-full p-2">
-                <User className="h-6 w-6" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      {/* BI Dashboard */}
+      <TeamBiDashboard teams={teams} />
 
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -742,44 +774,55 @@ export default function Team() {
                     const firstName = member.firstName || member.firstname || "";
                     const lastName = member.lastName || member.lastname || "";
                     const fullName = `${firstName} ${lastName}`.trim() || member.email || "Unknown";
+                    const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+                    const roleName = member.role?.name || 'user';
+                    const roleColors: Record<string, string> = {
+                      admin: 'bg-red-100 text-red-700',
+                      manager: 'bg-purple-100 text-purple-700',
+                      chef_projet: 'bg-blue-100 text-blue-700',
+                      technicien: 'bg-green-100 text-green-700',
+                      worker: 'bg-amber-100 text-amber-700',
+                      user: 'bg-gray-100 text-gray-600',
+                    };
+                    const roleColor = roleColors[roleName] || roleColors.user;
                     return (
                       <div
                         key={member._id}
-                        className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 px-3 py-2"
+                        className="flex items-center justify-between px-3 py-2.5 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors"
                       >
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-7 w-7">
-                            <AvatarFallback className="text-xs bg-blue-100 text-blue-700">
-                              {getInitials(fullName)}
-                            </AvatarFallback>
-                          </Avatar>
+                        <div className="flex items-center gap-3">
+                          <div className="h-9 w-9 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-sm font-bold shrink-0">
+                            {initials || '?'}
+                          </div>
                           <div>
-                            <p className="text-sm font-medium">{fullName}</p>
-                            {member.email && (
-                              <p className="text-xs text-gray-500">{member.email}</p>
-                            )}
+                            <p className="text-sm font-semibold text-gray-900">{fullName}</p>
+                            {member.email && <p className="text-xs text-gray-400">{member.email}</p>}
                           </div>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
-                          onClick={async () => {
-                            if (!editTeam) return;
-                            try {
-                              const response = await removeMemberFromTeam(editTeam._id, member._id);
-                              const updated = { ...editTeam, members: response.data.members ?? editTeam.members.filter((m: any) => m._id !== member._id) };
-                              setEditTeam(updated);
-                              setTeams(teams.map((t) => t._id === editTeam._id ? updated : t));
-                              toast.success("Member removed");
-                            } catch {
-                              toast.error("Error removing member");
-                            }
-                          }}
-                          title="Remove member"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${roleColor}`}>
+                            {roleName}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0 text-red-400 hover:text-red-600 hover:bg-red-50"
+                            onClick={async () => {
+                              if (!editTeam) return;
+                              try {
+                                const response = await removeMemberFromTeam(editTeam._id, member._id);
+                                const updated = { ...editTeam, members: response.data.members ?? editTeam.members.filter((m: any) => m._id !== member._id) };
+                                setEditTeam(updated);
+                                setTeams(teams.map((t) => t._id === editTeam._id ? updated : t));
+                                toast.success("Member removed");
+                              } catch {
+                                toast.error("Error removing member");
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
                       </div>
                     );
                   })}
@@ -788,67 +831,96 @@ export default function Team() {
                 <p className="text-sm text-gray-400 italic">No members yet</p>
               )}
 
-              {/* Add member */}
-              <div className="flex gap-2 pt-1">
-                <Select value={editMemberUserId} onValueChange={setEditMemberUserId}>
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Select a member to add" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(() => {
-                      const filtered = availableUsers.filter((u) => {
-                        // Exclude already in this team
-                        if (editTeam?.members?.some((m: any) => m._id === u._id)) return false;
-                        // Exclude if member belongs to a team assigned to an active (non-completed) site
-                        const busyInActiveTeam = Object.entries(teamSiteAssignments).find(
-                          ([teamId, assignment]) => {
-                            const team = teams.find((t) => t._id === teamId);
-                            const isMember = team?.members?.some((m: any) => m._id === u._id);
-                            return isMember && assignment.status !== "completed";
-                          }
-                        );
-                        return !busyInActiveTeam;
-                      });
+              {/* Add member — scrollable list */}
+              <div className="border rounded-xl overflow-hidden">
+                <div className="max-h-56 overflow-y-auto divide-y divide-gray-100">
+                  {availableUsers.length === 0 ? (
+                    <div className="py-6 flex flex-col items-center gap-2">
+                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent" />
+                      <p className="text-sm text-gray-400">Loading users...</p>
+                    </div>
+                  ) : (() => {
+                    const filtered = availableUsers.filter((u) => {
+                      if (editTeam?.members?.some((m: any) => m._id === u._id)) return false;
+                      if (busyMemberIds.has(u._id)) return false;
+                      return true;
+                    });
 
-                      if (filtered.length === 0) {
-                        return (
-                          <div className="py-4 px-2 text-sm text-gray-500 text-center">
-                            No available members
-                          </div>
-                        );
-                      }
-                      return filtered.map((user) => (
-                        <SelectItem key={user._id} value={user._id}>
-                          {user.firstName} {user.lastName}
-                          {user.email ? ` (${user.email})` : ""}
-                        </SelectItem>
-                      ));
-                    })()}
-                  </SelectContent>
-                </Select>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="shrink-0"
-                  disabled={!editMemberUserId}
-                  onClick={async () => {
-                    if (!editTeam || !editMemberUserId) return;
-                    try {
-                      const response = await addMemberToTeam(editTeam._id, editMemberUserId);
-                      const updated = response.data;
-                      setEditTeam(updated);
-                      setTeams(teams.map((t) => t._id === editTeam._id ? updated : t));
-                      setEditMemberUserId("");
-                      toast.success("Member added");
-                    } catch {
-                      toast.error("Error adding member");
+                    if (filtered.length === 0) {
+                      return (
+                        <div className="py-6 text-sm text-gray-400 text-center">
+                          No available members
+                        </div>
+                      );
                     }
-                  }}
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  Add
-                </Button>
+
+                    return filtered.map((user) => {
+                      const isSelected = editMemberUserId === user._id;
+                      const initials = `${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`.toUpperCase();
+                      const roleName = user.role?.name || 'user';
+                      const roleColors: Record<string, string> = {
+                        admin: 'bg-red-100 text-red-700',
+                        manager: 'bg-purple-100 text-purple-700',
+                        chef_projet: 'bg-blue-100 text-blue-700',
+                        technicien: 'bg-green-100 text-green-700',
+                        worker: 'bg-amber-100 text-amber-700',
+                        user: 'bg-gray-100 text-gray-600',
+                      };
+                      const roleColor = roleColors[roleName] || roleColors.user;
+                      return (
+                        <div
+                          key={user._id}
+                          onClick={() => setEditMemberUserId(isSelected ? '' : user._id)}
+                          className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors
+                            ${isSelected ? 'bg-blue-50 border-l-4 border-blue-500' : 'hover:bg-gray-50 border-l-4 border-transparent'}`}
+                        >
+                          <div className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0
+                            ${isSelected ? 'bg-blue-500 text-white' : 'bg-gradient-to-br from-blue-400 to-purple-500 text-white'}`}>
+                            {initials || '?'}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-gray-900 truncate">
+                              {user.firstName} {user.lastName}
+                            </p>
+                            <p className="text-xs text-gray-400 truncate">{user.email}</p>
+                          </div>
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${roleColor}`}>
+                            {roleName}
+                          </span>
+                          {isSelected && (
+                            <div className="h-5 w-5 rounded-full bg-blue-500 flex items-center justify-center shrink-0">
+                              <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
               </div>
+
+              <Button
+                className="w-full bg-gray-900 hover:bg-gray-700 font-semibold"
+                disabled={!editMemberUserId}
+                onClick={async () => {
+                  if (!editTeam || !editMemberUserId) return;
+                  try {
+                    const response = await addMemberToTeam(editTeam._id, editMemberUserId);
+                    const updated = response.data;
+                    setEditTeam(updated);
+                    setTeams(teams.map((t) => t._id === editTeam._id ? updated : t));
+                    setEditMemberUserId("");
+                    toast.success("Member added");
+                  } catch {
+                    toast.error("Error adding member");
+                  }
+                }}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Member
+              </Button>
             </div>
 
             {/* Actions */}
@@ -945,51 +1017,98 @@ export default function Team() {
                         <DialogTitle>Add Member</DialogTitle>
                       </DialogHeader>
                       <div className="space-y-4">
-                        <Select
-                          value={selectedUserId}
-                          onValueChange={setSelectedUserId}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a member" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {(() => {
-                              // Filter users: not in current team, not in team assigned to active site (not completed)
-                              const availableForSelection = availableUsers
-                                .filter((u) => {
-                                  // Not already in this team
-                                  if (selectedTeamView?.members?.some((m: any) => m._id === u._id)) {
-                                    return false;
-                                  }
-                                  // Check if user is in a team assigned to a site that's NOT completed
-                                  const userInActiveAssignedTeam = Object.entries(teamSiteAssignments).find(
-                                    ([teamId, assignment]) => {
-                                      const team = teams.find(t => t._id === teamId);
-                                      const isMemberOfTeam = team?.members?.some((m: any) => m._id === u._id);
-                                      const isSiteCompleted = assignment.status === 'completed';
-                                      return isMemberOfTeam && !isSiteCompleted;
-                                    }
-                                  );
-                                  // Allow if not in any active assigned team (site not completed)
-                                  return !userInActiveAssignedTeam;
-                                });
+                        {/* Scrollable user list */}
+                        <div className="border rounded-xl overflow-hidden">
+                          <div className="max-h-72 overflow-y-auto divide-y divide-gray-100">
+                            {userLoadingError ? (
+                              <div className="py-8 text-center">
+                                <p className="text-sm text-red-500 font-medium">Failed to load users</p>
+                                <button
+                                  className="text-xs text-blue-500 underline mt-1"
+                                  onClick={loadAvailableUsers}
+                                >
+                                  Retry
+                                </button>
+                              </div>
+                            ) : availableUsers.length === 0 ? (
+                              <div className="py-8 flex flex-col items-center gap-2">
+                                <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent" />
+                                <p className="text-sm text-gray-400">Loading users...</p>
+                              </div>
+                            ) : (() => {
+                              // Filter: exclude members already in this team
+                              // AND exclude members busy on an active project (not completed/terminé)
+                              const availableForSelection = availableUsers.filter((u) => {
+                                if (selectedTeamView?.members?.some((m: any) => m._id === u._id)) return false;
+                                if (busyMemberIds.has(u._id)) return false;
+                                return true;
+                              });
+
                               if (availableForSelection.length === 0) {
                                 return (
-                                  <div className="py-4 px-2 text-sm text-gray-500 text-center">
-                                    Aucun utilisateur disponible
+                                  <div className="py-8 text-sm text-gray-400 text-center">
+                                    No available users
                                   </div>
                                 );
                               }
-                              return availableForSelection.map((user) => (
-                                <SelectItem key={user._id} value={user._id}>
-                                  {user.firstName} {user.lastName} ({user.email})
-                                </SelectItem>
-                              ));
+
+                              return availableForSelection.map((user) => {
+                                const isSelected = selectedUserId === user._id;
+                                const initials = `${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`.toUpperCase();
+                                const roleName = user.role?.name || 'user';
+                                const roleColors: Record<string, string> = {
+                                  admin: 'bg-red-100 text-red-700',
+                                  manager: 'bg-purple-100 text-purple-700',
+                                  chef_projet: 'bg-blue-100 text-blue-700',
+                                  technicien: 'bg-green-100 text-green-700',
+                                  worker: 'bg-amber-100 text-amber-700',
+                                  user: 'bg-gray-100 text-gray-600',
+                                };
+                                const roleColor = roleColors[roleName] || roleColors.user;
+
+                                return (
+                                  <div
+                                    key={user._id}
+                                    onClick={() => setSelectedUserId(isSelected ? '' : user._id)}
+                                    className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors
+                                      ${isSelected
+                                        ? 'bg-blue-50 border-l-4 border-blue-500'
+                                        : 'hover:bg-gray-50 border-l-4 border-transparent'
+                                      }`}
+                                  >
+                                    {/* Avatar */}
+                                    <div className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0
+                                      ${isSelected ? 'bg-blue-500 text-white' : 'bg-gradient-to-br from-blue-400 to-purple-500 text-white'}`}>
+                                      {initials || '?'}
+                                    </div>
+                                    {/* Info */}
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm font-semibold text-gray-900 truncate">
+                                        {user.firstName} {user.lastName}
+                                      </p>
+                                      <p className="text-xs text-gray-400 truncate">{user.email}</p>
+                                    </div>
+                                    {/* Role badge */}
+                                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${roleColor}`}>
+                                      {roleName}
+                                    </span>
+                                    {/* Check */}
+                                    {isSelected && (
+                                      <div className="h-5 w-5 rounded-full bg-blue-500 flex items-center justify-center shrink-0">
+                                        <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              });
                             })()}
-                          </SelectContent>
-                        </Select>
+                          </div>
+                        </div>
+
                         <Button
-                          className="w-full"
+                          className="w-full bg-gray-900 hover:bg-gray-700 font-semibold"
                           onClick={handleAddMember}
                           disabled={!selectedUserId}
                         >
@@ -1001,37 +1120,52 @@ export default function Team() {
                 )}
               </div>
               <div className="space-y-2 max-h-60 overflow-y-auto">
-                {selectedTeamView?.members?.map((member: any) => (
+                {selectedTeamView?.members?.map((member: any) => {
+                  const initials = `${member.firstName?.charAt(0) || ''}${member.lastName?.charAt(0) || ''}`.toUpperCase();
+                  const roleName = member.role?.name || 'user';
+                  const roleColors: Record<string, string> = {
+                    admin: 'bg-red-100 text-red-700',
+                    manager: 'bg-purple-100 text-purple-700',
+                    chef_projet: 'bg-blue-100 text-blue-700',
+                    technicien: 'bg-green-100 text-green-700',
+                    worker: 'bg-amber-100 text-amber-700',
+                    user: 'bg-gray-100 text-gray-600',
+                  };
+                  const roleColor = roleColors[roleName] || roleColors.user;
+                  return (
                   <div
                     key={member._id}
-                    className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                    className="flex items-center justify-between px-3 py-2.5 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors"
                   >
-                    <div className="flex items-center gap-2">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="text-xs bg-blue-100 text-blue-600">
-                          {member.firstName?.charAt(0)}
-                          {member.lastName?.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
+                    <div className="flex items-center gap-3">
+                      <div className="h-9 w-9 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-sm font-bold shrink-0">
+                        {initials || '?'}
+                      </div>
                       <div>
-                        <p className="text-sm font-medium">
+                        <p className="text-sm font-semibold text-gray-900">
                           {member.firstName} {member.lastName}
                         </p>
-                        <p className="text-xs text-gray-500">{member.email}</p>
+                        <p className="text-xs text-gray-400">{member.email}</p>
                       </div>
                     </div>
-                    {canManageTeam && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-500 hover:text-red-700"
-                        onClick={() => handleRemoveMember(member._id)}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    )}
+                    <div className="flex items-center gap-2">
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${roleColor}`}>
+                        {roleName}
+                      </span>
+                      {canManageTeam && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-400 hover:text-red-600 hover:bg-red-50 h-7 w-7 p-0"
+                          onClick={() => handleRemoveMember(member._id)}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                ))}
+                  );
+                })}
                 {(!selectedTeamView?.members ||
                   selectedTeamView.members.length === 0) && (
                   <p className="text-sm text-gray-500 text-center py-4">
@@ -1050,113 +1184,204 @@ export default function Team() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
       ) : (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <>
+          {/* Search bar */}
+          <div className="flex flex-wrap gap-3 items-end bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+            <div className="flex-1 min-w-[200px]">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
                   placeholder="Search teams..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-9"
                 />
               </div>
             </div>
-          </CardHeader>
-          <CardContent>
-            {filteredTeams.length === 0 ? (
-              <div className="text-center py-12">
-                <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500">No teams found</p>
-              </div>
-            ) : (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {filteredTeams.map((team) => (
-                  <Card
+          </div>
+
+          {filteredTeams.length === 0 ? (
+            <div className="text-center py-16">
+              <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500 font-medium">No teams found</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {paginatedTeams.map((team, idx) => {
+                const accents = [
+                  { bar: "from-blue-400 to-cyan-400",     icon: "from-blue-500 to-cyan-500",     bg: "bg-blue-50",    ring: "ring-blue-100",    iconBg: "bg-gradient-to-br from-blue-500 to-cyan-500" },
+                  { bar: "from-violet-400 to-purple-400", icon: "from-violet-500 to-purple-500", bg: "bg-violet-50",  ring: "ring-violet-100",  iconBg: "bg-gradient-to-br from-violet-500 to-purple-500" },
+                  { bar: "from-emerald-400 to-teal-400",  icon: "from-emerald-500 to-teal-500",  bg: "bg-emerald-50", ring: "ring-emerald-100", iconBg: "bg-gradient-to-br from-emerald-500 to-teal-500" },
+                  { bar: "from-amber-400 to-orange-400",  icon: "from-amber-500 to-orange-500",  bg: "bg-amber-50",   ring: "ring-amber-100",   iconBg: "bg-gradient-to-br from-amber-500 to-orange-500" },
+                  { bar: "from-rose-400 to-pink-400",     icon: "from-rose-500 to-pink-500",     bg: "bg-rose-50",    ring: "ring-rose-100",    iconBg: "bg-gradient-to-br from-rose-500 to-pink-500" },
+                  { bar: "from-sky-400 to-indigo-400",    icon: "from-sky-500 to-indigo-500",    bg: "bg-sky-50",     ring: "ring-sky-100",     iconBg: "bg-gradient-to-br from-sky-500 to-indigo-500" },
+                ];
+                const accent = accents[idx % accents.length];
+                const memberCount = team.members?.length || 0;
+
+                return (
+                  <div
                     key={team._id}
-                    className="hover:shadow-md transition-shadow cursor-pointer"
-                    onClick={() => handleViewTeam(team)}
+                    className={`group relative flex flex-col rounded-2xl shadow-md hover:shadow-xl ring-1 overflow-hidden transition-all duration-300 hover:-translate-y-1 ${accent.bg} ${accent.ring}`}
                   >
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-12 w-12">
-                            <AvatarFallback className="bg-gradient-to-br from-blue-600 to-green-600 text-white">
-                              {getInitials(team.name)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <h3 className="font-semibold text-gray-900 dark:text-white">
+                    {/* Top accent bar */}
+                    <div className={`h-1.5 w-full bg-gradient-to-r ${accent.bar}`} />
+
+                    <div className="flex flex-col flex-1 p-6 gap-5">
+
+                      {/* Header */}
+                      <div
+                        className="flex items-start justify-between gap-3 cursor-pointer"
+                        onClick={() => handleViewTeam(team)}
+                      >
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <div className={`shrink-0 p-3 rounded-xl shadow-md ${accent.iconBg}`}>
+                            <Users className="h-6 w-6 text-white" />
+                          </div>
+                          <div className="min-w-0">
+                            <h3 className="font-bold text-gray-900 dark:text-white text-lg leading-tight truncate">
                               {team.name}
                             </h3>
                             {team.teamCode && (
-                              <p className="text-xs text-gray-500">
-                                {team.teamCode}
-                              </p>
+                              <p className="text-xs text-gray-400 font-mono mt-0.5">{team.teamCode}</p>
                             )}
                           </div>
                         </div>
-                        <Badge
-                          variant={team.isActive ? "secondary" : "destructive"}
-                        >
+                        <span className={`shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full ${
+                          team.isActive
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-red-100 text-red-600"
+                        }`}>
                           {team.isActive ? "Active" : "Inactive"}
-                        </Badge>
+                        </span>
                       </div>
 
+                      {/* Description */}
                       {team.description && (
-                        <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                        <p className="text-sm text-gray-500 line-clamp-2 -mt-2">
                           {team.description}
                         </p>
                       )}
 
-                      <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
-                        <div className="flex items-center gap-1">
-                          <Users className="h-4 w-4" />
-                          <span>{team.members?.length || 0} membres</span>
+                      {/* Members avatars */}
+                      <div
+                        className="flex items-center gap-3 cursor-pointer"
+                        onClick={() => handleViewTeam(team)}
+                      >
+                        <div className="flex -space-x-2">
+                          {(team.members || []).slice(0, 4).map((m: any, i: number) => {
+                            const fn = m.firstName || m.firstname || "";
+                            const ln = m.lastName || m.lastname || "";
+                            const initials = `${fn.charAt(0)}${ln.charAt(0)}`.toUpperCase() || "?";
+                            const colors = ["from-blue-400 to-cyan-400", "from-violet-400 to-purple-400", "from-emerald-400 to-teal-400", "from-amber-400 to-orange-400"];
+                            return (
+                              <div
+                                key={m._id || i}
+                                className={`h-8 w-8 rounded-full bg-gradient-to-br ${colors[i % colors.length]} flex items-center justify-center text-white text-xs font-bold ring-2 ring-white`}
+                                title={`${fn} ${ln}`.trim()}
+                              >
+                                {initials}
+                              </div>
+                            );
+                          })}
+                          {memberCount > 4 && (
+                            <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-xs font-bold ring-2 ring-white">
+                              +{memberCount - 4}
+                            </div>
+                          )}
                         </div>
-                        {isTeamAssignedToSite(team._id) && (
-                          <div className="flex items-center gap-1">
-                            <Building className="h-4 w-4" />
-                            <span>
-                              Site: {teamSiteAssignments[team._id].siteName}
-                            </span>
-                          </div>
-                        )}
+                        <span className="text-sm text-gray-500 font-medium">
+                          {memberCount} member{memberCount !== 1 ? "s" : ""}
+                        </span>
                       </div>
 
+                      {/* Site assignment */}
+                      {isTeamAssignedToSite(team._id) && (
+                        <div className="flex items-center gap-2 text-xs text-gray-500 bg-white/60 rounded-lg px-3 py-2">
+                          <Building className="h-3.5 w-3.5 shrink-0" />
+                          <span className="truncate">Site: <strong>{teamSiteAssignments[team._id].siteName}</strong></span>
+                        </div>
+                      )}
+
+                      {/* Actions */}
                       <div
-                        className="flex gap-2 pt-4 border-t"
+                        className="flex gap-2 pt-4 border-t border-black/5 mt-auto"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <Button
                           variant="outline"
                           size="sm"
-                          className="flex-1"
+                          className="flex-1 bg-white/70 hover:bg-white border-gray-200 text-gray-700 font-medium"
+                          onClick={() => handleViewTeam(team)}
+                        >
+                          <Users className="h-3.5 w-3.5 mr-1.5" />
+                          View
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 bg-white/70 hover:bg-white border-gray-200 text-gray-700 font-medium"
                           onClick={() => handleEditTeam(team)}
                         >
-                          <Edit className="h-3 w-3 mr-1" />
-                          Modifier
+                          <Edit className="h-3.5 w-3.5 mr-1.5" />
+                          Edit
                         </Button>
                         {canManageTeam && (
                           <Button
                             variant="outline"
                             size="sm"
-                            className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            className="bg-white/70 hover:bg-red-50 border-gray-200 text-red-500 hover:text-red-600 hover:border-red-200 px-3"
                             onClick={() => handleDeleteTeam(team)}
                           >
-                            <Trash2 className="h-3 w-3 mr-1" />
-                            Delete
+                            <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         )}
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Pagination */}
+      {!loading && filteredTeams.length > 0 && (
+        <div className="flex items-center justify-between pt-2">
+          <p className="text-sm text-gray-500">
+            Showing {(teamPage - 1) * TEAM_PAGE_SIZE + 1}–{Math.min(teamPage * TEAM_PAGE_SIZE, filteredTeams.length)} of {filteredTeams.length} teams
+          </p>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline" size="sm"
+              onClick={() => setTeamPage(p => Math.max(1, p - 1))}
+              disabled={teamPage === 1}
+              className="h-8 w-8 p-0"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            {Array.from({ length: teamTotalPages }, (_, i) => i + 1).map(page => (
+              <Button
+                key={page}
+                variant={page === teamPage ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setTeamPage(page)}
+                className={`h-8 w-8 p-0 ${page === teamPage ? 'bg-blue-600 hover:bg-blue-700 text-white' : ''}`}
+              >
+                {page}
+              </Button>
+            ))}
+            <Button
+              variant="outline" size="sm"
+              onClick={() => setTeamPage(p => Math.min(teamTotalPages, p + 1))}
+              disabled={teamPage === teamTotalPages}
+              className="h-8 w-8 p-0"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
       )}
     </div>
   );
