@@ -47,6 +47,7 @@ import { trackAuditEvent } from "../../action/audit.action";
 import { incidentMatchesSearch } from "../../utils/incidentSearchFilter";
 import { incidentEvents } from "../../components/IncidentBadge";
 import { NotificationPanel } from "../../components/NotificationPanel";
+import { IncidentBiDashboard } from "../../components/IncidentBiDashboard";
 import { io, Socket } from "socket.io-client";
 
 // API pour rechercher des utilisateurs
@@ -1276,6 +1277,8 @@ Pour toute question, veuillez contacter l'administrateur système.
           )}
         </div>
       </div>
+
+      <IncidentBiDashboard userCin={user?.cin} />
 
       <Card className="border-none shadow-lg">
         <CardHeader className="bg-gradient-to-r from-slate-50 to-blue-50 border-b">
