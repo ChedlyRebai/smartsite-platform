@@ -223,6 +223,21 @@ export default function Sites() {
   const [selectedUserId, setSelectedUserId] = useState('');
   const [loadingTeams, setLoadingTeams] = useState(false);
 
+  // Clients list state — only users with role "client"
+  const [clientsList, setClientsList] = useState<Array<{ _id: string; firstName?: string; lastName?: string; email?: string; name?: string }>>([]);
+
+  useEffect(() => {
+    const token = user?.access_token;
+    // Use /users/role/client which filters by role in DB (approved users only)
+    axios.get(`${import.meta.env.VITE_AUTH_API_URL || 'http://localhost:3000'}/users/role/client`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    }).then((res) => {
+      if (Array.isArray(res.data)) {
+        setClientsList(res.data);
+      }
+    }).catch(() => {});
+  }, []);
+
   // Auto-refresh for real-time updates
   useEffect(() => {
     if (autoRefresh) {
@@ -1240,12 +1255,22 @@ export default function Sites() {
                       <Label htmlFor="clientName" className="text-sm font-medium">
                         Client Name <span className="text-gray-500">(Optional)</span>
                       </Label>
-                      <Input
+                      <select
                         id="clientName"
-                        placeholder="e.g., ABC Corporation"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         value={newSite.clientName}
                         onChange={(e) => setNewSite({ ...newSite, clientName: e.target.value })}
-                      />
+                      >
+                        <option value="">-- Select a client --</option>
+                        {clientsList.map((c) => {
+                          const label = c.firstName && c.lastName
+                            ? `${c.firstName} ${c.lastName}`
+                            : c.name || c.email || c._id;
+                          return (
+                            <option key={c._id} value={label}>{label}</option>
+                          );
+                        })}
+                      </select>
                     </div>
 
                     <div className="space-y-2">
@@ -1959,12 +1984,22 @@ export default function Sites() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-client" className="text-sm font-medium">Client Name</Label>
-                  <Input
+                  <select
                     id="edit-client"
-                    placeholder="e.g., Client ABC"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     value={manageData.clientName}
                     onChange={(e) => setManageData({ ...manageData, clientName: e.target.value })}
-                  />
+                  >
+                    <option value="">-- Select a client --</option>
+                    {clientsList.map((c) => {
+                      const label = c.firstName && c.lastName
+                        ? `${c.firstName} ${c.lastName}`
+                        : c.name || c.email || c._id;
+                      return (
+                        <option key={c._id} value={label}>{label}</option>
+                      );
+                    })}
+                  </select>
                 </div>
 
                 <div className="space-y-2">
