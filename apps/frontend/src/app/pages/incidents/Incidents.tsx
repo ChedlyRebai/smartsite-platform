@@ -62,7 +62,7 @@ const incidentsApi = axios.create({
 
 // API pour les projets (port 3007)
 const projectsApi = axios.create({
-  baseURL: "http://localhost:3007",
+  baseURL: "https://smartsite-gestion-projects-latest.onrender.com",
   timeout: 10000,
 });
 
@@ -367,7 +367,7 @@ export default function Incidents() {
             allUsers.length,
           );
         }, 500);
-      } catch (error) {
+      } catch (error:any) {
         console.error(
           "❌ Frontend: Erreur lors du chargement des utilisateurs:",
           error,
@@ -415,7 +415,7 @@ export default function Incidents() {
             hasAssignment: !!(incident.assignedTo || incident.assignedUserRole),
           });
         });
-      } catch (error) {
+      } catch (error:any) {
         console.error(
           "❌ Frontend: Erreur lors du chargement des incidents:",
           error,
@@ -474,7 +474,7 @@ export default function Incidents() {
         setProjects(projectsData);
         console.log("✅ Frontend: Projets chargés:", projectsData.length);
         console.log("🔍 Premier projet:", projectsData[0]);
-      } catch (error) {
+      } catch (error:any) {
         console.error("❌ Frontend: Erreur chargement projets:", error);
         console.error("   URL:", error.config?.url);
         console.error("   Status:", error.response?.status);
@@ -505,7 +505,7 @@ export default function Incidents() {
         setSites(sitesData);
         console.log("✅ Frontend: Sites chargés:", sitesData.length);
         console.log("🔍 Premier site:", sitesData[0]);
-      } catch (error) {
+      } catch (error:any) {
         console.error("❌ Frontend: Erreur chargement sites:", error);
         console.error("   URL:", error.config?.url);
         setSites([]);
@@ -594,7 +594,7 @@ export default function Incidents() {
       });
 
       toast.success("Incident enregistré avec succès dans la base de données");
-    } catch (error) {
+    } catch (error:any) {
       console.error(
         "❌ Frontend: Erreur lors de la sauvegarde de l'incident:",
         error,

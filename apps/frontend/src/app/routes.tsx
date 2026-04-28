@@ -114,9 +114,9 @@ export const router = createBrowserRouter([
     path: "/",
     element: (
       <ProtectedRoute>
-        <RoutePermissionGuard>
+        
           <DashboardLayout />
-        </RoutePermissionGuard>
+        
       </ProtectedRoute>
     ),
     children: [
