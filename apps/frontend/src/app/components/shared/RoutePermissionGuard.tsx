@@ -12,6 +12,15 @@ type RoutePermissionGuardProps = {
 const ALWAYS_ALLOWED_AUTHENTICATED_PATHS = new Set([
   "/reset-password-first-login",
   "/change-password-first-login",
+  "/materials",
+  "/stock-predictions",
+  "/anomalies-alerts",
+  "/auto-orders",
+  "/order-tracking-map",
+  "/site-consumption",
+  "/flow-log",
+  "/ml-training",
+
   "/project-milestone",
   "/bim",
 ]);

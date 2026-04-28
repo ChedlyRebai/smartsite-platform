@@ -1,0 +1,250 @@
+### ========================================
+### 🧪 TESTS DE CONSOMMATION - MATERIALS SERVICE
+### ========================================
+### Remplacez SITE_ID et MATERIAL_ID par vos vraies valeurs
+### ========================================
+
+@baseUrl = http://localhost:3002/api
+@siteId = VOTRE_SITE_ID_ICI
+@materialIdCiment = MATERIAL_ID_CIM001_ICI
+@materialIdSable = MATERIAL_ID_CIM009_ICI
+@materialIdGravier = MATERIAL_ID_CIM010_ICI
+
+### ========================================
+### ÉTAPE 0 : Récupérer les IDs des matériaux
+### ========================================
+
+### Chercher Ciment Portland (CIM001)
+GET {{baseUrl}}/materials?search=Ciment Portland
+Content-Type: application/json
+
+###
+
+### Chercher Sable (CIM009)
+GET {{baseUrl}}/materials?search=Sable
+Content-Type: application/json
+
+###
+
+### Chercher Gravier (CIM010)
+GET {{baseUrl}}/materials?search=Gravier
+Content-Type: application/json
+
+###
+
+### ========================================
+### TEST 1 : CRÉER UNE EXIGENCE DE CONSOMMATION
+### ========================================
+
+### Créer exigence pour Ciment Portland (5000 kg)
+POST {{baseUrl}}/site-consumption
+Content-Type: application/json
+
+{
+  "siteId": "{{siteId}}",
+  "materialId": "{{materialIdCiment}}",
+  "initialQuantity": 5000,
+  "notes": "Ciment Portland pour fondations - Chantier A"
+}
+
+###
+
+### Créer exigence pour Sable (12000 kg)
+POST {{baseUrl}}/site-consumption
+Content-Type: application/json
+
+{
+  "siteId": "{{siteId}}",
+  "materialId": "{{materialIdSable}}",
+  "initialQuantity": 12000,
+  "notes": "Sable pour béton"
+}
+
+###
+
+### Créer exigence pour Gravier (9500 kg)
+POST {{baseUrl}}/site-consumption
+Content-Type: application/json
+
+{
+  "siteId": "{{siteId}}",
+  "materialId": "{{materialIdGravier}}",
+  "initialQuantity": 9500,
+  "notes": "Gravier pour béton"
+}
+
+###
+
+### ========================================
+### TEST 2 : AJOUTER DES CONSOMMATIONS PROGRESSIVES
+### ========================================
+
+### Jour 1 : Consommer 1500 kg de ciment (30%)
+POST {{baseUrl}}/site-consumption/{{siteId}}/{{materialIdCiment}}/add
+Content-Type: application/json
+
+{
+  "quantity": 1500,
+  "notes": "Jour 1 - Coulage dalle principale"
+}
+
+###
+
+### Jour 5 : Consommer 2000 kg de ciment supplémentaires (70% total)
+POST {{baseUrl}}/site-consumption/{{siteId}}/{{materialIdCiment}}/add
+Content-Type: application/json
+
+{
+  "quantity": 2000,
+  "notes": "Jour 5 - Murs porteurs"
+}
+
+###
+
+### Jour 10 : Consommer 1000 kg de ciment (90% total)
+POST {{baseUrl}}/site-consumption/{{siteId}}/{{materialIdCiment}}/add
+Content-Type: application/json
+
+{
+  "quantity": 1000,
+  "notes": "Jour 10 - Poteaux"
+}
+
+###
+
+### Consommer 10000 kg de sable (83.3%)
+POST {{baseUrl}}/site-consumption/{{siteId}}/{{materialIdSable}}/add
+Content-Type: application/json
+
+{
+  "quantity": 10000,
+  "notes": "Consommation importante de sable"
+}
+
+###
+
+### Consommer 8000 kg de gravier (84.2%)
+POST {{baseUrl}}/site-consumption/{{siteId}}/{{materialIdGravier}}/add
+Content-Type: application/json
+
+{
+  "quantity": 8000,
+  "notes": "Consommation importante de gravier"
+}
+
+###
+
+### ========================================
+### TEST 3 : METTRE À JOUR LA CONSOMMATION DIRECTEMENT
+### ========================================
+
+### Corriger la consommation de ciment à 4200 kg (84%)
+PUT {{baseUrl}}/site-consumption/{{siteId}}/{{materialIdCiment}}
+Content-Type: application/json
+
+{
+  "consumedQuantity": 4200,
+  "notes": "Correction après inventaire"
+}
+
+###
+
+### ========================================
+### TEST 4 : CONSULTER LES DONNÉES
+### ========================================
+
+### Voir tous les matériaux du chantier
+GET {{baseUrl}}/site-consumption/site/{{siteId}}
+Content-Type: application/json
+
+###
+
+### Voir les statistiques du chantier
+GET {{baseUrl}}/site-consumption/site/{{siteId}}/stats?siteName=Chantier%20A
+Content-Type: application/json
+
+###
+
+### Voir les matériaux à forte consommation (>80%)
+GET {{baseUrl}}/site-consumption/high-consumption?threshold=80
+Content-Type: application/json
+
+###
+
+### Voir les matériaux à forte consommation (>70%)
+GET {{baseUrl}}/site-consumption/high-consumption?threshold=70
+Content-Type: application/json
+
+###
+
+### Voir toutes les exigences (tous chantiers)
+GET {{baseUrl}}/site-consumption/all
+Content-Type: application/json
+
+###
+
+### Voir une exigence spécifique
+GET {{baseUrl}}/site-consumption/{{siteId}}/{{materialIdCiment}}
+Content-Type: application/json
+
+###
+
+### ========================================
+### TEST 5 : TESTS D'ERREURS
+### ========================================
+
+### ERREUR : Dépasser la quantité initiale (devrait échouer)
+POST {{baseUrl}}/site-consumption/{{siteId}}/{{materialIdCiment}}/add
+Content-Type: application/json
+
+{
+  "quantity": 10000,
+  "notes": "Tentative de dépassement"
+}
+
+###
+
+### ERREUR : Créer un doublon (devrait échouer)
+POST {{baseUrl}}/site-consumption
+Content-Type: application/json
+
+{
+  "siteId": "{{siteId}}",
+  "materialId": "{{materialIdCiment}}",
+  "initialQuantity": 3000,
+  "notes": "Tentative de doublon"
+}
+
+###
+
+### ERREUR : Matériau inexistant (devrait échouer)
+POST {{baseUrl}}/site-consumption
+Content-Type: application/json
+
+{
+  "siteId": "{{siteId}}",
+  "materialId": "000000000000000000000000",
+  "initialQuantity": 1000,
+  "notes": "Matériau inexistant"
+}
+
+###
+
+### ========================================
+### TEST 6 : NETTOYAGE (OPTIONNEL)
+### ========================================
+
+### Supprimer l'exigence de ciment
+DELETE {{baseUrl}}/site-consumption/{{siteId}}/{{materialIdCiment}}
+
+###
+
+### Supprimer l'exigence de sable
+DELETE {{baseUrl}}/site-consumption/{{siteId}}/{{materialIdSable}}
+
+###
+
+### Supprimer l'exigence de gravier
+DELETE {{baseUrl}}/site-consumption/{{siteId}}/{{materialIdGravier}}
+
+###

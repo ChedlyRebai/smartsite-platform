@@ -33,6 +33,16 @@ import Home2 from "./pages/Home/Home2";
 import Pricing from "./pages/pricing/Pricing";
 import ClientsNew from "./pages/clients/ClientsNew";
 import UserGuide from "./pages/guide/UserGuide";
+import {
+  AnomaliesAlertsPage,
+  AutoOrdersPage,
+  FlowLogPage,
+  MLTrainingPage,
+  OrderTrackingMapPage,
+  SiteConsumptionPage,
+  StockPredictionsPage,
+} from "./pages/materials/MaterialsFeaturePages";
+import ExpiringMaterials from "../components/ExpiringMaterials";
 
 import AddSupplierNew from "./pages/suppliers-new/AddSupplier";
 import SuppliersListNew from "./pages/suppliers-new/SuppliersList";
@@ -65,6 +75,7 @@ import ResourceOptimizationDashboard from "@/features/resource-optimization/page
 import AccountBanned from "./pages/AccountBanned";
 import { useAuthStore } from "./store/authStore";
 import RoutePermissionGuard from "./components/shared/RoutePermissionGuard";
+import Materials from "./pages/materials/Materials";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -267,6 +278,42 @@ export const router = createBrowserRouter([
       {
         path:"reset-password-first-login",
         element:<ChangePasswordFirstLogin />
+      },
+      {
+        path: "materials",
+        element: <Materials />,
+      },
+      {
+        path: "materials/expiring",
+        element: <ExpiringMaterials />,
+      },
+      {
+        path: "stock-predictions",
+        element: <StockPredictionsPage />,
+      },
+      {
+        path: "anomalies-alerts",
+        element: <AnomaliesAlertsPage />,
+      },
+      {
+        path: "auto-orders",
+        element: <AutoOrdersPage />,
+      },
+      {
+        path: "order-tracking-map",
+        element: <OrderTrackingMapPage />,
+      },
+      {
+        path: "site-consumption",
+        element: <SiteConsumptionPage />,
+      },
+      {
+        path: "flow-log",
+        element: <FlowLogPage />,
+      },
+      {
+        path: "ml-training",
+        element: <MLTrainingPage />,
       },
       {
         path: "finance",

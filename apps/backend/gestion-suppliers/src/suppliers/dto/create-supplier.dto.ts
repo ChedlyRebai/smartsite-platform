@@ -6,45 +6,97 @@ import {
   MaxLength,
   Matches,
   IsEnum,
+  IsOptional,
+  IsArray,
+  IsNumber,
+  Min,
+  Max,
+  IsBoolean,
 } from 'class-validator';
+
 import { SupplierCategory } from '../entities/supplier.entity';
 
 export class CreateSupplierDto {
+  // ✅ CORE (from main)
   @IsString()
-  @IsNotEmpty({ message: 'Supplier name is required (min 2 characters)' })
-  @MinLength(2, { message: 'Supplier name is required (min 2 characters)' })
+  @IsNotEmpty()
+  @MinLength(2)
   @MaxLength(100)
   name: string;
 
-  @IsEnum(SupplierCategory, { message: 'Please select a category' })
+  @IsEnum(SupplierCategory)
   category: string;
 
-  @IsEmail({}, { message: 'Please enter a valid email address (e.g., name@domain.com)' })
+  @IsEmail()
   email: string;
 
   @IsString()
-  @Matches(/^[0-9+\s]{10,}$/, {
-    message: 'Please enter a valid phone number (min 10 digits)',
-  })
+  @Matches(/^[0-9+\s]{10,}$/)
   phone: string;
 
   @IsString()
-  @IsNotEmpty({ message: 'Address is required (min 5 characters)' })
-  @MinLength(5, { message: 'Address is required (min 5 characters)' })
-  @MaxLength(255)
+  @IsNotEmpty()
+  @MinLength(5)
   address: string;
 
   @IsString()
-  @Matches(/^[0-9]{14}$/, {
-    message: 'SIRET must be exactly 14 digits (numbers only)',
-  })
+  @Matches(/^[0-9]{14}$/)
   siret: string;
 
   @IsString()
-  @IsNotEmpty()
   createdBy: string;
 
   @IsString()
-  @IsNotEmpty()
   createdByName: string;
+
+  // ✅ EXTRA (from your version)
+  @IsOptional()
+  @IsString()
+  city?: string;
+
+  @IsOptional()
+  @IsString()
+  postalCode?: string;
+
+  @IsOptional()
+  @IsString()
+  country?: string;
+
+  @IsOptional()
+  @IsString()
+  website?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  specialities?: string[];
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  deliveryDelay?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Max(5)
+  rating?: number;
+
+  @IsOptional()
+  @IsString()
+  notes?: string;
+
+  @IsOptional()
+  @IsArray()
+  materialsSupplied?: string[];
+
+  @IsOptional()
+  coordonnees?: {
+    latitude?: number;
+    longitude?: number;
+  };
+
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
 }

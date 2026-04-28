@@ -1,0 +1,186 @@
+/* Styles pour les composants de géocodage */
+
+.address-search {
+  max-width: 800px;
+  margin: 20px auto;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.search-section {
+  padding: 20px;
+}
+
+.search-input {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.search-input input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.search-input input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+}
+
+.search-input input:disabled {
+  background: #f8f9fa;
+  cursor: not-allowed;
+}
+
+.search-input button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.search-input button:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+.search-input button:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.error-message {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #f5c6cb;
+  margin-bottom: 15px;
+}
+
+.search-results {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.search-results h4 {
+  margin: 0;
+  padding: 12px 16px;
+  background: white;
+  border-bottom: 1px solid #dee2e6;
+  color: #343a40;
+  font-size: 16px;
+}
+
+.result-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid #dee2e6;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.result-item:hover {
+  background: #e9ecef;
+}
+
+.result-item.selected {
+  background: #d4edda;
+  border-left: 4px solid #28a745;
+}
+
+.result-item:last-child {
+  border-bottom: none;
+}
+
+.result-name {
+  font-weight: 600;
+  color: #343a40;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.result-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.confidence {
+  background: #28a745;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.selected-location {
+  padding: 20px;
+  background: #d4edda;
+  border-top: 1px solid #dee2e6;
+}
+
+.selected-location h4 {
+  margin: 0 0 12px 0;
+  color: #28a745;
+  font-size: 18px;
+}
+
+.location-details {
+  display: grid;
+  gap: 8px;
+}
+
+.location-details div {
+  font-size: 14px;
+  color: #343a40;
+}
+
+.location-details strong {
+  color: #155724;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .search-input {
+    flex-direction: column;
+  }
+  
+  .search-input button {
+    width: 100%;
+  }
+  
+  .result-details {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .address-search {
+    margin: 10px;
+  }
+  
+  .search-section {
+    padding: 15px;
+  }
+}

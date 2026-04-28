@@ -233,4 +233,22 @@ export class GestionSiteController {
     
     return teamToSiteMap;
   }
+
+  /**
+   * Geocode an address to get coordinates
+   */
+  @Get('geocode/search')
+  async geocodeAddress(@Query('address') address: string) {
+    this.logger.log(`🔍 Recherche de géocodage pour l'adresse: ${address}`);
+    return this.gestionSiteService.geocodeAddress(address);
+  }
+
+  /**
+   * Advanced geocoding with better map integration
+   */
+  @Post('geocode/search-advanced')
+  async geocodeAddressAdvanced(@Body() body: { address: string; country?: string; city?: string }) {
+    this.logger.log(`🔍 Recherche avancée de géocodage pour: ${body.address}`);
+    return this.gestionSiteService.geocodeAddressAdvanced(body.address, body.country, body.city);
+  }
 }
