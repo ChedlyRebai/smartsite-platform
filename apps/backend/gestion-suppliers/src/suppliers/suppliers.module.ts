@@ -2,9 +2,12 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { HttpModule } from '@nestjs/axios';
 import { ConfigModule } from '@nestjs/config';
+
 import { SuppliersController } from './suppliers.controller';
 import { SuppliersService } from './suppliers.service';
+import { SuppliersSeedService } from './suppliers.seed';
 import { MLModule } from '../ml/ml.module';
+
 import { Supplier, SupplierSchema } from './entities/supplier.entity';
 import { SupplierRating, SupplierRatingSchema } from './entities/supplier-rating.entity';
 
@@ -19,7 +22,7 @@ import { SupplierRating, SupplierRatingSchema } from './entities/supplier-rating
     MLModule,
   ],
   controllers: [SuppliersController],
-  providers: [SuppliersService],
-  exports: [SuppliersService],
+  providers: [SuppliersService, SuppliersSeedService],
+  exports: [SuppliersService, SuppliersSeedService],
 })
 export class SuppliersModule {}

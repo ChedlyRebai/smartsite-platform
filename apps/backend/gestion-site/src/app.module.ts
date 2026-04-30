@@ -11,6 +11,11 @@ import { GestionSiteModule } from '../gestion-site.module';
     }),
     MongooseModule.forRoot(
       process.env.MONGODB_URI || 'mongodb://localhost:27017/smartsite',
+      {
+        serverSelectionTimeoutMS: 30000,
+        connectTimeoutMS: 30000,
+        socketTimeoutMS: 30000,
+      },
     ),
     GestionSiteModule,
   ],

@@ -9,6 +9,7 @@ export class StripeService {
   constructor(private configService: ConfigService) {
     // STRIPE_SECRET_KEY must be set in environment variables
     const secretKey = this.configService.get<string>('STRIPE_SECRET_KEY');
+    console.log('STRIPE_SECRET_KEY from config:', secretKey); // Debug line
     if (!secretKey) {
       throw new Error('STRIPE_SECRET_KEY environment variable is not set');
     }

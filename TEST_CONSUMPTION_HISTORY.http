@@ -1,0 +1,241 @@
+### ========================================
+### 🧪 TESTS DU SYSTÈME D'HISTORIQUE DE CONSOMMATION
+### ========================================
+
+@baseUrl = http://localhost:3002/api
+@materialId = VOTRE_MATERIAL_ID
+@siteId = VOTRE_SITE_ID
+
+### ========================================
+### 1. SYNCHRONISER LES DONNÉES EXISTANTES
+### ========================================
+
+### Synchroniser toutes les données de MaterialFlowLog et DailyConsumptionLog
+POST {{baseUrl}}/consumption-history/sync
+Content-Type: application/json
+
+###
+
+### ========================================
+### 2. RÉCUPÉRER L'HISTORIQUE
+### ========================================
+
+### Récupérer l'historique paginé (page 1, 50 résultats)
+GET {{baseUrl}}/consumption-history?page=1&limit=50&sortBy=date&sortOrder=desc
+Content-Type: application/json
+
+###
+
+### Récupérer l'historique filtré par matériau
+GET {{baseUrl}}/consumption-history?materialId={{materialId}}&page=1&limit=20
+Content-Type: application/json
+
+###
+
+### Récupérer l'historique filtré par site
+GET {{baseUrl}}/consumption-history?siteId={{siteId}}&page=1&limit=20
+Content-Type: application/json
+
+###
+
+### Récupérer l'historique filtré par date
+GET {{baseUrl}}/consumption-history?startDate=2026-04-01&endDate=2026-04-27&page=1&limit=50
+Content-Type: application/json
+
+###
+
+### Récupérer l'historique filtré par type de flux
+GET {{baseUrl}}/consumption-history?flowType=OUT,DAILY_CONSUMPTION&page=1&limit=50
+Content-Type: application/json
+
+###
+
+### Récupérer l'historique filtré par anomalies
+GET {{baseUrl}}/consumption-history?anomalyType=vol,probleme&page=1&limit=50
+Content-Type: application/json
+
+###
+
+### Récupérer l'historique avec recherche textuelle
+GET {{baseUrl}}/consumption-history?searchText=Ciment&page=1&limit=20
+Content-Type: application/json
+
+###
+
+### Récupérer l'historique avec filtres combinés
+GET {{baseUrl}}/consumption-history?siteId={{siteId}}&startDate=2026-04-01&flowType=OUT&anomalySeverity=critical&page=1&limit=50
+Content-Type: application/json
+
+###
+
+### ========================================
+### 3. STATISTIQUES POUR GRAPHIQUES
+### ========================================
+
+### Statistiques globales groupées par jour
+GET {{baseUrl}}/consumption-history/statistics?groupBy=day&startDate=2026-04-01&endDate=2026-04-27
+Content-Type: application/json
+
+###
+
+### Statistiques pour un site spécifique groupées par semaine
+GET {{baseUrl}}/consumption-history/statistics?siteId={{siteId}}&groupBy=week&startDate=2026-03-01&endDate=2026-04-27
+Content-Type: application/json
+
+###
+
+### Statistiques pour un matériau spécifique groupées par mois
+GET {{baseUrl}}/consumption-history/statistics?materialId={{materialId}}&groupBy=month&startDate=2026-01-01&endDate=2026-04-27
+Content-Type: application/json
+
+###
+
+### Statistiques complètes (site + matériau + période)
+GET {{baseUrl}}/consumption-history/statistics?siteId={{siteId}}&materialId={{materialId}}&groupBy=day&startDate=2026-04-01&endDate=2026-04-27
+Content-Type: application/json
+
+###
+
+### ========================================
+### 4. TENDANCE D'UN MATÉRIAU
+### ========================================
+
+### Tendance sur 30 jours (par défaut)
+GET {{baseUrl}}/consumption-history/material/{{materialId}}/trend
+Content-Type: application/json
+
+###
+
+### Tendance sur 7 jours
+GET {{baseUrl}}/consumption-history/material/{{materialId}}/trend?days=7
+Content-Type: application/json
+
+###
+
+### Tendance sur 90 jours
+GET {{baseUrl}}/consumption-history/material/{{materialId}}/trend?days=90
+Content-Type: application/json
+
+###
+
+### ========================================
+### 5. DÉTAIL D'UNE ENTRÉE
+### ========================================
+
+### Récupérer une entrée spécifique par ID
+GET {{baseUrl}}/consumption-history/ENTRY_ID
+Content-Type: application/json
+
+###
+
+### ========================================
+### 6. TESTER L'AJOUT AUTOMATIQUE
+### ========================================
+
+### Créer un nouveau flux de matériau (OUT)
+POST {{baseUrl}}/material-flow
+Content-Type: application/json
+
+{
+  "siteId": "{{siteId}}",
+  "materialId": "{{materialId}}",
+  "type": "OUT",
+  "quantity": 100,
+  "reason": "Test historique automatique - Sortie"
+}
+
+###
+
+### Créer un nouveau flux de matériau (IN)
+POST {{baseUrl}}/material-flow
+Content-Type: application/json
+
+{
+  "siteId": "{{siteId}}",
+  "materialId": "{{materialId}}",
+  "type": "IN",
+  "quantity": 200,
+  "reason": "Test historique automatique - Entrée"
+}
+
+###
+
+### Enregistrer une consommation quotidienne
+POST {{baseUrl}}/consumption/record
+Content-Type: application/json
+
+{
+  "materialId": "{{materialId}}",
+  "siteId": "{{siteId}}",
+  "date": "2026-04-27",
+  "quantityUsed": 150,
+  "expectedConsumption": 100
+}
+
+###
+
+### Vérifier que les entrées apparaissent dans l'historique
+GET {{baseUrl}}/consumption-history?materialId={{materialId}}&limit=5&sortBy=date&sortOrder=desc
+Content-Type: application/json
+
+###
+
+### ========================================
+### 7. NETTOYAGE (OPTIONNEL)
+### ========================================
+
+### Nettoyer les entrées avant le 1er janvier 2026
+DELETE {{baseUrl}}/consumption-history/cleanup
+Content-Type: application/json
+
+{
+  "beforeDate": "2026-01-01T00:00:00.000Z"
+}
+
+###
+
+### Nettoyer toutes les entrées (ATTENTION !)
+DELETE {{baseUrl}}/consumption-history/cleanup
+Content-Type: application/json
+
+{}
+
+###
+
+### ========================================
+### 8. TESTS DE PERFORMANCE
+### ========================================
+
+### Récupérer 200 entrées (limite max)
+GET {{baseUrl}}/consumption-history?page=1&limit=200
+Content-Type: application/json
+
+###
+
+### Statistiques sur une longue période (1 an)
+GET {{baseUrl}}/consumption-history/statistics?groupBy=month&startDate=2025-04-01&endDate=2026-04-27
+Content-Type: application/json
+
+###
+
+### ========================================
+### 9. TESTS D'ERREURS
+### ========================================
+
+### Matériau inexistant
+GET {{baseUrl}}/consumption-history/material/000000000000000000000000/trend
+Content-Type: application/json
+
+###
+
+### Entrée inexistante
+GET {{baseUrl}}/consumption-history/000000000000000000000000
+Content-Type: application/json
+
+###
+
+### Paramètres invalides
+GET {{baseUrl}}/consumption-history?page=0&limit=300
+Content-Type: application/json
+
+###

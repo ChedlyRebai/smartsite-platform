@@ -1,0 +1,242 @@
+timestamp,materialId,materialName,siteId,siteName,stockLevel,consumption,hourOfDay,dayOfWeek,weather,projectType,siteActivityLevel
+2024-01-01T00:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,1000,0,0,1,sunny,residential,low
+2024-01-01T01:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,1000,0,1,1,sunny,residential,low
+2024-01-01T02:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,1000,0,2,1,sunny,residential,low
+2024-01-01T03:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,1000,0,3,1,sunny,residential,low
+2024-01-01T04:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,1000,0,4,1,sunny,residential,low
+2024-01-01T05:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,1000,0,5,1,sunny,residential,low
+2024-01-01T06:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,1000,0,6,1,sunny,residential,low
+2024-01-01T07:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,1000,5,7,1,sunny,residential,medium
+2024-01-01T08:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,995,15,8,1,sunny,residential,high
+2024-01-01T09:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,980,20,9,1,sunny,residential,high
+2024-01-01T10:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,960,25,10,1,sunny,residential,high
+2024-01-01T11:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,935,30,11,1,sunny,residential,high
+2024-01-01T12:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,905,15,12,1,sunny,residential,medium
+2024-01-01T13:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,890,25,13,1,sunny,residential,high
+2024-01-01T14:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,865,30,14,1,sunny,residential,high
+2024-01-01T15:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,835,25,15,1,sunny,residential,high
+2024-01-01T16:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,810,20,16,1,sunny,residential,medium
+2024-01-01T17:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,790,10,17,1,sunny,residential,low
+2024-01-01T18:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,780,0,18,1,sunny,residential,low
+2024-01-01T19:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,780,0,19,1,sunny,residential,low
+2024-01-01T20:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,780,0,20,1,sunny,residential,low
+2024-01-01T21:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,780,0,21,1,sunny,residential,low
+2024-01-01T22:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,780,0,22,1,sunny,residential,low
+2024-01-01T23:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,780,0,23,1,sunny,residential,low
+2024-01-02T00:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,780,0,0,2,cloudy,residential,low
+2024-01-02T01:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,780,0,1,2,cloudy,residential,low
+2024-01-02T02:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,780,0,2,2,cloudy,residential,low
+2024-01-02T03:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,780,0,3,2,cloudy,residential,low
+2024-01-02T04:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,780,0,4,2,cloudy,residential,low
+2024-01-02T05:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,780,0,5,2,cloudy,residential,low
+2024-01-02T06:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,780,0,6,2,cloudy,residential,low
+2024-01-02T07:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,780,8,7,2,cloudy,residential,medium
+2024-01-02T08:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,772,18,8,2,cloudy,residential,high
+2024-01-02T09:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,754,22,9,2,cloudy,residential,high
+2024-01-02T10:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,732,28,10,2,cloudy,residential,high
+2024-01-02T11:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,704,32,11,2,cloudy,residential,high
+2024-01-02T12:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,672,18,12,2,cloudy,residential,medium
+2024-01-02T13:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,654,28,13,2,cloudy,residential,high
+2024-01-02T14:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,626,32,14,2,cloudy,residential,high
+2024-01-02T15:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,594,28,15,2,cloudy,residential,high
+2024-01-02T16:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,566,22,16,2,cloudy,residential,medium
+2024-01-02T17:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,544,12,17,2,cloudy,residential,low
+2024-01-02T18:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,532,0,18,2,cloudy,residential,low
+2024-01-02T19:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,532,0,19,2,cloudy,residential,low
+2024-01-02T20:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,532,0,20,2,cloudy,residential,low
+2024-01-02T21:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,532,0,21,2,cloudy,residential,low
+2024-01-02T22:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,532,0,22,2,cloudy,residential,low
+2024-01-02T23:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,532,0,23,2,cloudy,residential,low
+2024-01-01T00:00:00Z,MAT002,Sable de construction,SITE001,Chantier Nord,2000,0,0,1,sunny,residential,low
+2024-01-01T01:00:00Z,MAT002,Sable de construction,SITE001,Chantier Nord,2000,0,1,1,sunny,residential,low
+2024-01-01T02:00:00Z,MAT002,Sable de construction,SITE001,Chantier Nord,2000,0,2,1,sunny,residential,low
+2024-01-01T03:00:00Z,MAT002,Sable de construction,SITE001,Chantier Nord,2000,0,3,1,sunny,residential,low
+2024-01-01T04:00:00Z,MAT002,Sable de construction,SITE001,Chantier Nord,2000,0,4,1,sunny,residential,low
+2024-01-01T05:00:00Z,MAT002,Sable de construction,SITE001,Chantier Nord,2000,0,5,1,sunny,residential,low
+2024-01-01T06:00:00Z,MAT002,Sable de construction,SITE001,Chantier Nord,2000,0,6,1,sunny,residential,low
+2024-01-01T07:00:00Z,MAT002,Sable de construction,SITE001,Chantier Nord,2000,10,7,1,sunny,residential,medium
+2024-01-01T08:00:00Z,MAT002,Sable de construction,SITE001,Chantier Nord,1990,35,8,1,sunny,residential,high
+2024-01-01T09:00:00Z,MAT002,Sable de construction,SITE001,Chantier Nord,1955,45,9,1,sunny,residential,high
+2024-01-01T10:00:00Z,MAT002,Sable de construction,SITE001,Chantier Nord,1910,50,10,1,sunny,residential,high
+2024-01-01T11:00:00Z,MAT002,Sable de construction,SITE001,Chantier Nord,1860,55,11,1,sunny,residential,high
+2024-01-01T12:00:00Z,MAT002,Sable de construction,SITE001,Chantier Nord,1805,30,12,1,sunny,residential,medium
+2024-01-01T13:00:00Z,MAT002,Sable de construction,SITE001,Chantier Nord,1775,50,13,1,sunny,residential,high
+2024-01-01T14:00:00Z,MAT002,Sable de construction,SITE001,Chantier Nord,1725,55,14,1,sunny,residential,high
+2024-01-01T15:00:00Z,MAT002,Sable de construction,SITE001,Chantier Nord,1670,50,15,1,sunny,residential,high
+2024-01-01T16:00:00Z,MAT002,Sable de construction,SITE001,Chantier Nord,1620,40,16,1,sunny,residential,medium
+2024-01-01T17:00:00Z,MAT002,Sable de construction,SITE001,Chantier Nord,1580,20,17,1,sunny,residential,low
+2024-01-01T18:00:00Z,MAT002,Sable de construction,SITE001,Chantier Nord,1560,0,18,1,sunny,residential,low
+2024-01-01T19:00:00Z,MAT002,Sable de construction,SITE001,Chantier Nord,1560,0,19,1,sunny,residential,low
+2024-01-01T20:00:00Z,MAT002,Sable de construction,SITE001,Chantier Nord,1560,0,20,1,sunny,residential,low
+2024-01-01T21:00:00Z,MAT002,Sable de construction,SITE001,Chantier Nord,1560,0,21,1,sunny,residential,low
+2024-01-01T22:00:00Z,MAT002,Sable de construction,SITE001,Chantier Nord,1560,0,22,1,sunny,residential,low
+2024-01-01T23:00:00Z,MAT002,Sable de construction,SITE001,Chantier Nord,1560,0,23,1,sunny,residential,low
+
+2024-01-01T00:00:00Z,MAT003,Briques rouges,SITE002,Chantier Sud,5000,0,0,1,sunny,commercial,low
+2024-01-01T01:00:00Z,MAT003,Briques rouges,SITE002,Chantier Sud,5000,0,1,1,sunny,commercial,low
+2024-01-01T02:00:00Z,MAT003,Briques rouges,SITE002,Chantier Sud,5000,0,2,1,sunny,commercial,low
+2024-01-01T03:00:00Z,MAT003,Briques rouges,SITE002,Chantier Sud,5000,0,3,1,sunny,commercial,low
+2024-01-01T04:00:00Z,MAT003,Briques rouges,SITE002,Chantier Sud,5000,0,4,1,sunny,commercial,low
+2024-01-01T05:00:00Z,MAT003,Briques rouges,SITE002,Chantier Sud,5000,0,5,1,sunny,commercial,low
+2024-01-01T06:00:00Z,MAT003,Briques rouges,SITE002,Chantier Sud,5000,0,6,1,sunny,commercial,low
+2024-01-01T07:00:00Z,MAT003,Briques rouges,SITE002,Chantier Sud,5000,20,7,1,sunny,commercial,medium
+2024-01-01T08:00:00Z,MAT003,Briques rouges,SITE002,Chantier Sud,4980,80,8,1,sunny,commercial,high
+2024-01-01T09:00:00Z,MAT003,Briques rouges,SITE002,Chantier Sud,4900,100,9,1,sunny,commercial,high
+2024-01-01T10:00:00Z,MAT003,Briques rouges,SITE002,Chantier Sud,4800,120,10,1,sunny,commercial,high
+2024-01-01T11:00:00Z,MAT003,Briques rouges,SITE002,Chantier Sud,4680,150,11,1,sunny,commercial,high
+2024-01-01T12:00:00Z,MAT003,Briques rouges,SITE002,Chantier Sud,4530,80,12,1,sunny,commercial,medium
+2024-01-01T13:00:00Z,MAT003,Briques rouges,SITE002,Chantier Sud,4450,120,13,1,sunny,commercial,high
+2024-01-01T14:00:00Z,MAT003,Briques rouges,SITE002,Chantier Sud,4330,150,14,1,sunny,commercial,high
+2024-01-01T15:00:00Z,MAT003,Briques rouges,SITE002,Chantier Sud,4180,120,15,1,sunny,commercial,high
+2024-01-01T16:00:00Z,MAT003,Briques rouges,SITE002,Chantier Sud,4060,100,16,1,sunny,commercial,medium
+2024-01-01T17:00:00Z,MAT003,Briques rouges,SITE002,Chantier Sud,3960,50,17,1,sunny,commercial,low
+2024-01-01T18:00:00Z,MAT003,Briques rouges,SITE002,Chantier Sud,3910,0,18,1,sunny,commercial,low
+2024-01-01T19:00:00Z,MAT003,Briques rouges,SITE002,Chantier Sud,3910,0,19,1,sunny,commercial,low
+2024-01-01T20:00:00Z,MAT003,Briques rouges,SITE002,Chantier Sud,3910,0,20,1,sunny,commercial,low
+2024-01-01T21:00:00Z,MAT003,Briques rouges,SITE002,Chantier Sud,3910,0,21,1,sunny,commercial,low
+2024-01-01T22:00:00Z,MAT003,Briques rouges,SITE002,Chantier Sud,3910,0,22,1,sunny,commercial,low
+2024-01-01T23:00:00Z,MAT003,Briques rouges,SITE002,Chantier Sud,3910,0,23,1,sunny,commercial,low
+
+2024-01-01T00:00:00Z,MAT004,Acier de construction,SITE003,Chantier Est,800,0,0,1,sunny,industrial,low
+2024-01-01T01:00:00Z,MAT004,Acier de construction,SITE003,Chantier Est,800,0,1,1,sunny,industrial,low
+2024-01-01T02:00:00Z,MAT004,Acier de construction,SITE003,Chantier Est,800,0,2,1,sunny,industrial,low
+2024-01-01T03:00:00Z,MAT004,Acier de construction,SITE003,Chantier Est,800,0,3,1,sunny,industrial,low
+2024-01-01T04:00:00Z,MAT004,Acier de construction,SITE003,Chantier Est,800,0,4,1,sunny,industrial,low
+2024-01-01T05:00:00Z,MAT004,Acier de construction,SITE003,Chantier Est,800,0,5,1,sunny,industrial,low
+2024-01-01T06:00:00Z,MAT004,Acier de construction,SITE003,Chantier Est,800,0,6,1,sunny,industrial,low
+2024-01-01T07:00:00Z,MAT004,Acier de construction,SITE003,Chantier Est,800,5,7,1,sunny,industrial,medium
+2024-01-01T08:00:00Z,MAT004,Acier de construction,SITE003,Chantier Est,795,12,8,1,sunny,industrial,high
+2024-01-01T09:00:00Z,MAT004,Acier de construction,SITE003,Chantier Est,783,15,9,1,sunny,industrial,high
+2024-01-01T10:00:00Z,MAT004,Acier de construction,SITE003,Chantier Est,768,18,10,1,sunny,industrial,high
+2024-01-01T11:00:00Z,MAT004,Acier de construction,SITE003,Chantier Est,750,20,11,1,sunny,industrial,high
+2024-01-01T12:00:00Z,MAT004,Acier de construction,SITE003,Chantier Est,730,10,12,1,sunny,industrial,medium
+2024-01-01T13:00:00Z,MAT004,Acier de construction,SITE003,Chantier Est,720,18,13,1,sunny,industrial,high
+2024-01-01T14:00:00Z,MAT004,Acier de construction,SITE003,Chantier Est,702,20,14,1,sunny,industrial,high
+2024-01-01T15:00:00Z,MAT004,Acier de construction,SITE003,Chantier Est,682,18,15,1,sunny,industrial,high
+2024-01-01T16:00:00Z,MAT004,Acier de construction,SITE003,Chantier Est,664,15,16,1,sunny,industrial,medium
+2024-01-01T17:00:00Z,MAT004,Acier de construction,SITE003,Chantier Est,649,8,17,1,sunny,industrial,low
+2024-01-01T18:00:00Z,MAT004,Acier de construction,SITE003,Chantier Est,641,0,18,1,sunny,industrial,low
+2024-01-01T19:00:00Z,MAT004,Acier de construction,SITE003,Chantier Est,641,0,19,1,sunny,industrial,low
+2024-01-01T20:00:00Z,MAT004,Acier de construction,SITE003,Chantier Est,641,0,20,1,sunny,industrial,low
+2024-01-01T21:00:00Z,MAT004,Acier de construction,SITE003,Chantier Est,641,0,21,1,sunny,industrial,low
+2024-01-01T22:00:00Z,MAT004,Acier de construction,SITE003,Chantier Est,641,0,22,1,sunny,industrial,low
+2024-01-01T23:00:00Z,MAT004,Acier de construction,SITE003,Chantier Est,641,0,23,1,sunny,industrial,low
+
+2024-01-01T00:00:00Z,MAT005,Béton prêt à l'emploi,SITE001,Chantier Nord,1500,0,0,1,sunny,residential,low
+2024-01-01T01:00:00Z,MAT005,Béton prêt à l'emploi,SITE001,Chantier Nord,1500,0,1,1,sunny,residential,low
+2024-01-01T02:00:00Z,MAT005,Béton prêt à l'emploi,SITE001,Chantier Nord,1500,0,2,1,sunny,residential,low
+2024-01-01T03:00:00Z,MAT005,Béton prêt à l'emploi,SITE001,Chantier Nord,1500,0,3,1,sunny,residential,low
+2024-01-01T04:00:00Z,MAT005,Béton prêt à l'emploi,SITE001,Chantier Nord,1500,0,4,1,sunny,residential,low
+2024-01-01T05:00:00Z,MAT005,Béton prêt à l'emploi,SITE001,Chantier Nord,1500,0,5,1,sunny,residential,low
+2024-01-01T06:00:00Z,MAT005,Béton prêt à l'emploi,SITE001,Chantier Nord,1500,0,6,1,sunny,residential,low
+2024-01-01T07:00:00Z,MAT005,Béton prêt à l'emploi,SITE001,Chantier Nord,1500,8,7,1,sunny,residential,medium
+2024-01-01T08:00:00Z,MAT005,Béton prêt à l'emploi,SITE001,Chantier Nord,1492,25,8,1,sunny,residential,high
+2024-01-01T09:00:00Z,MAT005,Béton prêt à l'emploi,SITE001,Chantier Nord,1467,30,9,1,sunny,residential,high
+2024-01-01T10:00:00Z,MAT005,Béton prêt à l'emploi,SITE001,Chantier Nord,1437,35,10,1,sunny,residential,high
+2024-01-01T11:00:00Z,MAT005,Béton prêt à l'emploi,SITE001,Chantier Nord,1402,40,11,1,sunny,residential,high
+2024-01-01T12:00:00Z,MAT005,Béton prêt à l'emploi,SITE001,Chantier Nord,1362,20,12,1,sunny,residential,medium
+2024-01-01T13:00:00Z,MAT005,Béton prêt à l'emploi,SITE001,Chantier Nord,1342,35,13,1,sunny,residential,high
+2024-01-01T14:00:00Z,MAT005,Béton prêt à l'emploi,SITE001,Chantier Nord,1307,40,14,1,sunny,residential,high
+2024-01-01T15:00:00Z,MAT005,Béton prêt à l'emploi,SITE001,Chantier Nord,1267,35,15,1,sunny,residential,high
+2024-01-01T16:00:00Z,MAT005,Béton prêt à l'emploi,SITE001,Chantier Nord,1232,30,16,1,sunny,residential,medium
+2024-01-01T17:00:00Z,MAT005,Béton prêt à l'emploi,SITE001,Chantier Nord,1202,15,17,1,sunny,residential,low
+2024-01-01T18:00:00Z,MAT005,Béton prêt à l'emploi,SITE001,Chantier Nord,1187,0,18,1,sunny,residential,low
+2024-01-01T19:00:00Z,MAT005,Béton prêt à l'emploi,SITE001,Chantier Nord,1187,0,19,1,sunny,residential,low
+2024-01-01T20:00:00Z,MAT005,Béton prêt à l'emploi,SITE001,Chantier Nord,1187,0,20,1,sunny,residential,low
+2024-01-01T21:00:00Z,MAT005,Béton prêt à l'emploi,SITE001,Chantier Nord,1187,0,21,1,sunny,residential,low
+2024-01-01T22:00:00Z,MAT005,Béton prêt à l'emploi,SITE001,Chantier Nord,1187,0,22,1,sunny,residential,low
+2024-01-01T23:00:00Z,MAT005,Béton prêt à l'emploi,SITE001,Chantier Nord,1187,0,23,1,sunny,residential,low
+2024-01-03T07:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,532,0,7,3,rainy,residential,low
+2024-01-03T08:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,532,5,8,3,rainy,residential,low
+2024-01-03T09:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,527,8,9,3,rainy,residential,medium
+2024-01-03T10:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,519,10,10,3,rainy,residential,medium
+2024-01-03T11:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,509,12,11,3,rainy,residential,medium
+2024-01-03T12:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,497,8,12,3,rainy,residential,low
+2024-01-03T13:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,489,10,13,3,rainy,residential,medium
+2024-01-03T14:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,479,12,14,3,rainy,residential,medium
+2024-01-03T15:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,467,10,15,3,rainy,residential,medium
+2024-01-03T16:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,457,8,16,3,rainy,residential,low
+2024-01-03T17:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,449,5,17,3,rainy,residential,low
+
+2024-01-04T07:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,444,12,7,4,sunny,residential,medium
+2024-01-04T08:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,432,28,8,4,sunny,residential,high
+2024-01-04T09:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,404,35,9,4,sunny,residential,high
+2024-01-04T10:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,369,40,10,4,sunny,residential,high
+2024-01-04T11:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,329,45,11,4,sunny,residential,high
+2024-01-04T12:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,284,25,12,4,sunny,residential,medium
+2024-01-04T13:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,259,40,13,4,sunny,residential,high
+2024-01-04T14:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,219,45,14,4,sunny,residential,high
+2024-01-04T15:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,174,40,15,4,sunny,residential,high
+2024-01-04T16:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,134,35,16,4,sunny,residential,medium
+2024-01-04T17:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,99,20,17,4,sunny,residential,low
+
+2024-01-05T07:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,79,15,7,5,sunny,residential,medium
+2024-01-05T08:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,64,25,8,5,sunny,residential,high
+2024-01-05T09:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,39,30,9,5,sunny,residential,high
+2024-01-05T10:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,9,9,10,5,sunny,residential,critical
+2024-01-05T11:00:00Z,MAT001,Ciment Portland,SITE001,Chantier Nord,0,0,11,5,sunny,residential,outofstock
+
+2024-01-01T00:00:00Z,MAT006,Gravier,SITE002,Chantier Sud,3000,0,0,1,sunny,commercial,low
+2024-01-01T07:00:00Z,MAT006,Gravier,SITE002,Chantier Sud,3000,15,7,1,sunny,commercial,medium
+2024-01-01T08:00:00Z,MAT006,Gravier,SITE002,Chantier Sud,2985,60,8,1,sunny,commercial,high
+2024-01-01T09:00:00Z,MAT006,Gravier,SITE002,Chantier Sud,2925,75,9,1,sunny,commercial,high
+2024-01-01T10:00:00Z,MAT006,Gravier,SITE002,Chantier Sud,2850,90,10,1,sunny,commercial,high
+2024-01-01T11:00:00Z,MAT006,Gravier,SITE002,Chantier Sud,2760,100,11,1,sunny,commercial,high
+2024-01-01T12:00:00Z,MAT006,Gravier,SITE002,Chantier Sud,2660,60,12,1,sunny,commercial,medium
+2024-01-01T13:00:00Z,MAT006,Gravier,SITE002,Chantier Sud,2600,90,13,1,sunny,commercial,high
+2024-01-01T14:00:00Z,MAT006,Gravier,SITE002,Chantier Sud,2510,100,14,1,sunny,commercial,high
+2024-01-01T15:00:00Z,MAT006,Gravier,SITE002,Chantier Sud,2410,90,15,1,sunny,commercial,high
+2024-01-01T16:00:00Z,MAT006,Gravier,SITE002,Chantier Sud,2320,75,16,1,sunny,commercial,medium
+2024-01-01T17:00:00Z,MAT006,Gravier,SITE002,Chantier Sud,2245,40,17,1,sunny,commercial,low
+
+2024-01-01T00:00:00Z,MAT007,Parpaings,SITE003,Chantier Est,1200,0,0,1,sunny,industrial,low
+2024-01-01T07:00:00Z,MAT007,Parpaings,SITE003,Chantier Est,1200,8,7,1,sunny,industrial,medium
+2024-01-01T08:00:00Z,MAT007,Parpaings,SITE003,Chantier Est,1192,20,8,1,sunny,industrial,high
+2024-01-01T09:00:00Z,MAT007,Parpaings,SITE003,Chantier Est,1172,25,9,1,sunny,industrial,high
+2024-01-01T10:00:00Z,MAT007,Parpaings,SITE003,Chantier Est,1147,30,10,1,sunny,industrial,high
+2024-01-01T11:00:00Z,MAT007,Parpaings,SITE003,Chantier Est,1117,35,11,1,sunny,industrial,high
+2024-01-01T12:00:00Z,MAT007,Parpaings,SITE003,Chantier Est,1082,20,12,1,sunny,industrial,medium
+2024-01-01T13:00:00Z,MAT007,Parpaings,SITE003,Chantier Est,1062,30,13,1,sunny,industrial,high
+2024-01-01T14:00:00Z,MAT007,Parpaings,SITE003,Chantier Est,1032,35,14,1,sunny,industrial,high
+2024-01-01T15:00:00Z,MAT007,Parpaings,SITE003,Chantier Est,997,30,15,1,sunny,industrial,high
+2024-01-01T16:00:00Z,MAT007,Parpaings,SITE003,Chantier Est,967,25,16,1,sunny,industrial,medium
+2024-01-01T17:00:00Z,MAT007,Parpaings,SITE003,Chantier Est,942,15,17,1,sunny,industrial,low
+
+2024-01-01T00:00:00Z,MAT008,Tuiles,SITE001,Chantier Nord,800,0,0,1,sunny,residential,low
+2024-01-01T07:00:00Z,MAT008,Tuiles,SITE001,Chantier Nord,800,3,7,1,sunny,residential,medium
+2024-01-01T08:00:00Z,MAT008,Tuiles,SITE001,Chantier Nord,797,8,8,1,sunny,residential,high
+2024-01-01T09:00:00Z,MAT008,Tuiles,SITE001,Chantier Nord,789,10,9,1,sunny,residential,high
+2024-01-01T10:00:00Z,MAT008,Tuiles,SITE001,Chantier Nord,779,12,10,1,sunny,residential,high
+2024-01-01T11:00:00Z,MAT008,Tuiles,SITE001,Chantier Nord,767,15,11,1,sunny,residential,high
+2024-01-01T12:00:00Z,MAT008,Tuiles,SITE001,Chantier Nord,752,8,12,1,sunny,residential,medium
+2024-01-01T13:00:00Z,MAT008,Tuiles,SITE001,Chantier Nord,744,12,13,1,sunny,residential,high
+2024-01-01T14:00:00Z,MAT008,Tuiles,SITE001,Chantier Nord,732,15,14,1,sunny,residential,high
+2024-01-01T15:00:00Z,MAT008,Tuiles,SITE001,Chantier Nord,717,12,15,1,sunny,residential,high
+2024-01-01T16:00:00Z,MAT008,Tuiles,SITE001,Chantier Nord,705,10,16,1,sunny,residential,medium
+2024-01-01T17:00:00Z,MAT008,Tuiles,SITE001,Chantier Nord,695,6,17,1,sunny,residential,low
+
+2024-01-01T00:00:00Z,MAT009,Isolant thermique,SITE002,Chantier Sud,600,0,0,1,sunny,commercial,low
+2024-01-01T07:00:00Z,MAT009,Isolant thermique,SITE002,Chantier Sud,600,5,7,1,sunny,commercial,medium
+2024-01-01T08:00:00Z,MAT009,Isolant thermique,SITE002,Chantier Sud,595,12,8,1,sunny,commercial,high
+2024-01-01T09:00:00Z,MAT009,Isolant thermique,SITE002,Chantier Sud,583,15,9,1,sunny,commercial,high
+2024-01-01T10:00:00Z,MAT009,Isolant thermique,SITE002,Chantier Sud,568,18,10,1,sunny,commercial,high
+2024-01-01T11:00:00Z,MAT009,Isolant thermique,SITE002,Chantier Sud,550,20,11,1,sunny,commercial,high
+2024-01-01T12:00:00Z,MAT009,Isolant thermique,SITE002,Chantier Sud,530,12,12,1,sunny,commercial,medium
+2024-01-01T13:00:00Z,MAT009,Isolant thermique,SITE002,Chantier Sud,518,18,13,1,sunny,commercial,high
+2024-01-01T14:00:00Z,MAT009,Isolant thermique,SITE002,Chantier Sud,500,20,14,1,sunny,commercial,high
+2024-01-01T15:00:00Z,MAT009,Isolant thermique,SITE002,Chantier Sud,480,18,15,1,sunny,commercial,high
+2024-01-01T16:00:00Z,MAT009,Isolant thermique,SITE002,Chantier Sud,462,15,16,1,sunny,commercial,medium
+2024-01-01T17:00:00Z,MAT009,Isolant thermique,SITE002,Chantier Sud,447,8,17,1,sunny,commercial,low
+
+2024-01-01T00:00:00Z,MAT010,Plâtre,SITE003,Chantier Est,400,0,0,1,sunny,industrial,low
+2024-01-01T07:00:00Z,MAT010,Plâtre,SITE003,Chantier Est,400,4,7,1,sunny,industrial,medium
+2024-01-01T08:00:00Z,MAT010,Plâtre,SITE003,Chantier Est,396,10,8,1,sunny,industrial,high
+2024-01-01T09:00:00Z,MAT010,Plâtre,SITE003,Chantier Est,386,12,9,1,sunny,industrial,high
+2024-01-01T10:00:00Z,MAT010,Plâtre,SITE003,Chantier Est,374,15,10,1,sunny,industrial,high
+2024-01-01T11:00:00Z,MAT010,Plâtre,SITE003,Chantier Est,359,18,11,1,sunny,industrial,high
+2024-01-01T12:00:00Z,MAT010,Plâtre,SITE003,Chantier Est,341,10,12,1,sunny,industrial,medium
+2024-01-01T13:00:00Z,MAT010,Plâtre,SITE003,Chantier Est,331,15,13,1,sunny,industrial,high
+2024-01-01T14:00:00Z,MAT010,Plâtre,SITE003,Chantier Est,316,18,14,1,sunny,industrial,high
+2024-01-01T15:00:00Z,MAT010,Plâtre,SITE003,Chantier Est,298,15,15,1,sunny,industrial,high
+2024-01-01T16:00:00Z,MAT010,Plâtre,SITE003,Chantier Est,283,12,16,1,sunny,industrial,medium
+2024-01-01T17:00:00Z,MAT010,Plâtre,SITE003,Chantier Est,271,6,17,1,sunny,industrial,low

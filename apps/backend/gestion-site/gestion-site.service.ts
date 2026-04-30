@@ -829,4 +829,244 @@ export class GestionSiteService {
       throw new InternalServerErrorException('Erreur lors de la récupération des sites avec équipes');
     }
   }
+
+  /**
+   * Geocode an address to get coordinates using Nominatim (OpenStreetMap)
+   */
+  async geocodeAddress(address: string): Promise<any> {
+    try {
+      if (!address || address.trim().length === 0) {
+        throw new BadRequestException('L\'adresse ne peut pas être vide');
+      }
+
+      this.logger.log(`🌍 Géocodage de l'adresse: ${address}`);
+
+      // Utiliser l'API Nominatim d'OpenStreetMap (gratuite)
+      const response = await axios.get('https://nominatim.openstreetmap.org/search', {
+        params: {
+          q: address,
+          format: 'json',
+          addressdetails: 1,
+          limit: 5, // Retourner jusqu'à 5 résultats
+        },
+        headers: {
+          'User-Agent': 'SmartSite-Platform/1.0', // Nominatim requiert un User-Agent
+        },
+        timeout: 10000,
+      });
+
+      if (!response.data || response.data.length === 0) {
+        this.logger.warn(`❌ Aucun résultat trouvé pour l'adresse: ${address}`);
+        return {
+          success: false,
+          message: 'Aucune adresse trouvée. Veuillez vérifier l\'adresse saisie.',
+          results: [],
+        };
+      }
+
+      // Formater les résultats
+      const results = response.data.map((result: any) => ({
+        displayName: result.display_name,
+        lat: parseFloat(result.lat),
+        lng: parseFloat(result.lon),
+        address: {
+          road: result.address?.road,
+          city: result.address?.city || result.address?.town || result.address?.village,
+          state: result.address?.state,
+          country: result.address?.country,
+          postcode: result.address?.postcode,
+        },
+        boundingBox: result.boundingbox,
+        type: result.type,
+        importance: result.importance,
+      }));
+
+      this.logger.log(`✅ ${results.length} résultat(s) trouvé(s) pour l'adresse: ${address}`);
+
+      return {
+        success: true,
+        message: `${results.length} adresse(s) trouvée(s)`,
+        results: results,
+        query: address,
+      };
+    } catch (error) {
+      this.logger.error(`❌ Erreur lors du géocodage de l'adresse: ${error.message}`);
+      
+      if (error.response?.status === 429) {
+        throw new HttpException(
+          'Trop de requêtes de géocodage. Veuillez réessayer dans quelques secondes.',
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
+      }
+
+      throw new InternalServerErrorException(
+        `Erreur lors de la recherche de l'adresse: ${error.message}`,
+      );
+    }
+  }
+
+  /**
+   * Advanced geocoding with better map integration and Tunisia focus
+   */
+  async geocodeAddressAdvanced(address: string, country?: string, city?: string): Promise<any> {
+    try {
+      if (!address || address.trim().length === 0) {
+        throw new BadRequestException('L\'adresse ne peut pas être vide');
+      }
+
+      this.logger.log(`🌍 Géocodage avancé de l'adresse: ${address}`);
+
+      // Construire la requête avec priorité pour la Tunisie
+      let searchQuery = address;
+      if (city) {
+        searchQuery = `${address}, ${city}`;
+      }
+      if (country) {
+        searchQuery = `${searchQuery}, ${country}`;
+      } else {
+        // Par défaut, chercher en Tunisie
+        searchQuery = `${searchQuery}, Tunisia`;
+      }
+
+      // Utiliser l'API Nominatim avec des paramètres optimisés
+      const response = await axios.get('https://nominatim.openstreetmap.org/search', {
+        params: {
+          q: searchQuery,
+          format: 'json',
+          addressdetails: 1,
+          limit: 10,
+          countrycodes: country === 'Tunisia' || !country ? 'tn' : undefined, // Priorité Tunisie
+          bounded: 1,
+          viewbox: country === 'Tunisia' || !country ? '7.5,30.2,11.6,37.5' : undefined, // Bounding box Tunisie
+        },
+        headers: {
+          'User-Agent': 'SmartSite-Platform/1.0',
+        },
+        timeout: 15000,
+      });
+
+      if (!response.data || response.data.length === 0) {
+        // Essayer une recherche plus large sans restrictions géographiques
+        this.logger.log(`🔄 Recherche élargie pour: ${address}`);
+        
+        const fallbackResponse = await axios.get('https://nominatim.openstreetmap.org/search', {
+          params: {
+            q: address,
+            format: 'json',
+            addressdetails: 1,
+            limit: 5,
+          },
+          headers: {
+            'User-Agent': 'SmartSite-Platform/1.0',
+          },
+          timeout: 10000,
+        });
+
+        if (!fallbackResponse.data || fallbackResponse.data.length === 0) {
+          this.logger.warn(`❌ Aucun résultat trouvé pour l'adresse: ${address}`);
+          return {
+            success: false,
+            message: 'Aucune adresse trouvée. Veuillez vérifier l\'adresse saisie.',
+            results: [],
+            suggestions: [
+              'Vérifiez l\'orthographe de l\'adresse',
+              'Essayez avec moins de détails (ex: juste le nom de la ville)',
+              'Utilisez des noms en français ou en arabe',
+            ],
+          };
+        }
+
+        response.data = fallbackResponse.data;
+      }
+
+      // Formater les résultats avec plus de détails
+      const results = response.data.map((result: any, index: number) => ({
+        id: index,
+        displayName: result.display_name,
+        lat: parseFloat(result.lat),
+        lng: parseFloat(result.lon),
+        coordinates: {
+          latitude: parseFloat(result.lat),
+          longitude: parseFloat(result.lon),
+        },
+        address: {
+          road: result.address?.road || result.address?.pedestrian,
+          houseNumber: result.address?.house_number,
+          city: result.address?.city || result.address?.town || result.address?.village,
+          suburb: result.address?.suburb || result.address?.neighbourhood,
+          state: result.address?.state || result.address?.county,
+          country: result.address?.country,
+          countryCode: result.address?.country_code,
+          postcode: result.address?.postcode,
+        },
+        boundingBox: result.boundingbox ? {
+          south: parseFloat(result.boundingbox[0]),
+          north: parseFloat(result.boundingbox[1]),
+          west: parseFloat(result.boundingbox[2]),
+          east: parseFloat(result.boundingbox[3]),
+        } : null,
+        type: result.type,
+        class: result.class,
+        importance: result.importance,
+        confidence: this.calculateConfidence(result, address),
+        mapUrl: `https://www.openstreetmap.org/?mlat=${result.lat}&mlon=${result.lon}&zoom=16`,
+      }));
+
+      // Trier par confiance et importance
+      results.sort((a, b) => (b.confidence * b.importance) - (a.confidence * a.importance));
+
+      this.logger.log(`✅ ${results.length} résultat(s) trouvé(s) pour l'adresse: ${address}`);
+
+      return {
+        success: true,
+        message: `${results.length} adresse(s) trouvée(s)`,
+        results: results,
+        query: address,
+        searchQuery: searchQuery,
+        bestMatch: results[0] || null,
+        mapCenter: results[0] ? {
+          lat: results[0].lat,
+          lng: results[0].lng,
+          zoom: 16,
+        } : null,
+      };
+    } catch (error) {
+      this.logger.error(`❌ Erreur lors du géocodage avancé: ${error.message}`);
+      
+      if (error.response?.status === 429) {
+        throw new HttpException(
+          'Trop de requêtes de géocodage. Veuillez réessayer dans quelques secondes.',
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
+      }
+
+      throw new InternalServerErrorException(
+        `Erreur lors de la recherche avancée de l'adresse: ${error.message}`,
+      );
+    }
+  }
+
+  /**
+   * Calculate confidence score for geocoding result
+   */
+  private calculateConfidence(result: any, originalQuery: string): number {
+    let confidence = 0.5; // Base confidence
+
+    // Boost confidence based on result type
+    if (result.type === 'house') confidence += 0.3;
+    else if (result.type === 'building') confidence += 0.25;
+    else if (result.type === 'road') confidence += 0.2;
+    else if (result.type === 'city') confidence += 0.15;
+
+    // Boost confidence if address components match query
+    const queryLower = originalQuery.toLowerCase();
+    const displayLower = result.display_name.toLowerCase();
+    
+    if (displayLower.includes(queryLower)) confidence += 0.2;
+    
+    // Boost confidence for Tunisia results
+    if (result.address?.country_code === 'tn') confidence += 0.1;
+
+    return Math.min(confidence, 1.0);
+  }
 }
