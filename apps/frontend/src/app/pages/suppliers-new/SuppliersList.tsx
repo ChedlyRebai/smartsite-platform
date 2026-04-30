@@ -22,7 +22,8 @@ import {
   Star,
 } from 'lucide-react';
 
-const API_URL = 'http://localhost:3011/suppliers';
+const BASE_SUPPLIERS_URL = (import.meta.env.VITE_GESTION_SUPPLIERS_URL as string) || 'http://localhost:3014';
+const API_URL = `${BASE_SUPPLIERS_URL.replace(/\/$/, '')}/suppliers`;
 
 interface Supplier {
   _id: string;

@@ -660,8 +660,7 @@
       "AppModule"
     ],
     "imports": [
-      "@nestjs/common",
-      "@nestjs/config"
+      "@nestjs/common"
     ]
   },
   "apps\\backend\\materials-service\\src\\app.service.ts": {
@@ -712,9 +711,7 @@
       "BulkImportMaterialDto",
       "BulkImportResponse"
     ],
-    "imports": [
-      "class-validator"
-    ]
+    "imports": []
   },
   "apps\\backend\\materials-service\\src\\materials\\dto\\create-material.dto.ts": {
     "purpose": "service",
@@ -722,7 +719,6 @@
       "CreateMaterialDto"
     ],
     "imports": [
-      "class-validator",
       "class-transformer"
     ]
   },
@@ -730,11 +726,10 @@
     "purpose": "service",
     "exports": [
       "HistoricalDataPointDto",
-      "UploadCsvDto"
+      "UploadCsvDto",
+      "AdvancedPredictionFeaturesDto"
     ],
-    "imports": [
-      "class-validator"
-    ]
+    "imports": []
   },
   "apps\\backend\\materials-service\\src\\materials\\dto\\material-query.dto.ts": {
     "purpose": "service",
@@ -753,9 +748,7 @@
       "UpdateOrderStatusDto",
       "TrackOrderDto"
     ],
-    "imports": [
-      "class-validator"
-    ]
+    "imports": []
   },
   "apps\\backend\\materials-service\\src\\materials\\dto\\scan-qr.dto.ts": {
     "purpose": "service",
@@ -812,6 +805,7 @@
       "MaterialsController"
     ],
     "imports": [
+      "@nestjs/common",
       "@nestjs/platform-express",
       "fs",
       "@nestjs/common",
@@ -842,6 +836,7 @@
       "@nestjs/config",
       "@nestjs/platform-express",
       "multer",
+      "src/payment/payment.module",
       "path",
       "fs"
     ]
@@ -911,10 +906,10 @@
       "OrdersService"
     ],
     "imports": [
-      "@nestjs/common",
       "@nestjs/mongoose",
       "mongoose",
-      "@nestjs/axios"
+      "@nestjs/axios",
+      "src/payment/payment.service"
     ]
   },
   "apps\\backend\\materials-service\\src\\materials\\services\\site-materials.service.ts": {
@@ -923,7 +918,6 @@
       "SiteMaterialsService"
     ],
     "imports": [
-      "@nestjs/common",
       "@nestjs/mongoose",
       "mongoose"
     ]
@@ -935,6 +929,8 @@
     ],
     "imports": [
       "@nestjs/common",
+      "@nestjs/mongoose",
+      "mongoose",
       "@tensorflow/tfjs"
     ]
   },
@@ -4574,8 +4570,7 @@
     ],
     "imports": [
       "lucide-react",
-      "sonner",
-      "react"
+      "sonner"
     ]
   },
   "apps\\frontend\\src\\app\\pages\\materials\\MaterialDetails.tsx": {
@@ -5344,8 +5339,7 @@
     ],
     "imports": [
       "react",
-      "class-variance-authority",
-      "@/lib/utils"
+      "class-variance-authority"
     ]
   },
   "apps\\frontend\\src\\components\\ui\\badge.tsx": {
@@ -6507,7 +6501,11 @@
       "ChatController"
     ],
     "imports": [
-      "@nestjs/common"
+      "@nestjs/platform-express",
+      "multer",
+      "path",
+      "uuid",
+      "fs"
     ]
   },
   "apps\\backend\\materials-service\\src\\chat\\chat.module.ts": {
@@ -6517,7 +6515,9 @@
     ],
     "imports": [
       "@nestjs/common",
-      "@nestjs/config"
+      "@nestjs/mongoose",
+      "@nestjs/config",
+      "@nestjs/axios"
     ]
   },
   "apps\\backend\\materials-service\\src\\chat\\chat.service.ts": {
@@ -6527,8 +6527,8 @@
     ],
     "imports": [
       "@nestjs/common",
-      "@nestjs/config",
-      "openai"
+      "@nestjs/mongoose",
+      "mongoose"
     ]
   },
   "apps\\backend\\notification\\src\\chat\\chat.controller.ts": {
@@ -7472,7 +7472,9 @@
     ],
     "imports": [
       "@nestjs/common",
-      "@nestjs/config"
+      "@nestjs/config",
+      "@nestjs/mongoose",
+      "@nestjs/axios"
     ]
   },
   "apps\\backend\\gestion-suppliers\\src\\chat.controller.ts": {
@@ -7509,8 +7511,10 @@
     "purpose": "unknown",
     "exports": [],
     "imports": [
+      "@nestjs/core",
       "@nestjs/common",
-      "@nestjs/core"
+      "path",
+      "@nestjs/platform-express"
     ]
   },
   "apps\\backend\\resource-optimization\\src\\modules\\power-bi\\power-bi.controller.ts": {
@@ -7646,6 +7650,1191 @@
     ],
     "imports": [
       "react"
+    ]
+  },
+  "apps\\backend\\gestion-suppliers\\src\\ml\\ml.module.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "MLModule"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/axios",
+      "@nestjs/config"
+    ]
+  },
+  "apps\\backend\\gestion-suppliers\\src\\ml\\ml.service.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "MLService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/axios",
+      "rxjs"
+    ]
+  },
+  "apps\\backend\\gestion-suppliers\\src\\suppliers\\dto\\create-supplier.dto.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "CreateSupplierDto"
+    ],
+    "imports": []
+  },
+  "apps\\backend\\gestion-suppliers\\src\\suppliers\\dto\\update-supplier.dto.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "UpdateSupplierDto"
+    ],
+    "imports": [
+      "@nestjs/mapped-types"
+    ]
+  },
+  "apps\\backend\\gestion-suppliers\\src\\suppliers\\entities\\supplier-rating.entity.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "SupplierRating",
+      "SupplierRatingSchema"
+    ],
+    "imports": [
+      "@nestjs/mongoose",
+      "mongoose"
+    ]
+  },
+  "apps\\backend\\gestion-suppliers\\src\\suppliers\\entities\\supplier.entity.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "Supplier",
+      "SupplierSchema"
+    ],
+    "imports": [
+      "@nestjs/mongoose",
+      "mongoose"
+    ]
+  },
+  "apps\\backend\\gestion-suppliers\\src\\suppliers\\suppliers.controller.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "SuppliersController"
+    ],
+    "imports": [
+      "@nestjs/platform-express",
+      "multer",
+      "path",
+      "fs"
+    ]
+  },
+  "apps\\backend\\gestion-suppliers\\src\\suppliers\\suppliers.module.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "SuppliersModule"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/mongoose",
+      "@nestjs/axios",
+      "@nestjs/config"
+    ]
+  },
+  "apps\\backend\\gestion-suppliers\\src\\suppliers\\suppliers.service.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "SuppliersService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/mongoose",
+      "mongoose",
+      "@nestjs/axios",
+      "rxjs",
+      "path"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\supplier\\DelayPrediction.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "lucide-react",
+      "sonner"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\suppliers-new\\RateSupplierModal.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "sonner"
+    ]
+  },
+  "apps\\backend\\gestion-suppliers\\src\\dto\\chat.dto.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "SendMessageDto",
+      "SendVoiceMessageDto",
+      "SendLocationDto",
+      "JoinRoomDto",
+      "TypingDto",
+      "MarkAsReadDto",
+      "CallSignalDto",
+      "AddReactionDto",
+      "RemoveReactionDto"
+    ],
+    "imports": []
+  },
+  "apps\\backend\\gestion-suppliers\\src\\entities\\chat-message.entity.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "ChatMessage",
+      "ChatMessageSchema"
+    ],
+    "imports": [
+      "@nestjs/mongoose",
+      "mongoose"
+    ]
+  },
+  "apps\\backend\\gestion-suppliers\\src\\suppliers\\suppliers.seed.ts": {
+    "purpose": "unknown",
+    "exports": [
+      "SuppliersSeedService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/mongoose",
+      "mongoose"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\auth\\auth.module.ts": {
+    "purpose": "service",
+    "exports": [
+      "AuthModule"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/jwt",
+      "@nestjs/passport",
+      "@nestjs/config"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\auth\\current-user.decorator.ts": {
+    "purpose": "service",
+    "exports": [
+      "CurrentUser"
+    ],
+    "imports": [
+      "@nestjs/common"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\auth\\interfaces\\jwt-payload.interface.ts": {
+    "purpose": "service",
+    "exports": [],
+    "imports": []
+  },
+  "apps\\backend\\materials-service\\src\\auth\\jwt-auth.guard.ts": {
+    "purpose": "service",
+    "exports": [
+      "JwtAuthGuard"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/passport"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\auth\\jwt.strategy.ts": {
+    "purpose": "service",
+    "exports": [
+      "JwtStrategy"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/passport",
+      "passport-jwt",
+      "@nestjs/config"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\auth\\roles.decorator.ts": {
+    "purpose": "service",
+    "exports": [
+      "ROLES_KEY",
+      "Roles"
+    ],
+    "imports": [
+      "@nestjs/common"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\auth\\roles.enum.ts": {
+    "purpose": "service",
+    "exports": [],
+    "imports": []
+  },
+  "apps\\backend\\materials-service\\src\\auth\\roles.guard.ts": {
+    "purpose": "service",
+    "exports": [
+      "RolesGuard"
+    ],
+    "imports": [
+      "@nestjs/core"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\chat\\ai-message-analyzer.service.ts": {
+    "purpose": "service",
+    "exports": [
+      "AiMessageAnalyzerService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/config",
+      "openai"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\chat\\chat.gateway.ts": {
+    "purpose": "service",
+    "exports": [
+      "ChatGateway"
+    ],
+    "imports": [
+      "socket.io",
+      "@nestjs/common",
+      "uuid"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\chat\\dto\\chat.dto.ts": {
+    "purpose": "service",
+    "exports": [
+      "SendMessageDto",
+      "SendVoiceMessageDto",
+      "SendLocationDto",
+      "JoinRoomDto",
+      "TypingDto",
+      "MarkAsReadDto",
+      "CallSignalDto",
+      "AddReactionDto",
+      "RemoveReactionDto"
+    ],
+    "imports": []
+  },
+  "apps\\backend\\materials-service\\src\\chat\\entities\\chat-message.entity.ts": {
+    "purpose": "service",
+    "exports": [
+      "ChatMessage",
+      "ChatMessageSchema"
+    ],
+    "imports": [
+      "@nestjs/mongoose",
+      "mongoose"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\chat\\weather.service.ts": {
+    "purpose": "service",
+    "exports": [
+      "WeatherService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/mongoose",
+      "mongoose",
+      "@nestjs/axios",
+      "rxjs",
+      "@nestjs/config"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\common\\email\\anomaly-email.service.ts": {
+    "purpose": "service",
+    "exports": [
+      "AnomalyEmailService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/config",
+      "nodemailer"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\common\\email\\index.ts": {
+    "purpose": "service",
+    "exports": [],
+    "imports": []
+  },
+  "apps\\backend\\materials-service\\src\\materials\\controllers\\consumption-history.controller.ts": {
+    "purpose": "service",
+    "exports": [
+      "ConsumptionHistoryController"
+    ],
+    "imports": []
+  },
+  "apps\\backend\\materials-service\\src\\materials\\controllers\\consumption.controller.ts": {
+    "purpose": "service",
+    "exports": [
+      "ConsumptionController"
+    ],
+    "imports": []
+  },
+  "apps\\backend\\materials-service\\src\\materials\\controllers\\material-flow.controller.ts": {
+    "purpose": "service",
+    "exports": [
+      "MaterialFlowController"
+    ],
+    "imports": []
+  },
+  "apps\\backend\\materials-service\\src\\materials\\controllers\\ml-training.controller.ts": {
+    "purpose": "service",
+    "exports": [
+      "MLTrainingController"
+    ],
+    "imports": [
+      "@nestjs/common"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\materials\\controllers\\orders-tracking.controller.ts": {
+    "purpose": "service",
+    "exports": [
+      "OrdersTrackingController"
+    ],
+    "imports": []
+  },
+  "apps\\backend\\materials-service\\src\\materials\\controllers\\site-consumption.controller.ts": {
+    "purpose": "service",
+    "exports": [
+      "SiteConsumptionController"
+    ],
+    "imports": []
+  },
+  "apps\\backend\\materials-service\\src\\materials\\controllers\\supplier-rating.controller.ts": {
+    "purpose": "service",
+    "exports": [
+      "SupplierRatingController"
+    ],
+    "imports": []
+  },
+  "apps\\backend\\materials-service\\src\\materials\\controllers\\weather.controller.ts": {
+    "purpose": "service",
+    "exports": [
+      "WeatherController"
+    ],
+    "imports": [
+      "@nestjs/common"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\materials\\dto\\create-consumption-history.dto.ts": {
+    "purpose": "service",
+    "exports": [
+      "CreateConsumptionHistoryDto"
+    ],
+    "imports": [
+      "class-transformer"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\materials\\dto\\daily-consumption.dto.ts": {
+    "purpose": "service",
+    "exports": [
+      "CreateDailyConsumptionDto",
+      "UpdateConsumptionDto",
+      "ConsumptionQueryDto"
+    ],
+    "imports": []
+  },
+  "apps\\backend\\materials-service\\src\\materials\\dto\\history-filters.dto.ts": {
+    "purpose": "service",
+    "exports": [
+      "HistoryFiltersDto",
+      "StatisticsFiltersDto",
+      "CleanupDto"
+    ],
+    "imports": [
+      "class-transformer"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\materials\\dto\\material-flow.dto.ts": {
+    "purpose": "service",
+    "exports": [
+      "CreateMaterialFlowDto",
+      "MaterialFlowQueryDto",
+      "AnomalyDetectionConfig"
+    ],
+    "imports": [
+      "class-transformer"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\materials\\dto\\material-requirement.dto.ts": {
+    "purpose": "service",
+    "exports": [
+      "CreateMaterialRequirementDto",
+      "UpdateConsumptionDto",
+      "MaterialRequirementQueryDto"
+    ],
+    "imports": [
+      "class-transformer"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\materials\\dto\\orders-tracking.dto.ts": {
+    "purpose": "service",
+    "exports": [
+      "GetAllOrdersTrackingDto",
+      "OrderTrackingOverviewDto",
+      "GlobalTrackingStatsDto",
+      "GlobalTrackingResponseDto"
+    ],
+    "imports": [
+      "class-validator"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\materials\\entities\\consumption-history.entity.ts": {
+    "purpose": "service",
+    "exports": [
+      "ConsumptionHistory",
+      "ConsumptionHistorySchema"
+    ],
+    "imports": [
+      "@nestjs/mongoose",
+      "mongoose"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\materials\\entities\\daily-consumption.entity.ts": {
+    "purpose": "service",
+    "exports": [
+      "DailyConsumptionLog",
+      "DailyConsumptionLogSchema"
+    ],
+    "imports": [
+      "@nestjs/mongoose",
+      "mongoose"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\materials\\entities\\material-flow-log.entity.ts": {
+    "purpose": "service",
+    "exports": [
+      "MaterialFlowLog",
+      "MaterialFlowLogSchema"
+    ],
+    "imports": [
+      "@nestjs/mongoose",
+      "mongoose"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\materials\\entities\\material-requirement.entity.ts": {
+    "purpose": "service",
+    "exports": [
+      "MaterialRequirement",
+      "MaterialRequirementSchema"
+    ],
+    "imports": [
+      "@nestjs/mongoose",
+      "mongoose"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\materials\\entities\\supplier-rating.entity.ts": {
+    "purpose": "service",
+    "exports": [
+      "SupplierRating",
+      "SupplierRatingSchema"
+    ],
+    "imports": [
+      "@nestjs/mongoose",
+      "mongoose"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\materials\\services\\consumption-ai-analyzer.service.ts": {
+    "purpose": "service",
+    "exports": [
+      "ConsumptionAIAnalyzerService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/mongoose",
+      "mongoose"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\materials\\services\\consumption-anomaly.service.ts": {
+    "purpose": "service",
+    "exports": [
+      "ConsumptionAnomalyService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/mongoose",
+      "mongoose",
+      "@nestjs/schedule",
+      "@nestjs/axios",
+      "rxjs"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\materials\\services\\consumption-history.service.ts": {
+    "purpose": "service",
+    "exports": [
+      "ConsumptionHistoryService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/mongoose",
+      "mongoose",
+      "@nestjs/axios",
+      "rxjs"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\materials\\services\\daily-report.service.ts": {
+    "purpose": "service",
+    "exports": [
+      "DailyReportService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/mongoose",
+      "mongoose",
+      "@nestjs/config",
+      "@nestjs/schedule"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\materials\\services\\intelligent-recommendation.service.ts": {
+    "purpose": "service",
+    "exports": [
+      "IntelligentRecommendationService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/mongoose",
+      "mongoose",
+      "@nestjs/config",
+      "mongodb"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\materials\\services\\material-flow.service.ts": {
+    "purpose": "service",
+    "exports": [
+      "MaterialFlowService"
+    ],
+    "imports": [
+      "@nestjs/mongoose",
+      "mongoose",
+      "@nestjs/schedule"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\materials\\services\\material-movement.service.ts": {
+    "purpose": "service",
+    "exports": [
+      "MaterialMovementService"
+    ],
+    "imports": [
+      "@nestjs/mongoose",
+      "mongoose",
+      "@nestjs/axios",
+      "rxjs"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\materials\\services\\ml-training-enhanced.service.ts": {
+    "purpose": "service",
+    "exports": [
+      "MLTrainingEnhancedService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/mongoose",
+      "mongoose"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\materials\\services\\orders-tracking.service.ts": {
+    "purpose": "service",
+    "exports": [
+      "OrdersTrackingService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/mongoose",
+      "mongoose"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\materials\\services\\site-consumption.service.ts": {
+    "purpose": "service",
+    "exports": [
+      "SiteConsumptionService"
+    ],
+    "imports": [
+      "@nestjs/mongoose",
+      "mongoose",
+      "@nestjs/axios",
+      "rxjs"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\materials\\services\\supplier-rating.service.ts": {
+    "purpose": "service",
+    "exports": [
+      "SupplierRatingService"
+    ],
+    "imports": [
+      "@nestjs/mongoose",
+      "mongoose"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\materials\\services\\weather.service.ts": {
+    "purpose": "service",
+    "exports": [
+      "WeatherService"
+    ],
+    "imports": [
+      "@nestjs/common"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\materials\\services\\websocket.service.ts": {
+    "purpose": "service",
+    "exports": [
+      "WebSocketService"
+    ],
+    "imports": [
+      "@nestjs/common"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\materials\\types\\consumption-history.types.ts": {
+    "purpose": "service",
+    "exports": [],
+    "imports": []
+  },
+  "apps\\backend\\materials-service\\src\\payment\\dto\\payment.dto.ts": {
+    "purpose": "service",
+    "exports": [
+      "CreatePaymentRequestDto",
+      "PaymentResponseDto"
+    ],
+    "imports": []
+  },
+  "apps\\backend\\materials-service\\src\\payment\\payment.module.ts": {
+    "purpose": "service",
+    "exports": [
+      "PaymentModule"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/axios"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\payment\\payment.service.ts": {
+    "purpose": "service",
+    "exports": [
+      "PaymentService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/axios",
+      "rxjs"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\sites\\sites.controller.ts": {
+    "purpose": "service",
+    "exports": [
+      "SitesController"
+    ],
+    "imports": [
+      "@nestjs/common"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\sites\\sites.module.ts": {
+    "purpose": "service",
+    "exports": [
+      "SitesModule"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/config"
+    ]
+  },
+  "apps\\backend\\materials-service\\src\\sites\\sites.service.ts": {
+    "purpose": "service",
+    "exports": [
+      "SitesService"
+    ],
+    "imports": [
+      "@nestjs/common",
+      "@nestjs/config",
+      "mongodb"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\materials\\AIPredictionWidget.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "lucide-react",
+      "sonner"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\materials\\AnomalyAlert.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "lucide-react",
+      "sonner"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\materials\\MaterialWeatherWidget.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "lucide-react",
+      "sonner"
+    ]
+  },
+  "apps\\frontend\\src\\app\\components\\materials\\MLTrainingButton.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "lucide-react",
+      "sonner",
+      "axios"
+    ]
+  },
+  "apps\\frontend\\src\\app\\hooks\\useSupplierRating.ts": {
+    "purpose": "hook",
+    "exports": [
+      "useSupplierRating"
+    ],
+    "imports": [
+      "react",
+      "axios"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\materials\\AnomaliesList.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "lucide-react"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\materials\\AutoOrderButton.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "lucide-react",
+      "sonner"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\materials\\AutoOrderDashboard.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "lucide-react",
+      "sonner"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\materials\\ChatDialog.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "sonner",
+      "react-leaflet",
+      "leaflet",
+      "socket.io-client"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\materials\\ConsumptionAIReport.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "sonner",
+      "axios"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\materials\\ConsumptionAnomalyAlert.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "lucide-react",
+      "sonner"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\materials\\ConsumptionBySite.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "lucide-react"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\materials\\ConsumptionHistory.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "sonner",
+      "axios"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\materials\\DashboardStats.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "lucide-react"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\materials\\MaterialAdvancedPrediction.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "lucide-react",
+      "sonner",
+      "axios"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\materials\\MaterialFlowLog.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "sonner",
+      "date-fns",
+      "date-fns/locale"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\materials\\MaterialRequirementForm.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": []
+  },
+  "apps\\frontend\\src\\app\\pages\\materials\\MaterialsFeaturePages.tsx": {
+    "purpose": "component",
+    "exports": [
+      "StockPredictionsPage",
+      "AnomaliesAlertsPage",
+      "AutoOrdersPage",
+      "OrderTrackingMapPage",
+      "SiteConsumptionPage",
+      "FlowLogPage",
+      "MLTrainingPage"
+    ],
+    "imports": [
+      "react",
+      "react-router"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\materials\\PayerAvecCarteDialog.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "@/components/ui/button",
+      "@/components/ui/label",
+      "@/components/ui/card",
+      "@/components/ui/checkbox",
+      "lucide-react",
+      "sonner",
+      "@stripe/stripe-js"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\materials\\PayerEspecesDialog.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "@/components/ui/button",
+      "@/components/ui/label",
+      "@/components/ui/card",
+      "@/components/ui/checkbox",
+      "lucide-react",
+      "sonner"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\materials\\PaymentDialog.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "@/components/ui/button",
+      "@/components/ui/card",
+      "lucide-react",
+      "sonner"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\materials\\PredictionsList.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "lucide-react"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\materials\\SiteConsumptionTracker.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "sonner"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\materials\\SupplierRatingDialog.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "sonner",
+      "lucide-react",
+      "axios"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\materials\\useSupplierRating.ts": {
+    "purpose": "hook",
+    "exports": [
+      "useSupplierRating"
+    ],
+    "imports": [
+      "react",
+      "axios"
+    ]
+  },
+  "apps\\frontend\\src\\app\\pages\\materials\\WeatherWidget.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "sonner",
+      "axios"
+    ]
+  },
+  "apps\\frontend\\src\\components\\chat\\EmojiPicker.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "emoji-picker-react",
+      "lucide-react"
+    ]
+  },
+  "apps\\frontend\\src\\components\\chat\\MessageAnalysisDisplay.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react"
+    ]
+  },
+  "apps\\frontend\\src\\components\\chat\\MessageSuggestion.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "lucide-react"
+    ]
+  },
+  "apps\\frontend\\src\\components\\ExpiringMaterials.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "@mui/icons-material"
+    ]
+  },
+  "apps\\frontend\\src\\components\\geocoding\\AddressSearch.tsx": {
+    "purpose": "component",
+    "exports": [
+      "AddressSearch",
+      "default"
+    ],
+    "imports": [
+      "react"
+    ]
+  },
+  "apps\\frontend\\src\\components\\orders\\OrdersTrackingDashboard.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react",
+      "leaflet",
+      "sonner"
+    ]
+  },
+  "apps\\frontend\\src\\components\\orders\\OrdersTrackingSidebar.tsx": {
+    "purpose": "component",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "react"
+    ]
+  },
+  "apps\\frontend\\src\\components\\suppliers\\SupplierSelector.tsx": {
+    "purpose": "component",
+    "exports": [
+      "SupplierSelector",
+      "default"
+    ],
+    "imports": [
+      "react"
+    ]
+  },
+  "apps\\frontend\\src\\components\\ui\\sheet.tsx": {
+    "purpose": "component",
+    "exports": [
+      "Sheet",
+      "SheetTrigger",
+      "SheetClose",
+      "SheetContent",
+      "SheetHeader",
+      "SheetFooter",
+      "SheetTitle",
+      "SheetDescription"
+    ],
+    "imports": [
+      "react",
+      "@radix-ui/react-dialog",
+      "lucide-react"
+    ]
+  },
+  "apps\\frontend\\src\\components\\ui\\utils.ts": {
+    "purpose": "component",
+    "exports": [
+      "cn"
+    ],
+    "imports": [
+      "clsx",
+      "tailwind-merge"
+    ]
+  },
+  "apps\\frontend\\src\\services\\aiPredictionService.ts": {
+    "purpose": "service",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "axios"
+    ]
+  },
+  "apps\\frontend\\src\\services\\anomalyDetectionService.ts": {
+    "purpose": "service",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "axios"
+    ]
+  },
+  "apps\\frontend\\src\\services\\chatService.ts": {
+    "purpose": "service",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "axios",
+      "socket.io-client"
+    ]
+  },
+  "apps\\frontend\\src\\services\\chatSocket.ts": {
+    "purpose": "service",
+    "exports": [
+      "chatSocket",
+      "default"
+    ],
+    "imports": [
+      "socket.io-client"
+    ]
+  },
+  "apps\\frontend\\src\\services\\consumptionService.ts": {
+    "purpose": "service",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "axios"
+    ]
+  },
+  "apps\\frontend\\src\\services\\intelligentOrderService.ts": {
+    "purpose": "service",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "axios"
+    ]
+  },
+  "apps\\frontend\\src\\services\\materialFlowService.ts": {
+    "purpose": "service",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "axios"
+    ]
+  },
+  "apps\\frontend\\src\\services\\messageAnalysisService.ts": {
+    "purpose": "service",
+    "exports": [
+      "messageAnalysisService",
+      "default"
+    ],
+    "imports": [
+      "axios"
+    ]
+  },
+  "apps\\frontend\\src\\services\\weatherService.ts": {
+    "purpose": "service",
+    "exports": [
+      "default"
+    ],
+    "imports": [
+      "axios"
     ]
   }
 }

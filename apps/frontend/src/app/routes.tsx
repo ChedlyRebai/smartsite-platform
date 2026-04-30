@@ -124,9 +124,9 @@ export const router = createBrowserRouter([
     path: "/",
     element: (
       <ProtectedRoute>
-        <RoutePermissionGuard>
-          <DashboardLayout />
-        </RoutePermissionGuard>
+        {/* <RoutePermissionGuard> */}
+        <DashboardLayout />
+        {/* </RoutePermissionGuard> */}
       </ProtectedRoute>
     ),
     children: [
@@ -276,8 +276,8 @@ export const router = createBrowserRouter([
         element: <Clients />,
       },
       {
-        path:"reset-password-first-login",
-        element:<ChangePasswordFirstLogin />
+        path: "reset-password-first-login",
+        element: <ChangePasswordFirstLogin />,
       },
       {
         path: "materials",

@@ -36,8 +36,9 @@ import {
   TrendingUp,
 } from 'lucide-react';
 
-const API_URL = 'http://localhost:3011/suppliers';
-const FILES_URL = 'http://localhost:3011';
+const BASE_SUPPLIERS_URL = (import.meta.env.VITE_GESTION_SUPPLIERS_URL as string) || 'http://localhost:3014';
+const API_URL = `${BASE_SUPPLIERS_URL.replace(/\/$/, '')}/suppliers`;
+const FILES_URL = BASE_SUPPLIERS_URL.replace(/\/$/, '');
 
 interface Supplier {
   _id: string;

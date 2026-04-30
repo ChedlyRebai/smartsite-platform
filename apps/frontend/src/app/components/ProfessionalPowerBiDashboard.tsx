@@ -96,6 +96,11 @@ const cardVariants = {
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
+const formatCompactNumber = (value: number) => new Intl.NumberFormat('fr-FR', {
+  notation: 'compact',
+  maximumFractionDigits: 1,
+}).format(value);
+
 interface KPICardProps {
   item: any;
   index: number;
@@ -393,13 +398,15 @@ export const ProfessionalPowerBiDashboard: React.FC = () => {
 
     for (const site of sites) {
       const date = new Date(site.createdAt);
+      if (Number.isNaN(date.getTime())) continue;
       const key = monthNames[date.getMonth()];
       const idx = monthIndexMap.get(key);
-      if (idx != null) buckets[idx].revenue += site.budget || 0;
+      if (idx != null) buckets[idx].revenue += 1;
     }
 
     for (const incident of incidents) {
       const date = new Date(incident.createdAt);
+      if (Number.isNaN(date.getTime())) continue;
       const key = monthNames[date.getMonth()];
       const idx = monthIndexMap.get(key);
       if (idx != null) buckets[idx].expenses += 1;
@@ -407,6 +414,7 @@ export const ProfessionalPowerBiDashboard: React.FC = () => {
 
     for (const task of tasks) {
       const date = new Date(task.createdAt);
+      if (Number.isNaN(date.getTime())) continue;
       const key = monthNames[date.getMonth()];
       const idx = monthIndexMap.get(key);
       if (idx != null) buckets[idx].savings += 1;
@@ -415,21 +423,117 @@ export const ProfessionalPowerBiDashboard: React.FC = () => {
     return buckets;
   }, [sites, incidents, tasks]);
 
-  const distributionData = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const site of sites) {
-      const name = site.status || 'unknown';
-      counts.set(name, (counts.get(name) || 0) + 1);
+  const opsChartData = useMemo(() => {
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const buckets: Array<{
+      month: string;
+      projects: number;
+      projectsInProgress: number;
+      sites: number;
+      sitesInProgress: number;
+    }> = [];
+
+    const normalizeStatus = (status: string) => status.toLowerCase().replace(/\s|-/g, '_');
+    const toProgressNumber = (value: unknown): number => {
+      if (typeof value === 'number' && Number.isFinite(value)) return value;
+      if (typeof value === 'string') {
+        const cleaned = value.replace(',', '.').replace(/[^0-9.\-]/g, '');
+        const parsed = Number(cleaned);
+        return Number.isFinite(parsed) ? parsed : 0;
+      }
+      return 0;
+    };
+    const isCompletedProject = (p: Project) => {
+      const status = normalizeStatus(String(p.status || ''));
+      const progress = toProgressNumber(p.progress);
+      const doneByStatus =
+        status.includes('termine') ||
+        status.includes('terminé') ||
+        status.includes('completed') ||
+        status.includes('done') ||
+        status.includes('closed') ||
+        status.includes('annule') ||
+        status.includes('cancel');
+
+      return doneByStatus || progress >= 100;
+    };
+    const isInProgressProject = (p: Project) => {
+      const status = normalizeStatus(String(p.status || ''));
+      const isRunning =
+        status.includes('en_cours') ||
+        status.includes('in_progress') ||
+        status.includes('running') ||
+        status.includes('active');
+      return isRunning && !isCompletedProject(p);
+    };
+    const isInProgressSite = (s: Site) => {
+      const status = normalizeStatus(s.status || '');
+      const progress = Number(s.progress || 0);
+      return (
+        status === 'in_progress' ||
+        status === 'en_cours' ||
+        status === 'active' ||
+        (progress > 0 && progress < 100)
+      );
+    };
+
+    for (let i = 6; i >= 0; i -= 1) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      buckets.push({
+        month: monthNames[d.getMonth()],
+        projects: 0,
+        projectsInProgress: 0,
+        sites: 0,
+        sitesInProgress: 0,
+      });
     }
 
-    const total = sites.length || 1;
-    const rows = Array.from(counts.entries()).map(([name, value]) => ({
-      name,
-      value: Math.round((value / total) * 100),
-    }));
+    const monthIndexMap = new Map<string, number>();
+    buckets.forEach((b, idx) => monthIndexMap.set(b.month, idx));
 
-    return rows.length > 0 ? rows : [{ name: 'No Data', value: 100 }];
-  }, [sites]);
+    for (const project of projects) {
+      const date = new Date(project.createdAt);
+      if (Number.isNaN(date.getTime())) continue;
+      const key = monthNames[date.getMonth()];
+      const idx = monthIndexMap.get(key);
+      if (idx == null) continue;
+      buckets[idx].projects += 1;
+      if (isInProgressProject(project)) buckets[idx].projectsInProgress += 1;
+    }
+
+    for (const site of sites) {
+      const date = new Date(site.createdAt);
+      if (Number.isNaN(date.getTime())) continue;
+      const key = monthNames[date.getMonth()];
+      const idx = monthIndexMap.get(key);
+      if (idx == null) continue;
+      buckets[idx].sites += 1;
+      if (isInProgressSite(site)) buckets[idx].sitesInProgress += 1;
+    }
+
+    return buckets;
+  }, [projects, sites]);
+
+  const distributionData = useMemo(() => {
+    const base = [
+      { name: 'Projects', value: projects.length },
+      { name: 'Projects In Progress', value: stats.inProgressProjects },
+      { name: 'Sites', value: sites.length },
+      { name: 'Sites In Progress', value: stats.inProgressSites },
+    ].filter((item) => item.value > 0);
+
+    if (base.length === 0) {
+      return [{ name: 'No Data', value: 1, percentage: 100 }];
+    }
+
+    const total = base.reduce((sum, item) => sum + item.value, 0);
+
+    return base.map((item) => ({
+      ...item,
+      percentage: Math.round((item.value / total) * 100),
+    }));
+  }, [projects.length, stats.inProgressProjects, sites.length, stats.inProgressSites]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -542,7 +646,7 @@ export const ProfessionalPowerBiDashboard: React.FC = () => {
                 <Card className="shadow-lg border-0 bg-white">
                   <CardHeader>
                     <CardTitle>Revenue Trend</CardTitle>
-                    <CardDescription>Last 7 months performance</CardDescription>
+                    <CardDescription>Last 7 months activity from KPI data</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
@@ -556,11 +660,14 @@ export const ProfessionalPowerBiDashboard: React.FC = () => {
                           </defs>
                           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                           <XAxis dataKey="month" />
-                          <YAxis />
-                          <Tooltip />
+                          <YAxis allowDecimals={false} tickFormatter={(value: number) => formatCompactNumber(value)} />
+                          <Tooltip formatter={(value: number) => formatCompactNumber(value)} />
                           <Area type="monotone" dataKey="revenue" stroke="#0088FE" fill="url(#colorRevenue)" />
                         </AreaChart>
                       </ResponsiveContainer>
+                      <p className="mt-3 text-xs text-gray-500">
+                        Blue area: number of sites created each month over the last 7 months.
+                      </p>
                     </motion.div>
                   </CardContent>
                 </Card>
@@ -571,7 +678,7 @@ export const ProfessionalPowerBiDashboard: React.FC = () => {
                 <Card className="shadow-lg border-0 bg-white h-full">
                   <CardHeader>
                     <CardTitle>Distribution</CardTitle>
-                    <CardDescription>By category</CardDescription>
+                    <CardDescription>Projects and sites overview</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
@@ -582,7 +689,7 @@ export const ProfessionalPowerBiDashboard: React.FC = () => {
                             cx="50%"
                             cy="50%"
                             labelLine={false}
-                            label={({ name, value }) => `${name}: ${value}%`}
+                            label={({ name, percentage }) => `${name}: ${percentage}%`}
                             outerRadius={80}
                             fill="#8884d8"
                             dataKey="value"
@@ -591,9 +698,15 @@ export const ProfessionalPowerBiDashboard: React.FC = () => {
                               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                           </Pie>
-                          <Tooltip />
+                          <Tooltip formatter={(value: number, _name: string, item: { payload?: { percentage?: number } }) => {
+                            const percentage = item?.payload?.percentage;
+                            return percentage != null ? [`${value} (${percentage}%)`, 'Value'] : [String(value), 'Value'];
+                          }} />
                         </PieChart>
                       </ResponsiveContainer>
+                      <p className="mt-3 text-xs text-gray-500">
+                        Share of totals by category: projects, projects in progress, sites, and sites in progress.
+                      </p>
                     </motion.div>
                   </CardContent>
                 </Card>
@@ -645,23 +758,27 @@ export const ProfessionalPowerBiDashboard: React.FC = () => {
               <motion.div variants={itemVariants}>
                 <Card className="shadow-lg border-0 bg-white">
                   <CardHeader>
-                    <CardTitle>Financial Overview</CardTitle>
-                    <CardDescription>Revenue vs Expenses vs Savings</CardDescription>
+                    <CardTitle>Analytics Overview</CardTitle>
+                    <CardDescription>Projects and sites by month</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
                       <ResponsiveContainer width="100%" height={350}>
-                        <BarChart data={chartData}>
+                        <BarChart data={opsChartData}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                           <XAxis dataKey="month" />
-                          <YAxis />
-                          <Tooltip />
+                          <YAxis allowDecimals={false} tickFormatter={(value: number) => formatCompactNumber(value)} />
+                          <Tooltip formatter={(value: number) => formatCompactNumber(value)} />
                           <Legend />
-                          <Bar dataKey="revenue" fill="#0088FE" radius={[8, 8, 0, 0]} />
-                          <Bar dataKey="expenses" fill="#FF8042" radius={[8, 8, 0, 0]} />
-                          <Bar dataKey="savings" fill="#00C49F" radius={[8, 8, 0, 0]} />
+                          <Bar dataKey="projects" name="Projects" fill="#0088FE" radius={[8, 8, 0, 0]} />
+                          <Bar dataKey="projectsInProgress" name="Projects In Progress" fill="#00C49F" radius={[8, 8, 0, 0]} />
+                          <Bar dataKey="sites" name="Sites" fill="#FFBB28" radius={[8, 8, 0, 0]} />
+                          <Bar dataKey="sitesInProgress" name="Sites In Progress" fill="#FF8042" radius={[8, 8, 0, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
+                      <p className="mt-3 text-xs text-gray-500">
+                        Monthly comparison: blue projects, green projects in progress, yellow sites, orange sites in progress.
+                      </p>
                     </motion.div>
                   </CardContent>
                 </Card>
@@ -681,21 +798,26 @@ export const ProfessionalPowerBiDashboard: React.FC = () => {
                 <Card className="shadow-lg border-0 bg-white">
                   <CardHeader>
                     <CardTitle>Performance Metrics</CardTitle>
-                    <CardDescription>System performance over time</CardDescription>
+                    <CardDescription>Projects and sites progress trend</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
                       <ResponsiveContainer width="100%" height={350}>
-                        <LineChart data={chartData}>
+                        <LineChart data={opsChartData}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                           <XAxis dataKey="month" />
-                          <YAxis />
-                          <Tooltip />
+                          <YAxis allowDecimals={false} tickFormatter={(value: number) => formatCompactNumber(value)} />
+                          <Tooltip formatter={(value: number) => formatCompactNumber(value)} />
                           <Legend />
-                          <Line type="monotone" dataKey="revenue" stroke="#0088FE" strokeWidth={2} dot={{ fill: '#0088FE', r: 4 }} />
-                          <Line type="monotone" dataKey="savings" stroke="#00C49F" strokeWidth={2} dot={{ fill: '#00C49F', r: 4 }} />
+                          <Line type="monotone" dataKey="projects" name="Projects" stroke="#0088FE" strokeWidth={2} dot={{ fill: '#0088FE', r: 4 }} />
+                          <Line type="monotone" dataKey="projectsInProgress" name="Projects In Progress" stroke="#00C49F" strokeWidth={2} dot={{ fill: '#00C49F', r: 4 }} />
+                          <Line type="monotone" dataKey="sites" name="Sites" stroke="#FFBB28" strokeWidth={2} dot={{ fill: '#FFBB28', r: 4 }} />
+                          <Line type="monotone" dataKey="sitesInProgress" name="Sites In Progress" stroke="#FF8042" strokeWidth={2} dot={{ fill: '#FF8042', r: 4 }} />
                         </LineChart>
                       </ResponsiveContainer>
+                      <p className="mt-3 text-xs text-gray-500">
+                        Trend lines show the month-to-month evolution of projects and sites, including in-progress volumes.
+                      </p>
                     </motion.div>
                   </CardContent>
                 </Card>
