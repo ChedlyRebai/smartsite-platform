@@ -53,7 +53,7 @@ interface Supplier {
   estArchive: boolean;
 }
 
-const API_URL = 'http://localhost:3014/suppliers';
+const API_URL = 'http://localhost:3011/suppliers';
 
 export default function EditSupplier() {
   const { id } = useParams<{ id: string }>();

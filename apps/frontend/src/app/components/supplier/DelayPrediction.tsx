@@ -7,7 +7,7 @@ import { Badge } from '../../components/ui/badge';
 import { Loader2, TrendingUp, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 
-const API_URL = 'http://localhost:3014/suppliers';
+const API_URL = 'http://localhost:3011/suppliers';
 
 interface PredictionResult {
   supplierId: string;

@@ -22,7 +22,7 @@ import {
   Star,
 } from 'lucide-react';
 
-const API_URL = 'http://localhost:3014/suppliers';
+const API_URL = 'http://localhost:3011/suppliers';
 
 interface Supplier {
   _id: string;

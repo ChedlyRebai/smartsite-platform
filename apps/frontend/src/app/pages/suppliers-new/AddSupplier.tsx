@@ -66,7 +66,7 @@ interface SuccessData {
   insuranceDocumentName: string;
 }
 
-const API_URL = 'http://localhost:3014/suppliers';
+const API_URL = 'http://localhost:3011/suppliers';
 
 export default function AddSupplier() {
   const navigate = useNavigate();

@@ -36,8 +36,8 @@ import {
   TrendingUp,
 } from 'lucide-react';
 
-const API_URL = 'http://localhost:3014/suppliers';
-const FILES_URL = 'http://localhost:3014';
+const API_URL = 'http://localhost:3011/suppliers';
+const FILES_URL = 'http://localhost:3011';
 
 interface Supplier {
   _id: string;
