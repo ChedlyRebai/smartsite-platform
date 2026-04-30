@@ -71,85 +71,14 @@ pipeline {
                 }
             }
         }
-
-        stage('Docker Build') {
-            steps {
-                echo "🐳 Construction image ${DOCKER_IMAGE}..."
-                dir("${SERVICE_DIR}") {
-                    sh '''
-                        docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} .
-                        docker tag ${DOCKER_IMAGE}:${BUILD_NUMBER} ${DOCKER_IMAGE}:latest
-                        echo "✅ Image Docker construite"
-                    '''
-                }
-            }
-        }
-
-        stage('Deploy to Kubernetes') {
-            steps {
-                echo "☸️ Déploiement ${SERVICE_NAME} sur Kubernetes..."
-                sh '''
-                    kubectl create namespace smart-site 2>/dev/null || true
-
-                    kubectl apply -f - <<EOF
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: incident-management
-  namespace: smart-site
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: incident-management
-  template:
-    metadata:
-      labels:
-        app: incident-management
-    spec:
-      containers:
-      - name: incident-management
-        image: ${DOCKER_IMAGE}:${BUILD_NUMBER}
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 3004
-        env:
-        - name: PORT
-          value: "3004"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 3004
-          initialDelaySeconds: 30
-          periodSeconds: 10
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: incident-management
-  namespace: smart-site
-spec:
-  selector:
-    app: incident-management
-  ports:
-    - port: 80
-      targetPort: 3004
-      protocol: TCP
-  type: ClusterIP
-EOF
-
-                    echo "✅ Déploiement incident-management terminé"
-                '''
-            }
-        }
     }
 
     post {
         success {
-            echo "🎉 CI/CD réussi pour ${SERVICE_NAME} — build #${BUILD_NUMBER}"
+            echo "🎉 CI réussi pour ${SERVICE_NAME} — build #${BUILD_NUMBER}"
         }
         failure {
-            echo "❌ CI/CD échoué pour ${SERVICE_NAME} — build #${BUILD_NUMBER}"
+            echo "❌ CI échoué pour ${SERVICE_NAME} — build #${BUILD_NUMBER}"
         }
         always {
             cleanWs()
