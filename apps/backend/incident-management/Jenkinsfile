@@ -8,11 +8,6 @@ pipeline {
         DOCKER_IMAGE  = 'smart-site-incident-management'
     }
 
-    tools {
-        nodejs 'NodeJS-20'
-        docker 'Docker'
-    }
-
     stages {
 
         stage('Checkout') {
