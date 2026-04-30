@@ -54,6 +54,7 @@ pipeline {
                                     -Dsonar.projectKey=${SONAR_PROJECT} \
                                     -Dsonar.projectName='SmartSite - Resource Optimization' \
                                     -Dsonar.sources=src \
+                                    -Dsonar.typescript.tsconfigPath=tsconfig.sonar.json \
                                     -Dsonar.exclusions=**/*.spec.ts,**/node_modules/**,**/dist/** \
                                     -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
                                     -Dsonar.coverage.exclusions=**/*.spec.ts,**/node_modules/**,**/dist/**

@@ -3,6 +3,7 @@ import { getModelToken } from '@nestjs/mongoose';
 import { NotFoundException } from '@nestjs/common';
 import { IncidentsService } from './incidents.service';
 import { Incident, IncidentType, IncidentSeverity, IncidentStatus } from './entities/incident.entity';
+import { IncidentEventsService } from './incidents-events.service';
 
 const mockIncident = {
   _id: '507f1f77bcf86cd799439011',
@@ -17,6 +18,14 @@ const mockIncidentModel = {
   findById: jest.fn(),
   findByIdAndUpdate: jest.fn(),
   findByIdAndDelete: jest.fn(),
+  countDocuments: jest.fn(),
+  aggregate: jest.fn(),
+};
+
+const mockEventsService = {
+  broadcastIncidentUpdate: jest.fn(),
+  notifyIncidentAssigned: jest.fn(),
+  notifyIncidentUpdated: jest.fn(),
 };
 
 // Constructor mock for `new this.incidentModel(payload)`
@@ -36,6 +45,10 @@ describe('IncidentsService', () => {
         {
           provide: getModelToken(Incident.name),
           useValue: MockModel,
+        },
+        {
+          provide: IncidentEventsService,
+          useValue: mockEventsService,
         },
       ],
     }).compile();
@@ -111,6 +124,21 @@ describe('IncidentsService', () => {
       await service.create(dto as any);
       expect(savedData.status).toBe(IncidentStatus.OPEN);
     });
+
+    it('appelle les notifications après création', async () => {
+      const dto = {
+        type: IncidentType.SAFETY,
+        title: 'Avec assignation',
+        assignedToCin: 'CIN123',
+      };
+
+      MockModel.prototype.save = jest.fn().mockResolvedValue({ ...mockIncident, assignedToCin: 'CIN123' });
+
+      await service.create(dto as any);
+
+      expect(mockEventsService.broadcastIncidentUpdate).toHaveBeenCalledTimes(1);
+      expect(mockEventsService.notifyIncidentAssigned).toHaveBeenCalledWith('CIN123', expect.any(Object));
+    });
   });
 
   describe('update', () => {
@@ -125,6 +153,17 @@ describe('IncidentsService', () => {
       MockModel.findByIdAndUpdate.mockReturnValue({ exec: jest.fn().mockResolvedValue(null) });
       await expect(service.update('invalid-id', {})).rejects.toThrow(NotFoundException);
     });
+
+    it('notifie une résolution d\'incident', async () => {
+      const updated = { ...mockIncident, status: IncidentStatus.RESOLVED, assignedToCin: 'CIN456' };
+      MockModel.findByIdAndUpdate.mockReturnValue({ exec: jest.fn().mockResolvedValue(updated) });
+
+      const result = await service.update('507f1f77bcf86cd799439011', { status: IncidentStatus.RESOLVED } as any);
+
+      expect(result).toEqual(updated);
+      expect(mockEventsService.notifyIncidentUpdated).toHaveBeenCalledWith('CIN456', updated, 'resolved');
+      expect(mockEventsService.broadcastIncidentUpdate).toHaveBeenCalledWith(updated, 'resolved');
+    });
   });
 
   describe('remove', () => {
@@ -137,6 +176,33 @@ describe('IncidentsService', () => {
     it('lève NotFoundException si l\'incident n\'existe pas', async () => {
       MockModel.findByIdAndDelete.mockReturnValue({ exec: jest.fn().mockResolvedValue(null) });
       await expect(service.remove('invalid-id')).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('filters and counters', () => {
+    it('retourne [] si siteId invalide', async () => {
+      const result = await service.findBySite('invalid-site');
+      expect(result).toEqual([]);
+    });
+
+    it('retourne [] si projectId invalide', async () => {
+      const result = await service.findByProject('invalid-project');
+      expect(result).toEqual([]);
+    });
+
+    it('retourne 0 si siteId invalide pour countBySite', async () => {
+      const result = await service.countBySite('invalid-site');
+      expect(result).toBe(0);
+    });
+
+    it('retourne 0 si projectId invalide pour countByProject', async () => {
+      const result = await service.countByProject('invalid-project');
+      expect(result).toBe(0);
+    });
+
+    it('retourne [] si userCin est vide', async () => {
+      const result = await service.findOpenByAssignedUserCin('');
+      expect(result).toEqual([]);
     });
   });
 });
