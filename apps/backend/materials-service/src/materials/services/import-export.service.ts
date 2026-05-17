@@ -89,14 +89,14 @@ export class ImportExportService {
     const normalizeKey = (key: string): string => {
       const normalized = key
         .toLowerCase()
-        .replace(/[éèêë]/g, 'e')
-        .replace(/[àâä]/g, 'a')
-        .replace(/[îï]/g, 'i')
-        .replace(/[ôö]/g, 'o')
-        .replace(/[ùûü]/g, 'u')
-        .replace(/[ç]/g, 'c')
-        .replace(/\s+/g, '')
-        .replace(/[^a-z0-9]/g, '');
+        .replace(/[éèêë]/gu, 'e')
+        .replace(/[àâä]/gu, 'a')
+        .replace(/[îï]/gu, 'i')
+        .replace(/[ôö]/gu, 'o')
+        .replace(/[ùûü]/gu, 'u')
+        .replace(/[ç]/gu, 'c')
+        .replaceAll(' ', '')
+        .replace(/[^a-z0-9]/gu, '');
       return normalized;
     };
 
@@ -190,7 +190,7 @@ export class ImportExportService {
           date = new Date(expiryDate);
         }
 
-        if (!isNaN(date.getTime())) {
+        if (!Number.isNaN(date.getTime())) {
           expiryDateStr = date.toISOString();
         }
       } catch {
@@ -253,7 +253,7 @@ export class ImportExportService {
       qrCode: qrResult.dataURL,
       qrCodeImage: qrResult.url,
       barcode,
-      priceHistory: { [new Date().toISOString().replace(/\./g, '-')]: 0 },
+      priceHistory: { [new Date().toISOString().replaceAll('.', '-')]: 0 },
       status: 'active',
       specifications,
     };

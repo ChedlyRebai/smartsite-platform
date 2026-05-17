@@ -262,7 +262,7 @@ export class AiMessageAnalyzerService {
       // Recherche exacte dans les mots ou dans le message complet
       return (
         words.some((w) => {
-          const cleanWord = w.replace(/[^a-zàâäéèêëïîôöùûüÿç]/g, '');
+          const cleanWord = w.replace(/[^a-zàâäéèêëïîôöùûüÿç]/gu, '');
           return cleanWord === word;
         }) ||
         lowerMessage.includes(` ${word} `) ||
@@ -275,7 +275,7 @@ export class AiMessageAnalyzerService {
     const frustrationMatches = FRUSTRATION_WORDS.filter((word) => {
       return (
         words.some((w) => {
-          const cleanWord = w.replace(/[^a-zàâäéèêëïîôöùûüÿç]/g, '');
+          const cleanWord = w.replace(/[^a-zàâäéèêëïîôöùûüÿç]/gu, '');
           return cleanWord === word;
         }) ||
         lowerMessage.includes(` ${word} `) ||
@@ -597,7 +597,7 @@ Analyze this message and return the JSON response.`;
         allow_send: emojiDetection.emotion !== 'angry',
         show_suggestion: true,
         improved_message: message.replace(
-          /[😠🤬👿😤😡💢🗯️🔴🤯👺😾🙅‍♂️🙅‍♀️😩😫😒🙄😑🤦🤦‍♂️🤦‍♀️😮‍💨🤷‍♂️🤷‍♀️]/g,
+          /[\u{1F620}\u{1F92C}\u{1F47F}\u{1F624}\u{1F621}\u{1F4A2}\u{1F5EF}\u{1F534}\u{1F92F}\u{1F47A}\u{1F63E}\u{1F645}\u{1F645}\u{1F629}\u{1F62B}\u{1F612}\u{1F644}\u{1F611}\u{1F926}\u{1F926}\u{1F926}\u{1F62E}\u{1F937}\u{1F937}]/gu,
           '',
         ),
         ui_message:

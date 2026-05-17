@@ -79,7 +79,7 @@ export class MaterialsService {
 
       const barcode = `MAT-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
-      const dateKey = new Date().toISOString().replace(/\./g, '-');
+      const dateKey = new Date().toISOString().replaceAll('.', '-');
 
       const materialData: any = {
         ...createMaterialDto,
@@ -1114,7 +1114,7 @@ export class MaterialsService {
         materialId,
         currentStock: material.quantity,
         dailyConsumption,
-        daysRemaining: isFinite(daysRemaining) ? daysRemaining : 999,
+        daysRemaining: Number.isFinite(daysRemaining) ? daysRemaining : 999,
         reorderDate,
         suggestedOrderQuantity,
         confidence: 0.85,
@@ -1254,7 +1254,7 @@ export class MaterialsService {
           dto.code,
         );
 
-        const dateKey = new Date().toISOString().replace(/\./g, '-');
+        const dateKey = new Date().toISOString().replaceAll('.', '-');
 
         const materialData: any = {
           ...dto,

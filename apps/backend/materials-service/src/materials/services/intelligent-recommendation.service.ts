@@ -80,7 +80,8 @@ export class IntelligentRecommendationService {
     private readonly predictionService: StockPredictionService,
     private configService: ConfigService,
   ) {
-    this.initializeSupplierConnection();
+    // Supplier connection initialization is deferred to avoid async in constructor
+    void this.initializeSupplierConnection();
   }
 
   private async initializeSupplierConnection() {

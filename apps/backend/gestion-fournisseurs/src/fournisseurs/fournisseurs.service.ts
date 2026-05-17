@@ -6,7 +6,7 @@ import { Fournisseur } from "./entities/fournisseur.entity";
 @Injectable()
 export class FournisseursService {
   constructor(
-    @InjectModel(Fournisseur.name) private fournisseurModel: Model<Fournisseur>,
+    @InjectModel(Fournisseur.name) private readonly fournisseurModel: Model<Fournisseur>,
   ) {}
 
   async create(createFournisseurDto: any) {

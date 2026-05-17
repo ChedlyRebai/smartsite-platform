@@ -6,7 +6,7 @@ import { Article } from "./entities/article.entity";
 @Injectable()
 export class ArticlesService {
   constructor(
-    @InjectModel(Article.name) private articleModel: Model<Article>,
+    @InjectModel(Article.name) private readonly articleModel: Model<Article>,
   ) {}
 
   async create(createArticleDto: any) {

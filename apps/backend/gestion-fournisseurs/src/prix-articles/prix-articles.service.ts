@@ -1,7 +1,6 @@
 import {
   Injectable,
   NotFoundException,
-  BadRequestException,
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
@@ -10,7 +9,7 @@ import { PrixArticle } from "./entities/prix-article.entity";
 @Injectable()
 export class PrixArticlesService {
   constructor(
-    @InjectModel(PrixArticle.name) private prixArticleModel: Model<PrixArticle>,
+    @InjectModel(PrixArticle.name) private readonly prixArticleModel: Model<PrixArticle>,
   ) {}
 
   async create(createPrixArticleDto: any) {

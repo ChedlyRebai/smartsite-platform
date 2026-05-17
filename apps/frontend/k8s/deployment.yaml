@@ -15,18 +15,21 @@ spec:
       labels:
         app: frontend
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: frontend
-          image: ghadabannourii/smartsite-frontend:latest
+          image: ghadabannourii/smartsite-frontend:12
           ports:
             - containerPort: 80
           resources:
             requests:
               memory: "64Mi"
               cpu: "50m"
+              ephemeral-storage: "128Mi"
             limits:
               memory: "128Mi"
               cpu: "200m"
+              ephemeral-storage: "256Mi"
           livenessProbe:
             httpGet:
               path: /

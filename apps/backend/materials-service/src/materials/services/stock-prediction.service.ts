@@ -31,7 +31,8 @@ export class StockPredictionService {
   constructor(
     @InjectModel(MaterialFlowLog.name) private flowLogModel: Model<any>,
   ) {
-    this.initializeModel();
+    // Model initialization is deferred to avoid async in constructor
+    void this.initializeModel();
   }
 
   /**

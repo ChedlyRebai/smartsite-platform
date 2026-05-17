@@ -59,7 +59,7 @@ class StockPredictionResponse(BaseModel):
     material_name: str
     current_stock: float
     predicted_stock_in_days: float
-    days_until_stockout: Optional[float]
+    days_until_stockout: Optional[float] = None
     status: str  # "critical", "warning", "normal"
     recommended_order_quantity: float
     confidence: float
@@ -125,16 +125,18 @@ def train_stock_prediction_model():
         
         # Scale features
         scaler = StandardScaler()
-        X_scaled = scaler.fit_transform(X)
+        x_scaled = scaler.fit_transform(X)
         
         # Train model
         model = RandomForestRegressor(
             n_estimators=100,
             max_depth=10,
+            min_samples_leaf=1,
+            max_features="sqrt",
             random_state=42,
             n_jobs=-1
         )
-        model.fit(X_scaled, y)
+        model.fit(x_scaled, y)
         
         # Store model and scaler
         models["stock_prediction"] = model
@@ -142,8 +144,7 @@ def train_stock_prediction_model():
         models["feature_names_stock"] = features
         
         # Calculate training score
-        score = model.score(X_scaled, y)
-        print(f"✅ Stock prediction model trained successfully! Score: {score:.4f}")
+        print("✅ Stock prediction model trained successfully! Score: " + str(round(score, 4)))
         print(f"📊 Training samples: {len(X)}")
         
         return True
@@ -183,7 +184,7 @@ def train_anomaly_detection_model():
         
         # Scale features
         scaler = StandardScaler()
-        X_scaled = scaler.fit_transform(X)
+        x_scaled = scaler.fit_transform(X)
         
         # Train Isolation Forest for anomaly detection
         model = IsolationForest(
@@ -191,14 +192,14 @@ def train_anomaly_detection_model():
             random_state=42,
             n_jobs=-1
         )
-        model.fit(X_scaled)
+        model.fit(x_scaled)
         
         # Store model and scaler
         models["anomaly_detection"] = model
         models["scaler_anomaly"] = scaler
         models["feature_names_anomaly"] = features
         
-        print(f"✅ Anomaly detection model trained successfully!")
+        print("✅ Anomaly detection model trained successfully!")
         print(f"📊 Training samples: {len(X)}")
         
         return True
@@ -256,7 +257,7 @@ async def health_check():
         }
     }
 
-@app.get("/datasets/stats")
+@app.get("/datasets/stats", responses={500: {"description": "Internal server error reading dataset stats"}})
 async def get_dataset_stats():
     """Get statistics from training datasets"""
     try:
@@ -295,7 +296,7 @@ async def get_dataset_stats():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error reading dataset stats: {str(e)}")
 
-@app.get("/datasets/material-consumption/{material_name}")
+@app.get("/datasets/material-consumption/{material_name}", responses={500: {"description": "Internal server error reading material consumption"}})
 async def get_material_consumption_from_dataset(material_name: str):
     """Get consumption statistics for a specific material from training dataset"""
     try:
@@ -343,17 +344,110 @@ async def get_material_consumption_from_dataset(material_name: str):
         raise HTTPException(status_code=500, detail=f"Error reading material consumption: {str(e)}")
 
 # ============================================================================
+# HELPER FUNCTIONS
+# ============================================================================
+
+def _classify_consumption(deviation_pct: float) -> tuple:
+    """
+    Classify consumption deviation into status, severity and recommended action.
+    Extracted to reduce cognitive complexity of detect_consumption_anomaly.
+    """
+    if abs(deviation_pct) < 15:
+        return (
+            "normal",
+            "low",
+            "No action required. Consumption is within normal range.",
+        )
+    if deviation_pct >= 50:
+        return (
+            "overconsumption",
+            "critical",
+            "URGENT: Investigate excessive consumption. Check for waste, theft, or measurement errors.",
+        )
+    if deviation_pct >= 30:
+        return (
+            "overconsumption",
+            "high",
+            "WARNING: Consumption is significantly higher than normal. Review usage patterns.",
+        )
+    if deviation_pct >= 15:
+        return (
+            "overconsumption",
+            "medium",
+            "Monitor consumption closely. Slight increase detected.",
+        )
+    if deviation_pct <= -50:
+        return (
+            "underconsumption",
+            "high",
+            "Consumption is very low. Check if site is operational or if there are reporting issues.",
+        )
+    if deviation_pct <= -30:
+        return (
+            "underconsumption",
+            "medium",
+            "Consumption is lower than expected. Verify site activity.",
+        )
+    return (
+        "underconsumption",
+        "low",
+        "Slight decrease in consumption. Continue monitoring.",
+    )
+
+
+def _get_actual_consumption(material_name: str, consumption_rate: float) -> float:
+    """
+    Resolve the effective consumption rate by blending request value with dataset statistics.
+    Extracted to reduce cognitive complexity of predict_stock_depletion.
+    """
+    try:
+        df_stock = pd.read_csv(STOCK_PREDICTION_CSV)
+        material_specific = df_stock[
+            df_stock['materialName'].str.contains(material_name, case=False, na=False)
+        ]
+
+        if len(material_specific) > 0 and material_specific['consumption'].mean() > 0:
+            dataset_consumption = material_specific['consumption'].mean()
+            print(f"   📊 Dataset consumption for {material_name}: {dataset_consumption:.2f}/day "
+                  f"(from {len(material_specific)} records)")
+            return (consumption_rate * 0.3) + (dataset_consumption * 0.7)
+
+        # Fallback: median of materials with similar consumption range
+        similar_range = df_stock[
+            (df_stock['consumption'] > consumption_rate * 0.5) &
+            (df_stock['consumption'] < consumption_rate * 1.5) &
+            (df_stock['consumption'] > 0)
+        ]
+        if len(similar_range) > 0:
+            dataset_consumption = similar_range['consumption'].median()
+            print(f"   📊 Using similar range median: {dataset_consumption:.2f}/day "
+                  f"(from {len(similar_range)} records)")
+            return (consumption_rate * 0.3) + (dataset_consumption * 0.7)
+
+        print(f"   ⚠️  No dataset match found, using request consumption: {consumption_rate:.2f}/day")
+        return consumption_rate
+
+    except Exception as e:
+        print(f"   ⚠️  Error reading dataset: {e}")
+        return consumption_rate
+
+
+# ============================================================================
 # STOCK PREDICTION ENDPOINT
 # ============================================================================
 
-@app.post("/predict/stock", response_model=StockPredictionResponse)
+@app.post("/predict/stock", response_model=StockPredictionResponse,
+          responses={
+              500: {"description": "Prediction error"},
+              503: {"description": "Stock prediction model not trained"}
+          })
 async def predict_stock_depletion(request: StockPredictionRequest):
     """
     Predict when a material will be out of stock
     Uses trained Random Forest model
     """
     print(f"\n{'='*80}")
-    print(f"� [FASTAPI] STOCK PREDICTION REQUEST")
+    print("🔮 [FASTAPI] STOCK PREDICTION REQUEST")
     print(f"{'='*80}")
     print(f"📦 Material: {request.material_name} (ID: {request.material_id})")
     print(f"📊 Current Stock: {request.current_stock}")
@@ -391,7 +485,6 @@ async def predict_stock_depletion(request: StockPredictionRequest):
         
         # Get feature importances to calculate confidence
         # Higher importance = higher confidence in prediction
-        feature_importances = models["stock_prediction"].feature_importances_
         # Calculate confidence based on model's certainty (R² score stored during training)
         # Use the model's score as base confidence
         base_confidence = 0.85  # From training score of 0.9682
@@ -407,36 +500,7 @@ async def predict_stock_depletion(request: StockPredictionRequest):
         
         # Calculate predicted stock after N days
         # Use the actual consumption from the model's training data
-        # Extract average consumption from dataset for THIS SPECIFIC material
-        try:
-            df_stock = pd.read_csv(STOCK_PREDICTION_CSV)
-            # Try to find consumption for THIS specific material by name
-            material_specific = df_stock[df_stock['materialName'].str.contains(request.material_name, case=False, na=False)]
-            
-            if len(material_specific) > 0 and material_specific['consumption'].mean() > 0:
-                # Use THIS material's average consumption from dataset
-                dataset_consumption = material_specific['consumption'].mean()
-                print(f"   📊 Dataset consumption for {request.material_name}: {dataset_consumption:.2f}/day (from {len(material_specific)} records)")
-                # Blend request consumption with dataset consumption (70% dataset, 30% request)
-                actual_consumption = (request.consumption_rate * 0.3) + (dataset_consumption * 0.7)
-            else:
-                # Fallback: use median of all materials with similar consumption range
-                similar_range = df_stock[
-                    (df_stock['consumption'] > request.consumption_rate * 0.5) & 
-                    (df_stock['consumption'] < request.consumption_rate * 1.5) &
-                    (df_stock['consumption'] > 0)
-                ]
-                if len(similar_range) > 0:
-                    dataset_consumption = similar_range['consumption'].median()
-                    print(f"   📊 Using similar range median: {dataset_consumption:.2f}/day (from {len(similar_range)} records)")
-                    actual_consumption = (request.consumption_rate * 0.3) + (dataset_consumption * 0.7)
-                else:
-                    # Last resort: use request consumption
-                    actual_consumption = request.consumption_rate
-                    print(f"   ⚠️  No dataset match found, using request consumption: {actual_consumption:.2f}/day")
-        except Exception as e:
-            print(f"   ⚠️  Error reading dataset: {e}")
-            actual_consumption = request.consumption_rate
+        actual_consumption = _get_actual_consumption(request.material_name, request.consumption_rate)
         
         predicted_stock = request.current_stock - (actual_consumption * request.days_to_predict)
         predicted_stock = round(predicted_stock, 1)
@@ -450,16 +514,12 @@ async def predict_stock_depletion(request: StockPredictionRequest):
         # Determine status
         if days_until_stockout <= 2:
             status = "critical"
-            severity = "critical"
         elif days_until_stockout <= 5:
             status = "warning"
-            severity = "high"
         elif days_until_stockout <= 10:
             status = "warning"
-            severity = "medium"
         else:
             status = "normal"
-            severity = "low"
         
         # Calculate recommended order quantity
         # Order enough for 30 days + safety stock
@@ -476,7 +536,7 @@ async def predict_stock_depletion(request: StockPredictionRequest):
         # Confidence score (based on model's feature importance)
         confidence = round(confidence, 2)
         
-        print(f"\n🎯 [FASTAPI] PREDICTION RESULT:")
+        print("\n🎯 [FASTAPI] PREDICTION RESULT:")
         print(f"   ├─ Days Until Stockout: {days_until_stockout} days")
         print(f"   ├─ Predicted Stock in {request.days_to_predict} days: {predicted_stock}")
         print(f"   ├─ Consumption Rate (ML-adjusted): {consumption_rate_clean}/day")
@@ -508,7 +568,11 @@ async def predict_stock_depletion(request: StockPredictionRequest):
 # CONSUMPTION ANOMALY DETECTION ENDPOINT
 # ============================================================================
 
-@app.post("/predict/consumption-anomaly", response_model=ConsumptionAnomalyResponse)
+@app.post("/predict/consumption-anomaly", response_model=ConsumptionAnomalyResponse,
+          responses={
+              500: {"description": "Detection error"},
+              503: {"description": "Anomaly detection model not trained"}
+          })
 async def detect_consumption_anomaly(request: ConsumptionAnomalyRequest):
     """
     Detect if consumption is normal, overconsumption, or underconsumption
@@ -553,38 +617,11 @@ async def detect_consumption_anomaly(request: ConsumptionAnomalyRequest):
         # Predict anomaly (-1 = anomaly, 1 = normal)
         prediction = models["anomaly_detection"].predict(features_scaled)[0]
         anomaly_score = models["anomaly_detection"].score_samples(features_scaled)[0]
-        
+
         is_anomaly = prediction == -1
-        
-        # Determine consumption status
-        if abs(deviation_pct) < 15:
-            consumption_status = "normal"
-            severity = "low"
-            recommended_action = "No action required. Consumption is within normal range."
-        elif deviation_pct >= 50:
-            consumption_status = "overconsumption"
-            severity = "critical"
-            recommended_action = "URGENT: Investigate excessive consumption. Check for waste, theft, or measurement errors."
-        elif deviation_pct >= 30:
-            consumption_status = "overconsumption"
-            severity = "high"
-            recommended_action = "WARNING: Consumption is significantly higher than normal. Review usage patterns."
-        elif deviation_pct >= 15:
-            consumption_status = "overconsumption"
-            severity = "medium"
-            recommended_action = "Monitor consumption closely. Slight increase detected."
-        elif deviation_pct <= -50:
-            consumption_status = "underconsumption"
-            severity = "high"
-            recommended_action = "Consumption is very low. Check if site is operational or if there are reporting issues."
-        elif deviation_pct <= -30:
-            consumption_status = "underconsumption"
-            severity = "medium"
-            recommended_action = "Consumption is lower than expected. Verify site activity."
-        else:
-            consumption_status = "underconsumption"
-            severity = "low"
-            recommended_action = "Slight decrease in consumption. Continue monitoring."
+
+        # Determine consumption status — extracted to helper to reduce complexity
+        consumption_status, severity, recommended_action = _classify_consumption(deviation_pct)
         
         # Generate message
         if consumption_status == "overconsumption":
@@ -618,7 +655,7 @@ async def detect_consumption_anomaly(request: ConsumptionAnomalyRequest):
 # RETRAIN ENDPOINTS
 # ============================================================================
 
-@app.post("/retrain/stock")
+@app.post("/retrain/stock", responses={500: {"description": "Failed to retrain stock prediction model"}})
 async def retrain_stock_model():
     """Retrain stock prediction model"""
     success = train_stock_prediction_model()
@@ -627,7 +664,7 @@ async def retrain_stock_model():
     else:
         raise HTTPException(status_code=500, detail="Failed to retrain stock prediction model")
 
-@app.post("/retrain/anomaly")
+@app.post("/retrain/anomaly", responses={500: {"description": "Failed to retrain anomaly detection model"}})
 async def retrain_anomaly_model():
     """Retrain anomaly detection model"""
     success = train_anomaly_detection_model()
@@ -636,7 +673,7 @@ async def retrain_anomaly_model():
     else:
         raise HTTPException(status_code=500, detail="Failed to retrain anomaly detection model")
 
-@app.post("/retrain/all")
+@app.post("/retrain/all", responses={500: {"description": "Failed to retrain some models"}})
 async def retrain_all_models():
     """Retrain all models"""
     stock_success = train_stock_prediction_model()
@@ -649,7 +686,9 @@ async def retrain_all_models():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # Use 127.0.0.1 for local dev; set HOST env var to override in production
+    host = os.environ.get("HOST", "127.0.0.1")
+    uvicorn.run(app, host=host, port=8000)
 
 # ============================================================================
 # BATCH ANOMALY DETECTION ENDPOINT
@@ -670,8 +709,8 @@ class BatchAnomalyRequest(BaseModel):
 class AnomalyMaterial(BaseModel):
     material_id: str
     material_name: str
-    site_id: Optional[str]
-    site_name: Optional[str]
+    site_id: Optional[str] = None
+    site_name: Optional[str] = None
     current_consumption: float
     average_consumption: float
     deviation_percentage: float
@@ -690,14 +729,15 @@ class BatchAnomalyResponse(BaseModel):
     over_consumption: List[AnomalyMaterial]
     normal: List[str]
 
-@app.post("/detect/batch-anomalies", response_model=BatchAnomalyResponse)
+@app.post("/detect/batch-anomalies", response_model=BatchAnomalyResponse,
+          responses={503: {"description": "Anomaly detection model not trained"}})
 async def detect_batch_anomalies(request: BatchAnomalyRequest):
     """
     Detect consumption anomalies for multiple materials
     Returns materials with theft risk, waste risk, or over-consumption
     """
     print(f"\n{'='*80}")
-    print(f"🔍 [FASTAPI] BATCH ANOMALY DETECTION")
+    print("🔍 [FASTAPI] BATCH ANOMALY DETECTION")
     print(f"{'='*80}")
     print(f"📊 Total Materials to Analyze: {len(request.materials)}")
     
@@ -742,7 +782,7 @@ async def detect_batch_anomalies(request: BatchAnomalyRequest):
             
             # Predict anomaly
             prediction = models["anomaly_detection"].predict(features_scaled)[0]
-            is_anomaly = prediction == -1
+            # prediction == -1 means anomaly, 1 means normal (used for classification below)
             
             # Determine anomaly type and severity
             if abs(deviation_pct) < 15:
@@ -845,7 +885,13 @@ async def detect_batch_anomalies(request: BatchAnomalyRequest):
                     recommended_action=recommended_action
                 ))
             
-            print(f"   {'🚨' if severity == 'critical' else '⚠️' if severity == 'high' else '📉'} {material.material_name}: {risk_level} ({deviation_pct:+.1f}%)")
+            if severity == 'critical':
+                icon = '🚨'
+            elif severity == 'high':
+                icon = '⚠️'
+            else:
+                icon = '📉'
+            print(f"   {icon} {material.material_name}: {risk_level} ({deviation_pct:+.1f}%)")
             
         except Exception as e:
             print(f"   ❌ Error analyzing {material.material_name}: {e}")
@@ -854,7 +900,7 @@ async def detect_batch_anomalies(request: BatchAnomalyRequest):
     total_anomalies = len(theft_risk) + len(waste_risk) + len(over_consumption)
     critical_count = len([a for a in theft_risk if a.severity == "critical"])
     
-    print(f"\n📊 [FASTAPI] ANOMALY DETECTION RESULTS:")
+    print("\n📊 [FASTAPI] ANOMALY DETECTION RESULTS:")
     print(f"   ├─ Total Analyzed: {len(request.materials)}")
     print(f"   ├─ Anomalies Detected: {total_anomalies}")
     print(f"   ├─ Theft Risk: {len(theft_risk)}")
