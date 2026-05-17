@@ -62,7 +62,7 @@ export class MaterialFlowController {
     return this.flowService.getFlowStatistics(
       materialId,
       siteId,
-      parseInt(days),
+      Number.parseInt(days, 10),
     );
   }
 

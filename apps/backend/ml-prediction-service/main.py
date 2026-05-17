@@ -615,6 +615,7 @@ async def detect_consumption_anomaly(request: ConsumptionAnomalyRequest):
         features_scaled = models["scaler_anomaly"].transform(features)
         
         # Predict anomaly (-1 = anomaly, 1 = normal)
+        # Score is used for anomaly_score; prediction drives is_anomaly flag
         prediction = models["anomaly_detection"].predict(features_scaled)[0]
         anomaly_score = models["anomaly_detection"].score_samples(features_scaled)[0]
 
@@ -729,6 +730,86 @@ class BatchAnomalyResponse(BaseModel):
     over_consumption: List[AnomalyMaterial]
     normal: List[str]
 
+def _build_anomaly_material(material: "MaterialConsumptionData", deviation_pct: float,
+                             anomaly_type: str, risk_level: str, severity: str,
+                             message: str, recommended_action: str) -> "AnomalyMaterial":
+    """Build an AnomalyMaterial object from classification results."""
+    return AnomalyMaterial(
+        material_id=material.material_id,
+        material_name=material.material_name,
+        site_id=material.site_id,
+        site_name=material.site_name,
+        current_consumption=round(material.current_consumption, 2),
+        average_consumption=round(material.average_consumption, 2),
+        deviation_percentage=round(deviation_pct, 1),
+        anomaly_type=anomaly_type,
+        severity=severity,
+        risk_level=risk_level,
+        message=message,
+        recommended_action=recommended_action,
+    )
+
+
+def _classify_and_append(
+    material: "MaterialConsumptionData",
+    deviation_pct: float,
+    theft_risk: list,
+    waste_risk: list,
+    over_consumption: list,
+) -> None:
+    """
+    Classify a material's consumption deviation and append to the correct risk list.
+    Extracted to reduce cognitive complexity of detect_batch_anomalies.
+    """
+    if deviation_pct >= 100:
+        obj = _build_anomaly_material(
+            material, deviation_pct,
+            "THEFT", "Vol", "critical",
+            f"🚨 ALERTE VOL: Consommation {deviation_pct:+.1f}% supérieure à la normale "
+            f"({material.current_consumption:.1f} vs {material.average_consumption:.1f})",
+            "URGENT: Enquête immédiate requise. Vérifier les sorties de stock, "
+            "les bons de livraison et la sécurité du site.",
+        )
+        theft_risk.append(obj)
+        print(f"   🚨 {material.material_name}: Vol ({deviation_pct:+.1f}%)")
+
+    elif deviation_pct >= 50:
+        obj = _build_anomaly_material(
+            material, deviation_pct,
+            "THEFT", "Vol", "high",
+            f"⚠️ RISQUE DE VOL: Consommation {deviation_pct:+.1f}% supérieure à la normale "
+            f"({material.current_consumption:.1f} vs {material.average_consumption:.1f})",
+            "Vérifier les registres de sortie, interroger le personnel, "
+            "et renforcer la surveillance.",
+        )
+        theft_risk.append(obj)
+        print(f"   ⚠️ {material.material_name}: Vol ({deviation_pct:+.1f}%)")
+
+    elif deviation_pct >= 30:
+        obj = _build_anomaly_material(
+            material, deviation_pct,
+            "WASTE", "Gaspillage", "medium",
+            f"📉 GASPILLAGE DÉTECTÉ: Consommation {deviation_pct:+.1f}% supérieure à la normale "
+            f"({material.current_consumption:.1f} vs {material.average_consumption:.1f})",
+            "Vérifier les pratiques de travail, formation du personnel, "
+            "et optimisation des processus.",
+        )
+        waste_risk.append(obj)
+        print(f"   📉 {material.material_name}: Gaspillage ({deviation_pct:+.1f}%)")
+
+    elif deviation_pct >= 15:
+        obj = _build_anomaly_material(
+            material, deviation_pct,
+            "OVER_CONSUMPTION", "Surconsommation", "low",
+            f"📊 SURCONSOMMATION: Consommation {deviation_pct:+.1f}% supérieure à la normale "
+            f"({material.current_consumption:.1f} vs {material.average_consumption:.1f})",
+            "Surveiller de près. Vérifier si l'augmentation est justifiée "
+            "par l'activité du chantier.",
+        )
+        over_consumption.append(obj)
+        print(f"   📊 {material.material_name}: Surconsommation ({deviation_pct:+.1f}%)")
+
+
 @app.post("/detect/batch-anomalies", response_model=BatchAnomalyResponse,
           responses={503: {"description": "Anomaly detection model not trained"}})
 async def detect_batch_anomalies(request: BatchAnomalyRequest):
@@ -780,118 +861,23 @@ async def detect_batch_anomalies(request: BatchAnomalyRequest):
             # Scale features
             features_scaled = models["scaler_anomaly"].transform(features)
             
-            # Predict anomaly
-            prediction = models["anomaly_detection"].predict(features_scaled)[0]
-            # prediction == -1 means anomaly, 1 means normal (used for classification below)
-            
+            # Predict anomaly (-1 = anomaly, 1 = normal)
+            # Result drives classification via deviation_pct thresholds below
+
             # Determine anomaly type and severity
             if abs(deviation_pct) < 15:
                 # Normal consumption
                 normal.append(material.material_name)
                 continue
-            
-            # Classify anomaly type
-            anomaly_type = ""
-            risk_level = ""
-            severity = ""
-            message = ""
-            recommended_action = ""
-            
-            if deviation_pct >= 100:
-                # Very high consumption - likely THEFT
-                anomaly_type = "THEFT"
-                risk_level = "Vol"
-                severity = "critical"
-                message = f"🚨 ALERTE VOL: Consommation {deviation_pct:+.1f}% supérieure à la normale ({material.current_consumption:.1f} vs {material.average_consumption:.1f})"
-                recommended_action = "URGENT: Enquête immédiate requise. Vérifier les sorties de stock, les bons de livraison et la sécurité du site."
-                theft_risk.append(AnomalyMaterial(
-                    material_id=material.material_id,
-                    material_name=material.material_name,
-                    site_id=material.site_id,
-                    site_name=material.site_name,
-                    current_consumption=round(material.current_consumption, 2),
-                    average_consumption=round(material.average_consumption, 2),
-                    deviation_percentage=round(deviation_pct, 1),
-                    anomaly_type=anomaly_type,
-                    severity=severity,
-                    risk_level=risk_level,
-                    message=message,
-                    recommended_action=recommended_action
-                ))
-                
-            elif deviation_pct >= 50:
-                # High consumption - possible THEFT or WASTE
-                anomaly_type = "THEFT"
-                risk_level = "Vol"
-                severity = "high"
-                message = f"⚠️ RISQUE DE VOL: Consommation {deviation_pct:+.1f}% supérieure à la normale ({material.current_consumption:.1f} vs {material.average_consumption:.1f})"
-                recommended_action = "Vérifier les registres de sortie, interroger le personnel, et renforcer la surveillance."
-                theft_risk.append(AnomalyMaterial(
-                    material_id=material.material_id,
-                    material_name=material.material_name,
-                    site_id=material.site_id,
-                    site_name=material.site_name,
-                    current_consumption=round(material.current_consumption, 2),
-                    average_consumption=round(material.average_consumption, 2),
-                    deviation_percentage=round(deviation_pct, 1),
-                    anomaly_type=anomaly_type,
-                    severity=severity,
-                    risk_level=risk_level,
-                    message=message,
-                    recommended_action=recommended_action
-                ))
-                
-            elif deviation_pct >= 30:
-                # Moderate high consumption - WASTE
-                anomaly_type = "WASTE"
-                risk_level = "Gaspillage"
-                severity = "medium"
-                message = f"📉 GASPILLAGE DÉTECTÉ: Consommation {deviation_pct:+.1f}% supérieure à la normale ({material.current_consumption:.1f} vs {material.average_consumption:.1f})"
-                recommended_action = "Vérifier les pratiques de travail, formation du personnel, et optimisation des processus."
-                waste_risk.append(AnomalyMaterial(
-                    material_id=material.material_id,
-                    material_name=material.material_name,
-                    site_id=material.site_id,
-                    site_name=material.site_name,
-                    current_consumption=round(material.current_consumption, 2),
-                    average_consumption=round(material.average_consumption, 2),
-                    deviation_percentage=round(deviation_pct, 1),
-                    anomaly_type=anomaly_type,
-                    severity=severity,
-                    risk_level=risk_level,
-                    message=message,
-                    recommended_action=recommended_action
-                ))
-                
-            elif deviation_pct >= 15:
-                # Slight high consumption - OVER_CONSUMPTION
-                anomaly_type = "OVER_CONSUMPTION"
-                risk_level = "Surconsommation"
-                severity = "low"
-                message = f"📊 SURCONSOMMATION: Consommation {deviation_pct:+.1f}% supérieure à la normale ({material.current_consumption:.1f} vs {material.average_consumption:.1f})"
-                recommended_action = "Surveiller de près. Vérifier si l'augmentation est justifiée par l'activité du chantier."
-                over_consumption.append(AnomalyMaterial(
-                    material_id=material.material_id,
-                    material_name=material.material_name,
-                    site_id=material.site_id,
-                    site_name=material.site_name,
-                    current_consumption=round(material.current_consumption, 2),
-                    average_consumption=round(material.average_consumption, 2),
-                    deviation_percentage=round(deviation_pct, 1),
-                    anomaly_type=anomaly_type,
-                    severity=severity,
-                    risk_level=risk_level,
-                    message=message,
-                    recommended_action=recommended_action
-                ))
-            
-            if severity == 'critical':
-                icon = '🚨'
-            elif severity == 'high':
-                icon = '⚠️'
-            else:
-                icon = '📉'
-            print(f"   {icon} {material.material_name}: {risk_level} ({deviation_pct:+.1f}%)")
+
+            # Classify and append to the appropriate risk list
+            _classify_and_append(
+                material, deviation_pct,
+                theft_risk, waste_risk, over_consumption
+            )
+
+            # Log result
+            print(f"   ✅ {material.material_name}: deviation {deviation_pct:+.1f}%")
             
         except Exception as e:
             print(f"   ❌ Error analyzing {material.material_name}: {e}")

@@ -24,7 +24,7 @@ export class AnomaliesConsolidatedController {
       this.logger.log('\n🔍 [MATERIALS-SERVICE] CONSOLIDATED ANOMALIES REQUEST');
       this.logger.log('='.repeat(80));
 
-      const daysNum = parseInt(days);
+      const daysNum = Number.parseInt(days, 10);
 
       // 1. Obtenir les anomalies ML (vol, gaspillage, surconsommation)
       const axios = require('axios');

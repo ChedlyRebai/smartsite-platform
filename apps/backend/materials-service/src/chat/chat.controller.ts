@@ -60,7 +60,7 @@ export class ChatController {
     try {
       const messages = await this.chatService.getMessages(
         orderId,
-        limit ? parseInt(limit) : 50,
+        limit ? Number.parseInt(limit, 10) : 50,
       );
       return { success: true, messages };
     } catch (error) {
@@ -224,7 +224,7 @@ export class ChatController {
       if (!file) return { success: false, error: 'No audio' };
 
       const audioUrl = `/uploads/voice/${file.filename}`;
-      const duration = parseInt(body.duration) || 0;
+      const duration = Number.parseInt(body.duration) || 0;
 
       let senderId, senderName, senderRole;
       if (body.senderType === 'site') {

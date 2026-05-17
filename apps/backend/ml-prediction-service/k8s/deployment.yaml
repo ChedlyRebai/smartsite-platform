@@ -15,9 +15,10 @@ spec:
       labels:
         app: ml-prediction-service
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: ml-prediction-service
-          image: ghadabannourii/smartsite-ml-prediction-service:latest
+          image: ghadabannourii/smartsite-ml-prediction-service:11
           ports:
             - containerPort: 8000
           env:
@@ -27,9 +28,11 @@ spec:
             requests:
               memory: "256Mi"
               cpu: "200m"
+              ephemeral-storage: "256Mi"
             limits:
               memory: "512Mi"
               cpu: "500m"
+              ephemeral-storage: "512Mi"
           livenessProbe:
             httpGet:
               path: /health

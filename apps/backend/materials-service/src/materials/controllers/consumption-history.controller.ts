@@ -183,7 +183,7 @@ export class ConsumptionHistoryController {
       const report = await this.aiAnalyzerService.generateConsumptionReport(
         materialId,
         siteId,
-        days ? parseInt(days.toString()) : 30,
+        days ? Number.parseInt(days.toString(), 10) : 30,
       );
       return {
         success: true,
