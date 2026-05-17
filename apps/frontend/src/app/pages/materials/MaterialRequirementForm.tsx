@@ -56,7 +56,7 @@ export default function MaterialRequirementForm({
           type="number"
           min={0}
           value={initialQuantity || ''}
-          onChange={(e) => onInitialQuantityChange(parseInt(e.target.value, 10) || 0)}
+          onChange={(e) => onInitialQuantityChange(Number.parseInt(e.target.value, 10) || 0)}
           placeholder="Ex: 1000"
         />
       </div>

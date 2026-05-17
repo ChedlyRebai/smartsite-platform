@@ -523,6 +523,9 @@ export default function OrdersTrackingDashboard() {
                       key={order.orderId}
                       className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
                       onClick={() => setSelectedOrder(order)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setSelectedOrder(order); }}
                     >
                       <div className="flex justify-between items-start">
                         <div className="flex-1">

@@ -335,14 +335,14 @@ export default function Home2() {
 
               <div className="mt-10 flex items-center justify-center gap-x-6">
                 <a
-                  href="#"
+                  href="/register"
                   className={`${styles.btnPrimary} rounded-lg px-8 py-4 text-sm font-semibold text-white`}
                 >
                   {t("cta.startTrial")}
                 </a>
 
                 <a
-                  href="#"
+                  href="/contact"
                   className={`${styles.btnSecondary} rounded-lg px-8 py-4 text-sm font-semibold text-white hover:text-indigo-400`}
                 >
                   {t("cta.requestDemo")} <span aria-hidden="true">→</span>
@@ -513,7 +513,7 @@ export default function Home2() {
                     <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">
                       {t("footer.solutions")}
                     </h3>
-                    <ul role="list" className="mt-4 space-y-4">
+                    <ul className="mt-4 space-y-4">
                       {navigationFooter.solutions.map((item: any) => (
                         <li key={item.name}>
                           <a
@@ -530,7 +530,7 @@ export default function Home2() {
                     <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">
                       {t("footer.support")}
                     </h3>
-                    <ul role="list" className="mt-4 space-y-4">
+                    <ul className="mt-4 space-y-4">
                       {navigationFooter.support.map((item: any) => (
                         <li key={item.name}>
                           <a
@@ -549,7 +549,7 @@ export default function Home2() {
                     <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">
                       {t("footer.company")}
                     </h3>
-                    <ul role="list" className="mt-4 space-y-4">
+                    <ul className="mt-4 space-y-4">
                       {navigationFooter.company.map((item: any) => (
                         <li key={item.name}>
                           <a
@@ -566,7 +566,7 @@ export default function Home2() {
                     <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">
                       {t("footer.legal")}
                     </h3>
-                    <ul role="list" className="mt-4 space-y-4">
+                    <ul className="mt-4 space-y-4">
                       {navigationFooter.legal.map((item: any) => (
                         <li key={item.name}>
                           <a

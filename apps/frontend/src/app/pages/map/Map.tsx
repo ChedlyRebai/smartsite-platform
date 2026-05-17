@@ -19,7 +19,7 @@ interface MapSite {
   projectId?: string;
 }
 
-export default function Map() {
+export default function MapPage() {
   const [sites, setSites] = useState<MapSite[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedSite, setSelectedSite] = useState<MapSite | null>(null);

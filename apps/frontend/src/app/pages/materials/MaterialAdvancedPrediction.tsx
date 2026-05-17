@@ -268,7 +268,7 @@ export default function MaterialAdvancedPrediction({
               min={0}
               max={23}
               value={features.hourOfDay}
-              onChange={(e) => setFeatures({ ...features, hourOfDay: parseInt(e.target.value) || 0 })}
+              onChange={(e) => setFeatures({ ...features, hourOfDay: parseInt(e.target.value, 10) || 0 })}
             />
           </div>
           <div>
@@ -276,7 +276,7 @@ export default function MaterialAdvancedPrediction({
             <select
               className="w-full p-2 border rounded-md"
               value={features.dayOfWeek}
-              onChange={(e) => setFeatures({ ...features, dayOfWeek: parseInt(e.target.value) })}
+              onChange={(e) => setFeatures({ ...features, dayOfWeek: parseInt(e.target.value, 10) })}
             >
               {dayOfWeekOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -293,7 +293,7 @@ export default function MaterialAdvancedPrediction({
               min={0}
               max={1}
               value={features.siteActivityLevel}
-              onChange={(e) => setFeatures({ ...features, siteActivityLevel: parseFloat(e.target.value) || 0 })}
+              onChange={(e) => setFeatures({ ...features, siteActivityLevel: Number(e.target.value) || 0 })}
             />
           </div>
           <div>

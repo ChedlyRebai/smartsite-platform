@@ -233,7 +233,7 @@ export const SiteRecommendationCard: React.FC<SiteRecommendationCardProps> = ({
               {loading ? 'Generating...' : 'Generate AI recommendations'}
             </Button>
           )}
-          {error && (
+          {!!error && (
             <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
               {error}
             </div>
@@ -256,13 +256,13 @@ export const SiteRecommendationCard: React.FC<SiteRecommendationCardProps> = ({
                           {statusConfig[rec.status]?.label || statusConfig.pending.label}
                         </Badge>
                       </div>
-                      {rec.targetMember && (
+                      {!!rec.targetMember && (
                         <div className="text-xs text-blue-600 mt-1">
                           Member: {rec.targetMember}
                         </div>
                       )}
                       <p className="text-xs text-gray-600 mt-1 line-clamp-2">{rec.description}</p>
-                      {rec.estimatedSavings && (
+                      {!!rec.estimatedSavings && (
                         <div className="text-xs text-green-600 mt-1">
                           Savings: {rec.estimatedSavings} TND
                         </div>

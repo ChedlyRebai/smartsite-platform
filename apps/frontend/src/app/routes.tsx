@@ -23,7 +23,7 @@ const QHSE = lazy(() => import("./pages/qhse/QHSE"));
 const Incidents = lazy(() => import("./pages/incidents/Incidents"));
 const Reports = lazy(() => import("./pages/reports/Reports"));
 const Analytics = lazy(() => import("./pages/analytics/Analytics"));
-const Map = lazy(() => import("./pages/map/Map"));
+const SiteMap = lazy(() => import("./pages/map/Map"));
 const Notifications = lazy(() => import("./pages/notifications/Notifications"));
 const UserManagement = lazy(() => import("./pages/users/UserManagement"));
 const RolesPage = lazy(() => import("./pages/admin/RolesPage"));
@@ -364,7 +364,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "map",
-        element: <Map />,
+        element: <SiteMap />,
       },
       {
         path: "notifications",

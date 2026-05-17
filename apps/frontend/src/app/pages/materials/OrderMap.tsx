@@ -726,7 +726,7 @@ export default function OrderMap({ open, onClose, orderId, materialName, siteLoc
                         </div>
                       ) : (
                         lowStockMaterials.map((mat) => (
-                          <div key={mat._id} onClick={() => handleSelectMaterial(mat)} className="p-3 rounded-lg border-2 cursor-pointer hover:border-yellow-400 bg-yellow-50">
+                          <div key={mat._id} onClick={() => handleSelectMaterial(mat)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleSelectMaterial(mat); }} role="button" tabIndex={0} className="p-3 rounded-lg border-2 cursor-pointer hover:border-yellow-400 bg-yellow-50">
                             <div className="flex justify-between">
                               <span className="font-semibold">{mat.name}</span>
                               <Badge variant={mat.quantity === 0 ? 'destructive' : 'secondary'}>
@@ -747,7 +747,7 @@ export default function OrderMap({ open, onClose, orderId, materialName, siteLoc
                         </div>
                       ) : (
                         sites.filter(s => s.coordinates).slice(0, 5).map((site) => (
-                          <div key={site._id} onClick={() => setSelectedSite(site)} className={`p-2 rounded border cursor-pointer ${selectedSite?._id === site._id ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}>
+                          <div key={site._id} onClick={() => setSelectedSite(site)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setSelectedSite(site); }} role="button" tabIndex={0} className={`p-2 rounded border cursor-pointer ${selectedSite?._id === site._id ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}>
                             <div className="font-medium">{site.nom}</div>
                             <div className="text-xs text-gray-500">{site.adresse}</div>
                           </div>
@@ -763,7 +763,7 @@ export default function OrderMap({ open, onClose, orderId, materialName, siteLoc
                         </div>
                       ) : (
                         supplierRoutes.map((route) => (
-                          <div key={route.supplier._id} onClick={() => handleSelectSupplier(route)} className={`p-3 rounded border cursor-pointer ${selectedFournisseur?._id === route.supplier._id ? 'border-green-500 bg-green-50' : 'border-gray-200'}`}>
+                          <div key={route.supplier._id} onClick={() => handleSelectSupplier(route)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleSelectSupplier(route); }} role="button" tabIndex={0} className={`p-3 rounded border cursor-pointer ${selectedFournisseur?._id === route.supplier._id ? 'border-green-500 bg-green-50' : 'border-gray-200'}`}>
                             <div className="flex justify-between">
                               <span className="font-semibold">{route.supplier.nom}</span>
                               <span className="text-sm font-medium text-blue-600">{formatDistance(route.distance)}</span>
@@ -793,7 +793,7 @@ export default function OrderMap({ open, onClose, orderId, materialName, siteLoc
                     </div>
                   ) : (
                     orders.map((order) => (
-                      <div key={order._id} onClick={() => setSelectedOrder(order)} className={`p-3 rounded-lg border-2 cursor-pointer ${selectedOrder?._id === order._id ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}>
+                      <div key={order._id} onClick={() => setSelectedOrder(order)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setSelectedOrder(order); }} role="button" tabIndex={0} className={`p-3 rounded-lg border-2 cursor-pointer ${selectedOrder?._id === order._id ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}>
                         <div className="flex justify-between">
                           <span className="font-semibold">{order.materialName}</span>
                           <Badge className={getStatusColor(order.status)}>{getStatusLabel(order.status)}</Badge>

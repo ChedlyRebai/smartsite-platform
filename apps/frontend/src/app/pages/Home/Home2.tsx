@@ -348,7 +348,7 @@ export default function Home2() {
 
               <div className="mt-10 flex items-center justify-center gap-x-6">
                 <a
-                  href="#"
+                  href="/register"
                   className={`${styles.btnPrimary} rounded-lg px-8 py-4 text-sm font-semibold text-white`}
                 >
                   {t("cta.startTrial")}
@@ -543,7 +543,7 @@ export default function Home2() {
                   <h3 className="text-xs font-bold text-blue-300 tracking-widest uppercase mb-6">
                     {t("footer.solutions")}
                   </h3>
-                  <ul role="list" className="space-y-3">
+                  <ul className="space-y-3">
                     {navigationFooter.solutions.map((item: any) => (
                       <li key={item.name}>
                         <a
@@ -560,7 +560,7 @@ export default function Home2() {
                   <h3 className="text-xs font-bold text-blue-300 tracking-widest uppercase mb-6">
                     {t("footer.support")}
                   </h3>
-                  <ul role="list" className="space-y-3">
+                  <ul className="space-y-3">
                     {navigationFooter.support.map((item: any) => (
                       <li key={item.name}>
                         <a
@@ -581,7 +581,7 @@ export default function Home2() {
                   <h3 className="text-xs font-bold text-blue-300 tracking-widest uppercase mb-6">
                     {t("footer.company")}
                   </h3>
-                  <ul role="list" className="space-y-3">
+                  <ul className="space-y-3">
                     {navigationFooter.company.map((item: any) => (
                       <li key={item.name}>
                         <a
@@ -598,7 +598,7 @@ export default function Home2() {
                   <h3 className="text-xs font-bold text-blue-300 tracking-widest uppercase mb-6">
                     {t("footer.legal")}
                   </h3>
-                  <ul role="list" className="space-y-3">
+                  <ul className="space-y-3">
                     {navigationFooter.legal.map((item: any) => (
                       <li key={item.name}>
                         <a

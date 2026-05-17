@@ -69,7 +69,7 @@ const ChatPage = () => {
           return;
         }
         const channelId = [String(streamUserId), String(targetUserId)]
-          .sort()
+          .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }))
           .join("-");
 
         // you and me

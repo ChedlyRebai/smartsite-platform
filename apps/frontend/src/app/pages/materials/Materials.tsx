@@ -591,7 +591,7 @@ export default function Materials() {
     const consumptionRate = prediction.consumptionRate ?? 0;
     
     // If values are invalid, show error message
-    if (!isFinite(hoursToOutOfStock) || hoursToOutOfStock < 0) {
+    if (!Number.isFinite(hoursToOutOfStock) || hoursToOutOfStock < 0) {
       return (
         <span className="text-xs text-orange-600">
           ⚠️ Insufficient data

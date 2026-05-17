@@ -151,6 +151,9 @@ export const AddressSearch: React.FC<AddressSearchProps> = ({
                 key={result.id}
                 className={`result-item ${selectedResult?.id === result.id ? 'selected' : ''}`}
                 onClick={() => selectLocation(result)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') selectLocation(result); }}
+                role="button"
+                tabIndex={0}
               >
                 <div className="result-name">{result.displayName}</div>
                 <div className="result-details">

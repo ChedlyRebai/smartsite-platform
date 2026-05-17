@@ -59,6 +59,8 @@ export function ThemeButton() {
           <div
             className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
+          role="presentation"
+          onKeyDown={(e) => { if (e.key === "Escape") setIsOpen(false); }}
           />
 
           {/* Dropdown Menu */}

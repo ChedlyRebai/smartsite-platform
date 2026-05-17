@@ -91,7 +91,7 @@ export default function Projects() {
     }
     try {
       await axios.post(`${API_URL}/projects`, {
-        name: newProject.name, budget: parseFloat(newProject.budget),
+        name: newProject.name, budget: Number(newProject.budget),
         siteCount: newProject.siteCount, sites: selectedSites, status: "planning", priority: "medium",
         startDate: newProject.startDate || undefined, endDate: newProject.endDate || undefined,
       });
@@ -426,7 +426,7 @@ export default function Projects() {
     if (editData.siteCount < 1) { toast.error("Number of sites must be at least 1"); return; }
     try {
       await axios.put(`${API_URL}/projects/${selectedProject?._id}`, {
-        name: editData.name, budget: parseFloat(editData.budget),
+        name: editData.name, budget: Number(editData.budget),
         siteCount: editData.siteCount, status: editData.status, progress: editData.progress,
         startDate: editData.startDate || undefined, endDate: editData.endDate || undefined,
       });
@@ -492,7 +492,7 @@ export default function Projects() {
                   <div className="space-y-1.5">
                     <Label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Number of Sites</Label>
                     <Input type="number" min="1" placeholder="e.g., 5" value={newProject.siteCount} className="border-gray-200 focus:border-gray-400"
-                      onChange={(e) => { setNewProject({ ...newProject, siteCount: parseInt(e.target.value) || 0 }); setCreateError(null); }} />
+                      onChange={(e) => { setNewProject({ ...newProject, siteCount: Number.parseInt(e.target.value, 10) || 0 }); setCreateError(null); }} />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
@@ -621,6 +621,9 @@ export default function Projects() {
                   <div
                     className="flex items-center gap-3 cursor-pointer flex-1 min-w-0"
                     onClick={() => navigate(`/projects/${project._id}/sites`)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate(`/projects/${project._id}/sites`); }}
+                    role="button"
+                    tabIndex={0}
                   >
                     <div className={`shrink-0 p-3 rounded-xl bg-gradient-to-br ${accent.icon} shadow-md`}>
                       <Briefcase className="h-6 w-6 text-white" />
@@ -787,7 +790,7 @@ export default function Projects() {
                         <div className="space-y-1.5">
                           <Label className="text-xs font-semibold text-purple-700 uppercase tracking-wide">Number of Sites</Label>
                           <Input type="number" min="1" value={editData.siteCount} className="border-purple-200"
-                            onChange={(e) => setEditData({ ...editData, siteCount: parseInt(e.target.value) || 0 })} />
+                            onChange={(e) => setEditData({ ...editData, siteCount: Number.parseInt(e.target.value, 10) || 0 })} />
                         </div>
                         <div className="space-y-1.5">
                           <Label className="text-xs font-semibold text-yellow-700 uppercase tracking-wide">Status</Label>
@@ -803,7 +806,7 @@ export default function Projects() {
                             Progress — <span className="text-cyan-600 font-bold">{editData.progress}%</span>
                           </Label>
                           <input type="range" min="0" max="100" value={editData.progress} className="w-full accent-cyan-500"
-                            onChange={(e) => setEditData({ ...editData, progress: parseInt(e.target.value) })} />
+                            onChange={(e) => setEditData({ ...editData, progress: Number.parseInt(e.target.value, 10) })} />
                           <div className="w-full bg-gray-200 rounded-full h-2">
                             <div className="bg-gradient-to-r from-cyan-500 to-blue-500 h-2 rounded-full transition-all" style={{ width: `${editData.progress}%` }} />
                           </div>

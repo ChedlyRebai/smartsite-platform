@@ -65,19 +65,18 @@ const TaskStageForm = ({ type }: { type: "edit" | "add" }) => {
   console.log("milestone from task form", milestoneId);
 
   console.log("milestone id from TAskForm", milestoneId);
-  if (type === "edit" && milestoneId) {
-    const { data: taskStageData } = useQuery({
-      queryKey: ["getTaskStageById", milestoneId],
-      queryFn: () =>
-        getTaskStageById(milestoneId as string).then((data) => {
-          form.reset(data);
-          console.log("task stage data from query", data);
-          return data;
-        }),
-      enabled: !!milestoneId,
-    });
-    console.log("====================================", taskStageData);
-  }
+
+  const { data: taskStageData } = useQuery({
+    queryKey: ["getTaskStageById", milestoneId],
+    queryFn: () =>
+      getTaskStageById(milestoneId as string).then((data) => {
+        form.reset(data);
+        console.log("task stage data from query", data);
+        return data;
+      }),
+    enabled: type === "edit" && !!milestoneId,
+  });
+  console.log("====================================", taskStageData);
 
   console.log("task stage data", milestoneId);
   const form = useForm({

@@ -266,7 +266,7 @@ export function UserDataTable<TData, TValue>({
           <>
             <Button
               onClick={() => {
-                (onOpen(), setType("edit"), setId(id));
+                onOpen(); setType("edit"); setId(id);
               }}
               variant="ghost"
               size="sm"

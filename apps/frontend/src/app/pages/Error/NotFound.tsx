@@ -31,7 +31,7 @@ export default function NotFound() {
                 </h1>
                 <p className="mt-2 text-base text-gray-500">Sorry, we couldn’t find the page you’re looking for.</p>
                 <div className="mt-6">
-                  <a href="#" className="text-base font-medium text-indigo-600 hover:text-indigo-500">
+                  <a href="/" className="text-base font-medium text-indigo-600 hover:text-indigo-500">
                     Go back home<span aria-hidden="true"> &rarr;</span>
                   </a>
                 </div>
@@ -41,15 +41,15 @@ export default function NotFound() {
           <footer className="flex-shrink-0 bg-gray-50">
             <div className="mx-auto max-w-7xl w-full px-4 py-16 sm:px-6 lg:px-8">
               <nav className="flex space-x-4">
-                <a href="#" className="text-sm font-medium text-gray-500 hover:text-gray-600">
+                <a href="/contact" className="text-sm font-medium text-gray-500 hover:text-gray-600">
                   Contact Support
                 </a>
                 <span className="inline-block border-l border-gray-300" aria-hidden="true" />
-                <a href="#" className="text-sm font-medium text-gray-500 hover:text-gray-600">
+                <a href="/status" className="text-sm font-medium text-gray-500 hover:text-gray-600">
                   Status
                 </a>
                 <span className="inline-block border-l border-gray-300" aria-hidden="true" />
-                <a href="#" className="text-sm font-medium text-gray-500 hover:text-gray-600">
+                <a href="https://twitter.com" className="text-sm font-medium text-gray-500 hover:text-gray-600">
                   Twitter
                 </a>
               </nav>

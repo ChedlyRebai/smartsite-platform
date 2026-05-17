@@ -340,6 +340,9 @@ Le motif doit être:
                     setSelectedUser(u);
                     setDetailsOpen(true);
                   }}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { setSelectedUser(u); setDetailsOpen(true); } }}
+                  role="button"
+                  tabIndex={0}
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">

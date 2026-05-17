@@ -204,7 +204,7 @@ export default function SuppliersList() {
                         <Badge className={`text-xs border ${status.className}`}>
                           {status.label}
                         </Badge>
-                        {supplier.ratingCount && supplier.ratingCount > 0 && (
+                        {!!supplier.ratingCount && supplier.ratingCount > 0 && (
                           <span className="flex items-center gap-1 text-xs text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded">
                             <Star className="w-3 h-3 fill-yellow-500 text-yellow-500" />
                             {supplier.averageRating?.toFixed(1)}/10 ({supplier.ratingCount})

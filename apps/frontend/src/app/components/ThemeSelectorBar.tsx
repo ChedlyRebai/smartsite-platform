@@ -113,6 +113,8 @@ export function ThemeSelectorBar() {
         <div
           className="fixed inset-0 z-30 bg-black/20"
           onClick={() => setIsOpen(false)}
+          role="presentation"
+          onKeyDown={(e) => { if (e.key === "Escape") setIsOpen(false); }}
         />
       )}
     </>

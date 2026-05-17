@@ -148,7 +148,7 @@ const PermissionForms = ({ type }: { type: "add" | "edit" }) => {
       deriveModuleFromHref(category.href),
     );
 
-    return Array.from(new Set([...baseSuggestions, ...derivedFromCategories])).sort();
+    return Array.from(new Set([...baseSuggestions, ...derivedFromCategories])).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
   }, []);
 
   let formSchema;

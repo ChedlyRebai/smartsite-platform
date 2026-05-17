@@ -94,7 +94,7 @@ export default function Finance() {
     const transaction = {
       id: transactions.length + 1,
       description: newTransaction.description,
-      amount: parseInt(newTransaction.amount),
+      amount: Number.parseInt(newTransaction.amount, 10),
       type: newTransaction.type as "income" | "expense",
       date: new Date().toISOString().split("T")[0],
     };

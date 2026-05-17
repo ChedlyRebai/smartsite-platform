@@ -229,11 +229,11 @@ export const createClient = async (
       return Promise.resolve({ status: res.status, data: res.data });
     }
   } catch (error: any) {
+    console.error("Create client error:", error?.response?.data?.message);
     return Promise.resolve({
       status: error?.response?.status,
       data: error?.response?.data?.message,
     });
-    console.error("Create client error:", error?.response?.data?.message);
   }
 };
 // ============ TEAM ASSIGNMENT API ============

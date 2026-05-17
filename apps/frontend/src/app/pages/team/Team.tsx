@@ -870,6 +870,9 @@ export default function Team() {
                       return (
                         <div
                           key={user._id}
+                          role="button"
+                          tabIndex={0}
+                          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") e.currentTarget.click(); }}
                           onClick={() => setEditMemberUserId(isSelected ? '' : user._id)}
                           className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors
                             ${isSelected ? 'bg-blue-50 border-l-4 border-blue-500' : 'hover:bg-gray-50 border-l-4 border-transparent'}`}
@@ -1069,7 +1072,10 @@ export default function Team() {
                                 return (
                                   <div
                                     key={user._id}
-                                    onClick={() => setSelectedUserId(isSelected ? '' : user._id)}
+                                    role="button"
+                          tabIndex={0}
+                          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") e.currentTarget.click(); }}
+                          onClick={() => setSelectedUserId(isSelected ? '' : user._id)}
                                     className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors
                                       ${isSelected
                                         ? 'bg-blue-50 border-l-4 border-blue-500'

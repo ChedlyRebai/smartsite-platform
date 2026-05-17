@@ -224,6 +224,8 @@ export function NotificationPanel() {
           <div
             className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
+            role="presentation"
+            onKeyDown={(e) => { if (e.key === 'Escape') setIsOpen(false); }}
           />
           <div className="absolute right-0 top-full mt-2 w-96 bg-white border rounded-lg shadow-xl z-50 max-h-[500px] overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b bg-gray-50">
@@ -285,6 +287,9 @@ export function NotificationPanel() {
                       className={`p-4 hover:bg-gray-50 transition-colors cursor-pointer ${!notif.read ? 'bg-blue-50/50' : ''
                         } ${getColor(notif.type)}`}
                       onClick={() => markAsRead(notif.id)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') markAsRead(notif.id); }}
+                      role="button"
+                      tabIndex={0}
                     >
                       <div className="flex items-start gap-3">
                         {getIcon(notif.type)}

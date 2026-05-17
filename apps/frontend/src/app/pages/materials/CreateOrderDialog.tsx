@@ -378,7 +378,7 @@ export default function CreateOrderDialog({
                     type="number"
                     min={minQuantity}
                     value={quantity}
-                    onChange={(e) => setQuantity(parseInt(e.target.value) || minQuantity)}
+                    onChange={(e) => setQuantity(parseInt(e.target.value, 10) || minQuantity)}
                     className={`w-full ${quantity < recommendedQuantity && recommendedQuantity > 0 ? 'border-red-500' : ''}`}
                   />
                   {quantity < recommendedQuantity && recommendedQuantity > 0 && (

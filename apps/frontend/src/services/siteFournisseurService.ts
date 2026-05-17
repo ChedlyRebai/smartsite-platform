@@ -20,15 +20,15 @@ const extractCoordinates = (data: any): { lat: number; lng: number } | undefined
   let lat: any = data.lat ?? data.latitude;
   let lng: any = data.lng ?? data.longitude;
   
-  if (lat?.$numberDouble) lat = parseFloat(lat.$numberDouble);
-  else if (lat?.$numberInt) lat = parseInt(lat.$numberInt);
-  else if (typeof lat === 'string') lat = parseFloat(lat);
+  if (lat?.$numberDouble) lat = Number.parseFloat(lat.$numberDouble);
+  else if (lat?.$numberInt) lat = Number.parseInt(lat.$numberInt, 10);
+  else if (typeof lat === 'string') lat = Number.parseFloat(lat);
   
-  if (lng?.$numberDouble) lng = parseFloat(lng.$numberDouble);
-  else if (lng?.$numberInt) lng = parseInt(lng.$numberInt);
-  else if (typeof lng === 'string') lng = parseFloat(lng);
+  if (lng?.$numberDouble) lng = Number.parseFloat(lng.$numberDouble);
+  else if (lng?.$numberInt) lng = Number.parseInt(lng.$numberInt, 10);
+  else if (typeof lng === 'string') lng = Number.parseFloat(lng);
   
-  if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) {
+  if (typeof lat !== 'number' || typeof lng !== 'number' || Number.isNaN(lat) || Number.isNaN(lng)) {
     return undefined;
   }
   return { lat, lng };

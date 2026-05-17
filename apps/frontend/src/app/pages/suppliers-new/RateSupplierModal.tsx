@@ -152,7 +152,7 @@ export default function RateSupplierModal({
                       max="10"
                       step="0.5"
                       value={ratings[criterion] || 0}
-                      onChange={(e) => handleRatingChange(criterion, parseFloat(e.target.value))}
+                      onChange={(e) => handleRatingChange(criterion, Number.parseFloat(e.target.value))}
                       className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
                     />
                     <span className="text-xs text-gray-500 w-16 text-right">Excellent</span>

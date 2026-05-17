@@ -1360,6 +1360,9 @@ Pour toute question, veuillez contacter l'administrateur système.
                   key={incident.id}
                   className="p-5 border border-slate-200 rounded-xl hover:shadow-md hover:border-blue-300 cursor-pointer transition-all duration-200 bg-white hover:bg-slate-50"
                   onClick={() => handleShowIncidentDetails(incident)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleShowIncidentDetails(incident); }}
+                  role="button"
+                  tabIndex={0}
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
@@ -1483,7 +1486,7 @@ Pour toute question, veuillez contacter l'administrateur système.
           </Button>
 
           <div className="flex items-center gap-1">
-            {[...Array(totalPages)].map((_, index) => (
+            {Array.from({ length: totalPages }).map((_, index) => (
               <Button
                 key={index + 1}
                 variant={currentPage === index + 1 ? "default" : "outline"}
@@ -1731,6 +1734,9 @@ Pour toute question, veuillez contacter l'administrateur système.
                       key={user._id}
                       className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
                       onClick={() => selectUserForIncident(user)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') selectUserForIncident(user); }}
+                      role="button"
+                      tabIndex={0}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">

@@ -393,6 +393,8 @@ const ChatbotWidget: React.FC<{ className?: string }> = ({ className = '' }) => 
           <div
             className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50"
             onClick={() => setShowServiceMenu(false)}
+          role="presentation"
+          onKeyDown={(e) => { if (e.key === "Escape") setShowServiceMenu(false); }}
           >
             {messages.length === 0 && (
               <div className="text-center py-4">

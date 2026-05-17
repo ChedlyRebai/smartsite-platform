@@ -92,19 +92,19 @@ export default function MaterialForm({ open, onClose, onSuccess, initialData }: 
         break;
       case 'quantity':
         if (value === undefined || value === null || value === '') return 'Quantity is required';
-        if (isNaN(Number(value))) return 'Quantity must be a number';
+        if (Number.isNaN(Number(value))) return 'Quantity must be a number';
         if (Number(value) < 0) return 'Quantity cannot be negative';
         if (Number(value) > 1000000) return 'Maximum quantity is 1,000,000';
         break;
       case 'minimumStock':
         if (value === undefined || value === null || value === '') return 'Minimum stock is required';
-        if (isNaN(Number(value))) return 'Must be a number';
+        if (Number.isNaN(Number(value))) return 'Must be a number';
         if (Number(value) < 0) return 'Cannot be negative';
         if (Number(value) > 1000000) return 'Maximum value: 1,000,000';
         break;
       case 'maximumStock':
         if (value === undefined || value === null || value === '') return 'Maximum stock is required';
-        if (isNaN(Number(value))) return 'Must be a number';
+        if (Number.isNaN(Number(value))) return 'Must be a number';
         if (Number(value) < 0) return 'Cannot be negative';
         if (Number(value) > 1000000) return 'Maximum value: 1,000,000';
         if (formData.minimumStock && Number(value) < formData.minimumStock) {
@@ -113,7 +113,7 @@ export default function MaterialForm({ open, onClose, onSuccess, initialData }: 
         break;
       case 'reorderPoint':
         if (value === undefined || value === null || value === '') return 'Reorder point is required';
-        if (isNaN(Number(value))) return 'Must be a number';
+        if (Number.isNaN(Number(value))) return 'Must be a number';
         if (Number(value) < 0) return 'Cannot be negative';
         if (Number(value) > 1000000) return 'Maximum value: 1,000,000';
         if (formData.minimumStock && Number(value) > formData.minimumStock) {

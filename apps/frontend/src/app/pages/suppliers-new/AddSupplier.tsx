@@ -417,6 +417,10 @@ export default function AddSupplier() {
                     : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'
                 }`}
                 onClick={() => contractRef.current?.click()}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') contractRef.current?.click(); }}
+                role="button"
+                tabIndex={0}
+                aria-label="Upload contract document"
               >
                 <input
                   ref={contractRef}
@@ -458,6 +462,10 @@ export default function AddSupplier() {
                     : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'
                 }`}
                 onClick={() => insuranceDocumentRef.current?.click()}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') insuranceDocumentRef.current?.click(); }}
+                role="button"
+                tabIndex={0}
+                aria-label="Upload insurance document"
               >
                 <input
                   ref={insuranceDocumentRef}

@@ -582,20 +582,20 @@ export default function Sites() {
 
     if (!newSite.area) {
       newErrors.area = 'Area is required';
-    } else if (parseInt(newSite.area) <= 0) {
+    } else if (Number.parseInt(newSite.area, 10) <= 0) {
       newErrors.area = 'Area must be greater than 0';
     }
 
     if (!newSite.budget) {
       newErrors.budget = 'Budget is required';
-    } else if (parseInt(newSite.budget) <= 0) {
+    } else if (Number.parseInt(newSite.budget, 10) <= 0) {
       newErrors.budget = 'Budget must be greater than 0';
     } else if (currentProjectId && projectBudget !== null) {
       // Sum of existing sites budgets for this project
       const existingSitesBudget = sites
         .filter(s => s.projectId === currentProjectId)
         .reduce((sum, s) => sum + (s.budget || 0), 0);
-      const newBudget = parseInt(newSite.budget);
+      const newBudget = Number.parseInt(newSite.budget, 10);
       if (existingSitesBudget + newBudget > projectBudget) {
         const remaining = projectBudget - existingSitesBudget;
         newErrors.budget = `Budget exceeds project limit. Remaining: ${new Intl.NumberFormat('fr-TN', { style: 'currency', currency: 'TND', minimumFractionDigits: 0 }).format(remaining > 0 ? remaining : 0)}`;
@@ -719,8 +719,8 @@ export default function Sites() {
           name: newSite.name,
           address: newSite.address,
           status: 'planning',
-          area: parseInt(newSite.area),
-          budget: parseInt(newSite.budget),
+          area: Number.parseInt(newSite.area, 10),
+          budget: Number.parseInt(newSite.budget, 10),
           progress: 0,
           workStartDate: new Date().toISOString(),
           projectId: currentProjectId || String(sites.length + 1),
@@ -735,8 +735,8 @@ export default function Sites() {
         const site: Partial<Site> = {
           name: newSite.name,
           address: newSite.address,
-          area: parseInt(newSite.area),
-          budget: parseInt(newSite.budget),
+          area: Number.parseInt(newSite.area, 10),
+          budget: Number.parseInt(newSite.budget, 10),
           status: 'planning',
           progress: 0,
           workStartDate: new Date().toISOString(),
@@ -1245,7 +1245,7 @@ export default function Sites() {
                             .filter(s => s.projectId === currentProjectId)
                             .reduce((sum, s) => sum + (s.budget || 0), 0);
                           const remaining = projectBudget - existingSitesBudget;
-                          const entered = parseInt(newSite.budget) || 0;
+                          const entered = Number.parseInt(newSite.budget, 10) || 0;
                           const afterNew = existingSitesBudget + entered;
                           const isOver = afterNew > projectBudget;
                           return (

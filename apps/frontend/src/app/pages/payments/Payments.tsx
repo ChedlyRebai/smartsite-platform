@@ -103,7 +103,7 @@ function validateForm(form: { siteId: string; amount: number | string; paymentMe
   const amount = Number(form.amount);
   if (!form.amount && form.amount !== 0) {
     errors.amount = "Amount is required.";
-  } else if (isNaN(amount) || amount <= 0) {
+  } else if (Number.isNaN(amount) || amount <= 0) {
     errors.amount = "Amount must be a positive number.";
   } else if (amount > 99_999_999) {
     errors.amount = "Amount exceeds the maximum allowed value.";

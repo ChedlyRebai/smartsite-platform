@@ -66,11 +66,12 @@ const SignUpPage = () => {
                 <div className="space-y-3">
                   {/* FULLNAME */}
                   <div className="form-control w-full">
-                    <label className="label">
+                    <label htmlFor="signup-fullname" className="label">
                       <span className="label-text">Full Name</span>
                     </label>
                     <input
                       type="text"
+                      id="signup-fullname"
                       placeholder="John Doe"
                       className="input input-bordered w-full"
                       value={signupData.fullName}
@@ -80,11 +81,12 @@ const SignUpPage = () => {
                   </div>
                   {/* EMAIL */}
                   <div className="form-control w-full">
-                    <label className="label">
+                    <label htmlFor="signup-email" className="label">
                       <span className="label-text">Email</span>
                     </label>
                     <input
                       type="email"
+                      id="signup-email"
                       placeholder="john@gmail.com"
                       className="input input-bordered w-full"
                       value={signupData.email}
@@ -94,11 +96,12 @@ const SignUpPage = () => {
                   </div>
                   {/* PASSWORD */}
                   <div className="form-control w-full">
-                    <label className="label">
+                    <label htmlFor="signup-password" className="label">
                       <span className="label-text">Password</span>
                     </label>
                     <input
                       type="password"
+                      id="signup-password"
                       placeholder="********"
                       className="input input-bordered w-full"
                       value={signupData.password}

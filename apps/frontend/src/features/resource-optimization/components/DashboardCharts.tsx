@@ -87,17 +87,17 @@ export const SummaryStats: React.FC<DashboardStatsProps> = ({ dashboard }) => {
     );
   }
 
-  const realizedSavings = dashboard.financial?.realizedSavings && isFinite(Number(dashboard.financial.realizedSavings)) 
+  const realizedSavings = dashboard.financial?.realizedSavings && Number.isFinite(Number(dashboard.financial.realizedSavings)) 
     ? Number(dashboard.financial.realizedSavings) 
     : 0;
   
   const implementedCount = dashboard.recommendations?.implemented || 0;
   
-  const effectiveness = dashboard.financial?.roi && isFinite(Number(dashboard.financial.roi)) 
+  const effectiveness = dashboard.financial?.roi && Number.isFinite(Number(dashboard.financial.roi)) 
     ? Math.round(Number(dashboard.financial.roi) * 100) 
     : 0;
 
-  const co2Reduction = dashboard.environmental?.actualCO2Reduction && isFinite(Number(dashboard.environmental.actualCO2Reduction))
+  const co2Reduction = dashboard.environmental?.actualCO2Reduction && Number.isFinite(Number(dashboard.environmental.actualCO2Reduction))
     ? Number(dashboard.environmental.actualCO2Reduction)
     : 0;
 
@@ -180,7 +180,7 @@ export const SavingsChart: React.FC<SavingsChartProps> = ({ data }) => {
   // Ensure data is valid and filter out invalid values
   const validData = (data || []).map(item => ({
     ...item,
-    value: isFinite(item.value) ? Number(item.value) : 0
+    value: Number.isFinite(item.value) ? Number(item.value) : 0
   }));
 
   const colorMap: Record<string, string> = {
@@ -235,7 +235,7 @@ export const SavingsChart: React.FC<SavingsChartProps> = ({ data }) => {
               <XAxis dataKey="name" tick={{ fontSize: 11 }} angle={-15} textAnchor="end" height={80} />
               <YAxis tick={{ fontSize: 11 }} />
               <Tooltip 
-                formatter={(value: any) => `${isFinite(value) ? Number(value).toLocaleString('fr-FR') : 0} TND`}
+                formatter={(value: any) => `${Number.isFinite(value) ? Number(value).toLocaleString('fr-FR') : 0} TND`}
                 labelStyle={{ fontWeight: 600, color: '#000' }}
                 contentStyle={{ borderRadius: '8px', border: '2px solid #e5e7eb' }}
               />
@@ -280,9 +280,9 @@ export const CO2ImpactChart: React.FC<CO2ImpactChartProps> = ({
   realized,
 }) => {
   const data = [
-    { name: 'Emissions (baseline)', value: isFinite(current) ? Number(current) : 0, color: '#ef4444' },
-    { name: 'Potential Reduction', value: isFinite(potential) ? Number(potential) : 0, color: '#f59e0b' },
-    { name: 'Realized Reduction', value: isFinite(realized) ? Number(realized) : 0, color: '#10b981' },
+    { name: 'Emissions (baseline)', value: Number.isFinite(current) ? Number(current) : 0, color: '#ef4444' },
+    { name: 'Potential Reduction', value: Number.isFinite(potential) ? Number(potential) : 0, color: '#f59e0b' },
+    { name: 'Realized Reduction', value: Number.isFinite(realized) ? Number(realized) : 0, color: '#10b981' },
   ];
 
   const potentialReduction = current > 0 ? ((potential / current) * 100).toFixed(1) : 0;

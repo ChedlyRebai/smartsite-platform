@@ -64,10 +64,11 @@ const LoginPage = () => {
 
                 <div className="flex flex-col gap-3">
                   <div className="form-control w-full space-y-2">
-                    <label className="label">
+                    <label htmlFor="login-email" className="label">
                       <span className="label-text">Email</span>
                     </label>
                     <input
+                      id="login-email"
                       type="email"
                       placeholder="hello@example.com"
                       className="input input-bordered w-full"
@@ -78,7 +79,7 @@ const LoginPage = () => {
                   </div>
 
                   <div className="form-control w-full space-y-2">
-                    <label className="label">
+                    <label htmlFor="login-password" className="label">
                       <span className="label-text">Password</span>
                     </label>
                     <input

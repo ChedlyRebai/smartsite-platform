@@ -123,7 +123,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                 </ul>
               </div>
             )}
-            {rec.suggestedDuration && (
+            {!!rec.suggestedDuration && (
               <div className="text-sm text-blue-600 mt-2">
                 <strong>Durée suggérée:</strong> {rec.suggestedDuration} jours maximum par tâche
               </div>

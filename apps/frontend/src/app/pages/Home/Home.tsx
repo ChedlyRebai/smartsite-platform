@@ -296,14 +296,14 @@ export default function Home2() {
 
               <div className="mt-10 flex items-center justify-center gap-x-6">
                 <a
-                  href="#"
+                  href="/register"
                   className="rounded-md bg-yellow-500 px-6 py-3 text-sm font-semibold text-gray-900 dark:text-white shadow-sm hover:bg-yellow-400 transition"
                 >
                   Start Free Trial
                 </a>
 
                 <a
-                  href="#"
+                  href="/contact"
                   className="text-sm font-semibold leading-6 text-white hover:text-yellow-400 transition"
                 >
                   Request Demo <span aria-hidden="true">→</span>
@@ -454,7 +454,6 @@ export default function Home2() {
             </p>
           </div>
           <ul
-            role="list"
             className="mx-auto mt-20 grid max-w-2xl grid-cols-2 gap-x-8 gap-y-16 text-center sm:grid-cols-3 md:grid-cols-4 lg:mx-0 lg:max-w-none lg:grid-cols-5 xl:grid-cols-6"
           >
             {team.map((person) => (

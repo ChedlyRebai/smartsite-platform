@@ -525,6 +525,9 @@ export default function DeliveryChat({ currentUser }: DeliveryChatProps) {
               <div
                 key={conv.orderId}
                 onClick={() => loadMessages(conv.orderId)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') loadMessages(conv.orderId); }}
+                role="button"
+                tabIndex={0}
                 className={`p-3 rounded-lg cursor-pointer mb-2 transition-colors ${
                   selectedOrderId === conv.orderId
                     ? "bg-blue-50 border border-blue-300"

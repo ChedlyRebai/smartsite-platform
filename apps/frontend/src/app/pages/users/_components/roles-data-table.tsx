@@ -211,7 +211,7 @@ export function RolesDataTable({
           <>
             <Button
               onClick={() => {
-                (onOpen(), setType("edit"), setId(id));
+                onOpen(); setType("edit"); setId(id);
               }}
               variant="ghost"
               size="sm"

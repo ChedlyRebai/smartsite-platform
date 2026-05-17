@@ -149,7 +149,7 @@ export const SupplierSelector: React.FC<SupplierSelectorProps> = ({
               Voir tous les fournisseurs
             </button>
           )}
-          {showAllSuppliers && (
+          {!!showAllSuppliers && (
             <button onClick={loadSuppliers} className="show-recommended-button">
               Voir les recommandés
             </button>
@@ -186,14 +186,14 @@ export const SupplierSelector: React.FC<SupplierSelectorProps> = ({
                   <span>Livraison: {supplier.delaiLivraison} jour(s)</span>
                 </div>
 
-                {supplier.distance && (
+                {!!supplier.distance && (
                   <div className="detail-item">
                     <span className="icon">📏</span>
                     <span>Distance: {supplier.distance.toFixed(1)} km</span>
                   </div>
                 )}
 
-                {supplier.prix && (
+                {!!supplier.prix && (
                   <div className="detail-item">
                     <span className="icon">💰</span>
                     <span>Prix: {supplier.prix} TND</span>

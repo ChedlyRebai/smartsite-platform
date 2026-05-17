@@ -56,7 +56,7 @@ export default function DashboardLayout() {
   const [logoAvailable, setLogoAvailable] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
-  const [fontSize, setFontSize] = useState(() => parseInt(localStorage.getItem('fontSize') || '100'));
+  const [fontSize, setFontSize] = useState(() => Number.parseInt(localStorage.getItem('fontSize') || '100', 10));
   const [showChatbot, setShowChatbot] = useState(false);
 
   const toggleModuleExpanded = (moduleKey: string) => {
@@ -126,6 +126,18 @@ export default function DashboardLayout() {
 
   console.log(navigationItems, "navigationItems in DashboardLayout");
 
+  const { data: currentUser } = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: () => getCurrentUser(user),
+    enabled: !!user,
+  });
+
+  const { data: unredDataLength, isError: UnreadError } = useQuery({
+    queryKey: ["unreadNotificationsLength"],
+    queryFn: () => getUnreadNotificationCount(),
+    enabled: !!user,
+  });
+
   // Utiliser useEffect pour la redirection
   useEffect(() => {
     if (!user) {
@@ -133,29 +145,14 @@ export default function DashboardLayout() {
       navigate("/login");
     } else if (!user.role) {
       console.log("Role est null, utilisation du role par défaut");
-      // Contournement : si le role est null, on considère que c'est un admin
-      //   TODO: Résoudre le problème de populate dans le backend
     } else {
       // Redirection automatique pour les Project Managers
-      //  const userRole = user.role?.name || user.role;
-      //  if (userRole === "project_manager") {
-      //    console.log("Redirection automatique vers dashboard Project Manager");
-      //    navigate("/project-manager-dashboard");
-      //  }
     }
   }, [user, navigate]);
 
   if (!user) {
     return null; // Afficher rien pendant la redirection
   }
-
-
-  const { data: currentUser } = useQuery({
-
-    queryKey: ["currentUser"],
-    queryFn: () => getCurrentUser(user), // Simuler une requête pour obtenir les données de l'utilisateur
-  });
-
 
   // const isInactiveAccount = currentUser?.status === 200 && currentUser?.data?.isActif === false;
 
@@ -177,11 +174,6 @@ export default function DashboardLayout() {
 
   console.log(currentUser, "currentUser in DashboardLayout");
   //const unreadNotifications = mockNotifications.filter((n) => !n.read).length;
-
-  const { data: unredDataLength, isError: UnreadError } = useQuery({
-    queryKey: ["unreadNotificationsLength"],
-    queryFn: () => getUnreadNotificationCount(),
-  });
 
   const groupedNavigationItems = groupPermissionsByModule(navigationItems ?? []);
   const unreadNotifications = 0; // Placeholder - will be implemented with real notifications

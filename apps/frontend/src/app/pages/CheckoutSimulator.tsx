@@ -18,7 +18,7 @@ export default function CheckoutSimulator() {
   const formattedAmount = new Intl.NumberFormat('fr-FR', {
     style: 'currency',
     currency: 'EUR'
-  }).format(parseFloat(amount));
+  }).format(Number(amount));
 
   // Handle successful payment after countdown
   useEffect(() => {
