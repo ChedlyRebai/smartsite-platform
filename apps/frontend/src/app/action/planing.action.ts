@@ -8,10 +8,10 @@ export const getMilestonesByProjectId = async (projectId:string) =>{
     try {
         //http://localhost:3002/milestone/project/69bc6b4219254da8217aaadf
         const response = await axios.get(`${baseUrl}/milestone/project/${projectId}`);
-        return Promise.resolve({status:response.status,data:response.data})
+        return ({status:response.status,data:response.data})
     } catch (error) {
         console.log('Error fetching milestones:', error);
-        return Promise.reject(error);
+        throw error;
     }
 }
 
@@ -22,7 +22,7 @@ export const getTasksBYMilestoneId= async (milestoneId:string) =>{
         return response.data;
     }catch(error){
         console.log('Error fetching tasks by milestone id:', error);
-        return Promise.reject(error);
+        throw error;
     }
 }
 
@@ -36,10 +36,10 @@ export const createTask = async (task: CreateTaskPayload,milestoneId:string,task
         //localhost:3002/task/milestone/:milestoneId/task-stage/:taskStageId'
         console.log(`${baseUrl}/task/milestone/${milestoneId}/task-stage/${taskStageId}`,task);
         const response = await axios.post(`${baseUrl}/task/milestone/${milestoneId}/task-stage/${taskStageId}`,task);
-        return Promise.resolve({ status: response.status, data: response.data });
+        return ({ status: response.status, data: response.data });
     } catch (error) {
         console.log("Error creating task:", error);
-        return Promise.reject(error);
+        throw error;
     }
 };
 
@@ -48,10 +48,10 @@ export const createTask = async (task: CreateTaskPayload,milestoneId:string,task
 export const getTaskById = async (taskId: string) => {
     try {
         const response = await axios.get(`${baseUrl}/task/${taskId}`);
-        return Promise.resolve({ status: response.status, data: response.data });
+        return ({ status: response.status, data: response.data });
     } catch (error) {
         console.log("Error fetching task details:", error);
-        return Promise.reject(error);
+        throw error;
     }
 };
 
@@ -61,20 +61,20 @@ export const updateTAskNew = async (taskId: string, colunId: string) => {
     try {
         //http://localhost:3002/task/69c14a43581bafc76e389b69/task-stage/69c056599fc8a9ce45f45bf6
         const response = await axios.put(`${baseUrl}/task/${taskId}/task-stage/${colunId}`);
-        return Promise.resolve({ status: response.status, data: response.data });
+        return ({ status: response.status, data: response.data });
     } catch (error) {
         console.log("Error updating task:", error);
-        return Promise.reject(error);
+        throw error;
     }
 };
 
 export const updateTask = async (taskId: string, task: UpdateTaskPayload) => {
     try {
         const response = await axios.put(`${baseUrl}/task/${taskId}`, task);
-        return Promise.resolve({ status: response.status, data: response.data });
+        return ({ status: response.status, data: response.data });
     } catch (error) {
         console.log("Error updating task:", error);
-        return Promise.reject(error);
+        throw error;
     }
 };
 
@@ -83,22 +83,22 @@ export const updateTask = async (taskId: string, task: UpdateTaskPayload) => {
 export const getMilestoneDetails=async (milestoneId:string) =>{
     try {
         const response = await axios.get(`${baseUrl}/milestone/${milestoneId}`);
-        return Promise.resolve({status:response.status,data:response.data})
+        return ({status:response.status,data:response.data})
     }
         catch (error) {
         console.log('Error fetching milestone details:', error);
-        return Promise.reject(error);
+        throw error;
     }
 }
 
 export const updateMilestone = async (milestoneId:string,milestone:Milestone) =>{
     try {
         const response =await axios.patch(`${baseUrl}/milestone/${milestoneId}`,milestone);
-        return Promise.resolve({status:response.status,data:response.data})
+        return ({status:response.status,data:response.data})
 
     } catch (error) {
         console.log('Error updating milestone:', error);
-        return Promise.reject(error);
+        throw error;
     }
 }
 
@@ -106,52 +106,52 @@ export const updateMilestone = async (milestoneId:string,milestone:Milestone) =>
 export const deleteMilestone = async (milestoneId:string) =>{
     try {
         const response = await axios.delete(`${baseUrl}/milestone/${milestoneId}`);
-        return Promise.resolve({status:response.status,data:response.data})
+        return ({status:response.status,data:response.data})
     } catch (error) {
         console.log('Error deleting milestone:', error);
-        return Promise.reject(error);
+        throw error;
     }
 }
 
 export const getAllMilestones = async () =>{
     try {
         const response = await axios.get(`${baseUrl}/milestone`);
-        return Promise.resolve({status:response.status,data:response.data})
+        return ({status:response.status,data:response.data})
     } catch (error) {
         console.log('Error fetching milestones:', error);
-        return Promise.reject(error);
+        throw error;
     }
 }
 
 export const getMilestoneTasks = async (milestoneId:string) =>{
     try {
         const response = await axios.get(`${baseUrl}/milestone/${milestoneId}`);
-        return Promise.resolve({status:response.status,data:response.data.tasks})
+        return ({status:response.status,data:response.data.tasks})
     } catch (error) {
         console.log('Error fetching milestone tasks:', error);
-        return Promise.reject(error);
+        throw error;
     }
 }
 
 export const getMilestoneProgress = async (milestoneId:string) =>{
     try {
         const response = await axios.get(`${baseUrl}/milestone/${milestoneId}`);
-        return Promise.resolve({status:response.status,data:response.data.progress})
+        return ({status:response.status,data:response.data.progress})
      }
         catch (error) {
         console.log('Error fetching milestone progress:', error);
-        return Promise.reject(error);
+        throw error;
      }
 }
 
 export const deleteTask = async (taskId:string) =>{
     try {
         const response = await axios.delete(`${baseUrl}/task/${taskId}`);
-        return Promise.resolve({status:response.status,data:response.data})
+        return ({status:response.status,data:response.data})
     }
 
         catch (error) {
         console.log('Error deleting task:', error);
-        return Promise.reject(error);
+        throw error;
      }
 }

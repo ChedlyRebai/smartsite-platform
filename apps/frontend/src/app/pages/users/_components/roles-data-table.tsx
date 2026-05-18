@@ -50,7 +50,7 @@ import useRolePermissionsModal from "@/app/hooks/use-role-permissions-modal";
 interface RolesDataTableProps {
   roles: Role[];
   onEdit?: (role: Role) => void;
-  onDelete?: (roleId: string) => void;
+  onDelete?: (roleId: string) => void | Promise<void>;
   onAddNew?: () => void;
 }
 

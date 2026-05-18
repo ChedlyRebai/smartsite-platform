@@ -12,11 +12,11 @@ export const getRoleById = async (id: string) => {
   try {
     const res = await axios.get(`${API_URL}/${id}`);
     if (res.status === 200) {
-      return Promise.resolve({ status: res.status, data: res.data });
+      return ({ status: res.status, data: res.data });
     }
   } catch (error: any) {
     console.error("Get role error:", error?.response?.data?.message);
-    return Promise.resolve({
+    return ({
       status: error?.response?.status,
       data: error?.response?.data?.message,
     });
@@ -35,11 +35,11 @@ export const createRole = async (
       permissions,
     });
     if (res.status === 201) {
-      return Promise.resolve({ status: res.status, data: res.data });
+      return ({ status: res.status, data: res.data });
     }
   } catch (error: any) {
     console.error("Create role error:", error?.response?.data?.message);
-    return Promise.resolve({
+    return ({
       status: error?.response?.status,
       data: error?.response?.data?.message,
     });
@@ -59,11 +59,11 @@ export const updateRole = async (
       permissions,
     });
     if (res.status === 200) {
-      return Promise.resolve({ status: res.status, data: res.data });
+      return ({ status: res.status, data: res.data });
     }
   } catch (error: any) {
     console.error("Update role error:", error?.response?.data?.message);
-    return Promise.resolve({
+    return ({
       status: error?.response?.status,
       data: error?.response?.data?.message,
     });
@@ -74,11 +74,11 @@ export const deleteRole = async (id: string) => {
   try {
     const res = await axios.delete(`${API_URL}/${id}`);
     if (res.status === 200) {
-      return Promise.resolve({ status: res.status, data: res.data });
+      return ({ status: res.status, data: res.data });
     }
   } catch (error: any) {
     console.error("Delete role error:", error?.response?.data?.message);
-    return Promise.resolve({
+    return ({
       status: error?.response?.status,
       data: error?.response?.data?.message,
     });
@@ -94,11 +94,11 @@ export const assignPermissionToRole = async (
       `${API_URL}/${roleId}/permissions/${permissionId}`,
     );
     if (res.status === 200) {
-      return Promise.resolve({ status: res.status, data: res.data });
+      return ({ status: res.status, data: res.data });
     }
   } catch (error: any) {
     console.error("Assign permission error:", error?.response?.data?.message);
-    return Promise.resolve({
+    return ({
       status: error?.response?.status,
       data: error?.response?.data?.message,
     });
@@ -114,11 +114,11 @@ export const removePermissionFromRole = async (
       `${API_URL}/${roleId}/permissions/${permissionId}`,
     );
     if (res.status === 200) {
-      return Promise.resolve({ status: res.status, data: res.data });
+      return ({ status: res.status, data: res.data });
     }
   } catch (error: any) {
     console.error("Remove permission error:", error?.response?.data?.message);
-    return Promise.resolve({
+    return ({
       status: error?.response?.status,
       data: error?.response?.data?.message,
     });

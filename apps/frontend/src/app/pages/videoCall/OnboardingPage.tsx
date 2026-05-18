@@ -80,12 +80,12 @@ const OnboardingPage = () => {
 
             {/* FULL NAME */}
             <div className="form-control">
-              <label className="label">
+              <label htmlFor="ob-fullname" className="label">
                 <span className="label-text">Full Name</span>
               </label>
               <input
                 type="text"
-                name="fullName"
+                id="ob-fullname" name="fullName"
                 value={formState.fullName}
                 onChange={(e) => setFormState({ ...formState, fullName: e.target.value })}
                 className="input input-bordered w-full"
@@ -95,11 +95,11 @@ const OnboardingPage = () => {
 
             {/* BIO */}
             <div className="form-control">
-              <label className="label">
+              <label htmlFor="ob-bio" className="label">
                 <span className="label-text">Bio</span>
               </label>
               <textarea
-                name="bio"
+                id="ob-bio" name="bio"
                 value={formState.bio}
                 onChange={(e) => setFormState({ ...formState, bio: e.target.value })}
                 className="textarea textarea-bordered h-24"
@@ -111,11 +111,11 @@ const OnboardingPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* NATIVE LANGUAGE */}
               <div className="form-control">
-                <label className="label">
+                <label htmlFor="ob-native-lang" className="label">
                   <span className="label-text">Native Language</span>
                 </label>
                 <select
-                  name="nativeLanguage"
+                  id="ob-native-lang" name="nativeLanguage"
                   value={formState.nativeLanguage}
                   onChange={(e) => setFormState({ ...formState, nativeLanguage: e.target.value })}
                   className="select select-bordered w-full"
@@ -131,11 +131,11 @@ const OnboardingPage = () => {
 
               {/* LEARNING LANGUAGE */}
               <div className="form-control">
-                <label className="label">
+                <label htmlFor="ob-learning-lang" className="label">
                   <span className="label-text">Learning Language</span>
                 </label>
                 <select
-                  name="learningLanguage"
+                  id="ob-learning-lang" name="learningLanguage"
                   value={formState.learningLanguage}
                   onChange={(e) => setFormState({ ...formState, learningLanguage: e.target.value })}
                   className="select select-bordered w-full"
@@ -152,14 +152,14 @@ const OnboardingPage = () => {
 
             {/* LOCATION */}
             <div className="form-control">
-              <label className="label">
+              <label htmlFor="ob-location" className="label">
                 <span className="label-text">Location</span>
               </label>
               <div className="relative">
                 <MapPinIcon className="absolute top-1/2 transform -translate-y-1/2 left-3 size-5 text-base-content opacity-70" />
                 <input
                   type="text"
-                  name="location"
+                  id="ob-location" name="location"
                   value={formState.location}
                   onChange={(e) => setFormState({ ...formState, location: e.target.value })}
                   className="input input-bordered w-full pl-10"

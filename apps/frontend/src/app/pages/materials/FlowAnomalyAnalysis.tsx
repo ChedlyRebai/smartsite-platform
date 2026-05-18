@@ -151,8 +151,9 @@ export default function FlowAnomalyAnalysis({ siteId, days = 30 }: FlowAnomalyAn
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Période d'analyse</label>
+                <label htmlFor="flow-days-filter" className="block text-sm font-medium mb-1">Période d'analyse</label>
                 <select
+                  id="flow-days-filter"
                   value={daysFilter}
                   onChange={(e) => setDaysFilter(Number(e.target.value))}
                   className="px-3 py-2 border rounded-md"

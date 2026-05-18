@@ -120,8 +120,9 @@ function InnerCardForm({ clientSecret, amount, siteName, onSuccess, onCancel }: 
 
       {/* Cardholder Name */}
       <div className="space-y-1">
-        <label className="text-sm font-medium text-gray-700">Cardholder Name *</label>
+        <label htmlFor="cardholder-name" className="text-sm font-medium text-gray-700">Cardholder Name *</label>
         <Input
+          id="cardholder-name"
           placeholder="Name as it appears on the card"
           value={cardholderName}
           onChange={(e) => {
@@ -140,7 +141,7 @@ function InnerCardForm({ clientSecret, amount, siteName, onSuccess, onCancel }: 
 
       {/* Card Number */}
       <div className="space-y-1">
-        <label className="text-sm font-medium text-gray-700">Card Number *</label>
+        <label id="card-number-label" className="text-sm font-medium text-gray-700">Card Number *</label>
         <div className="flex items-center border rounded-md px-3 py-2.5 focus-within:ring-2 focus-within:ring-blue-500 bg-white">
           <CreditCard className="h-4 w-4 text-gray-400 mr-2 shrink-0" />
           <div className="flex-1">
@@ -152,13 +153,13 @@ function InnerCardForm({ clientSecret, amount, siteName, onSuccess, onCancel }: 
       {/* Expiry + CVC side by side */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1">
-          <label className="text-sm font-medium text-gray-700">Expiry Date *</label>
+          <label id="card-expiry-label" className="text-sm font-medium text-gray-700">Expiry Date *</label>
           <div className="border rounded-md px-3 py-2.5 focus-within:ring-2 focus-within:ring-blue-500 bg-white">
             <CardExpiryElement options={ELEMENT_STYLE} />
           </div>
         </div>
         <div className="space-y-1">
-          <label className="text-sm font-medium text-gray-700">CVC *</label>
+          <label id="card-cvc-label" className="text-sm font-medium text-gray-700">CVC *</label>
           <div className="border rounded-md px-3 py-2.5 focus-within:ring-2 focus-within:ring-blue-500 bg-white">
             <CardCvcElement options={ELEMENT_STYLE} />
           </div>

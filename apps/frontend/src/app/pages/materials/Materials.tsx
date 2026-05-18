@@ -863,12 +863,10 @@ export default function Materials() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-7 mb-4">
           <TabsTrigger value="list" className="flex items-center gap-2">
-            <span>📦</span>
-            Materials
+            <span>📦</span>{" "}Materials
           </TabsTrigger>
           <TabsTrigger value="alerts" className="flex items-center gap-2">
-            <span>🔔</span>
-            Alerts
+            <span>🔔</span>{" "}Alerts
             {alerts.length > 0 && (
               <span className="ml-1 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">
                 {alerts.length > 99 ? '99+' : alerts.length}
@@ -876,8 +874,7 @@ export default function Materials() {
             )}
           </TabsTrigger>
           <TabsTrigger value="expiring" className="flex items-center gap-2">
-            <span>⏰</span>
-            Expiring
+            <span>⏰</span>{" "}Expiring
             {expiringCount > 0 && (
               <span className="ml-1 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-orange-500 rounded-full">
                 {expiringCount > 99 ? '99+' : expiringCount}
@@ -885,20 +882,16 @@ export default function Materials() {
             )}
           </TabsTrigger>
           <TabsTrigger value="auto-order" className="flex items-center gap-2">
-            <span>🚚</span>
-            Auto Orders
+            <span>🚚</span>{" "}Auto Orders
           </TabsTrigger>
           <TabsTrigger  value="consumption" className="flex items-center gap-2">
-            <span>📊</span>
-            Consumption
+            <span>📊</span>{" "}Consumption
           </TabsTrigger>
           <TabsTrigger value="anomalies" className="flex items-center gap-2">
-            <span>⚠️</span>
-            Anomalies
+            <span>⚠️</span>{" "}Anomalies
           </TabsTrigger>
           <TabsTrigger value="forecast" className="flex items-center gap-2">
-            <span>📈</span>
-            Forecast
+            <span>📈</span>{" "}Forecast
           </TabsTrigger>
         </TabsList>
 
@@ -928,8 +921,9 @@ export default function Materials() {
               {filterOpen && (
                 <div className="mt-4 grid grid-cols-3 gap-4">
                   <div>
-                    <label className="text-sm text-gray-600">Category</label>
+                    <label htmlFor="mat-category" className="text-sm text-gray-600">Category</label>
                     <select 
+                      id="mat-category"
                       className="w-full px-3 py-2 border rounded-md mt-1" 
                       value={selectedCategory} 
                       onChange={(e) => setSelectedCategory(e.target.value)}
@@ -941,8 +935,9 @@ export default function Materials() {
                     </select>
                   </div>
                   <div>
-                    <label className="text-sm text-gray-600">Per page</label>
+                    <label htmlFor="mat-per-page" className="text-sm text-gray-600">Per page</label>
                     <select 
+                      id="mat-per-page"
                       className="w-full px-3 py-2 border rounded-md mt-1" 
                       value={pagination.limit} 
                       onChange={(e) => setPagination(prev => ({ ...prev, limit: Number(e.target.value), page: 1 }))}

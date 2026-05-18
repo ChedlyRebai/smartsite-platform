@@ -745,10 +745,7 @@ export default function ClientsNew() {
                                 </AlertDialogTitle>
                                 <AlertDialogDescription>
                                   This will permanently delete the client{" "}
-                                  <strong>
-                                    {selectedClient?.firstName}{" "}
-                                    {selectedClient?.lastName}
-                                  </strong>
+                                  <strong>{`${selectedClient?.firstName} ${selectedClient?.lastName}`}</strong>
                                   . This action cannot be undone.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>

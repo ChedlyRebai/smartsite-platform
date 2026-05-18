@@ -7,11 +7,11 @@ export const getAllStatics = async () => {
   try {
     const res = await axios.get(`${API_URL}`);
     if (res.status === 200) {
-      return Promise.resolve({ status: res.status, data: res.data });
+      return ({ status: res.status, data: res.data });
     }
   } catch (error: any) {
     console.error("Get users error:", error?.response?.data?.message);
-    return Promise.resolve({
+    return ({
       status: error?.response?.status,
       data: error?.response?.data?.message,
     });

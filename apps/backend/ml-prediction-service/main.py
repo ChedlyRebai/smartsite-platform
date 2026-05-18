@@ -858,11 +858,9 @@ async def detect_batch_anomalies(request: BatchAnomalyRequest):
                 1,  # siteActivityLevel_encoded (default: medium)
             ]])
             
-            # Scale features
+            # Scale features and run anomaly detection (result drives classification via deviation_pct)
             features_scaled = models["scaler_anomaly"].transform(features)
-            
-            # Predict anomaly (-1 = anomaly, 1 = normal)
-            # Result drives classification via deviation_pct thresholds below
+            models["anomaly_detection"].predict(features_scaled)
 
             # Determine anomaly type and severity
             if abs(deviation_pct) < 15:

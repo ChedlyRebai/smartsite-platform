@@ -9,7 +9,7 @@ export const getPermissions = async () => {
 
     if (!token) {
       console.error("No token found in auth store");
-      return Promise.resolve({
+      return ({
         status: 401,
         data: "No authentication token found",
       });
@@ -21,7 +21,7 @@ export const getPermissions = async () => {
       },
     });
     if (res.status === 200) {
-      return Promise.resolve({
+      return ({
         status: res.status,
         data: res.data.permissions,
       });
@@ -29,7 +29,7 @@ export const getPermissions = async () => {
     return res.data.permissions || [];
   } catch (error: any) {
     console.error("Error fetching permissions:", error);
-    return Promise.resolve({
+    return ({
       status: error?.response.status,
       data: error?.response?.data?.message,
     });

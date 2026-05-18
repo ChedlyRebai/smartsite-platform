@@ -46,8 +46,12 @@ export const formatUtils = {
    * @returns {boolean} True si valide
    */
   validateTunisianPhone: (phone) => {
-    const phoneRegex = /^(\+216|216)?[2-9]\d{7}$/;
-    return phoneRegex.test(phone.replace(/\s/g, ''));
+    const cleaned = phone.replace(/\s/g, '');
+    // International format: +216XXXXXXXX or 216XXXXXXXX (11 digits total)
+    const intlRegex = /^(\+216|216)[2-9]\d{7}$/;
+    // Local format: 8 digits starting with 2-9
+    const localRegex = /^[2-9]\d{7}$/;
+    return intlRegex.test(cleaned) || localRegex.test(cleaned);
   }
 };
 
@@ -103,7 +107,8 @@ export const stateUtils = {
   createInitialFormState: (fields) => {
     const state = {};
     Object.keys(fields).forEach(key => {
-      state[key] = fields[key].defaultValue || '';
+      const val = fields[key].defaultValue;
+      state[key] = (val !== undefined && val !== null) ? val : '';
     });
     return state;
   },

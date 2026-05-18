@@ -226,16 +226,18 @@ export default function MaterialFlowLog({ materialId, siteId }: MaterialFlowLogP
         <CardContent className="p-4">
           <div className="flex flex-wrap gap-3 items-end">
             <div className="flex-1 min-w-[160px]">
-              <label className="block text-xs font-medium text-gray-600 mb-1">Start Date</label>
+              <label htmlFor="flow-start-date" className="block text-xs font-medium text-gray-600 mb-1">Start Date</label>
               <Input
+                id="flow-start-date"
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
               />
             </div>
             <div className="flex-1 min-w-[160px]">
-              <label className="block text-xs font-medium text-gray-600 mb-1">End Date</label>
+              <label htmlFor="flow-end-date" className="block text-xs font-medium text-gray-600 mb-1">End Date</label>
               <Input
+                id="flow-end-date"
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}

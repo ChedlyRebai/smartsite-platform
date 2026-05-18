@@ -20,11 +20,11 @@ export const LoginAction = async (cin: string, password: string) => {
 
       cookieStore.set("jwt2", res.data.token);
       console.log("Login successful, token stored in cookie",res);
-      return Promise.resolve({ status: res.status, data: res.data.message });
+      return ({ status: res.status, data: res.data.message });
     }
   } catch (error: any) {
     console.error("Login error:", error?.response?.data?.message);
-    return Promise.resolve({
+    return ({
       status: error?.response.status,
       data: error?.response?.data?.message,
     });
@@ -40,9 +40,9 @@ export const getCurrentUser = async (authUser: any) => {
       },
     });
     console.log("Get current user response:", res.data);
-    return Promise.resolve({ status: res.status, data: res.data });
+    return ({ status: res.status, data: res.data });
   } catch (error: any) {
-    return Promise.resolve({
+    return ({
       status: error?.response?.status || 500,
       data: error?.response?.data?.message || "Error fetching user data",
     });

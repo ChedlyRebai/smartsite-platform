@@ -1964,7 +1964,7 @@ export default function Sites() {
                     type="number"
                     min="1"
                     value={manageData.area}
-                    onChange={(e) => setManageData({ ...manageData, area: parseInt(e.target.value) || 0 })}
+                    onChange={(e) => setManageData({ ...manageData, area: Number.parseInt(e.target.value) || 0 })}
                     className={errors.area ? 'border-red-500 focus:ring-red-500' : ''}
                   />
                   {errors.area && (
@@ -2013,7 +2013,7 @@ export default function Sites() {
                   min="0"
                   max="100"
                   value={manageData.progress}
-                  onChange={(e) => setManageData({ ...manageData, progress: parseInt(e.target.value) || 0 })}
+                  onChange={(e) => setManageData({ ...manageData, progress: Number.parseInt(e.target.value) || 0 })}
                 />
               </div>
 

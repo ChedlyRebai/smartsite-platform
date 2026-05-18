@@ -222,9 +222,9 @@ export const PowerBiAdvancedDashboard: React.FC<PowerBiAdvancedDashboardProps> =
 
         {/* Site Selector */}
         <div className="flex items-center gap-4 mb-4">
-          <label className="text-sm font-medium text-gray-700">Select Site:</label>
+          <label htmlFor="site-select" className="text-sm font-medium text-gray-700">Select Site:</label>
           <Select value={selectedSite} onValueChange={setSelectedSite}>
-            <SelectTrigger className="w-64">
+            <SelectTrigger className="w-64" id="site-select">
               <SelectValue placeholder="Choose a site..." />
             </SelectTrigger>
             <SelectContent>

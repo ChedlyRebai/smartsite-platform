@@ -364,9 +364,9 @@ export default function ProjectManagerDashboard() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label className="text-sm font-medium mb-2 block">Statut</label>
+              <label htmlFor="pm-status-filter" className="text-sm font-medium mb-2 block">Statut</label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
+                <SelectTrigger id="pm-status-filter">
                   <SelectValue placeholder="Filtrer par statut" />
                 </SelectTrigger>
                 <SelectContent>
@@ -381,7 +381,7 @@ export default function ProjectManagerDashboard() {
             <div>
               <label className="text-sm font-medium mb-2 block">Priorité</label>
               <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-                <SelectTrigger>
+                <SelectTrigger id="pm-priority-filter">
                   <SelectValue placeholder="Filtrer par priorité" />
                 </SelectTrigger>
                 <SelectContent>
@@ -395,9 +395,9 @@ export default function ProjectManagerDashboard() {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Trier par</label>
+              <label htmlFor="pm-sort-by" className="text-sm font-medium mb-2 block">Trier par</label>
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger>
+                <SelectTrigger id="pm-sort-by">
                   <SelectValue placeholder="Trier par" />
                 </SelectTrigger>
                 <SelectContent>

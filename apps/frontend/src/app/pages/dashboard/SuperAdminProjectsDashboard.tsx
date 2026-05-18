@@ -445,7 +445,7 @@ export default function SuperAdminProjectsDashboard() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div>
-              <label className="text-sm font-medium mb-2 block">Statut</label>
+              <label htmlFor="admin-status-filter" className="text-sm font-medium mb-2 block">Statut</label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger>
                   <SelectValue placeholder="Filtrer par statut" />
@@ -476,7 +476,7 @@ export default function SuperAdminProjectsDashboard() {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Project Manager</label>
+              <label htmlFor="admin-pm-filter" className="text-sm font-medium mb-2 block">Project Manager</label>
               <Select value={projectManagerFilter} onValueChange={setProjectManagerFilter}>
                 <SelectTrigger>
                   <SelectValue placeholder="Filtrer par PM" />
@@ -491,7 +491,7 @@ export default function SuperAdminProjectsDashboard() {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Trier par</label>
+              <label htmlFor="admin-sort-by" className="text-sm font-medium mb-2 block">Trier par</label>
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger>
                   <SelectValue placeholder="Trier par" />

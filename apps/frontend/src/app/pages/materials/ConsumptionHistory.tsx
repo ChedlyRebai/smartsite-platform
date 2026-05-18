@@ -344,10 +344,11 @@ export default function ConsumptionHistory({ materialId, siteId }: ConsumptionHi
           {showFilters && (
             <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <label className="text-sm text-gray-600">Search</label>
+                <label htmlFor="ch-search" className="text-sm text-gray-600">Search</label>
                 <div className="relative mt-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
+                    id="ch-search"
                     placeholder="Material, site..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -357,8 +358,9 @@ export default function ConsumptionHistory({ materialId, siteId }: ConsumptionHi
               </div>
               
               <div>
-                <label className="text-sm text-gray-600">Type</label>
+                <label htmlFor="ch-type" className="text-sm text-gray-600">Type</label>
                 <select 
+                  id="ch-type"
                   className="w-full px-3 py-2 border rounded-md mt-1" 
                   value={typeFilter} 
                   onChange={(e) => setTypeFilter(e.target.value)}
@@ -375,7 +377,7 @@ export default function ConsumptionHistory({ materialId, siteId }: ConsumptionHi
               </div>
               
               <div>
-                <label className="text-sm text-gray-600">Start date</label>
+                <label htmlFor="ch-start-date" className="text-sm text-gray-600">Start date</label>
                 <Input
                   type="date"
                   value={dateFrom}
@@ -385,7 +387,7 @@ export default function ConsumptionHistory({ materialId, siteId }: ConsumptionHi
               </div>
               
               <div>
-                <label className="text-sm text-gray-600">End date</label>
+                <label htmlFor="ch-end-date" className="text-sm text-gray-600">End date</label>
                 <Input
                   type="date"
                   value={dateTo}

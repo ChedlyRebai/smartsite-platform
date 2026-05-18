@@ -625,7 +625,7 @@ const Payments = () => {
               </DialogHeader>
               <div className="space-y-4 mt-2">
                 <div className="space-y-1">
-                  <label className="text-sm font-medium">Site *</label>
+                  <label htmlFor="payment-site" className="text-sm font-medium">Site *</label>
                   <Select value={form.siteId} onValueChange={(v) => { setForm({ ...form, siteId: v }); setFormErrors((e) => ({ ...e, siteId: undefined })); }}>
                     <SelectTrigger className={formErrors.siteId ? "border-red-500" : ""}>
                       <SelectValue placeholder="Select a site" />
@@ -638,8 +638,8 @@ const Payments = () => {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-sm font-medium">Amount (DT) *</label>
-                  <Input type="number" min={0.01} step="0.001" placeholder="0.000" value={form.amount} className={formErrors.amount ? "border-red-500" : ""} onChange={(e) => { setForm({ ...form, amount: e.target.value }); setFormErrors((err) => ({ ...err, amount: undefined })); }} />
+                  <label htmlFor="payment-amount" className="text-sm font-medium">Amount (DT) *</label>
+                  <Input id="payment-amount" type="number" min={0.01} step="0.001" placeholder="0.000" value={form.amount} className={formErrors.amount ? "border-red-500" : ""} onChange={(e) => { setForm({ ...form, amount: e.target.value }); setFormErrors((err) => ({ ...err, amount: undefined })); }} />
                   {formErrors.amount && <p className="text-xs text-red-500 flex items-center gap-1"><AlertCircle className="h-3 w-3" />{formErrors.amount}</p>}
                 </div>
 
@@ -651,7 +651,7 @@ const Payments = () => {
                 )}
 
                 <div className="space-y-1">
-                  <label className="text-sm font-medium">Payment Method *</label>
+                  <label htmlFor="payment-method" className="text-sm font-medium">Payment Method *</label>
                   <Select value={form.paymentMethod} onValueChange={(v) => { setForm({ ...form, paymentMethod: v as PaymentMethod }); setFormErrors((e) => ({ ...e, paymentMethod: undefined })); }}>
                     <SelectTrigger className={formErrors.paymentMethod ? "border-red-500" : ""}>
                       <SelectValue placeholder="Select payment method" />
@@ -664,8 +664,8 @@ const Payments = () => {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-sm font-medium">Description</label>
-                  <Input placeholder="Optional description (max 500 chars)" value={form.description} maxLength={500} className={formErrors.description ? "border-red-500" : ""} onChange={(e) => { setForm({ ...form, description: e.target.value }); setFormErrors((err) => ({ ...err, description: undefined })); }} />
+                  <label htmlFor="payment-description" className="text-sm font-medium">Description</label>
+                  <Input id="payment-description" placeholder="Optional description (max 500 chars)" value={form.description} maxLength={500} className={formErrors.description ? "border-red-500" : ""} onChange={(e) => { setForm({ ...form, description: e.target.value }); setFormErrors((err) => ({ ...err, description: undefined })); }} />
                   <p className="text-xs text-muted-foreground text-right">{form.description.length}/500</p>
                   {formErrors.description && <p className="text-xs text-red-500 flex items-center gap-1"><AlertCircle className="h-3 w-3" />{formErrors.description}</p>}
                 </div>
